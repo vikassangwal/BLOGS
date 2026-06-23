@@ -9,11 +9,11 @@ export async function GET() {
       return NextResponse.json({ message: 'Admin already exists' });
     }
 
-    const hashedPassword = await hashPassword('admin123');
+    const hashedPassword = await hashPassword('Vikas@0502');
     const user = await prisma.user.create({
       data: {
-        name: 'Admin',
-        email: 'admin@antigravity.com',
+        name: 'Vikas Sangwal',
+        email: 'vsangwal54@gmail.com',
         password: hashedPassword,
         role: 'SUPER_ADMIN',
         isVerified: true
@@ -23,8 +23,8 @@ export async function GET() {
     return NextResponse.json({ 
       message: 'Admin account created successfully!',
       credentials: {
-        email: 'admin@antigravity.com',
-        password: 'admin123'
+        email: 'vsangwal54@gmail.com',
+        password: 'Vikas@0502'
       }
     });
   } catch (error: any) {

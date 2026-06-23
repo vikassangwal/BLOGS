@@ -27,6 +27,9 @@ export default function SmartBanners() {
     if (p.includes('whatsapp')) return { icon: '💬', bg: 'linear-gradient(135deg, #25D366, #128C7E)' };
     if (p.includes('telegram')) return { icon: '✈️', bg: 'linear-gradient(135deg, #0088cc, #005580)' };
     if (p.includes('instagram')) return { icon: '📸', bg: 'linear-gradient(135deg, #833ab4, #fd1d1d, #fcb045)' };
+    if (p.includes('twitter') || p.includes('x.com')) return { icon: '🐦', bg: 'linear-gradient(135deg, #1DA1F2, #1a91da)' };
+    if (p.includes('facebook')) return { icon: '📘', bg: 'linear-gradient(135deg, #1877F2, #166fe5)' };
+    if (p.includes('youtube')) return { icon: '▶️', bg: 'linear-gradient(135deg, #FF0000, #cc0000)' };
     if (p.includes('phone') || p.includes('call')) return { icon: '📞', bg: 'linear-gradient(135deg, #1d1d1f, #434345)' };
     return { icon: '🔗', bg: 'linear-gradient(135deg, var(--color-accent), #004999)' };
   };

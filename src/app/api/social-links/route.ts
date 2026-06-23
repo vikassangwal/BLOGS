@@ -1,64 +1,55 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { verifyToken } from '@/lib/auth';
 
 export async function GET() {
   try {
-    const links = await prisma.socialLink.findMany({
-      where: { isActive: true },
-      orderBy: { displayOrder: 'asc' }
-    });
+    const links = await prisma.socialLink.findMany({ orderBy: { displayOrder: 'asc' } });
     return NextResponse.json(links);
   } catch (error) {
     return NextResponse.json({ error: 'Failed to fetch social links' }, { status: 500 });
   }
 }
 
-export async function POST(request: Request) {
+export async function POST(req: Request) {
   try {
-    const cookieHeader = request.headers.get('cookie') || '';
-    const tokenMatch = cookieHeader.match(/automata_auth_token=([^;]+)/);
-    const user = tokenMatch ? verifyToken(tokenMatch[1]) : null;
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-
-    const body = await request.json();
-    const link = await prisma.socialLink.create({ data: body });
-    return NextResponse.json({ success: true, link }, { status: 201 });
+    const data = await req.json();
+    const link = await prisma.socialLink.create({
+      data: {
+        platform: data.platform,
+        label: data.label,
+        url: data.url,
+        isActive: data.isActive ?? true,
+        displayOrder: data.displayOrder ?? 0,
+      }
+    });
+    return NextResponse.json(link);
   } catch (error) {
-    return NextResponse.json({ error: 'Failed to create link' }, { status: 500 });
+    return NextResponse.json({ error: 'Failed to create social link' }, { status: 500 });
   }
 }
 
-export async function PUT(request: Request) {
+export async function PUT(req: Request) {
   try {
-    const cookieHeader = request.headers.get('cookie') || '';
-    const tokenMatch = cookieHeader.match(/automata_auth_token=([^;]+)/);
-    const user = tokenMatch ? verifyToken(tokenMatch[1]) : null;
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-
-    const body = await request.json();
-    const { id, ...data } = body;
-    const link = await prisma.socialLink.update({ where: { id }, data });
-    return NextResponse.json({ success: true, link });
+    const data = await req.json();
+    const { id, ...updateData } = data;
+    const link = await prisma.socialLink.update({
+      where: { id },
+      data: updateData
+    });
+    return NextResponse.json(link);
   } catch (error) {
-    return NextResponse.json({ error: 'Failed to update link' }, { status: 500 });
+    return NextResponse.json({ error: 'Failed to update social link' }, { status: 500 });
   }
 }
 
-export async function DELETE(request: Request) {
+export async function DELETE(req: Request) {
   try {
-    const cookieHeader = request.headers.get('cookie') || '';
-    const tokenMatch = cookieHeader.match(/automata_auth_token=([^;]+)/);
-    const user = tokenMatch ? verifyToken(tokenMatch[1]) : null;
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-
-    const { searchParams } = new URL(request.url);
+    const { searchParams } = new URL(req.url);
     const id = searchParams.get('id');
-    if (!id) return NextResponse.json({ error: 'ID required' }, { status: 400 });
-
+    if (!id) return NextResponse.json({ error: 'ID is required' }, { status: 400 });
     await prisma.socialLink.delete({ where: { id } });
     return NextResponse.json({ success: true });
   } catch (error) {
-    return NextResponse.json({ error: 'Failed to delete link' }, { status: 500 });
+    return NextResponse.json({ error: 'Failed to delete social link' }, { status: 500 });
   }
 }

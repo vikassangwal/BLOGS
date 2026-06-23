@@ -81,7 +81,8 @@ export default function BlogListingPage() {
               padding: '1rem 1.5rem',
               borderRadius: '30px',
               border: '1px solid var(--color-border)',
-              background: '#fff',
+              background: 'rgba(255,255,255,0.03)',
+              color: 'var(--color-text-primary)',
               fontSize: '1rem',
               outline: 'none',
               boxShadow: '0 4px 20px rgba(0,0,0,0.05)',
@@ -170,7 +171,7 @@ export default function BlogListingPage() {
                     opacity: 0,
                     transform: 'translateY(20px)',
                     overflow: 'hidden',
-                    background: '#fff',
+                    background: 'rgba(255,255,255,0.03)',
                     borderRadius: '20px',
                     border: '1px solid var(--color-border)',
                     transition: 'transform 0.3s, box-shadow 0.3s'
@@ -200,13 +201,13 @@ export default function BlogListingPage() {
                           position: 'absolute',
                           top: '1rem',
                           right: '1rem',
-                          background: 'rgba(255,255,255,0.9)',
+                          background: 'rgba(0,0,0,0.6)',
                           padding: '0.4rem 0.8rem',
                           borderRadius: '20px',
                           fontSize: '0.75rem',
                           fontWeight: 600,
                           backdropFilter: 'blur(10px)',
-                          color: 'var(--color-text-primary)'
+                          color: '#fff'
                         }}>
                           {post.tags[0]}
                         </span>

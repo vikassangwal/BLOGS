@@ -7,13 +7,10 @@ const sidebarItems = [
   { name: 'Dashboard', path: '/admin', icon: '📊' },
   { name: 'Blog Management', path: '/admin/blog', icon: '📝' },
   { name: 'AI Auto-Blogging', path: '/admin/auto-blog', icon: '🤖' },
-  { name: 'CRM & Lead Management', path: '/admin/crm', icon: '💼' },
-  { name: 'AI Outreach Hub', path: '/admin/outreach', icon: '📡' },
-  { name: 'AI Agents', path: '/admin/agents', icon: '⚡' },
-  { name: 'Services', path: '/admin/services', icon: '🛠️' },
-  { name: 'Portfolio', path: '/admin/portfolio', icon: '🎨' },
-  { name: 'Users & Roles', path: '/admin/users', icon: '👥' },
-  { name: 'Settings', path: '/admin/settings', icon: '⚙️' },
+  { name: 'Captured Leads', path: '/admin/leads', icon: '🎯' },
+  { name: 'Social Links', path: '/admin/social-links', icon: '🔗' },
+  { name: 'Team Management', path: '/admin/team', icon: '👥' },
+  { name: 'Site Settings', path: '/admin/settings', icon: '⚙️' },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -65,8 +62,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   };
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: '#f8f9fa' }}>
-      {/* Toast Notification */}
+    <>
+      <meta name="robots" content="noindex, nofollow" />
+      <div style={{ display: 'flex', minHeight: '100vh', background: '#0a0a0a', color: '#f5f5f7' }}>
+        {/* Toast Notification */}
       {toast?.visible && (
         <div
           style={{
@@ -74,7 +73,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             top: '20px',
             right: '20px',
             background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
-            color: '#fff',
+            color: 'rgba(255, 255, 255, 0.05)',
             padding: '1rem 1.5rem',
             borderRadius: '16px',
             boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
@@ -115,7 +114,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           gap: 0.75rem;
           padding: 0.75rem 1rem;
           border-radius: 10px;
-          color: #6b7280;
+          color: #a1a1aa;
           text-decoration: none;
           font-weight: 500;
           font-size: 0.9rem;
@@ -123,13 +122,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           border: 1px solid transparent;
         }
         .sidebar-link:hover {
-          background: #f0f1f3;
-          color: #1d1d1f;
+          background: rgba(255, 255, 255, 0.05);
+          color: #f5f5f7;
         }
         .sidebar-link.active {
-          background: linear-gradient(135deg, #0066cc15 0%, #0066cc08 100%);
-          color: #0066cc;
-          border-color: #0066cc20;
+          background: rgba(59, 130, 246, 0.15);
+          color: #3b82f6;
+          border-color: rgba(59, 130, 246, 0.3);
           font-weight: 600;
         }
         .sidebar-link .icon {
@@ -143,8 +142,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <aside
         style={{
           width: sidebarCollapsed ? '80px' : '270px',
-          background: '#ffffff',
-          borderRight: '1px solid #e5e7eb',
+          background: '#121212',
+          borderRight: '1px solid #27272a',
           display: 'flex',
           flexDirection: 'column',
           transition: 'width 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
@@ -156,7 +155,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <div
           style={{
             padding: sidebarCollapsed ? '1.5rem 0.75rem' : '1.5rem 1.5rem',
-            borderBottom: '1px solid #e5e7eb',
+            borderBottom: '1px solid #27272a',
             display: 'flex',
             alignItems: 'center',
             gap: '0.75rem',
@@ -166,12 +165,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             style={{
               width: '36px',
               height: '36px',
-              background: 'linear-gradient(135deg, #0066cc, #004999)',
+              background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)',
               borderRadius: '10px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              color: '#fff',
+              color: 'rgba(255, 255, 255, 0.05)',
               fontWeight: 800,
               fontSize: '1rem',
               flexShrink: 0,
@@ -181,10 +180,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </div>
           {!sidebarCollapsed && (
             <div>
-              <h2 style={{ fontSize: '1rem', fontWeight: 800, letterSpacing: '-0.3px', margin: 0, color: '#1d1d1f' }}>
+              <h2 style={{ fontSize: '1rem', fontWeight: 800, letterSpacing: '-0.3px', margin: 0, color: '#f5f5f7' }}>
                 {siteName}
               </h2>
-              <span style={{ fontSize: '0.7rem', color: '#9ca3af', fontWeight: 500 }}>Admin Panel</span>
+              <span style={{ fontSize: '0.7rem', color: '#a1a1aa', fontWeight: 500 }}>Admin Panel</span>
             </div>
           )}
         </div>
@@ -218,18 +217,18 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </nav>
 
         {/* Footer */}
-        <div style={{ padding: '1rem 0.75rem', borderTop: '1px solid #e5e7eb' }}>
+        <div style={{ padding: '1rem 0.75rem', borderTop: '1px solid #27272a' }}>
           <button
             onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
             style={{
               width: '100%',
               padding: '0.6rem',
-              background: '#f5f5f7',
-              border: '1px solid #e5e7eb',
+              background: 'rgba(255, 255, 255, 0.05)',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
               borderRadius: '8px',
               cursor: 'pointer',
               fontSize: '0.8rem',
-              color: '#6b7280',
+              color: '#a1a1aa',
               fontWeight: 500,
               marginBottom: '0.75rem',
               transition: 'all 0.2s ease',
@@ -247,7 +246,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                color: '#fff',
+                color: 'rgba(255, 255, 255, 0.05)',
                 fontSize: '0.8rem',
                 fontWeight: 700,
                 flexShrink: 0,
@@ -257,7 +256,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </div>
             {!sidebarCollapsed && (
               <div style={{ flex: 1, minWidth: 0 }}>
-                <p style={{ fontSize: '0.85rem', fontWeight: 600, margin: 0, color: '#1d1d1f' }}>{userName}</p>
+                <p style={{ fontSize: '0.85rem', fontWeight: 600, margin: 0, color: '#f5f5f7' }}>{userName}</p>
                 <button
                   onClick={handleLogout}
                   style={{
@@ -265,7 +264,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                     border: 'none',
                     cursor: 'pointer',
                     fontSize: '0.75rem',
-                    color: '#ef4444',
+                    color: '#f87171',
                     padding: 0,
                     fontWeight: 500,
                   }}
@@ -290,5 +289,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         {children}
       </main>
     </div>
+    </>
   );
 }

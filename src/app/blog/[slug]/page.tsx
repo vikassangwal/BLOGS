@@ -75,9 +75,14 @@ export default function BlogPostPage({ params }: { params: Promise<{ slug: strin
               ))}
             </div>
           )}
-          <h1 style={{ fontSize: '3.5rem', fontWeight: 800, lineHeight: 1.2, letterSpacing: '-1px', marginBottom: '1.5rem' }}>
+          <h1 style={{ fontSize: '3.5rem', fontWeight: 800, lineHeight: 1.2, letterSpacing: '-1px', marginBottom: post.subtitle ? '0.5rem' : '1.5rem' }}>
             {post.title}
           </h1>
+          {post.subtitle && (
+            <h2 style={{ fontSize: '1.5rem', fontWeight: 400, color: 'var(--color-text-secondary)', marginBottom: '1.5rem' }}>
+              {post.subtitle}
+            </h2>
+          )}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '1rem', color: 'var(--color-text-secondary)', fontSize: '0.9rem' }}>
             {post.author?.name && (
               <span style={{ fontWeight: 600, color: 'var(--color-text-primary)' }}>{post.author.name}</span>
@@ -105,9 +110,36 @@ export default function BlogPostPage({ params }: { params: Promise<{ slug: strin
         {/* Post Content */}
         <div 
           className="blog-content"
-          style={{ fontSize: '1.1rem', lineHeight: 1.8, color: '#374151' }}
+          style={{ fontSize: '1.1rem', lineHeight: 1.8, color: 'var(--color-text-secondary)' }}
           dangerouslySetInnerHTML={{ __html: contentHtml }} 
         />
+
+        {/* YMYL Disclaimer */}
+        {(post.tags?.includes('Finance & Earning') || post.tags?.includes('Education & Career')) && (
+          <div style={{ marginTop: '3rem', padding: '1.5rem', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.2)', borderRadius: '12px', color: '#fca5a5' }}>
+            <h4 style={{ fontWeight: 700, marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <span>⚠️</span> Disclaimer
+            </h4>
+            <p style={{ fontSize: '0.9rem', margin: 0, lineHeight: 1.6 }}>
+              यह जानकारी केवल शैक्षिक उद्देश्यों के लिए है। (This information is for educational purposes only.) Please consult with a certified professional before making any financial or career-altering decisions.
+            </p>
+          </div>
+        )}
+
+        {/* Author Box */}
+        <div style={{ marginTop: '3rem', padding: '2rem', background: 'rgba(255, 255, 255, 0.03)', border: '1px solid var(--color-border)', borderRadius: '16px', display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
+          <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: 'linear-gradient(135deg, var(--color-accent), #c084fc)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2rem', color: '#fff', fontWeight: 'bold', flexShrink: 0 }}>
+            {post.author?.name ? post.author.name.substring(0, 1).toUpperCase() : 'AG'}
+          </div>
+          <div>
+            <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--color-text-primary)', marginBottom: '0.5rem' }}>
+              Written by {post.author?.name || 'Anti Gravity Team'}
+            </h3>
+            <p style={{ fontSize: '0.9rem', color: 'var(--color-text-secondary)', lineHeight: 1.6, margin: 0 }}>
+              {post.author?.name ? `${post.author.name} is a senior editor and subject matter expert.` : 'The Anti Gravity Team consists of industry experts and AI specialists dedicated to bringing you the most accurate and up-to-date information.'}
+            </p>
+          </div>
+        </div>
 
         {/* Smart Banners */}
         <SmartBanners />
@@ -127,15 +159,19 @@ export default function BlogPostPage({ params }: { params: Promise<{ slug: strin
       <BlogChatbot postTitle={post.title} postContent={post.content} />
 
       <style>{`
-        .blog-content h2 { fontSize: 2rem; fontWeight: 700; margin: 2.5rem 0 1rem; color: #111827; letter-spacing: -0.5px; }
-        .blog-content h3 { fontSize: 1.5rem; fontWeight: 600; margin: 2rem 0 1rem; color: #1f2937; }
+        .blog-content h2 { fontSize: 2rem; fontWeight: 700; margin: 2.5rem 0 1rem; color: var(--color-text-primary); letter-spacing: -0.5px; }
+        .blog-content h3 { fontSize: 1.5rem; fontWeight: 600; margin: 2rem 0 1rem; color: var(--color-text-primary); }
         .blog-content p { margin-bottom: 1.5rem; }
         .blog-content ul { margin: 0 0 1.5rem 2rem; list-style-type: disc; }
         .blog-content li { margin-bottom: 0.5rem; }
-        .blog-content strong { color: #111827; }
+        .blog-content strong { color: var(--color-text-primary); }
         .blog-content a { color: var(--color-accent); text-decoration: none; border-bottom: 1px solid transparent; transition: border-color 0.2s; }
         .blog-content a:hover { border-bottom-color: var(--color-accent); }
-        .blog-content blockquote { border-left: 4px solid var(--color-accent); margin: 2rem 0; padding-left: 1.5rem; font-style: italic; color: #4b5563; }
+        .blog-content blockquote { border-left: 4px solid var(--color-accent); margin: 2rem 0; padding-left: 1.5rem; font-style: italic; color: var(--color-text-secondary); background: rgba(255,255,255,0.05); border-radius: 8px; }
+        .blog-content table { width: 100%; border-collapse: collapse; margin: 2rem 0; font-size: 0.95rem; text-align: left; background: rgba(255,255,255,0.02); border-radius: 8px; overflow: hidden; border-spacing: 0; }
+        .blog-content th, .blog-content td { padding: 12px 15px; border-bottom: 1px solid var(--color-border); }
+        .blog-content th { background-color: rgba(255,255,255,0.05); font-weight: bold; color: var(--color-text-primary); }
+        .blog-content tr:last-of-type td { border-bottom: none; }
       `}</style>
     </div>
   );

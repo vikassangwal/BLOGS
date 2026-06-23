@@ -4,7 +4,7 @@ import * as jose from 'jose';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'automata-labs-secret-key-change-in-production';
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   
   // Security headers for all responses

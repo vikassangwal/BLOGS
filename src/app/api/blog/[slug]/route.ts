@@ -48,23 +48,30 @@ export async function PUT(request: Request, context: { params: Promise<{ slug: s
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const params = await context.params;
-    const slug = params.slug;
-    const body = await request.json();
-    const { title, newSlug, content, excerpt, featuredImage, status, seoTitle, seoDescription, seoKeywords, scheduledAt, tags } = body;
 
-    const existingPost = await prisma.blogPost.findUnique({ where: { slug } });
+    const body = await request.json();
+    const { title, subtitle, slug, content, excerpt, featuredImage, status, seoTitle, seoDescription, seoKeywords, scheduledAt, tags = [] } = body;
+
+    const existingPost = await prisma.blogPost.findUnique({
+      where: { slug: params.slug },
+      include: { tags: true }
+    });
+
     if (!existingPost) {
       return NextResponse.json({ error: 'Post not found' }, { status: 404 });
     }
 
-    let finalSlug = newSlug || existingPost.slug;
-    if (newSlug && newSlug !== existingPost.slug) {
-      const existingSlug = await prisma.blogPost.findUnique({ where: { slug: newSlug } });
-      if (existingSlug) finalSlug = `${newSlug}-${Date.now()}`;
+    let finalSlug = params.slug;
+    if (slug && slug !== params.slug) {
+      const slugExists = await prisma.blogPost.findUnique({ where: { slug } });
+      if (!slugExists) {
+        finalSlug = slug;
+      }
     }
 
     const updateData: any = {
       title,
+      subtitle,
       slug: finalSlug,
       content,
       excerpt,

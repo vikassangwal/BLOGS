@@ -1,105 +1,115 @@
-import React from 'react';
-import { prisma } from '@/lib/prisma';
+'use client';
 
-export default async function Home() {
-  // Fetch About content
-  const aboutSetting = await prisma.aboutSetting.findUnique({ where: { id: 'default' } });
-  
-  // Default fallbacks if none set
-  const aboutHeading = aboutSetting?.heading || "About Us";
-  const aboutContent = aboutSetting?.content || "We build enterprise-grade automation systems and AI agents that handle your operations, so you can focus on growth.";
-  const aboutMission = aboutSetting?.mission || "";
+import React, { useEffect, useState } from 'react';
+import Link from 'next/link';
+
+export default function HomePage() {
+  const [techPosts, setTechPosts] = useState<any[]>([]);
+  const [eduPosts, setEduPosts] = useState<any[]>([]);
+  const [financePosts, setFinancePosts] = useState<any[]>([]);
+
+  useEffect(() => {
+    // Fetch posts for each category
+    const fetchCategory = async (tag: string, setter: any) => {
+      try {
+        const res = await fetch(`/api/blog?published=true&limit=3&tag=${encodeURIComponent(tag)}`);
+        const data = await res.json();
+        if (data.posts) setter(data.posts);
+      } catch (err) {
+        console.error('Failed to fetch', tag, err);
+      }
+    };
+
+    fetchCategory('Technology', setTechPosts);
+    fetchCategory('Education & Career', setEduPosts);
+    fetchCategory('Finance & Earning', setFinancePosts);
+  }, []);
+
+  const CategorySection = ({ title, posts, tag }: { title: string, posts: any[], tag: string }) => {
+    if (posts.length === 0) return null;
+    return (
+      <div className="mt-20 w-full animate-slide-up">
+        <div className="flex justify-between items-end mb-8">
+          <h2 className="text-3xl font-bold text-white">{title}</h2>
+          <Link href={`/blog?tag=${encodeURIComponent(tag)}`} className="text-blue-400 hover:text-blue-300 font-medium text-sm transition-colors">
+            View All →
+          </Link>
+        </div>
+        <div className="grid md:grid-cols-3 gap-6">
+          {posts.map((post) => (
+            <Link href={`/blog/${post.slug}`} key={post.id} className="block group">
+              <div className="premium-card h-full flex flex-col overflow-hidden">
+                <div className="h-48 relative bg-gray-900 overflow-hidden">
+                  {post.featuredImage ? (
+                    <img src={post.featuredImage} alt={post.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-blue-900 to-black opacity-80" />
+                  )}
+                  <span className="absolute top-4 right-4 bg-black/60 text-white px-3 py-1 text-xs font-semibold rounded-full backdrop-blur-md">
+                    {tag}
+                  </span>
+                </div>
+                <div className="p-6 flex-1 flex flex-col">
+                  <p className="text-xs text-gray-400 mb-2">
+                    {new Date(post.publishedAt || post.createdAt).toLocaleDateString()}
+                  </p>
+                  <h3 className="text-xl font-bold text-white mb-3 leading-tight group-hover:text-blue-400 transition-colors">
+                    {post.title}
+                  </h3>
+                  <p className="text-sm text-gray-400 line-clamp-2">
+                    {post.excerpt}
+                  </p>
+                </div>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
   return (
-    <main>
-      {/* Sleek Hero Section */}
-      <section style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', position: 'relative', overflow: 'hidden', paddingTop: '80px' }}>
-        <div className="bg-mesh"></div>
+    <div className="flex flex-col items-center justify-center min-h-[calc(100vh-140px)] px-4 py-10">
+      {/* Hero Section */}
+      <div className="max-w-4xl mx-auto text-center animate-slide-up mt-10">
+        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-panel text-sm text-blue-400 mb-8 border-blue-500/20 shadow-[0_0_20px_rgba(59,130,246,0.15)]">
+          <span className="relative flex h-2 w-2">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+          </span>
+          AI-Powered Content Generation is Live
+        </div>
         
-        <div className="container" style={{ textAlign: 'center', maxWidth: '900px' }}>
-          <div className="animate-slide-up" style={{ 
-            display: 'inline-block', 
-            padding: '0.4rem 1.2rem', 
-            borderRadius: '50px', 
-            border: '1px solid var(--color-border)', 
-            background: 'var(--color-bg-primary)', 
-            marginBottom: '2rem', 
-            fontSize: '0.9rem', 
-            fontWeight: 500,
-            color: 'var(--color-text-secondary)'
-          }}>
-            Introducing Automata Intelligence OS
-          </div>
-          
-          <h1 className="animate-slide-up delay-1" style={{ fontSize: '5rem', marginBottom: '1.5rem', lineHeight: 1.1, letterSpacing: '-2px' }}>
-            Work less.<br />
-            Accomplish <span style={{ color: 'var(--color-accent)' }}>everything.</span>
-          </h1>
-          
-          <p className="text-gray animate-slide-up delay-2" style={{ fontSize: '1.25rem', marginBottom: '3rem', maxWidth: '600px', margin: '0 auto 3rem auto', color: 'var(--color-text-secondary)' }}>
-            We build enterprise-grade automation systems and AI agents that handle your operations, so you can focus on growth.
-          </p>
-          
-          <div className="animate-slide-up delay-3" style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
-            <button className="btn-primary">Start Automating</button>
-            <button className="btn-secondary">View Case Studies</button>
-          </div>
+        <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight mb-8 leading-tight">
+          Next-Generation <br className="hidden md:block" />
+          <span className="premium-gradient-text">Blogging Platform</span>
+        </h1>
+        
+        <p className="text-lg md:text-xl text-gray-400 mb-12 max-w-2xl mx-auto font-light leading-relaxed">
+          Discover expertly curated and AI-assisted insights in Technology, Education & Career, and Finance & Earning. High-quality knowledge for the modern world.
+        </p>
+        
+        <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
+          <Link href="/blog" className="w-full sm:w-auto px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-full transition-all hover:scale-105 shadow-[0_0_30px_rgba(37,99,235,0.4)]">
+            Read Our Articles
+          </Link>
         </div>
-      </section>
+      </div>
 
-      {/* ABOUT SECTION */}
-      <section id="about" className="section" style={{ background: 'var(--color-bg-primary)', borderTop: '1px solid var(--color-border)' }}>
-        <div className="container">
-          <div style={{ maxWidth: '800px', margin: '0 auto', textAlign: 'center' }}>
-            <div className="animate-slide-up" style={{ 
-              display: 'inline-block', 
-              padding: '0.4rem 1.2rem', 
-              borderRadius: '50px', 
-              border: '1px solid var(--color-border)', 
-              background: 'var(--color-bg-secondary)', 
-              marginBottom: '1.5rem', 
-              fontSize: '0.85rem', 
-              fontWeight: 600,
-              color: 'var(--color-text-secondary)'
-            }}>
-              {aboutHeading}
-            </div>
-            
-            <h2 className="animate-slide-up delay-1" style={{ fontSize: '2.5rem', marginBottom: '2rem', letterSpacing: '-1px', lineHeight: 1.2 }}>
-              {aboutContent}
-            </h2>
-            
-            {aboutMission && (
-              <p className="text-gray animate-slide-up delay-2" style={{ fontSize: '1.1rem', color: 'var(--color-text-secondary)', fontWeight: 500 }}>
-                <strong>Our Mission:</strong> {aboutMission}
-              </p>
-            )}
+      {/* Latest & Trending Sections */}
+      <div className="max-w-6xl w-full mx-auto mt-20 pb-20">
+        {(techPosts.length > 0 || eduPosts.length > 0 || financePosts.length > 0) ? (
+          <>
+            <CategorySection title="Trending in Technology" posts={techPosts} tag="Technology" />
+            <CategorySection title="Education & Career" posts={eduPosts} tag="Education & Career" />
+            <CategorySection title="Finance & Earning" posts={financePosts} tag="Finance & Earning" />
+          </>
+        ) : (
+          <div className="text-center text-gray-500 mt-20 p-10 glass-panel rounded-2xl animate-fade-in">
+            <p>No articles available yet. Check back soon!</p>
           </div>
-        </div>
-      </section>
-
-      {/* Minimalist Stats Section */}
-      <section className="section" style={{ background: 'var(--color-bg-secondary)' }}>
-        <div className="container">
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '2rem', textAlign: 'center' }}>
-            <div className="minimal-card animate-slide-up">
-              <h2 style={{ fontSize: '3rem', marginBottom: '0.5rem', letterSpacing: '-1px' }}>99%</h2>
-              <p style={{ color: 'var(--color-text-secondary)', fontWeight: 500 }}>Tasks Automated</p>
-            </div>
-            <div className="minimal-card animate-slide-up delay-1">
-              <h2 style={{ fontSize: '3rem', marginBottom: '0.5rem', letterSpacing: '-1px' }}>150+</h2>
-              <p style={{ color: 'var(--color-text-secondary)', fontWeight: 500 }}>Enterprise Clients</p>
-            </div>
-            <div className="minimal-card animate-slide-up delay-2">
-              <h2 style={{ fontSize: '3rem', marginBottom: '0.5rem', letterSpacing: '-1px' }}>24/7</h2>
-              <p style={{ color: 'var(--color-text-secondary)', fontWeight: 500 }}>System Uptime</p>
-            </div>
-            <div className="minimal-card animate-slide-up delay-3">
-              <h2 style={{ fontSize: '3rem', marginBottom: '0.5rem', letterSpacing: '-1px' }}>10x</h2>
-              <p style={{ color: 'var(--color-text-secondary)', fontWeight: 500 }}>ROI Delivered</p>
-            </div>
-          </div>
-        </div>
-      </section>
-    </main>
+        )}
+      </div>
+    </div>
   );
 }

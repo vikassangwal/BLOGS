@@ -36,6 +36,7 @@ model User {
 model BlogPost {
   id              String    @id @default(uuid())
   title           String
+  subtitle        String?
   slug            String    @unique
   content         String
   excerpt         String?
@@ -84,7 +85,7 @@ model SiteSettings {
   siteName      String  @default("Anti Gravity 2.0")
   siteTagline   String  @default("AI-Powered Blogging Platform")
   adminEmail    String  @default("admin@antigravity.com")
-  aiProvider    String  @default("openai")    // openai, gemini, anthropic
+  aiProvider    String  @default("openai")    // openai, gemini, anthropic, deepseek
   aiApiKey      String  @default("")
   aiModel       String  @default("gpt-4o-mini")
   seoTitle      String  @default("Anti Gravity 2.0 | AI-Powered Blog")
@@ -239,5 +240,18 @@ model AboutSetting {
   content     String   @default("Welcome to our company.")
   mission     String?
   imageUrl    String?
+  updatedAt   DateTime @updatedAt
+}
+
+model TeamMember {
+  id          String   @id @default(uuid())
+  name        String
+  role        String
+  bio         String   // Short excerpt
+  fullDetails String   // Long HTML/text
+  imageUrl    String?
+  socialLinks String?  // JSON string
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }

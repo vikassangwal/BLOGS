@@ -10,6 +10,7 @@ function BlogEditor() {
 
   const [formData, setFormData] = useState({
     title: '',
+    subtitle: '',
     slug: '',
     content: '',
     excerpt: '',
@@ -31,6 +32,7 @@ function BlogEditor() {
           if (data.id) {
             setFormData({
               title: data.title || '',
+              subtitle: data.subtitle || '',
               slug: data.slug || '',
               content: data.content || '',
               excerpt: data.excerpt || '',
@@ -116,6 +118,8 @@ function BlogEditor() {
     } finally {
       setAiLoading(false);
     }
+  };
+
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -130,7 +134,7 @@ function BlogEditor() {
   return (
     <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-        <h1 style={{ fontSize: '2rem', fontWeight: 800, margin: 0, color: '#111827' }}>
+        <h1 style={{ fontSize: '2rem', fontWeight: 800, margin: 0, color: 'var(--color-text-primary)' }}>
           {isEdit ? 'Edit Post' : 'Create New Post'}
         </h1>
         <button onClick={() => router.push('/admin/blog')} className="btn-secondary">Cancel</button>
@@ -139,25 +143,33 @@ function BlogEditor() {
       <form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '2rem' }}>
         {/* Main Content Area */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          <div style={{ background: '#fff', padding: '1.5rem', borderRadius: '16px', border: '1px solid #e5e7eb' }}>
-            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, color: '#374151' }}>Post Title</label>
+          <div style={{ background: 'rgba(255, 255, 255, 0.05)', padding: '1.5rem', borderRadius: '16px', border: '1px solid var(--color-border)' }}>
+            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, color: 'var(--color-text-primary)' }}>Post Title</label>
             <input
               type="text"
               value={formData.title}
               onChange={e => setFormData({ ...formData, title: e.target.value })}
-              style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid #e5e7eb', fontSize: '1.1rem' }}
+              style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--color-border)', fontSize: '1.1rem', background: 'transparent', color: 'var(--color-text-primary)' }}
               required
+            />
+
+            <label style={{ display: 'block', marginTop: '1rem', marginBottom: '0.5rem', fontWeight: 600, color: 'var(--color-text-primary)' }}>Subtitle (Optional)</label>
+            <input
+              type="text"
+              value={formData.subtitle}
+              onChange={e => setFormData({ ...formData, subtitle: e.target.value })}
+              style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--color-border)', fontSize: '1rem', background: 'transparent', color: 'var(--color-text-primary)' }}
             />
           </div>
 
-          <div style={{ background: '#fff', padding: '1.5rem', borderRadius: '16px', border: '1px solid #e5e7eb' }}>
+          <div style={{ background: 'rgba(255, 255, 255, 0.05)', padding: '1.5rem', borderRadius: '16px', border: '1px solid var(--color-border)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-              <label style={{ fontWeight: 600, color: '#374151' }}>Content (HTML)</label>
+              <label style={{ fontWeight: 600, color: 'var(--color-text-primary)' }}>Content (HTML)</label>
               <button 
                 type="button" 
                 onClick={() => handleAiGenerate('article')}
                 disabled={aiLoading}
-                style={{ background: 'linear-gradient(135deg, #9333ea, #c084fc)', color: '#fff', border: 'none', padding: '0.4rem 1rem', borderRadius: '6px', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+                style={{ background: 'linear-gradient(135deg, #9333ea, #c084fc)', color: 'rgba(255, 255, 255, 0.05)', border: 'none', padding: '0.4rem 1rem', borderRadius: '6px', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.5rem' }}
               >
                 {aiLoading ? 'Generating...' : '✨ Generate with AI'}
               </button>
@@ -165,29 +177,29 @@ function BlogEditor() {
             <textarea
               value={formData.content}
               onChange={e => setFormData({ ...formData, content: e.target.value })}
-              style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid #e5e7eb', minHeight: '400px', fontFamily: 'monospace' }}
+              style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--color-border)', minHeight: '400px', fontFamily: 'monospace' }}
               required
             />
           </div>
 
-          <div style={{ background: '#fff', padding: '1.5rem', borderRadius: '16px', border: '1px solid #e5e7eb' }}>
-            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, color: '#374151' }}>Excerpt</label>
+          <div style={{ background: 'rgba(255, 255, 255, 0.05)', padding: '1.5rem', borderRadius: '16px', border: '1px solid var(--color-border)' }}>
+            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, color: 'var(--color-text-primary)' }}>Excerpt</label>
             <textarea
               value={formData.excerpt}
               onChange={e => setFormData({ ...formData, excerpt: e.target.value })}
-              style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid #e5e7eb', minHeight: '100px' }}
+              style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--color-border)', minHeight: '100px' }}
             />
           </div>
           
           {/* SEO Section */}
-          <div style={{ background: '#fff', padding: '1.5rem', borderRadius: '16px', border: '1px solid #e5e7eb' }}>
+          <div style={{ background: 'rgba(255, 255, 255, 0.05)', padding: '1.5rem', borderRadius: '16px', border: '1px solid var(--color-border)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
               <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 600 }}>SEO Settings</h3>
               <button 
                 type="button" 
                 onClick={() => handleAiGenerate('seo')}
                 disabled={aiLoading}
-                style={{ background: '#f3f4f6', color: '#374151', border: '1px solid #e5e7eb', padding: '0.4rem 1rem', borderRadius: '6px', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600 }}
+                style={{ background: 'rgba(255, 255, 255, 0.02)', color: 'var(--color-text-primary)', border: '1px solid var(--color-border)', padding: '0.4rem 1rem', borderRadius: '6px', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600 }}
               >
                 🤖 Auto-Fill SEO
               </button>
@@ -195,29 +207,29 @@ function BlogEditor() {
             
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               <div>
-                <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: '#4b5563' }}>SEO Title</label>
+                <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'var(--color-text-secondary)' }}>SEO Title</label>
                 <input
                   type="text"
                   value={formData.seoTitle}
                   onChange={e => setFormData({ ...formData, seoTitle: e.target.value })}
-                  style={{ width: '100%', padding: '0.6rem', borderRadius: '6px', border: '1px solid #e5e7eb' }}
+                  style={{ width: '100%', padding: '0.6rem', borderRadius: '6px', border: '1px solid var(--color-border)' }}
                 />
               </div>
               <div>
-                <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: '#4b5563' }}>SEO Description</label>
+                <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'var(--color-text-secondary)' }}>SEO Description</label>
                 <textarea
                   value={formData.seoDescription}
                   onChange={e => setFormData({ ...formData, seoDescription: e.target.value })}
-                  style={{ width: '100%', padding: '0.6rem', borderRadius: '6px', border: '1px solid #e5e7eb', minHeight: '80px' }}
+                  style={{ width: '100%', padding: '0.6rem', borderRadius: '6px', border: '1px solid var(--color-border)', minHeight: '80px' }}
                 />
               </div>
               <div>
-                <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: '#4b5563' }}>Keywords (comma separated)</label>
+                <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'var(--color-text-secondary)' }}>Keywords (comma separated)</label>
                 <input
                   type="text"
                   value={formData.seoKeywords}
                   onChange={e => setFormData({ ...formData, seoKeywords: e.target.value })}
-                  style={{ width: '100%', padding: '0.6rem', borderRadius: '6px', border: '1px solid #e5e7eb' }}
+                  style={{ width: '100%', padding: '0.6rem', borderRadius: '6px', border: '1px solid var(--color-border)' }}
                 />
               </div>
             </div>
@@ -226,14 +238,14 @@ function BlogEditor() {
 
         {/* Sidebar */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          <div style={{ background: '#fff', padding: '1.5rem', borderRadius: '16px', border: '1px solid #e5e7eb' }}>
+          <div style={{ background: 'rgba(255, 255, 255, 0.05)', padding: '1.5rem', borderRadius: '16px', border: '1px solid var(--color-border)' }}>
             <h3 style={{ margin: '0 0 1rem 0', fontSize: '1.1rem', fontWeight: 600 }}>Publishing</h3>
             
-            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: '#4b5563' }}>Status</label>
+            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'var(--color-text-secondary)' }}>Status</label>
             <select
               value={formData.status}
               onChange={e => setFormData({ ...formData, status: e.target.value })}
-              style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid #e5e7eb', marginBottom: '1.5rem' }}
+              style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--color-border)', marginBottom: '1.5rem' }}
             >
               <option value="Draft">Draft</option>
               <option value="Published">Published</option>
@@ -245,46 +257,46 @@ function BlogEditor() {
             </button>
           </div>
 
-          <div style={{ background: '#fff', padding: '1.5rem', borderRadius: '16px', border: '1px solid #e5e7eb' }}>
+          <div style={{ background: 'rgba(255, 255, 255, 0.05)', padding: '1.5rem', borderRadius: '16px', border: '1px solid var(--color-border)' }}>
             <h3 style={{ margin: '0 0 1rem 0', fontSize: '1.1rem', fontWeight: 600 }}>Featured Image</h3>
             
             <div style={{ marginBottom: '1rem' }}>
-              <label style={{ display: 'block', fontSize: '0.85rem', marginBottom: '0.4rem', color: '#4b5563' }}>Upload from Gallery</label>
-              <input type="file" accept="image/*" onChange={handleImageUpload} style={{ width: '100%', padding: '0.5rem', background: '#f9fafb', border: '1px solid #e5e7eb', borderRadius: '6px' }} />
+              <label style={{ display: 'block', fontSize: '0.85rem', marginBottom: '0.4rem', color: 'var(--color-text-secondary)' }}>Upload from Gallery</label>
+              <input type="file" accept="image/*" onChange={handleImageUpload} style={{ width: '100%', padding: '0.5rem', background: 'rgba(255, 255, 255, 0.02)', border: '1px solid var(--color-border)', borderRadius: '6px' }} />
             </div>
 
-            <p style={{ fontSize: '0.8rem', color: '#6b7280', marginBottom: '0.5rem' }}>Or paste an image URL:</p>
+            <p style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', marginBottom: '0.5rem' }}>Or paste an image URL:</p>
             <input
               type="url"
               placeholder="https://example.com/image.jpg"
               value={formData.featuredImage}
               onChange={e => setFormData({ ...formData, featuredImage: e.target.value })}
-              style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid #e5e7eb' }}
+              style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--color-border)' }}
             />
             {formData.featuredImage && (
               <img src={formData.featuredImage} alt="Preview" style={{ width: '100%', marginTop: '1rem', borderRadius: '8px', objectFit: 'cover' }} />
             )}
           </div>
 
-          <div style={{ background: '#fff', padding: '1.5rem', borderRadius: '16px', border: '1px solid #e5e7eb' }}>
+          <div style={{ background: 'rgba(255, 255, 255, 0.05)', padding: '1.5rem', borderRadius: '16px', border: '1px solid var(--color-border)' }}>
             <h3 style={{ margin: '0 0 1rem 0', fontSize: '1.1rem', fontWeight: 600 }}>Tags</h3>
-            <p style={{ fontSize: '0.8rem', color: '#6b7280', marginBottom: '0.5rem' }}>Comma separated tags</p>
+            <p style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', marginBottom: '0.5rem' }}>Comma separated tags</p>
             <input
               type="text"
               value={formData.tags}
               onChange={e => setFormData({ ...formData, tags: e.target.value })}
-              style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid #e5e7eb' }}
+              style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--color-border)' }}
             />
           </div>
           
-          <div style={{ background: '#fff', padding: '1.5rem', borderRadius: '16px', border: '1px solid #e5e7eb' }}>
+          <div style={{ background: 'rgba(255, 255, 255, 0.05)', padding: '1.5rem', borderRadius: '16px', border: '1px solid var(--color-border)' }}>
             <h3 style={{ margin: '0 0 1rem 0', fontSize: '1.1rem', fontWeight: 600 }}>URL Slug</h3>
             <input
               type="text"
               value={formData.slug}
               onChange={e => setFormData({ ...formData, slug: e.target.value })}
               placeholder="Auto-generated if empty"
-              style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid #e5e7eb' }}
+              style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--color-border)' }}
             />
           </div>
         </div>

@@ -16,10 +16,21 @@ export async function getAIConfig(): Promise<AIConfig | null> {
     // First try SiteSettings
     const settings = await prisma.siteSettings.findUnique({ where: { id: 'default' } });
     if (settings?.aiApiKey) {
+      const provider = settings.aiProvider as AIProvider;
+      let model = settings.aiModel;
+      
+      if (!model) {
+        if (provider === 'openai') model = 'gpt-4o-mini';
+        else if (provider === 'gemini') model = 'gemini-1.5-pro';
+        else if (provider === 'anthropic') model = 'claude-3-haiku-20240307';
+        else if (provider === 'deepseek') model = 'deepseek-chat';
+        else model = 'gpt-4o-mini';
+      }
+
       return {
-        provider: settings.aiProvider as AIProvider,
+        provider,
         apiKey: settings.aiApiKey,
-        model: settings.aiModel,
+        model,
       };
     }
     

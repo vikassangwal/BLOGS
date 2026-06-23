@@ -98,6 +98,11 @@ function BlogEditor() {
       
       const data = await res.json();
       
+      if (!res.ok || data.error) {
+        alert(`Error: ${data.error || 'Failed to generate content'}`);
+        return;
+      }
+      
       if (data.result) {
         if (type === 'article') {
           setFormData(prev => ({ ...prev, content: data.result }));

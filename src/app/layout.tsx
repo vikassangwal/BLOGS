@@ -4,27 +4,43 @@ import './globals.css';
 import GlobalHeader from '@/components/GlobalHeader';
 import GlobalFooter from '@/components/GlobalFooter';
 
-export const metadata: Metadata = {
-  title: 'Anti Gravity | Premium AI Blogging',
-  description: 'A dedicated platform for fully automated AI blogging and lead generation.',
-};
+import { prisma } from '@/lib/prisma';
 
-export default function RootLayout({
+export async function generateMetadata(): Promise<Metadata> {
+  let settings = null;
+  try {
+    settings = await prisma.siteSettings.findUnique({ where: { id: 'default' } });
+  } catch (e) {}
+
+  return {
+    title: settings?.seoTitle || settings?.siteName || 'Anti Gravity | Premium AI Blogging',
+    description: settings?.seoDescription || settings?.siteTagline || 'A dedicated platform for fully automated AI blogging and lead generation.',
+  };
+}
+
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  let settings = null;
+  try {
+    settings = await prisma.siteSettings.findUnique({ where: { id: 'default' } });
+  } catch (e) {}
+
+  const siteName = settings?.siteName || 'Anti Gravity';
+
   return (
     <html lang="en">
       <body className="antialiased min-h-screen flex flex-col bg-black text-white relative">
         <div className="bg-mesh"></div>
-        <GlobalHeader />
+        <GlobalHeader siteName={siteName} />
 
         <main className="flex-grow flex flex-col">
           {children}
         </main>
 
-        <GlobalFooter />
+        <GlobalFooter siteName={siteName} />
 
         <Script
           src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"

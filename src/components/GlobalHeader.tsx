@@ -2,7 +2,7 @@
 import React from 'react';
 import { usePathname } from 'next/navigation';
 
-export default function GlobalHeader() {
+export default function GlobalHeader({ siteName }: { siteName?: string }) {
   const pathname = usePathname();
   
   if (pathname && pathname.startsWith('/admin')) {
@@ -13,7 +13,7 @@ export default function GlobalHeader() {
     <header className="sticky top-0 z-50 glass-panel border-b border-white/10 w-full">
       <div className="container mx-auto px-6 h-20 flex items-center justify-between">
         <a href="/" className="text-2xl font-bold tracking-tight premium-gradient-text">
-          Anti Gravity
+          {siteName || 'Anti Gravity'}
         </a>
         <div className="flex items-center gap-6">
           <nav className="hidden md:flex gap-6 items-center font-medium text-sm text-gray-300">

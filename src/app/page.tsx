@@ -1,29 +1,43 @@
-'use client';
-
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import Link from 'next/link';
+import { prisma } from '@/lib/prisma';
 
-export default function HomePage() {
-  const [techPosts, setTechPosts] = useState<any[]>([]);
-  const [eduPosts, setEduPosts] = useState<any[]>([]);
-  const [financePosts, setFinancePosts] = useState<any[]>([]);
+export const revalidate = 60; // Revalidate the page every 60 seconds for performance
 
-  useEffect(() => {
-    // Fetch posts for each category
-    const fetchCategory = async (tag: string, setter: any) => {
-      try {
-        const res = await fetch(`/api/blog?published=true&limit=3&tag=${encodeURIComponent(tag)}`);
-        const data = await res.json();
-        if (data.posts) setter(data.posts);
-      } catch (err) {
-        console.error('Failed to fetch', tag, err);
+async function getPostsByTag(tag: string) {
+  try {
+    return await prisma.blogPost.findMany({
+      where: {
+        status: 'Published',
+        tags: {
+          has: tag
+        }
+      },
+      orderBy: { publishedAt: 'desc' },
+      take: 3,
+      select: {
+        id: true,
+        title: true,
+        slug: true,
+        excerpt: true,
+        featuredImage: true,
+        publishedAt: true,
+        createdAt: true
       }
-    };
+    });
+  } catch (err) {
+    console.error('Failed to fetch', tag, err);
+    return [];
+  }
+}
 
-    fetchCategory('Technology', setTechPosts);
-    fetchCategory('Education & Career', setEduPosts);
-    fetchCategory('Finance & Earning', setFinancePosts);
-  }, []);
+export default async function HomePage() {
+  // Fetch all categories in parallel on the server
+  const [techPosts, eduPosts, financePosts] = await Promise.all([
+    getPostsByTag('Technology'),
+    getPostsByTag('Education & Career'),
+    getPostsByTag('Finance & Earning')
+  ]);
 
   const CategorySection = ({ title, posts, tag }: { title: string, posts: any[], tag: string }) => {
     if (posts.length === 0) return null;

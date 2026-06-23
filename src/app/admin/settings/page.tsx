@@ -9,9 +9,8 @@ export default function SettingsAdmin() {
   useEffect(() => {
     fetch('/api/settings')
       .then(r => r.json())
-      .then(data => {
-        if (data.id) setSettings(data);
-      });
+      .then(data => setSettings(data || {}))
+      .catch(() => setSettings({}));
   }, []);
 
   const handleSave = async (e: React.FormEvent) => {
@@ -61,25 +60,25 @@ export default function SettingsAdmin() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', background: 'rgba(255, 255, 255, 0.05)', padding: '2rem', borderRadius: '16px', border: '1px solid var(--color-border)' }}>
             <div>
               <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>Site Name</label>
-              <input type="text" value={settings.siteName} onChange={e => setSettings({ ...settings, siteName: e.target.value })} style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--color-border)' }} />
+              <input type="text" value={settings.siteName || ''} onChange={e => setSettings({ ...settings, siteName: e.target.value })} style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--color-border)' }} />
             </div>
             <div>
               <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>Site Tagline</label>
-              <input type="text" value={settings.siteTagline} onChange={e => setSettings({ ...settings, siteTagline: e.target.value })} style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--color-border)' }} />
+              <input type="text" value={settings.siteTagline || ''} onChange={e => setSettings({ ...settings, siteTagline: e.target.value })} style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--color-border)' }} />
             </div>
             <div>
               <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>Admin Email</label>
-              <input type="email" value={settings.adminEmail} onChange={e => setSettings({ ...settings, adminEmail: e.target.value })} style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--color-border)' }} />
+              <input type="email" value={settings.adminEmail || ''} onChange={e => setSettings({ ...settings, adminEmail: e.target.value })} style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--color-border)' }} />
             </div>
             <hr style={{ border: 'none', borderTop: '1px solid var(--color-border)', margin: '1rem 0' }} />
             <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 700 }}>Global SEO</h3>
             <div>
               <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>Home SEO Title</label>
-              <input type="text" value={settings.seoTitle} onChange={e => setSettings({ ...settings, seoTitle: e.target.value })} style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--color-border)' }} />
+              <input type="text" value={settings.seoTitle || ''} onChange={e => setSettings({ ...settings, seoTitle: e.target.value })} style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--color-border)' }} />
             </div>
             <div>
               <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>Home SEO Description</label>
-              <textarea value={settings.seoDescription} onChange={e => setSettings({ ...settings, seoDescription: e.target.value })} style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--color-border)', minHeight: '100px' }} />
+              <textarea value={settings.seoDescription || ''} onChange={e => setSettings({ ...settings, seoDescription: e.target.value })} style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--color-border)', minHeight: '100px' }} />
             </div>
           </div>
         )}
@@ -92,7 +91,7 @@ export default function SettingsAdmin() {
             
             <div>
               <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>AI Provider</label>
-              <select value={settings.aiProvider} onChange={e => setSettings({ ...settings, aiProvider: e.target.value })} style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--color-border)' }}>
+              <select value={settings.aiProvider || 'openai'} onChange={e => setSettings({ ...settings, aiProvider: e.target.value })} style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--color-border)' }}>
                 <option value="openai">OpenAI</option>
                 <option value="gemini">Google Gemini</option>
                 <option value="anthropic">Anthropic (Claude)</option>
@@ -102,12 +101,12 @@ export default function SettingsAdmin() {
             
             <div>
               <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>API Key</label>
-              <input type="password" value={settings.aiApiKey} onChange={e => setSettings({ ...settings, aiApiKey: e.target.value })} placeholder="Enter API Key" style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--color-border)' }} />
+              <input type="password" value={settings.aiApiKey || ''} onChange={e => setSettings({ ...settings, aiApiKey: e.target.value })} placeholder="Enter API Key" style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--color-border)' }} />
             </div>
 
             <div>
               <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>Preferred Model</label>
-              <input type="text" value={settings.aiModel} onChange={e => setSettings({ ...settings, aiModel: e.target.value })} placeholder="e.g. gpt-4o, gemini-1.5-pro, claude-3-5-sonnet" style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--color-border)' }} />
+              <input type="text" value={settings.aiModel || ''} onChange={e => setSettings({ ...settings, aiModel: e.target.value })} placeholder="e.g. gpt-4o, gemini-1.5-pro, claude-3-5-sonnet" style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--color-border)' }} />
               <p style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', marginTop: '0.5rem' }}>Make sure the model name matches the provider's API.</p>
             </div>
           </div>

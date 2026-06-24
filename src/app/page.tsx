@@ -10,7 +10,11 @@ async function getPostsByTag(tag: string) {
       where: {
         status: 'Published',
         tags: {
-          has: tag
+          some: {
+            tag: {
+              name: tag
+            }
+          }
         }
       },
       orderBy: { publishedAt: 'desc' },

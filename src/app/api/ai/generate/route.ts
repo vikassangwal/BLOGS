@@ -34,7 +34,7 @@ export async function POST(request: Request) {
           apiKey: apiKeyRecord.apiKey.trim(),
           model: modelOverride
         };
-      } else if (aiConfig?.provider === providerOverride) {
+      } else if (aiConfig && aiConfig.provider === providerOverride) {
         // Fallback to default if it matches provider
         aiConfig.model = modelOverride;
       }

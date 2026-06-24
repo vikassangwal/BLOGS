@@ -17,9 +17,9 @@ export default function AutoBlogAdmin() {
         fetch('/api/auto-blog').catch(() => ({ json: () => ({}) })),
         fetch('/api/auto-blog/keywords?limit=10').catch(() => ({ json: () => ({ keywords: [] }) }))
       ]);
-      const settingsData = await settingsRes.json();
-      const autoBlogData = await autoBlogRes.json();
-      const keywordsData = await keywordsRes.json();
+      const settingsData: any = await settingsRes.json();
+      const autoBlogData: any = await autoBlogRes.json();
+      const keywordsData: any = await keywordsRes.json();
 
       setSettings(settingsData);
       setStats(autoBlogData.stats || {});

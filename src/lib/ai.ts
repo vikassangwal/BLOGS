@@ -29,7 +29,7 @@ export async function getAIConfig(): Promise<AIConfig | null> {
 
       return {
         provider,
-        apiKey: settings.aiApiKey,
+        apiKey: settings.aiApiKey.trim(),
         model,
       };
     }
@@ -52,7 +52,7 @@ export async function getAIConfig(): Promise<AIConfig | null> {
       };
       return {
         provider: providerMap[apiKey.provider] || 'openai',
-        apiKey: apiKey.apiKey,
+        apiKey: apiKey.apiKey.trim(),
         model: apiKey.provider === 'openai' ? 'gpt-4o-mini' : 
                apiKey.provider === 'google_ai' ? 'gemini-pro' : 
                apiKey.provider === 'deepseek' ? 'deepseek-chat' : 'claude-3-haiku-20240307',

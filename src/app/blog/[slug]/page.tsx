@@ -156,7 +156,7 @@ export default function BlogPostPage({ params }: { params: Promise<{ slug: strin
       </article>
 
       {/* Floating Chatbot */}
-      <BlogChatbot postTitle={post.title} postContent={post.content} />
+      <BlogChatbot postId={post.id} postTitle={post.title} />
 
       <style>{`
         .blog-content h2 { fontSize: 2rem; fontWeight: 700; margin: 2.5rem 0 1rem; color: var(--color-text-primary); letter-spacing: -0.5px; }

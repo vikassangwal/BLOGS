@@ -11,9 +11,34 @@ export async function POST(request: Request) {
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const body = await request.json();
-    const { type, topic, content, title } = body;
+    const { type, topic, content, title, providerOverride, modelOverride } = body;
 
-    const aiConfig = await getAIConfig();
+    let aiConfig = await getAIConfig();
+
+    // Handle Task-Specific Override
+    if (providerOverride && modelOverride) {
+      const apiKeyRecord = await prisma.apiKey.findFirst({
+        where: { provider: providerOverride, isActive: true },
+        orderBy: { createdAt: 'desc' }
+      });
+      if (apiKeyRecord) {
+        const providerMap: Record<string, any> = {
+          'openai': 'openai',
+          'google_ai': 'gemini',
+          'anthropic': 'anthropic',
+          'deepseek': 'deepseek',
+          'openrouter': 'openrouter'
+        };
+        aiConfig = {
+          provider: providerMap[providerOverride] || 'openai',
+          apiKey: apiKeyRecord.apiKey.trim(),
+          model: modelOverride
+        };
+      } else if (aiConfig?.provider === providerOverride) {
+        // Fallback to default if it matches provider
+        aiConfig.model = modelOverride;
+      }
+    }
 
     if (!aiConfig) {
       // Fallback responses if AI is not configured
@@ -23,6 +48,8 @@ export async function POST(request: Request) {
       else if (type === 'article') fallbackText = `<h2>Understanding ${title || topic}</h2>\n<p>This is a placeholder article generated because AI is not configured. Please go to Settings > AI Configuration to add an API key (OpenAI, Gemini, or Claude).</p>\n<h3>Why this matters</h3>\n<p>Configuring AI unlocks the full potential of Anti Gravity 2.0.</p>`;
       else if (type === 'seo') fallbackText = `SEO Title: Guide to ${topic}\nSEO Description: Learn everything about ${topic}.\nKeywords: ${topic}, guide, tutorial`;
       else if (type === 'improve') fallbackText = `[Improved] ${content}`;
+      else if (type === 'captions') fallbackText = `🔥 Check out our latest post about ${topic}! #trends #tech`;
+      else if (type === 'hashtags') fallbackText = `#${(topic||'blog').replace(/\s+/g,'')} #AI #Technology`;
 
       return NextResponse.json({ result: fallbackText });
     }
@@ -56,6 +83,16 @@ export async function POST(request: Request) {
         systemPrompt = 'You are an expert editor. Improve the following text for readability, flow, grammar, and engagement while preserving the original meaning and HTML tags. Return ONLY the improved text.';
         userPrompt = content || '';
         maxTokens = 2000;
+        break;
+      case 'captions':
+        systemPrompt = 'You are a social media manager. Generate 3 engaging, short social media captions (for Instagram/Twitter) to promote this blog post. Use emojis. Return ONLY the captions, separated by double newlines.';
+        userPrompt = `Title: ${title}\nTopic: ${topic}`;
+        maxTokens = 300;
+        break;
+      case 'hashtags':
+        systemPrompt = 'You are an SEO and Social Media expert. Generate a list of 10-15 trending, highly relevant hashtags for the given topic. Return ONLY the hashtags separated by spaces (e.g. #Tech #AI).';
+        userPrompt = `Topic: ${topic}`;
+        maxTokens = 150;
         break;
       default:
         return NextResponse.json({ error: 'Invalid generation type' }, { status: 400 });

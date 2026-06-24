@@ -8,13 +8,13 @@ interface Message {
 
 interface BlogChatbotProps {
   postTitle: string;
-  postContent: string;
+  postId: string;
 }
 
-export default function BlogChatbot({ postTitle, postContent }: BlogChatbotProps) {
+export default function BlogChatbot({ postTitle, postId }: BlogChatbotProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
-    { role: 'ai', content: 'Hi! I am the AI assistant for this post. What would you like to know?' }
+    { role: 'ai', content: `Hi! I am the AI assistant for "${postTitle}". What would you like to know? If you spot any mistakes, please let me know!` }
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -40,8 +40,7 @@ export default function BlogChatbot({ postTitle, postContent }: BlogChatbotProps
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           message: userMessage,
-          postTitle,
-          postContent,
+          postId,
           history: messages
         })
       });

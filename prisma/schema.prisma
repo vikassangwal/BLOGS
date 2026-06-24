@@ -48,6 +48,8 @@ model BlogPost {
   seoTitle        String?
   seoDescription  String?
   seoKeywords     String?   // comma-separated
+  socialCaptions  String?
+  socialHashtags  String?
   viewCount       Int       @default(0)
   authorId        String?
   author          User?     @relation(fields: [authorId], references: [id])
@@ -56,6 +58,17 @@ model BlogPost {
 
   tags            PostTag[]
   leads           Lead[]
+  feedback        ReaderFeedback[]
+}
+
+model ReaderFeedback {
+  id        String   @id @default(uuid())
+  postId    String
+  post      BlogPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  message   String
+  type      String   @default("feedback") // feedback, typo, suggestion
+  status    String   @default("new")      // new, reviewed, resolved
+  createdAt DateTime @default(now())
 }
 
 model Tag {

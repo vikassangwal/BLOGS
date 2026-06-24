@@ -19,10 +19,14 @@ function BlogEditor() {
     seoTitle: '',
     seoDescription: '',
     seoKeywords: '',
+    socialCaptions: '',
+    socialHashtags: '',
     tags: ''
   });
   const [isSaving, setIsSaving] = useState(false);
   const [aiLoading, setAiLoading] = useState(false);
+  const [providerOverride, setProviderOverride] = useState('');
+  const [modelOverride, setModelOverride] = useState('');
 
   useEffect(() => {
     if (isEdit && slug) {
@@ -41,6 +45,8 @@ function BlogEditor() {
               seoTitle: data.seoTitle || '',
               seoDescription: data.seoDescription || '',
               seoKeywords: data.seoKeywords || '',
+              socialCaptions: data.socialCaptions || '',
+              socialHashtags: data.socialHashtags || '',
               tags: Array.isArray(data.tags) ? data.tags.join(', ') : ''
             });
           }
@@ -88,7 +94,14 @@ function BlogEditor() {
     
     setAiLoading(true);
     try {
-      let payload = { type, topic: formData.title, title: formData.title, content: formData.content };
+      let payload = { 
+        type, 
+        topic: formData.title, 
+        title: formData.title, 
+        content: formData.content,
+        providerOverride: providerOverride || undefined,
+        modelOverride: modelOverride || undefined
+      };
       
       const res = await fetch('/api/ai/generate', {
         method: 'POST',
@@ -106,6 +119,10 @@ function BlogEditor() {
       if (data.result) {
         if (type === 'article') {
           setFormData(prev => ({ ...prev, content: data.result }));
+        } else if (type === 'captions') {
+          setFormData(prev => ({ ...prev, socialCaptions: data.result }));
+        } else if (type === 'hashtags') {
+          setFormData(prev => ({ ...prev, socialHashtags: data.result }));
         } else if (type === 'seo') {
           // Parse SEO result
           const lines = data.result.split('\n');
@@ -148,6 +165,33 @@ function BlogEditor() {
       <form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '2rem' }}>
         {/* Main Content Area */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          
+          <div style={{ background: 'rgba(255, 255, 255, 0.05)', padding: '1.5rem', borderRadius: '16px', border: '1px solid var(--color-border)' }}>
+            <h3 style={{ margin: '0 0 1rem 0', fontSize: '1.1rem', fontWeight: 600 }}>AI Model Selector (Override)</h3>
+            <p style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)', marginBottom: '1rem' }}>Select a specific AI model for generating this content. Leave default to use Site Settings.</p>
+            <div style={{ display: 'flex', gap: '1rem' }}>
+              <select 
+                value={providerOverride} 
+                onChange={e => setProviderOverride(e.target.value)}
+                style={{ padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--color-border)', flex: 1, background: 'transparent' }}
+              >
+                <option value="" style={{color: 'black'}}>Default (from Settings)</option>
+                <option value="openrouter" style={{color: 'black'}}>OpenRouter</option>
+                <option value="openai" style={{color: 'black'}}>OpenAI</option>
+                <option value="google_ai" style={{color: 'black'}}>Google Gemini</option>
+                <option value="anthropic" style={{color: 'black'}}>Anthropic Claude</option>
+                <option value="deepseek" style={{color: 'black'}}>DeepSeek</option>
+              </select>
+              <input 
+                type="text" 
+                placeholder="Model ID (e.g. meta-llama/llama-3.3-70b-instruct)" 
+                value={modelOverride}
+                onChange={e => setModelOverride(e.target.value)}
+                style={{ padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--color-border)', flex: 2, background: 'transparent' }}
+              />
+            </div>
+          </div>
+
           <div style={{ background: 'rgba(255, 255, 255, 0.05)', padding: '1.5rem', borderRadius: '16px', border: '1px solid var(--color-border)' }}>
             <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, color: 'var(--color-text-primary)' }}>Post Title</label>
             <input
@@ -235,6 +279,51 @@ function BlogEditor() {
                   value={formData.seoKeywords}
                   onChange={e => setFormData({ ...formData, seoKeywords: e.target.value })}
                   style={{ width: '100%', padding: '0.6rem', borderRadius: '6px', border: '1px solid var(--color-border)' }}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Social Media Section */}
+          <div style={{ background: 'rgba(255, 255, 255, 0.05)', padding: '1.5rem', borderRadius: '16px', border: '1px solid var(--color-border)' }}>
+            <h3 style={{ margin: '0 0 1.5rem 0', fontSize: '1.1rem', fontWeight: 600 }}>Social Media Content</h3>
+            
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                  <label style={{ fontSize: '0.9rem', color: 'var(--color-text-secondary)' }}>Social Captions (Insta/Twitter)</label>
+                  <button 
+                    type="button" 
+                    onClick={() => handleAiGenerate('captions')}
+                    disabled={aiLoading}
+                    style={{ background: 'rgba(255, 255, 255, 0.02)', color: 'var(--color-text-primary)', border: '1px solid var(--color-border)', padding: '0.3rem 0.8rem', borderRadius: '6px', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600 }}
+                  >
+                    ✨ Auto-Generate
+                  </button>
+                </div>
+                <textarea
+                  value={formData.socialCaptions}
+                  onChange={e => setFormData({ ...formData, socialCaptions: e.target.value })}
+                  style={{ width: '100%', padding: '0.6rem', borderRadius: '6px', border: '1px solid var(--color-border)', minHeight: '120px' }}
+                />
+              </div>
+
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                  <label style={{ fontSize: '0.9rem', color: 'var(--color-text-secondary)' }}>Trending Hashtags</label>
+                  <button 
+                    type="button" 
+                    onClick={() => handleAiGenerate('hashtags')}
+                    disabled={aiLoading}
+                    style={{ background: 'rgba(255, 255, 255, 0.02)', color: 'var(--color-text-primary)', border: '1px solid var(--color-border)', padding: '0.3rem 0.8rem', borderRadius: '6px', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600 }}
+                  >
+                    ✨ Auto-Generate
+                  </button>
+                </div>
+                <textarea
+                  value={formData.socialHashtags}
+                  onChange={e => setFormData({ ...formData, socialHashtags: e.target.value })}
+                  style={{ width: '100%', padding: '0.6rem', borderRadius: '6px', border: '1px solid var(--color-border)', minHeight: '60px' }}
                 />
               </div>
             </div>

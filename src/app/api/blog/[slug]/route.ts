@@ -50,7 +50,7 @@ export async function PUT(request: Request, context: { params: Promise<{ slug: s
     const params = await context.params;
 
     const body = await request.json();
-    const { title, subtitle, slug, content, excerpt, featuredImage, status, seoTitle, seoDescription, seoKeywords, scheduledAt, tags = [] } = body;
+    const { title, subtitle, slug, content, excerpt, featuredImage, status, seoTitle, seoDescription, seoKeywords, socialCaptions, socialHashtags, scheduledAt, tags = [] } = body;
 
     const existingPost = await prisma.blogPost.findUnique({
       where: { slug: params.slug },
@@ -80,6 +80,8 @@ export async function PUT(request: Request, context: { params: Promise<{ slug: s
       seoTitle,
       seoDescription,
       seoKeywords,
+      socialCaptions,
+      socialHashtags,
     };
 
     if (status === 'Published' && existingPost.status !== 'Published') {

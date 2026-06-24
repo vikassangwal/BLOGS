@@ -13,9 +13,9 @@ export default function AutoBlogAdmin() {
   const fetchData = async () => {
     try {
       const [settingsRes, autoBlogRes, keywordsRes] = await Promise.all([
-        fetch('/api/auto-blog/settings'),
-        fetch('/api/auto-blog'),
-        fetch('/api/auto-blog/keywords?limit=10')
+        fetch('/api/auto-blog/settings').catch(() => ({ json: () => ({}) })),
+        fetch('/api/auto-blog').catch(() => ({ json: () => ({}) })),
+        fetch('/api/auto-blog/keywords?limit=10').catch(() => ({ json: () => ({ keywords: [] }) }))
       ]);
       const settingsData = await settingsRes.json();
       const autoBlogData = await autoBlogRes.json();

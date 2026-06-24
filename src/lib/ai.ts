@@ -1,6 +1,6 @@
 import { prisma } from '@/lib/prisma';
 
-export type AIProvider = 'openai' | 'gemini' | 'anthropic' | 'deepseek';
+export type AIProvider = 'openai' | 'gemini' | 'anthropic' | 'deepseek' | 'openrouter';
 
 interface AIConfig {
   provider: AIProvider;
@@ -24,6 +24,7 @@ export async function getAIConfig(): Promise<AIConfig | null> {
         else if (provider === 'gemini') model = 'gemini-1.5-pro';
         else if (provider === 'anthropic') model = 'claude-3-haiku-20240307';
         else if (provider === 'deepseek') model = 'deepseek-chat';
+        else if (provider === 'openrouter') model = 'meta-llama/llama-3-8b-instruct:free';
         else model = 'gpt-4o-mini';
       }
 
@@ -48,14 +49,16 @@ export async function getAIConfig(): Promise<AIConfig | null> {
         'openai': 'openai',
         'google_ai': 'gemini',
         'anthropic': 'anthropic',
-        'deepseek': 'deepseek'
+        'deepseek': 'deepseek',
+        'openrouter': 'openrouter'
       };
       return {
         provider: providerMap[apiKey.provider] || 'openai',
         apiKey: apiKey.apiKey.trim(),
         model: apiKey.provider === 'openai' ? 'gpt-4o-mini' : 
                apiKey.provider === 'google_ai' ? 'gemini-pro' : 
-               apiKey.provider === 'deepseek' ? 'deepseek-chat' : 'claude-3-haiku-20240307',
+               apiKey.provider === 'deepseek' ? 'deepseek-chat' : 
+               apiKey.provider === 'openrouter' ? 'meta-llama/llama-3-8b-instruct:free' : 'claude-3-haiku-20240307',
       };
     }
     
@@ -154,6 +157,30 @@ export async function generateAIContent(
       })
     });
     if (!res.ok) throw new Error(`DeepSeek API error: ${res.status}`);
+    const data = await res.json();
+    return data.choices?.[0]?.message?.content || '';
+  }
+  
+  if (config.provider === 'openrouter') {
+    const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${config.apiKey}`,
+        'HTTP-Referer': 'https://antigravity.com', // Optional but recommended by OpenRouter
+        'X-Title': 'Anti Gravity 2.0',
+      },
+      body: JSON.stringify({
+        model: config.model,
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userPrompt }
+        ],
+        temperature: 0.7,
+        max_tokens: maxTokens
+      })
+    });
+    if (!res.ok) throw new Error(`OpenRouter API error: ${res.status}`);
     const data = await res.json();
     return data.choices?.[0]?.message?.content || '';
   }

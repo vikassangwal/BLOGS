@@ -1,5 +1,6 @@
 'use client';
 import React, { useEffect, useState } from 'react';
+import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import Head from 'next/head';
 import LeadCaptureForm from '@/components/LeadCaptureForm';
@@ -103,7 +104,7 @@ export default function BlogPostPage({ params }: { params: Promise<{ slug: strin
         {/* Featured Image */}
         {post.featuredImage && (
           <figure style={{ margin: '0 -2rem 3rem', borderRadius: '24px', overflow: 'hidden', boxShadow: '0 20px 40px rgba(0,0,0,0.1)' }}>
-            <img src={post.featuredImage} alt={post.title} style={{ width: '100%', height: 'auto', display: 'block' }} />
+            <Image src={post.featuredImage} alt={post.title} fill  sizes="(max-width: 768px) 100vw, 50vw" />
           </figure>
         )}
 

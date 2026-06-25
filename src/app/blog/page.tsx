@@ -188,11 +188,7 @@ export default function BlogListingPage() {
                     {/* Image */}
                     <div style={{ height: '200px', position: 'relative', background: 'var(--color-bg-secondary)' }}>
                       {post.featuredImage ? (
-                        <img
-                          src={post.featuredImage}
-                          alt={post.title}
-                          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                        />
+                        <Image src={post.featuredImage} alt={post.title} fill  sizes="(max-width: 768px) 100vw, 50vw" />
                       ) : (
                         <div style={{ width: '100%', height: '100%', background: 'linear-gradient(135deg, var(--color-accent), #002244)', opacity: 0.8 }} />
                       )}

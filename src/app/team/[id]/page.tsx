@@ -1,5 +1,6 @@
 'use client';
 import React, { useEffect, useState } from 'react';
+import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import Head from 'next/head';
 
@@ -42,7 +43,7 @@ export default function TeamMemberPage({ params }: { params: Promise<{ id: strin
           <div className="flex flex-col md:flex-row items-center md:items-start gap-8 mb-10">
             <div className="w-32 h-32 md:w-48 md:h-48 rounded-full bg-blue-600 flex items-center justify-center text-4xl md:text-6xl font-bold text-white shrink-0 overflow-hidden shadow-[0_0_30px_rgba(37,99,235,0.4)]">
               {member.imageUrl ? (
-                <img src={member.imageUrl} alt={member.name} className="w-full h-full object-cover" />
+                <Image src={member.imageUrl} alt={member.name} fill className="w-full h-full object-cover" sizes="(max-width: 768px) 100vw, 50vw" />
               ) : (
                 member.name.substring(0, 2).toUpperCase()
               )}

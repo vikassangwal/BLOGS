@@ -1,5 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { prisma } from '@/lib/prisma';
 
 export const revalidate = 60; // Revalidate the page every 60 seconds for performance
@@ -59,7 +60,7 @@ export default async function HomePage() {
               <div className="premium-card h-full flex flex-col overflow-hidden">
                 <div className="h-48 relative bg-gray-900 overflow-hidden">
                   {post.featuredImage ? (
-                    <img src={post.featuredImage} alt={post.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                    <Image src={post.featuredImage} alt={post.title} fill className="object-cover transition-transform duration-500 group-hover:scale-110" sizes="(max-width: 768px) 100vw, 33vw" />
                   ) : (
                     <div className="w-full h-full bg-gradient-to-br from-blue-900 to-black opacity-80" />
                   )}

@@ -28,7 +28,10 @@ function BlogEditor() {
   const [providerOverride, setProviderOverride] = useState('');
   const [modelOverride, setModelOverride] = useState('');
 
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+
   useEffect(() => {
+    // Edit mode: fetch from server
     if (isEdit && slug) {
       fetch(`/api/blog/${slug}`)
         .then(res => res.json())
@@ -51,8 +54,36 @@ function BlogEditor() {
             });
           }
         });
+    } else {
+      // New post mode: Check for saved draft
+      const savedDraft = localStorage.getItem('ag_draft_post');
+      if (savedDraft) {
+        try {
+          const parsed = JSON.parse(savedDraft);
+          if (parsed.title || parsed.content) {
+            if (confirm('You have an unsaved draft. Would you like to restore it?')) {
+              setFormData(parsed);
+            } else {
+              localStorage.removeItem('ag_draft_post');
+            }
+          }
+        } catch(e) {}
+      }
     }
   }, [isEdit, slug]);
+
+  // Auto-save draft every 30 seconds
+  useEffect(() => {
+    if (isEdit) return; // Don't auto-save over existing published posts locally to avoid confusion, only for new posts
+    
+    const interval = setInterval(() => {
+      if (formData.title || formData.content) {
+        localStorage.setItem('ag_draft_post', JSON.stringify(formData));
+        console.log('Draft auto-saved');
+      }
+    }, 30000);
+    return () => clearInterval(interval);
+  }, [formData, isEdit]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -75,12 +106,14 @@ function BlogEditor() {
       });
       
       if (res.ok) {
+        localStorage.removeItem('ag_draft_post');
         router.push('/admin/blog');
       } else {
-        alert('Failed to save post');
+        const errorData = await res.json().catch(() => ({}));
+        alert(`Failed to save post: ${errorData.error || res.statusText || 'Unknown error (Are you logged in?)'}`);
       }
-    } catch (error) {
-      alert('An error occurred');
+    } catch (error: any) {
+      alert(`An error occurred: ${error.message}`);
     } finally {
       setIsSaving(false);
     }
@@ -346,9 +379,14 @@ function BlogEditor() {
               <option value="Scheduled">Scheduled</option>
             </select>
 
-            <button type="submit" disabled={isSaving} className="btn-primary" style={{ width: '100%' }}>
-              {isSaving ? 'Saving...' : (isEdit ? 'Update Post' : 'Publish Post')}
-            </button>
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <button type="button" onClick={() => setIsPreviewOpen(true)} className="btn-secondary" style={{ flex: 1 }}>
+                Preview
+              </button>
+              <button type="submit" disabled={isSaving} className="btn-primary" style={{ flex: 2 }}>
+                {isSaving ? 'Saving...' : (isEdit ? 'Update Post' : 'Publish Post')}
+              </button>
+            </div>
           </div>
 
           <div style={{ background: 'rgba(255, 255, 255, 0.05)', padding: '1.5rem', borderRadius: '16px', border: '1px solid var(--color-border)' }}>
@@ -395,6 +433,24 @@ function BlogEditor() {
           </div>
         </div>
       </form>
+
+      {/* Preview Modal */}
+      {isPreviewOpen && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(10px)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
+          <div style={{ background: 'var(--color-bg-primary)', width: '100%', maxWidth: '800px', height: '100%', maxHeight: '90vh', borderRadius: '16px', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ padding: '1.5rem', borderBottom: '1px solid var(--color-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h2 style={{ margin: 0 }}>Preview</h2>
+              <button onClick={() => setIsPreviewOpen(false)} style={{ background: 'none', border: 'none', color: 'var(--color-text-primary)', fontSize: '1.5rem', cursor: 'pointer' }}>✕</button>
+            </div>
+            <div style={{ flex: 1, overflowY: 'auto', padding: '2rem' }}>
+              <h1 style={{ fontSize: '2.5rem', fontWeight: 800, marginBottom: '1rem' }}>{formData.title || 'Untitled Post'}</h1>
+              {formData.subtitle && <h2 style={{ fontSize: '1.5rem', color: 'var(--color-text-secondary)', marginBottom: '1rem' }}>{formData.subtitle}</h2>}
+              {formData.featuredImage && <img src={formData.featuredImage} alt="Featured" style={{ width: '100%', borderRadius: '12px', marginBottom: '2rem' }} />}
+              <div dangerouslySetInnerHTML={{ __html: formData.content }} className="blog-content" style={{ fontSize: '1.1rem', lineHeight: 1.8 }} />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

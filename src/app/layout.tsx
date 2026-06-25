@@ -32,6 +32,9 @@ export default async function RootLayout({
 
   return (
     <html lang="en">
+      <head>
+        <link rel="manifest" href="/manifest.json" />
+      </head>
       <body className="antialiased min-h-screen flex flex-col bg-black text-white relative">
         <div className="bg-mesh"></div>
         <GlobalHeader siteName={siteName} />
@@ -55,6 +58,21 @@ export default async function RootLayout({
                 layout: window.google.translate.TranslateElement.InlineLayout.SIMPLE
               }, 'google_translate_element');
             };
+          `}
+        </Script>
+
+        {/* OneSignal SDK */}
+        <Script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" strategy="beforeInteractive" />
+        <Script id="onesignal-init" strategy="lazyOnload">
+          {`
+            window.OneSignalDeferred = window.OneSignalDeferred || [];
+            window.OneSignalDeferred.push(async function(OneSignal) {
+              await OneSignal.init({
+                appId: "${settings?.aiApiKey?.includes('onesignalAppId') ? JSON.parse(settings.aiApiKey).onesignalAppId : ''}",
+                safari_web_id: "web.onesignal.auto.11111111-1111-1111-1111-111111111111",
+                notifyButton: { enable: true },
+              });
+            });
           `}
         </Script>
       </body>

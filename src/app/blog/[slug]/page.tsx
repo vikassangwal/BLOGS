@@ -1,4 +1,3 @@
-'use client';
 import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
@@ -6,28 +5,59 @@ import Head from 'next/head';
 import LeadCaptureForm from '@/components/LeadCaptureForm';
 import SmartBanners from '@/components/SmartBanners';
 import BlogChatbot from '@/components/BlogChatbot';
+import AdInjector from '@/components/AdInjector';
 
 export default function BlogPostPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = React.use(params);
   const [post, setPost] = useState<any>(null);
   const [ads, setAds] = useState<any[]>([]);
+  const [relatedPosts, setRelatedPosts] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [translatedHtml, setTranslatedHtml] = useState<string | null>(null);
+  const [isTranslating, setIsTranslating] = useState(false);
+  const [isUnlocked, setIsUnlocked] = useState(false);
 
   useEffect(() => {
-    // Fetch post and ads in parallel
+    // Fetch post, ads, and related posts in parallel
     Promise.all([
       fetch(`/api/blog/${slug}`).then(res => res.ok ? res.json() : null),
-      fetch('/api/ads').then(res => res.ok ? res.json() : [])
-    ]).then(([postData, adsData]) => {
+      fetch('/api/ads').then(res => res.ok ? res.json() : []),
+      fetch('/api/blog?published=true&limit=3').then(res => res.ok ? res.json() : { posts: [] })
+    ]).then(([postData, adsData, relatedData]) => {
       if (!postData) notFound();
       setPost(postData);
       setAds(Array.isArray(adsData) ? adsData : []);
+      // Exclude current post from related posts
+      const related = (relatedData?.posts || []).filter((p: any) => p.id !== postData.id).slice(0, 3);
+      setRelatedPosts(related);
       setIsLoading(false);
     }).catch(() => {
       setIsLoading(false);
       notFound();
     });
   }, [slug]);
+
+  const handleTranslate = async (lang: string) => {
+    if (!lang) return;
+    setIsTranslating(true);
+    try {
+      const res = await fetch('/api/ai/translate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ htmlContent: post.content, targetLanguage: lang })
+      });
+      const data = await res.json();
+      if (data.translatedHtml) {
+        setTranslatedHtml(data.translatedHtml);
+      } else {
+        alert('Translation failed. Please check AI API configuration.');
+      }
+    } catch (err) {
+      alert('Translation failed.');
+    } finally {
+      setIsTranslating(false);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -40,17 +70,15 @@ export default function BlogPostPage({ params }: { params: Promise<{ slug: strin
   if (!post) return null;
 
   const headerAd = ads.find(a => a.position === 'header');
-  const inContentAd = ads.find(a => a.position === 'in_content');
   const footerAd = ads.find(a => a.position === 'footer');
 
-  // Inject in-content ad after the second paragraph if it exists
-  let contentHtml = post.content || '';
-  if (inContentAd && inContentAd.adCode) {
-    const parts = contentHtml.split('</p>');
-    if (parts.length > 2) {
-      parts[1] = parts[1] + '</p><div class="ad-container my-8">' + inContentAd.adCode + '</div>';
-      contentHtml = parts.join('</p>');
-    }
+  const isPremium = post.tags?.includes('Premium');
+  let contentHtml = translatedHtml || post.content || '';
+  
+  if (isPremium && !isUnlocked) {
+    // Show only the first 30% of content
+    const charLimit = Math.floor(contentHtml.length * 0.3);
+    contentHtml = contentHtml.substring(0, charLimit) + '...';
   }
 
   return (
@@ -65,13 +93,28 @@ export default function BlogPostPage({ params }: { params: Promise<{ slug: strin
       )}
 
       <article style={{ maxWidth: '800px', margin: '0 auto', padding: '4rem 2rem' }}>
+        {/* Translate Toolbar */}
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1rem' }}>
+          <select 
+            onChange={(e) => handleTranslate(e.target.value)}
+            disabled={isTranslating}
+            style={{ padding: '0.4rem 0.8rem', borderRadius: '8px', background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)' }}
+          >
+            <option value="">{isTranslating ? 'Translating...' : 'Translate with AI'}</option>
+            <option value="Hindi">Hindi (हिन्दी)</option>
+            <option value="Spanish">Spanish (Español)</option>
+            <option value="French">French (Français)</option>
+            <option value="German">German (Deutsch)</option>
+          </select>
+        </div>
+
         {/* Post Header */}
         <header style={{ marginBottom: '3rem', textAlign: 'center' }}>
           {post.tags?.length > 0 && (
-            <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center', marginBottom: '1.5rem' }}>
+            <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
               {post.tags.map((tag: string) => (
-                <span key={tag} style={{ background: 'var(--color-bg-secondary)', padding: '0.4rem 1rem', borderRadius: '20px', fontSize: '0.8rem', fontWeight: 600, color: 'var(--color-accent)' }}>
-                  {tag}
+                <span key={tag} style={{ background: tag === 'Premium' ? 'linear-gradient(135deg, #f59e0b, #d97706)' : 'var(--color-bg-secondary)', padding: '0.4rem 1rem', borderRadius: '20px', fontSize: '0.8rem', fontWeight: 600, color: tag === 'Premium' ? '#fff' : 'var(--color-accent)' }}>
+                  {tag === 'Premium' ? '👑 Premium' : tag}
                 </span>
               ))}
             </div>
@@ -103,17 +146,38 @@ export default function BlogPostPage({ params }: { params: Promise<{ slug: strin
 
         {/* Featured Image */}
         {post.featuredImage && (
-          <figure style={{ margin: '0 -2rem 3rem', borderRadius: '24px', overflow: 'hidden', boxShadow: '0 20px 40px rgba(0,0,0,0.1)' }}>
-            <Image src={post.featuredImage} alt={post.title} fill  sizes="(max-width: 768px) 100vw, 50vw" />
+          <figure style={{ margin: '0 -2rem 3rem', borderRadius: '24px', overflow: 'hidden', boxShadow: '0 20px 40px rgba(0,0,0,0.1)', position: 'relative', height: '400px' }}>
+            <Image src={post.featuredImage} alt={post.title} fill style={{ objectFit: 'cover' }} sizes="(max-width: 768px) 100vw, 800px" />
           </figure>
         )}
 
         {/* Post Content */}
-        <div 
-          className="blog-content"
-          style={{ fontSize: '1.1rem', lineHeight: 1.8, color: 'var(--color-text-secondary)' }}
-          dangerouslySetInnerHTML={{ __html: contentHtml }} 
-        />
+        <div style={{ position: 'relative' }}>
+          <AdInjector htmlContent={contentHtml} />
+          
+          {/* Premium Paywall Blur */}
+          {isPremium && !isUnlocked && (
+            <div style={{ 
+              position: 'absolute', bottom: 0, left: 0, right: 0, height: '400px',
+              background: 'linear-gradient(to bottom, transparent, var(--color-bg-primary) 80%)',
+              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-end', paddingBottom: '2rem'
+            }}>
+              <div style={{ 
+                background: 'rgba(255, 255, 255, 0.05)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.1)',
+                padding: '2rem', borderRadius: '16px', textAlign: 'center', maxWidth: '400px', width: '100%'
+              }}>
+                <h3 style={{ fontSize: '1.5rem', fontWeight: 800, margin: '0 0 1rem 0' }}>👑 Premium Content</h3>
+                <p style={{ color: 'var(--color-text-secondary)', marginBottom: '1.5rem' }}>This article is exclusive to premium subscribers. Unlock it to read the rest.</p>
+                <button 
+                  onClick={() => setIsUnlocked(true)} 
+                  className="btn-primary" style={{ width: '100%', background: 'linear-gradient(135deg, #f59e0b, #d97706)', border: 'none', fontWeight: 800 }}
+                >
+                  Unlock via Razorpay (Demo)
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
 
         {/* YMYL Disclaimer */}
         {(post.tags?.includes('Finance & Earning') || post.tags?.includes('Education & Career')) && (
@@ -153,6 +217,25 @@ export default function BlogPostPage({ params }: { params: Promise<{ slug: strin
         {/* Footer Ad */}
         {footerAd && (
           <div className="ad-container" style={{ textAlign: 'center', marginTop: '3rem' }} dangerouslySetInnerHTML={{ __html: footerAd.adCode }} />
+        )}
+
+        {/* Related Posts */}
+        {relatedPosts.length > 0 && (
+          <div style={{ marginTop: '4rem', borderTop: '1px solid var(--color-border)', paddingTop: '3rem' }}>
+            <h3 style={{ fontSize: '1.8rem', fontWeight: 800, color: 'var(--color-text-primary)', marginBottom: '2rem' }}>Related Articles</h3>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '2rem' }}>
+              {relatedPosts.map((rp: any) => (
+                <a href={`/blog/${rp.slug}`} key={rp.id} style={{ textDecoration: 'none', color: 'inherit', display: 'flex', flexDirection: 'column', background: 'rgba(255, 255, 255, 0.03)', borderRadius: '16px', overflow: 'hidden', border: '1px solid var(--color-border)', transition: 'all 0.3s ease' }} className="minimal-card">
+                  <div style={{ width: '100%', height: '180px', background: rp.featuredImage ? `url(${rp.featuredImage}) center/cover` : 'linear-gradient(135deg, #1e1e2f, #2d2b42)' }} />
+                  <div style={{ padding: '1.5rem', flex: 1, display: 'flex', flexDirection: 'column' }}>
+                    <h4 style={{ fontSize: '1.2rem', fontWeight: 700, margin: '0 0 0.5rem 0', color: 'var(--color-text-primary)', lineHeight: 1.4 }}>{rp.title}</h4>
+                    <p style={{ fontSize: '0.9rem', color: 'var(--color-text-secondary)', margin: '0 0 1rem 0', flex: 1, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{rp.excerpt || rp.content.replace(/<[^>]+>/g, '').substring(0, 100) + '...'}</p>
+                    <span style={{ color: 'var(--color-accent)', fontWeight: 600, fontSize: '0.9rem' }}>Read Article →</span>
+                  </div>
+                </a>
+              ))}
+            </div>
+          </div>
         )}
       </article>
 

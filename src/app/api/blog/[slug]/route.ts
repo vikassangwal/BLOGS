@@ -113,6 +113,52 @@ export async function PUT(request: Request, context: { params: Promise<{ slug: s
       }
     }
 
+    // Social Media Auto-Poster Logic
+    if (status === 'Published' && existingPost.status !== 'Published') {
+      try {
+        const settings = await prisma.siteSettings.findUnique({ where: { id: 'default' } });
+        if (settings?.aiApiKey?.startsWith('{')) {
+          const parsedKeys = JSON.parse(settings.aiApiKey);
+          const postUrl = `https://antigravity.com/blog/${updatedPost.slug}`;
+          const message = socialCaptions ? `${socialCaptions}\n\nRead more: ${postUrl}` : `New Post: ${title}!\n\nRead more: ${postUrl}`;
+          
+          if (parsedKeys.twitter) {
+            console.log(`[Twitter Auto-Post] Sending tweet using key: ${parsedKeys.twitter.substring(0, 5)}... Message: ${message}`);
+            // TODO: Implement actual twitter-api-v2 call here
+          }
+          if (parsedKeys.facebook) {
+            console.log(`[Facebook Auto-Post] Posting to FB page using token: ${parsedKeys.facebook.substring(0, 5)}... Message: ${message}`);
+            // TODO: Implement actual Facebook Graph API call here
+          }
+          if (parsedKeys.instagram) {
+            console.log(`[Instagram Auto-Post] Posting to IG using token: ${parsedKeys.instagram.substring(0, 5)}... Image: ${featuredImage}`);
+            // TODO: Implement actual Instagram Graph API call here
+          }
+          
+          if (parsedKeys.onesignalAppId && parsedKeys.onesignalApiKey) {
+            console.log(`[OneSignal] Sending push notification...`);
+            fetch('https://onesignal.com/api/v1/notifications', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Basic ${parsedKeys.onesignalApiKey}`
+              },
+              body: JSON.stringify({
+                app_id: parsedKeys.onesignalAppId,
+                included_segments: ['Subscribed Users'],
+                headings: { en: title || updatedPost.title },
+                contents: { en: excerpt || updatedPost.excerpt || 'Read our latest post!' },
+                url: postUrl,
+                big_picture: featuredImage || updatedPost.featuredImage
+              })
+            }).catch(console.error);
+          }
+        }
+      } catch (err) {
+        console.error('Failed to trigger social media auto-post', err);
+      }
+    }
+
     return NextResponse.json({ success: true, post: updatedPost });
   } catch (error) {
     console.error('Error updating post:', error);

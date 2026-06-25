@@ -15,27 +15,46 @@ export async function POST(request: Request) {
     let aiConfig = await getAIConfig();
 
     // Handle Task-Specific Override
-    if (providerOverride && modelOverride) {
-      const apiKeyRecord = await prisma.apiKey.findFirst({
-        where: { provider: providerOverride, isActive: true },
-        orderBy: { createdAt: 'desc' }
-      });
-      if (apiKeyRecord) {
-        const providerMap: Record<string, any> = {
-          'openai': 'openai',
-          'google_ai': 'gemini',
-          'anthropic': 'anthropic',
-          'deepseek': 'deepseek',
-          'openrouter': 'openrouter'
-        };
+    if (providerOverride) {
+      // First try to grab the key from JSON site settings if available
+      const settings = await prisma.siteSettings.findUnique({ where: { id: 'default' } });
+      let overrideKey = '';
+      if (settings?.aiApiKey?.startsWith('{')) {
+        try {
+          const parsed = JSON.parse(settings.aiApiKey);
+          overrideKey = parsed[providerOverride];
+        } catch(e) {}
+      }
+      
+      if (overrideKey) {
         aiConfig = {
-          provider: providerMap[providerOverride] || 'openai',
-          apiKey: apiKeyRecord.apiKey.trim(),
-          model: modelOverride
+          provider: providerOverride as any,
+          apiKey: overrideKey,
+          model: modelOverride || ''
         };
-      } else if (aiConfig && aiConfig.provider === providerOverride) {
-        // Fallback to default if it matches provider
-        aiConfig.model = modelOverride;
+      } else {
+        // Fallback to ApiKey table
+        const apiKeyRecord = await prisma.apiKey.findFirst({
+          where: { provider: providerOverride, isActive: true },
+          orderBy: { createdAt: 'desc' }
+        });
+        if (apiKeyRecord) {
+          const providerMap: Record<string, any> = {
+            'openai': 'openai',
+            'google_ai': 'gemini',
+            'anthropic': 'anthropic',
+            'deepseek': 'deepseek',
+            'openrouter': 'openrouter'
+          };
+          aiConfig = {
+            provider: providerMap[providerOverride] || 'openai',
+            apiKey: apiKeyRecord.apiKey.trim(),
+            model: modelOverride || ''
+          };
+        } else if (aiConfig && aiConfig.provider === providerOverride) {
+          // Fallback to default if it matches provider
+          if (modelOverride) aiConfig.model = modelOverride;
+        }
       }
     }
 

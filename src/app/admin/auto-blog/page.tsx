@@ -205,7 +205,34 @@ export default function AutoBlogAdmin() {
               <label htmlFor="autoPublish" style={{ fontWeight: 600 }}>Publish immediately (otherwise Draft)</label>
             </div>
 
-            <button type="submit" disabled={isSaving} className="btn-primary">
+            <hr style={{ border: 'none', borderTop: '1px solid var(--color-border)', margin: '1rem 0' }} />
+            
+            <h3 style={{ fontSize: '1.1rem', fontWeight: 700, margin: '0' }}>📰 Live News Auto-Blogger</h3>
+            <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.85rem', margin: '-1rem 0 0 0' }}>Fetches live news via Google RSS, rewrites & auto-publishes.</p>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              <input
+                type="checkbox"
+                id="isNewsActive"
+                checked={settings.isNewsActive || false}
+                onChange={e => setSettings({ ...settings, isNewsActive: e.target.checked })}
+                style={{ width: '20px', height: '20px' }}
+              />
+              <label htmlFor="isNewsActive" style={{ fontWeight: 600 }}>Enable Live News Auto-Blogging</label>
+            </div>
+
+            <div>
+              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, color: 'var(--color-text-primary)' }}>News Topics / Niches (Comma separated)</label>
+              <textarea
+                value={settings.newsTopics || ''}
+                onChange={e => setSettings({ ...settings, newsTopics: e.target.value })}
+                placeholder="e.g., Education Yojna, Scholarships India, Technology, Finance"
+                style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--color-border)', minHeight: '80px' }}
+              />
+              <p style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', marginTop: '0.5rem' }}>The system will pick a random topic from this list on every run to fetch live news.</p>
+            </div>
+
+            <button type="submit" disabled={isSaving} className="btn-primary" style={{ marginTop: '1rem' }}>
               {isSaving ? 'Saving...' : 'Save Settings'}
             </button>
           </form>

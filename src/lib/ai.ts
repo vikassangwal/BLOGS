@@ -18,6 +18,15 @@ export async function getAIConfig(): Promise<AIConfig | null> {
     if (settings?.aiApiKey) {
       const provider = settings.aiProvider as AIProvider;
       let model = settings.aiModel;
+      let apiKeyToUse = settings.aiApiKey.trim();
+
+      try {
+        if (apiKeyToUse.startsWith('{')) {
+          const parsedKeys = JSON.parse(apiKeyToUse);
+          // If we want a specific provider, grab it. Otherwise use the default provider's key
+          apiKeyToUse = parsedKeys[provider] || parsedKeys['openai'] || '';
+        }
+      } catch(e) {}
       
       if (!model) {
         if (provider === 'openai') model = 'gpt-4o-mini';
@@ -28,11 +37,13 @@ export async function getAIConfig(): Promise<AIConfig | null> {
         else model = 'gpt-4o-mini';
       }
 
-      return {
-        provider,
-        apiKey: settings.aiApiKey.trim(),
-        model,
-      };
+      if (apiKeyToUse) {
+        return {
+          provider,
+          apiKey: apiKeyToUse,
+          model,
+        };
+      }
     }
     
     // Fallback to ApiKey table

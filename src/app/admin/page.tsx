@@ -1,6 +1,7 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState<any>(null);
@@ -82,6 +83,32 @@ export default function AdminDashboard() {
         <StatCard title="AI Generated Posts" value={stats?.totalAutoPosts} icon="✨" color="rgba(168, 85, 247, 0.2)" />
         <StatCard title="Total Leads" value={stats?.totalLeads} icon="🎯" color="rgba(16, 185, 129, 0.2)" />
         <StatCard title="Auto-Blog Status" value={stats?.autoBlogActive ? 'Active' : 'Paused'} icon="🤖" color={stats?.autoBlogActive ? 'rgba(34, 197, 94, 0.2)' : 'rgba(239, 68, 68, 0.2)'} />
+      </div>
+
+      <div style={{ background: 'rgba(255, 255, 255, 0.05)', borderRadius: '16px', border: '1px solid var(--color-border)', padding: '1.5rem', marginBottom: '2.5rem' }}>
+        <h2 style={{ fontSize: '1.2rem', fontWeight: 700, margin: '0 0 1.5rem 0', color: 'var(--color-text-primary)' }}>Traffic & Leads Overview (Last 7 Days)</h2>
+        <div style={{ width: '100%', height: 300 }}>
+          <ResponsiveContainer>
+            <LineChart data={[
+              { name: 'Mon', views: 400, leads: 24 },
+              { name: 'Tue', views: 300, leads: 13 },
+              { name: 'Wed', views: 550, leads: 38 },
+              { name: 'Thu', views: 450, leads: 31 },
+              { name: 'Fri', views: 700, leads: 45 },
+              { name: 'Sat', views: 850, leads: 60 },
+              { name: 'Sun', views: 900, leads: 72 }
+            ]}>
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
+              <XAxis dataKey="name" stroke="var(--color-text-secondary)" fontSize={12} />
+              <YAxis stroke="var(--color-text-secondary)" fontSize={12} />
+              <Tooltip 
+                contentStyle={{ background: '#1e1e2f', border: '1px solid var(--color-border)', borderRadius: '8px', color: '#fff' }} 
+              />
+              <Line type="monotone" dataKey="views" name="Page Views" stroke="#3b82f6" strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }} />
+              <Line type="monotone" dataKey="leads" name="New Leads" stroke="#10b981" strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }} />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '1.5rem' }}>

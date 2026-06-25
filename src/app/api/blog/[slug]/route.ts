@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { verifyToken } from '@/lib/auth';
+import { auth } from '@/auth';
 
 // GET: Fetch single post by slug
 export async function GET(request: Request, context: { params: Promise<{ slug: string }> }) {
@@ -42,9 +42,8 @@ export async function GET(request: Request, context: { params: Promise<{ slug: s
 // PUT: Update post
 export async function PUT(request: Request, context: { params: Promise<{ slug: string }> }) {
   try {
-    const cookieHeader = request.headers.get('cookie') || '';
-    const tokenMatch = cookieHeader.match(/automata_auth_token=([^;]+)/);
-    const user = tokenMatch ? verifyToken(tokenMatch[1]) : null;
+    const session = await auth();
+    const user = session?.user;
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const params = await context.params;

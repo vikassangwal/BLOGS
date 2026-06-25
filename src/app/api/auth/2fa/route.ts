@@ -1,19 +1,18 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { verifyToken } from '@/lib/auth';
+import { auth } from '@/auth';
 import { generateTOTPSecret, verifyTOTP, getTOTPUri, generateRecoveryCodes } from '@/lib/totp';
 
 export async function POST(request: Request) {
   try {
-    const cookieHeader = request.headers.get('cookie') || '';
-    const tokenMatch = cookieHeader.match(/automata_auth_token=([^;]+)/);
-    const user = tokenMatch ? verifyToken(tokenMatch[1]) : null;
+    const session = await auth();
+    const user = session?.user;
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const body = await request.json();
     const { action, code } = body;
 
-    const dbUser = await prisma.user.findUnique({ where: { id: user.userId } });
+    const dbUser = await prisma.user.findUnique({ where: { id: user.id } });
     if (!dbUser) return NextResponse.json({ error: 'User not found' }, { status: 404 });
 
     // Action: SETUP
@@ -21,7 +20,7 @@ export async function POST(request: Request) {
       const secret = generateTOTPSecret();
       
       await prisma.user.update({
-        where: { id: user.userId },
+        where: { id: user.id },
         data: { twoFactorSecret: secret, twoFactorEnabled: false } // Save secret but don't enable yet
       });
 
@@ -40,7 +39,7 @@ export async function POST(request: Request) {
       const recoveryCodes = generateRecoveryCodes(8);
       
       await prisma.user.update({
-        where: { id: user.userId },
+        where: { id: user.id },
         data: { 
           twoFactorEnabled: true,
           recoveryCodes: JSON.stringify(recoveryCodes)
@@ -53,7 +52,7 @@ export async function POST(request: Request) {
     // Action: DISABLE
     if (action === 'disable') {
       await prisma.user.update({
-        where: { id: user.userId },
+        where: { id: user.id },
         data: { 
           twoFactorEnabled: false,
           twoFactorSecret: null,

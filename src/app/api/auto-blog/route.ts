@@ -45,12 +45,35 @@ export async function POST(request: Request) {
     let topic = 'Business';
     let newsContext = '';
 
-    if (liveNewsSettings.isNewsActive && liveNewsSettings.newsTopics) {
-      // 1. Pick a random news topic
+    // 1. Prioritize manual keywords from the queue first
+    const pendingKeyword = await prisma.autoBlogKeyword.findFirst({
+      where: { status: 'pending' },
+      orderBy: [{ priority: 'desc' }, { createdAt: 'asc' }]
+    });
+
+    if (pendingKeyword) {
+      topic = pendingKeyword.keyword;
+      // Update Keyword to processing
+      await prisma.autoBlogKeyword.update({
+        where: { id: pendingKeyword.id },
+        data: { status: 'used', usedAt: new Date() }
+      });
+      // Try to fetch some news context for this specific manual topic to make it fresh
+      try {
+        const Parser = require('rss-parser');
+        const parser = new Parser();
+        const rssUrl = `https://news.google.com/rss/search?q=${encodeURIComponent(topic + ' India')}&hl=en-IN&gl=IN&ceid=IN:en`;
+        const feed = await parser.parseURL(rssUrl);
+        if (feed.items && feed.items.length > 0) {
+          const item = feed.items[0];
+          newsContext = `Latest News on this topic: ${item.title}\nLink: ${item.link}\nSnippet: ${item.contentSnippet || item.content || ''}`;
+        }
+      } catch (rssError) {}
+    } else if (liveNewsSettings.isNewsActive && liveNewsSettings.newsTopics) {
+      // 2. Fallback to random Live News if queue is empty
       const topics = liveNewsSettings.newsTopics.split(',').map((t: string) => t.trim());
       topic = topics[Math.floor(Math.random() * topics.length)];
       
-      // 2. Fetch Google News RSS
       try {
         const Parser = require('rss-parser');
         const parser = new Parser();
@@ -58,7 +81,6 @@ export async function POST(request: Request) {
         const feed = await parser.parseURL(rssUrl);
         
         if (feed.items && feed.items.length > 0) {
-          // Pick a random recent news item from the top 5
           const item = feed.items[Math.floor(Math.random() * Math.min(5, feed.items.length))];
           newsContext = `News Title: ${item.title}\nLink: ${item.link}\nSnippet: ${item.contentSnippet || item.content || ''}`;
         }
@@ -66,27 +88,12 @@ export async function POST(request: Request) {
         console.error('Failed to fetch RSS:', rssError);
       }
     } else {
-      // Fallback to AutoBlogKeyword queue
-      const pendingKeyword = await prisma.autoBlogKeyword.findFirst({
-        where: { status: 'pending' },
-        orderBy: [{ priority: 'desc' }, { createdAt: 'asc' }]
-      });
-
-      if (!pendingKeyword) {
-        return NextResponse.json({ message: 'No pending keywords or Live News found.', status: 'empty' });
-      }
-      topic = pendingKeyword.keyword;
-      
-      // Update Keyword to processing to prevent duplicates in quick succession
-      await prisma.autoBlogKeyword.update({
-        where: { id: pendingKeyword.id },
-        data: { status: 'used', usedAt: new Date() }
-      });
+      return NextResponse.json({ message: 'No pending keywords and Live News is disabled.', status: 'empty' });
     }
 
     // 2. Generate Content
     // Generate Title
-    const titlePrompt = 'You are an expert SEO copywriter. Generate 1 highly engaging, click-worthy, SEO-optimized blog post title for the given topic or news. Return ONLY the title, no quotes, no extra text.';
+    const titlePrompt = 'You are an expert SEO copywriter. Generate 1 highly engaging, click-worthy, SEO-optimized blog post title in Hindi or English for the given topic. Return ONLY the title, no quotes, no extra text.';
     const rawTitle = await generateAIContent(aiConfig, titlePrompt, `Topic: ${topic}\n${newsContext}`, 100);
     const title = rawTitle.replace(/^["']|["']$/g, '').trim();
 
@@ -97,14 +104,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'News already covered' }, { status: 409 });
     }
 
-    // Generate Article
-    let articlePrompt = '';
-    
-    // Check if topic is Education & Career related
-    const isEdu = /education|career|job|sarkari|yojna|result|admit card|exam|scholarship|recruitment|vacancy/i.test(topic + newsContext);
-
-    if (isEdu) {
-      articlePrompt = `तुम एक Professional SEO Content Writer, Blogging Expert, Google Discover Friendly और AdSense Friendly Content Creator हो।
+    // ALWAYS use the Universal SEO Blog Prompt for EVERY topic
+    const articlePrompt = `तुम एक Professional SEO Content Writer, Blogging Expert, Google Discover Friendly और AdSense Friendly Content Creator हो।
 नीचे दिए गए विषय (Topic) या Live News पर 100% यूनिक, Human-Written, SEO Optimized, Google Ranking Friendly और Publish Ready ब्लॉग तैयार करो।
 
 IMPORTANT TECHNICAL RULE: You MUST format your entire response in valid HTML (using <h2>, <h3>, <p>, <table>, <ul>, <li>). Do NOT wrap the response in markdown code blocks like \`\`\`html. The user instruction "HTML Code नहीं लिखना" means do not write visible code for the user to read, but you MUST use HTML tags internally for formatting so the website can render it properly.
@@ -112,46 +113,26 @@ IMPORTANT TECHNICAL RULE: You MUST format your entire response in valid HTML (us
 क्या करना है:
 1. SEO Title: आकर्षक, क्लिक योग्य और मुख्य Keyword वाला। (Do not use h1 tag, start with h2)
 2. Introduction: 150–250 शब्दों का परिचय, मुख्य Keyword के साथ।
-3. महत्वपूर्ण जानकारी (Table): सबसे पहले एक Professional HTML <table> बनानी है। 
-   Rows: विभाग/संस्था, पद/विषय, कुल पद, आवेदन का माध्यम, आधिकारिक वेबसाइट (<a href="#">👉 Click Here</a>), ऑफिशियल नोटिफिकेशन (Coming Soon), ऑनलाइन आवेदन (Coming Soon), एडमिट कार्ड (Coming Soon), रिजल्ट (Coming Soon), आवेदन शुरू (Coming Soon), अंतिम तिथि (Coming Soon), परीक्षा तिथि (Coming Soon), चयन प्रक्रिया, नौकरी का स्थान।
-   (जहां लिंक हो वहां <a href="#">👉 Click Here</a> का प्रयोग करें। यदि आपको योजना/भर्ती की असली Official Website का लिंक पता है तो "#" की जगह उस असली लिंक का प्रयोग करें, अन्यथा "#" ही लिखें। जहां जानकारी न हो वहां Coming Soon)
-4. पदों का विवरण: सभी पदों की जानकारी सरल भाषा में।
-5. शैक्षणिक योग्यता: आवश्यक योग्यता विस्तार से।
-6. आयु सीमा: न्यूनतम, अधिकतम और छूट।
-7. आवेदन शुल्क: सभी वर्गों का शुल्क।
-8. चयन प्रक्रिया: चयन के सभी चरण।
-9. परीक्षा पैटर्न: विषय, समय, प्रश्न संख्या।
-10. सिलेबस: केवल Topic List (e.g. <ul><li><a href="#">👉 सामान्य ज्ञान (Click Here)</a></li></ul>)
-11. शारीरिक मापदंड: यदि लागू हो।
-12. वेतन: Salary, Grade Pay।
-13. आवेदन प्रक्रिया: Step-by-Step।
-14. आवश्यक दस्तावेज़: सूची।
-15. महत्वपूर्ण तिथियाँ: तिथियाँ या Coming Soon।
-16. कार्य विवरण (Job Profile)
-17. FAQ: 8–15 प्रश्न जिनका उत्तर पहले नहीं दिया गया हो। उत्तर बिल्कुल नहीं लिखना। सभी प्रश्न <ul><li><a href="#">👉 [Question]? (Click Here)</a></li></ul> के रूप में लिखने हैं। 
-18. Conclusion: 100–150 शब्दों का निष्कर्ष।
+3. महत्वपूर्ण जानकारी (Table): सबसे पहले एक Professional HTML <table> बनानी है। (विषय के अनुसार Table के Rows और Columns को Adjust करें। यदि कोई जानकारी लागू नहीं होती तो Coming Soon या Not Applicable लिखें।)
+   (जहां लिंक हो वहां <a href="#">👉 Click Here</a> का प्रयोग करें। यदि आपको योजना/भर्ती या असली Official Website का लिंक पता है तो "#" की जगह उस असली लिंक का प्रयोग करें, अन्यथा "#" ही लिखें।)
+4. मुख्य विवरण (Main Content): विषय की पूरी जानकारी सरल और विस्तृत भाषा में।
+5. योग्यता / शर्तें / आवश्यकताएं (यदि लागू हो)
+6. फायदे और नुकसान (Pros & Cons)
+7. प्रक्रिया (Step-by-Step Guide): अगर कोई प्रक्रिया है तो उसे चरणबद्ध तरीके से समझाएं।
+8. FAQ: 8–15 प्रश्न जिनका उत्तर पहले नहीं दिया गया हो। उत्तर बिल्कुल नहीं लिखना। सभी प्रश्न <ul><li><a href="#">👉 [Question]? (Click Here)</a></li></ul> के रूप में लिखने हैं। 
+9. Conclusion: 100–150 शब्दों का निष्कर्ष।
 
 SEO Rules:
 - मुख्य Keyword Title, Intro, H2, H3, Conclusion में शामिल।
 - सभी Heading (H2, H3) बहुत ही आकर्षक और सुंदर (Catchy) होनी चाहिए।
 - Keyword Stuffing नहीं। छोटे Paragraph।
-- ब्लॉग कम से कम 2000–3000+ शब्दों का होना चाहिए (Make it extremely detailed).
+- ब्लॉग कम से कम 1500–2000+ शब्दों का होना चाहिए (Make it extremely detailed).
 - 100% Original and Human-Written in Hindi/Hinglish.
 - किसी भी जानकारी का अनुमान नहीं लगाना।
 
 Topic: ${title}
 News Context: ${newsContext}
 Return ONLY the HTML output.`;
-    } else {
-      articlePrompt = `You are an expert blog writer and news analyst. Write a comprehensive, highly engaging, and user-friendly SEO-optimized article (1000+ words) based on the provided topic or live news. 
-Analyze the news deeply and explain it in simple terms.
-Use appropriate HTML formatting (h2, h3, p, ul, li, strong, blockquote). 
-Ensure the tone is professional yet engaging. Do not include a title tag (h1), start with an h2 or introductory paragraph. Return ONLY the HTML content.
-
-Title: ${title}
-Topic: ${topic}
-${newsContext}`;
-    }
 
     const content = await generateAIContent(aiConfig, articlePrompt, '', 4000);
 

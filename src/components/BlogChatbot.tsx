@@ -7,14 +7,18 @@ interface Message {
 }
 
 interface BlogChatbotProps {
-  postTitle: string;
-  postId: string;
+  postTitle?: string;
+  postId?: string;
 }
 
 export default function BlogChatbot({ postTitle, postId }: BlogChatbotProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const initialMsg = postTitle 
+    ? `Hi! I am the AI assistant for "${postTitle}". What would you like to know?` 
+    : `Hi! I'm your AI Blog Assistant. How can I help you explore our content today?`;
+    
   const [messages, setMessages] = useState<Message[]>([
-    { role: 'ai', content: `Hi! I am the AI assistant for "${postTitle}". What would you like to know? If you spot any mistakes, please let me know!` }
+    { role: 'ai', content: initialMsg }
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);

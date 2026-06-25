@@ -2,7 +2,7 @@ import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { prisma } from '@/lib/prisma';
-
+import BlogChatbot from '@/components/BlogChatbot';
 export const revalidate = 60; // Revalidate the page every 60 seconds for performance
 
 async function getPostsByTag(tag: string) {
@@ -129,6 +129,9 @@ export default async function HomePage() {
           </div>
         )}
       </div>
+      
+      {/* Global AI Chatbot */}
+      <BlogChatbot />
     </div>
   );
 }

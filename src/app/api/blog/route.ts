@@ -48,12 +48,16 @@ export async function GET(request: Request) {
       tags: p.tags.map((t: any) => t.tag.name)
     }));
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       posts: formattedPosts,
       total,
       page,
       totalPages: Math.ceil(total / limit)
     });
+    
+    // Cache for 60 seconds on CDN (Edge), stale-while-revalidate for 1 hour
+    response.headers.set('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=3600');
+    return response;
   } catch (error) {
     console.error('Error fetching posts:', error);
     return NextResponse.json({ error: 'Failed to fetch posts' }, { status: 500 });

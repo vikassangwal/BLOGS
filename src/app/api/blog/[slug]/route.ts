@@ -32,7 +32,10 @@ export async function GET(request: Request, context: { params: Promise<{ slug: s
       tags: post.tags.map((t: any) => t.tag.name)
     };
 
-    return NextResponse.json(formattedPost);
+    const response = NextResponse.json(formattedPost);
+    // Cache for 15 minutes on CDN (Edge), stale-while-revalidate for 1 hour
+    response.headers.set('Cache-Control', 'public, s-maxage=900, stale-while-revalidate=3600');
+    return response;
   } catch (error) {
     console.error('Error fetching post:', error);
     return NextResponse.json({ error: 'Failed to fetch post' }, { status: 500 });

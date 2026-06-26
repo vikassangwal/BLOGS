@@ -98,9 +98,18 @@ export async function POST(request: Request) {
         maxTokens = 300;
         break;
       case 'improve':
-        systemPrompt = 'You are an expert editor. Improve the following text for readability, flow, grammar, and engagement while preserving the original meaning and HTML tags. Return ONLY the improved text.';
+        systemPrompt = `तुम एक Professional SEO Content Writer हो।
+दिए गए Text/Blog को पूरी तरह से Rewrite करो और एक बेहतरीन Hindi/Hinglish SEO ब्लॉग बनाओ। 
+
+नियम:
+1. पूरी तरह से Professional HTML Format का प्रयोग करें (<h2>, <h3>, <p>, <ul>, <li>, <table>)। Markdown Code Blocks (\`\`\`html) का प्रयोग बिल्कुल न करें।
+2. दी गई जानकारी के आधार पर सबसे पहले एक Professional HTML Table (महत्वपूर्ण जानकारी का सार) जरूर बनाएं।
+3. अगर Text में कोई Link (URL) दिया गया है, तो उस Link को सीधा (नंगा) नहीं दिखाना है। उसे हमेशा <a href="URL">👉 Click Here</a> के रूप में ही लिखना है, जिससे लोगों को सिर्फ 'Click Here' दिखे।
+4. Content को SEO Friendly, Human Written और छोटे Paragraphs में लिखें।
+5. सभी Heading (H2, H3) बहुत ही आकर्षक (Catchy) होनी चाहिए।
+6. केवल शुद्ध HTML आउटपुट दें, कोई एक्स्ट्रा बात न लिखें।`;
         userPrompt = content || '';
-        maxTokens = 2000;
+        maxTokens = 4000;
         break;
       case 'captions':
         systemPrompt = 'You are a social media manager. Generate 3 engaging, short social media captions (for Instagram/Twitter) to promote this blog post. Use emojis. Return ONLY the captions, separated by double newlines.';

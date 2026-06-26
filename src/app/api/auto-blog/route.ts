@@ -15,19 +15,6 @@ export async function POST(request: Request) {
       // Actually, allow manual triggers even if paused.
     }
 
-    // 1. Fetch next pending keyword
-    const pendingKeyword = await prisma.autoBlogKeyword.findFirst({
-      where: { status: 'pending' },
-      orderBy: [
-        { priority: 'desc' },
-        { createdAt: 'asc' }
-      ]
-    });
-
-    if (!pendingKeyword) {
-      return NextResponse.json({ message: 'No pending keywords found in queue.', status: 'empty' });
-    }
-
     const aiConfig = await getAIConfig();
     if (!aiConfig) {
       return NextResponse.json({ error: 'AI Provider not configured.' }, { status: 400 });

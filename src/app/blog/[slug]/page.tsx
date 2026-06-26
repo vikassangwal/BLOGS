@@ -7,7 +7,7 @@ import LeadCaptureForm from '@/components/LeadCaptureForm';
 import SmartBanners from '@/components/SmartBanners';
 import BlogChatbot from '@/components/BlogChatbot';
 import AdInjector from '@/components/AdInjector';
-
+import AdBanner from '@/components/AdBanner';
 export default function BlogPostPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = React.use(params);
   const [post, setPost] = useState<any>(null);
@@ -154,7 +154,9 @@ export default function BlogPostPage({ params }: { params: Promise<{ slug: strin
 
         {/* Post Content */}
         <div style={{ position: 'relative' }}>
+          <AdBanner dataAdSlot="top-content" />
           <AdInjector htmlContent={contentHtml} />
+          <AdBanner dataAdSlot="bottom-content" />
           
           {/* Premium Paywall Blur */}
           {isPremium && !isUnlocked && (

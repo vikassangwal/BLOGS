@@ -91,6 +91,17 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'News already covered' }, { status: 409 });
     }
 
+    // 2.5 Fetch recent posts for Internal Linking
+    const recentPosts = await prisma.blogPost.findMany({
+      where: { status: 'Published' },
+      orderBy: { publishedAt: 'desc' },
+      take: 5,
+      select: { title: true, slug: true }
+    });
+    const internalLinksContext = recentPosts.length > 0 
+      ? `\nINTERNAL LINKING INSTRUCTION:\nHere are some existing articles on our website:\n${recentPosts.map(p => `- ${p.title} (URL: /blog/${p.slug})`).join('\n')}\nIf any of these articles are highly relevant to your content, please contextually hyperlink them within your paragraphs using <a href="URL">...</a>.` 
+      : '';
+
     // ALWAYS use the Universal SEO Blog Prompt for EVERY topic
     const articlePrompt = `तुम एक Professional SEO Content Writer, Blogging Expert, Google Discover Friendly और AdSense Friendly Content Creator हो।
 नीचे दिए गए विषय (Topic) या Live News पर 100% यूनिक, Human-Written, SEO Optimized, Google Ranking Friendly और Publish Ready ब्लॉग तैयार करो।
@@ -122,7 +133,7 @@ SEO Rules:
 - Keyword Stuffing नहीं। छोटे Paragraph।
 - ब्लॉग कम से कम 1500–2000+ शब्दों का होना चाहिए (Make it extremely detailed).
 - 100% Original and Human-Written in Hindi/Hinglish.
-- किसी भी जानकारी का अनुमान नहीं लगाना।
+- किसी भी जानकारी का अनुमान नहीं लगाना।${internalLinksContext}
 
 Topic: ${title}
 News Context: ${newsContext}
@@ -210,6 +221,51 @@ Keywords: [kw]`;
       where: { id: pendingKeyword.id },
       data: { status: 'used', usedAt: new Date(), postId: post.id }
     });
+
+    // 5.5 Social Media & Push Notification Auto-Poster
+    if (post.status === 'Published') {
+      try {
+        const siteSettingsObj = await prisma.siteSettings.findUnique({ where: { id: 'default' } });
+        if (siteSettingsObj?.aiApiKey?.startsWith('{')) {
+          const parsedKeys = JSON.parse(siteSettingsObj.aiApiKey);
+          const postUrl = `https://antigravity.com/blog/${post.slug}`;
+          const message = `New Post: ${post.title}!\n\nRead more: ${postUrl}`;
+          
+          if (parsedKeys.twitter) {
+            console.log(`[Twitter Auto-Post] Sending tweet... Message: ${message}`);
+            // Telegram Bot API Integration (re-using twitter key for telegram token for simplicity or actual Telegram)
+            if (parsedKeys.telegramToken && parsedKeys.telegramChatId) {
+                fetch(`https://api.telegram.org/bot${parsedKeys.telegramToken}/sendMessage`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ chat_id: parsedKeys.telegramChatId, text: message })
+                }).catch(console.error);
+            }
+          }
+          
+          if (parsedKeys.onesignalAppId && parsedKeys.onesignalApiKey) {
+            console.log(`[OneSignal] Sending push notification...`);
+            fetch('https://onesignal.com/api/v1/notifications', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Basic ${parsedKeys.onesignalApiKey}`
+              },
+              body: JSON.stringify({
+                app_id: parsedKeys.onesignalAppId,
+                included_segments: ['Subscribed Users'],
+                headings: { en: post.title },
+                contents: { en: post.excerpt || 'Read our latest auto-generated post!' },
+                url: postUrl,
+                big_picture: post.featuredImage
+              })
+            }).catch(console.error);
+          }
+        }
+      } catch (err) {
+        console.error('Failed to trigger social media auto-post', err);
+      }
+    }
 
     // 6. Log success
     await prisma.autoBlogLog.create({

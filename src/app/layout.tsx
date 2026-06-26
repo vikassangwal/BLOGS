@@ -34,6 +34,20 @@ export default async function RootLayout({
     <html lang="en">
       <head>
         <link rel="manifest" href="/manifest.json" />
+        {/* Google AdSense Global Script (Replace with actual publisher ID) */}
+        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossOrigin="anonymous"></script>
+        {/* OneSignal Push Notifications */}
+        <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+        <script dangerouslySetInnerHTML={{
+          __html: `
+            window.OneSignalDeferred = window.OneSignalDeferred || [];
+            OneSignalDeferred.push(function(OneSignal) {
+              OneSignal.init({
+                appId: "YOUR_ONESIGNAL_APP_ID",
+              });
+            });
+          `
+        }} />
       </head>
       <body className="antialiased min-h-screen flex flex-col bg-black text-white relative">
         <div className="bg-mesh"></div>

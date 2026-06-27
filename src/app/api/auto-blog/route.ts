@@ -292,20 +292,20 @@ Keywords: [kw]`;
     // Attempt to log failure
     try {
       // Find pending again to log if we crashed during generation
-      const pendingKeyword = await prisma.autoBlogKeyword.findFirst({
+      const failedKeyword = await prisma.autoBlogKeyword.findFirst({
         where: { status: 'pending' },
         orderBy: [{ priority: 'desc' }, { createdAt: 'asc' }]
       });
       
-      if (pendingKeyword) {
+      if (failedKeyword) {
         await prisma.autoBlogKeyword.update({
-          where: { id: pendingKeyword.id },
+          where: { id: failedKeyword.id },
           data: { status: 'failed' }
         });
         
         await prisma.autoBlogLog.create({
           data: {
-            keyword: pendingKeyword.keyword,
+            keyword: failedKeyword.keyword,
             status: 'failed',
             error: error.message || 'Unknown error'
           }

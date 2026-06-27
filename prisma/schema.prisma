@@ -189,6 +189,7 @@ model AutoBlogSettings {
   lastRunAt       DateTime?
   imageSource     String   @default("unsplash")  // unsplash, ai, none
   autoPublish     Boolean  @default(true)
+  embedYoutube    Boolean  @default(true)
   updatedAt       DateTime @updatedAt
 }
 

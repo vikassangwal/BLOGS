@@ -205,6 +205,17 @@ export default function AutoBlogAdmin() {
               <label htmlFor="autoPublish" style={{ fontWeight: 600 }}>Publish immediately (otherwise Draft)</label>
             </div>
 
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              <input
+                type="checkbox"
+                id="embedYoutube"
+                checked={settings.embedYoutube !== false}
+                onChange={e => setSettings({ ...settings, embedYoutube: e.target.checked })}
+                style={{ width: '20px', height: '20px' }}
+              />
+              <label htmlFor="embedYoutube" style={{ fontWeight: 600 }}>Auto-Embed YouTube Videos (Boosts SEO)</label>
+            </div>
+
             <hr style={{ border: 'none', borderTop: '1px solid var(--color-border)', margin: '1rem 0' }} />
             
             <h3 style={{ fontSize: '1.1rem', fontWeight: 700, margin: '0' }}>📰 Live News Auto-Blogger</h3>

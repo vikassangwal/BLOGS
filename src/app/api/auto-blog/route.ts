@@ -179,35 +179,37 @@ Keywords: [kw]`;
 
     // 3.5 Auto YouTube Video Embed
     let finalContent = content;
-    try {
-      const ytSearchQuery = encodeURIComponent(topic + ' Hindi');
-      const ytSearchUrl = `https://www.youtube.com/results?search_query=${ytSearchQuery}`;
-      const ytRes = await fetch(ytSearchUrl, {
-        headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' }
-      });
-      const ytHtml = await ytRes.text();
-      const videoIdMatch = ytHtml.match(/"videoId":"([a-zA-Z0-9_-]{11})"/);
-      if (videoIdMatch && videoIdMatch[1]) {
-        const videoId = videoIdMatch[1];
-        const youtubeEmbed = `
+    if (settings?.embedYoutube !== false) {
+      try {
+        const ytSearchQuery = encodeURIComponent(topic + ' Hindi');
+        const ytSearchUrl = `https://www.youtube.com/results?search_query=${ytSearchQuery}`;
+        const ytRes = await fetch(ytSearchUrl, {
+          headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' }
+        });
+        const ytHtml = await ytRes.text();
+        const videoIdMatch = ytHtml.match(/"videoId":"([a-zA-Z0-9_-]{11})"/);
+        if (videoIdMatch && videoIdMatch[1]) {
+          const videoId = videoIdMatch[1];
+          const youtubeEmbed = `
 <div style="margin:2rem 0;text-align:center;">
   <h3>📺 इस विषय पर वीडियो देखें</h3>
   <div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;max-width:100%;border-radius:12px;">
     <iframe src="https://www.youtube.com/embed/${videoId}" style="position:absolute;top:0;left:0;width:100%;height:100%;border:none;border-radius:12px;" allowfullscreen loading="lazy"></iframe>
   </div>
 </div>`;
-        // Insert YouTube video after the first 40% of content
-        const insertPos = Math.floor(finalContent.length * 0.4);
-        const closingTagPos = finalContent.indexOf('</p>', insertPos);
-        if (closingTagPos !== -1) {
-          finalContent = finalContent.substring(0, closingTagPos + 4) + youtubeEmbed + finalContent.substring(closingTagPos + 4);
-        } else {
-          finalContent += youtubeEmbed;
+          // Insert YouTube video after the first 40% of content
+          const insertPos = Math.floor(finalContent.length * 0.4);
+          const closingTagPos = finalContent.indexOf('</p>', insertPos);
+          if (closingTagPos !== -1) {
+            finalContent = finalContent.substring(0, closingTagPos + 4) + youtubeEmbed + finalContent.substring(closingTagPos + 4);
+          } else {
+            finalContent += youtubeEmbed;
+          }
+          console.log(`[YouTube Embed] Added video: ${videoId} for topic: ${topic}`);
         }
-        console.log(`[YouTube Embed] Added video: ${videoId} for topic: ${topic}`);
+      } catch (ytError) {
+        console.error('[YouTube Embed] Failed:', ytError);
       }
-    } catch (ytError) {
-      console.error('[YouTube Embed] Failed:', ytError);
     }
 
     // 4. Create Post

@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import type { Metadata } from 'next';
 import Script from 'next/script';
 import './globals.css';
@@ -51,7 +52,9 @@ export default async function RootLayout({
       </head>
       <body className="antialiased min-h-screen flex flex-col relative transition-colors duration-300">
         <div className="bg-mesh"></div>
-        <GlobalHeader siteName={siteName} />
+        <Suspense fallback={<div className="h-20 w-full" />}>
+          <GlobalHeader siteName={siteName} />
+        </Suspense>
 
         <main className="flex-grow flex flex-col">
           {children}

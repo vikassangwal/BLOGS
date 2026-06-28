@@ -252,10 +252,12 @@ Keywords: [kw]`;
     });
 
     // 5. Update Keyword
-    await prisma.autoBlogKeyword.update({
-      where: { id: pendingKeyword.id },
-      data: { status: 'used', usedAt: new Date(), postId: post.id }
-    });
+    if (pendingKeyword) {
+      await prisma.autoBlogKeyword.update({
+        where: { id: pendingKeyword.id },
+        data: { status: 'used', usedAt: new Date(), postId: post.id }
+      });
+    }
 
     // 5.5 Social Media & Push Notification Auto-Poster
     if (post.status === 'Published') {
@@ -305,7 +307,7 @@ Keywords: [kw]`;
     // 6. Log success
     await prisma.autoBlogLog.create({
       data: {
-        keyword: pendingKeyword.keyword,
+        keyword: pendingKeyword ? pendingKeyword.keyword : topic,
         title: post.title,
         status: 'success',
         postId: post.id

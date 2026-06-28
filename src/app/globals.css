@@ -30,6 +30,15 @@
     --color-glass: rgba(255, 255, 255, 0.85);
     --color-glass-border: rgba(0, 0, 0, 0.1);
   }
+
+  /* Override hardcoded Tailwind classes in Light Theme */
+  .light-theme .text-white { color: var(--color-text-primary) !important; }
+  .light-theme .text-gray-200,
+  .light-theme .text-gray-300,
+  .light-theme .text-gray-400,
+  .light-theme .text-gray-500 { color: var(--color-text-secondary) !important; }
+  .light-theme h2, .light-theme h3 { color: var(--color-text-primary) !important; }
+  .light-theme .border-white\/10 { border-color: var(--color-border) !important; }
 }
 
 @layer base {

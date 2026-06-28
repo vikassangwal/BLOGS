@@ -1,6 +1,7 @@
 'use client';
 import React from 'react';
 import { usePathname } from 'next/navigation';
+import ThemeToggle from './ThemeToggle';
 
 export default function GlobalHeader({ siteName }: { siteName?: string }) {
   const pathname = usePathname();
@@ -24,6 +25,7 @@ export default function GlobalHeader({ siteName }: { siteName?: string }) {
             <a href="/about" className="hover:text-white transition-colors">About Us</a>
           </nav>
           <div id="google_translate_element" className="hidden sm:block [&>div]:!mb-0 scale-90 origin-right"></div>
+          <ThemeToggle />
         </div>
       </div>
     </header>

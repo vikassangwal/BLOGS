@@ -49,7 +49,7 @@ export default async function RootLayout({
           `
         }} />
       </head>
-      <body className="antialiased min-h-screen flex flex-col bg-black text-white relative">
+      <body className="antialiased min-h-screen flex flex-col relative transition-colors duration-300">
         <div className="bg-mesh"></div>
         <GlobalHeader siteName={siteName} />
 

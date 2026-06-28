@@ -23,6 +23,21 @@ export default function BlogChatbot({ postTitle, postId }: BlogChatbotProps) {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const chatRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (chatRef.current && !chatRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    }
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isOpen]);
 
   useEffect(() => {
     if (messagesEndRef.current) {
@@ -110,8 +125,10 @@ export default function BlogChatbot({ postTitle, postId }: BlogChatbotProps) {
             flexDirection: 'column',
             zIndex: 9999,
             overflow: 'hidden',
-            animation: 'slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1)'
+            animation: 'slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+            color: '#111827'
           }}
+          ref={chatRef}
         >
           {/* Header */}
           <div style={{
@@ -163,8 +180,8 @@ export default function BlogChatbot({ postTitle, postId }: BlogChatbotProps) {
                 style={{
                   alignSelf: msg.role === 'user' ? 'flex-end' : 'flex-start',
                   maxWidth: '85%',
-                  background: msg.role === 'user' ? 'var(--color-accent)' : '#f3f4f6',
-                  color: msg.role === 'user' ? '#fff' : 'var(--color-text-primary)',
+                  background: msg.role === 'user' ? 'var(--color-accent, #3b82f6)' : '#f3f4f6',
+                  color: msg.role === 'user' ? '#fff' : '#111827',
                   padding: '0.8rem 1.2rem',
                   borderRadius: msg.role === 'user' ? '18px 18px 4px 18px' : '18px 18px 18px 4px',
                   fontSize: '0.9rem',
@@ -203,8 +220,9 @@ export default function BlogChatbot({ postTitle, postId }: BlogChatbotProps) {
                 flex: 1,
                 padding: '0.8rem 1rem',
                 borderRadius: '20px',
-                border: '1px solid var(--color-border)',
+                border: '1px solid var(--color-border, #e5e7eb)',
                 background: '#f9fafb',
+                color: '#111827',
                 outline: 'none',
                 fontSize: '0.9rem'
               }}

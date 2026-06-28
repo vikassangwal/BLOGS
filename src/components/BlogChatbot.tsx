@@ -25,6 +25,8 @@ export default function BlogChatbot({ postTitle, postId }: BlogChatbotProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatRef = useRef<HTMLDivElement>(null);
 
+  const [isDismissed, setIsDismissed] = useState(false);
+
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (chatRef.current && !chatRef.current.contains(event.target as Node)) {
@@ -73,36 +75,60 @@ export default function BlogChatbot({ postTitle, postId }: BlogChatbotProps) {
     }
   };
 
+  if (isDismissed) return null;
+
   return (
     <>
       {/* Floating Button */}
       {!isOpen && (
-        <button
-          onClick={() => setIsOpen(true)}
-          style={{
-            position: 'fixed',
-            bottom: '2rem',
-            right: '2rem',
-            width: '60px',
-            height: '60px',
-            borderRadius: '50%',
-            background: 'linear-gradient(135deg, var(--color-accent) 0%, #004999 100%)',
-            color: '#fff',
-            border: 'none',
-            boxShadow: '0 8px 32px rgba(0, 102, 204, 0.4)',
-            cursor: 'pointer',
-            fontSize: '1.8rem',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 9999,
-            transition: 'transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
-          }}
-          onMouseEnter={(e) => (e.currentTarget.style.transform = 'scale(1.1)')}
-          onMouseLeave={(e) => (e.currentTarget.style.transform = 'scale(1)')}
-        >
-          💬
-        </button>
+        <div style={{ position: 'fixed', bottom: '2rem', right: '2rem', zIndex: 9999 }}>
+          <button
+            onClick={() => setIsDismissed(true)}
+            style={{
+              position: 'absolute',
+              top: '-8px',
+              right: '-8px',
+              background: '#ef4444',
+              color: 'white',
+              border: 'none',
+              borderRadius: '50%',
+              width: '24px',
+              height: '24px',
+              fontSize: '12px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+              zIndex: 10
+            }}
+            title="Hide Chatbot"
+          >
+            ✕
+          </button>
+          <button
+            onClick={() => setIsOpen(true)}
+            style={{
+              width: '60px',
+              height: '60px',
+              borderRadius: '50%',
+              background: 'linear-gradient(135deg, var(--color-accent) 0%, #004999 100%)',
+              color: '#fff',
+              border: 'none',
+              boxShadow: '0 8px 32px rgba(0, 102, 204, 0.4)',
+              cursor: 'pointer',
+              fontSize: '1.8rem',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              transition: 'transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.transform = 'scale(1.1)')}
+            onMouseLeave={(e) => (e.currentTarget.style.transform = 'scale(1)')}
+          >
+            💬
+          </button>
+        </div>
       )}
 
       {/* Chat Panel */}

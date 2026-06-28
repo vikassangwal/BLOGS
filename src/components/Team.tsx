@@ -16,7 +16,7 @@ export default function Team() {
             <h3 style={{ fontSize: '2rem', marginBottom: '0.2rem' }}>Alex Mercer</h3>
             <p className="text-gradient" style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '1rem' }}>Founder & AI Architect</p>
             <p className="text-gray" style={{ marginBottom: '1.5rem' }}>
-              Building the future of business automation. With over a decade of experience in machine learning and scalable web architecture, Alex leads Anti Gravity 2.0's mission to make enterprise AI accessible to everyone.
+              Building the future of business automation. With over a decade of experience in machine learning and scalable web architecture, Alex leads Our Blog's mission to make enterprise AI accessible to everyone.
             </p>
             <div style={{ display: 'flex', gap: '1rem' }}>
               <span style={{ padding: '0.4rem 1rem', background: 'rgba(255,255,255,0.05)', borderRadius: '50px', fontSize: '0.8rem' }}>Next.js</span>

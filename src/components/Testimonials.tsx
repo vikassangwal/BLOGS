@@ -1,7 +1,7 @@
 import React from 'react';
 
 const testimonials = [
-  { name: 'Sarah Jenkins', role: 'CEO, TechFlow', text: 'Anti Gravity completely transformed our operational speed. The AI agent they built handles 40% of our customer queries automatically.', rating: 5 },
+  { name: 'Sarah Jenkins', role: 'CEO, TechFlow', text: 'Our Blog completely transformed our operational speed. The AI agent they built handles 40% of our customer queries automatically.', rating: 5 },
   { name: 'David Chen', role: 'Founder, Elevate CRM', text: 'Their design aesthetic is unmatched. Combine that with a robust Next.js backend and you have a world-class product.', rating: 5 },
   { name: 'Elena Rodriguez', role: 'Director, HealthPlus', text: 'The automated booking system saved our clinic hundreds of hours a month. Truly futuristic solutions.', rating: 5 }
 ];

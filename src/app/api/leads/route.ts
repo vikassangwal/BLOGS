@@ -74,7 +74,7 @@ export async function POST(request: Request) {
           await resend.emails.send({
             from: 'Welcome <onboarding@resend.dev>', // Resend testing domain
             to: email,
-            subject: `Welcome to ${settings.siteName || 'Anti Gravity'}!`,
+            subject: `Welcome to ${settings.siteName || 'Our Blog'}!`,
             html: `<p>Hi ${name || 'there'},</p>
                    <p>Thank you for subscribing to our updates!</p>
                    <p>Stay tuned for more amazing content.</p>

@@ -13,7 +13,7 @@ export async function generateMetadata(): Promise<Metadata> {
   } catch (e) {}
 
   return {
-    title: settings?.seoTitle || settings?.siteName || 'Anti Gravity | Premium AI Blogging',
+    title: settings?.seoTitle || settings?.siteName || 'Our Blog | Premium AI Blogging',
     description: settings?.seoDescription || settings?.siteTagline || 'A dedicated platform for fully automated AI blogging and lead generation.',
   };
 }
@@ -28,7 +28,7 @@ export default async function RootLayout({
     settings = await prisma.siteSettings.findUnique({ where: { id: 'default' } });
   } catch (e) {}
 
-  const siteName = settings?.siteName || 'Anti Gravity';
+  const siteName = settings?.siteName || 'Our Blog';
 
   return (
     <html lang="en">

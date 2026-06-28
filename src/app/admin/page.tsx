@@ -89,7 +89,7 @@ export default function AdminDashboard() {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
           <h1 style={{ fontSize: '2.2rem', fontWeight: 800, margin: '0 0 0.5rem 0', color: 'var(--color-text-primary)', letterSpacing: '-0.5px' }}>
-            ⚡ Anti Gravity Dashboard
+            ⚡ Our Blog Dashboard
           </h1>
           <p style={{ color: 'var(--color-text-secondary)', margin: 0, fontSize: '0.95rem' }}>
             🕐 {currentTime.toLocaleString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' })}

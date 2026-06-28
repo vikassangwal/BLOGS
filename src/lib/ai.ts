@@ -179,7 +179,7 @@ export async function generateAIContent(
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${config.apiKey}`,
         'HTTP-Referer': 'https://antigravity.com', // Optional but recommended by OpenRouter
-        'X-Title': 'Anti Gravity 2.0',
+        'X-Title': 'Our Blog',
       },
       body: JSON.stringify({
         model: config.model,

@@ -63,7 +63,7 @@ export async function POST(request: Request) {
       let fallbackText = '';
       if (type === 'title') fallbackText = `1. The Ultimate Guide to ${topic || 'This Topic'}\n2. Why ${topic || 'This'} is Important Now\n3. 10 Tips for ${topic || 'Success'}`;
       else if (type === 'outline') fallbackText = `<h2>Introduction to ${topic}</h2>\n<p>Overview of the topic.</p>\n<h2>Key Concepts</h2>\n<ul><li>Point 1</li><li>Point 2</li></ul>\n<h2>Conclusion</h2>`;
-      else if (type === 'article') fallbackText = `<h2>Understanding ${title || topic}</h2>\n<p>This is a placeholder article generated because AI is not configured. Please go to Settings > AI Configuration to add an API key (OpenAI, Gemini, or Claude).</p>\n<h3>Why this matters</h3>\n<p>Configuring AI unlocks the full potential of Anti Gravity 2.0.</p>`;
+      else if (type === 'article') fallbackText = `<h2>Understanding ${title || topic}</h2>\n<p>This is a placeholder article generated because AI is not configured. Please go to Settings > AI Configuration to add an API key (OpenAI, Gemini, or Claude).</p>\n<h3>Why this matters</h3>\n<p>Configuring AI unlocks the full potential of Our Blog.</p>`;
       else if (type === 'seo') fallbackText = `SEO Title: Guide to ${topic}\nSEO Description: Learn everything about ${topic}.\nKeywords: ${topic}, guide, tutorial`;
       else if (type === 'improve') fallbackText = `[Improved] ${content}`;
       else if (type === 'captions') fallbackText = `🔥 Check out our latest post about ${topic}! #trends #tech`;

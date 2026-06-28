@@ -201,10 +201,10 @@ export default function BlogPostPage({ params }: { params: Promise<{ slug: strin
           </div>
           <div>
             <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--color-text-primary)', marginBottom: '0.5rem' }}>
-              Written by {post.author?.name || 'Anti Gravity Team'}
+              Written by {post.author?.name || 'Our Blog Team'}
             </h3>
             <p style={{ fontSize: '0.9rem', color: 'var(--color-text-secondary)', lineHeight: 1.6, margin: 0 }}>
-              {post.author?.name ? `${post.author.name} is a senior editor and subject matter expert.` : 'The Anti Gravity Team consists of industry experts and AI specialists dedicated to bringing you the most accurate and up-to-date information.'}
+              {post.author?.name ? `${post.author.name} is a senior editor and subject matter expert.` : 'The Our Blog Team consists of industry experts and AI specialists dedicated to bringing you the most accurate and up-to-date information.'}
             </p>
           </div>
         </div>

@@ -14,7 +14,7 @@ export default function Timeline() {
     <section className="section">
       <div className="container">
         <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
-          <h2 style={{ fontSize: '3rem', marginBottom: '1rem' }}>Why Choose <span className="text-gradient">Anti Gravity 2.0</span></h2>
+          <h2 style={{ fontSize: '3rem', marginBottom: '1rem' }}>Why Choose <span className="text-gradient">Our Blog</span></h2>
           <p className="text-gray" style={{ maxWidth: '600px', margin: '0 auto', fontSize: '1.1rem' }}>
             We don't just build websites; we build intelligent systems designed to scale.
           </p>

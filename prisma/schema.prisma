@@ -96,13 +96,13 @@ model PostTag {
 // ==========================================
 model SiteSettings {
   id            String  @id @default("default")
-  siteName      String  @default("Anti Gravity 2.0")
+  siteName      String  @default("Our Blog")
   siteTagline   String  @default("AI-Powered Blogging Platform")
   adminEmail    String  @default("admin@antigravity.com")
   aiProvider    String  @default("openai")    // openai, gemini, anthropic, deepseek
   aiApiKey      String  @default("")
   aiModel       String  @default("gpt-4o-mini")
-  seoTitle      String  @default("Anti Gravity 2.0 | AI-Powered Blog")
+  seoTitle      String  @default("Our Blog | AI-Powered Blog")
   seoDescription String @default("Advanced AI-Powered Blogging Platform")
   updatedAt     DateTime @updatedAt
 }

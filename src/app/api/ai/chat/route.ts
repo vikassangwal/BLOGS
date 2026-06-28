@@ -45,7 +45,7 @@ export async function POST(request: Request) {
     // Format history (limit to last 5 messages for context window)
     const recentHistory = history.slice(-5).map((h: any) => `${h.role === 'user' ? 'Reader' : 'AI'}: ${h.content}`).join('\n');
 
-    const systemPrompt = `You are a helpful and polite AI assistant for the Anti Gravity blog.
+    const systemPrompt = `You are a helpful and polite AI assistant for the Our Blog blog.
 Your ONLY job is to answer the reader's questions strictly based on the provided blog post content.
 If the user asks something outside the scope of the article, politely decline and say you can only answer questions related to the article.
 If the user points out a mistake, thank them and let them know the feedback has been logged for the author.

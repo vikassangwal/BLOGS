@@ -39,7 +39,7 @@ export async function GET(request: Request, context: { params: Promise<{ slug: s
   <body>
     <amp-story standalone
         title="${post.title}"
-        publisher="Anti Gravity"
+        publisher="Our Blog"
         publisher-logo-src="${publisherLogo}"
         poster-portrait-src="${posterImage}">
       

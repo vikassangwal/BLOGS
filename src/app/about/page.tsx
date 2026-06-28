@@ -18,18 +18,18 @@ export default function AboutUsPage() {
 
   return (
     <div className="min-h-screen py-20 px-6">
-      <title>About Us | Anti Gravity</title>
-      <meta name="description" content="Learn more about Anti Gravity, our mission, and our expert team of writers and developers." />
+      <title>About Us | Our Blog</title>
+      <meta name="description" content="Learn more about Our Blog, our mission, and our expert team of writers and developers." />
       
       <div className="max-w-4xl mx-auto">
         <h1 className="text-4xl md:text-5xl font-extrabold mb-8 text-center premium-gradient-text">
-          About Anti Gravity
+          About Our Blog
         </h1>
         
         <div className="glass-panel p-8 md:p-12 rounded-3xl mb-12 animate-slide-up">
           <h2 className="text-2xl font-bold mb-4 text-white">Our Mission</h2>
           <p className="text-gray-300 leading-relaxed mb-6">
-            At Anti Gravity, our mission is to empower readers with high-quality, expertly curated content across Technology, Education & Career, and Finance & Earning. 
+            At Our Blog, our mission is to empower readers with high-quality, expertly curated content across Technology, Education & Career, and Finance & Earning. 
             We believe that knowledge should be accessible, accurate, and actionable. Our platform leverages advanced AI combined with human expertise to bring you the most reliable insights.
           </p>
           

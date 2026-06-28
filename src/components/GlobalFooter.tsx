@@ -12,7 +12,7 @@ export default function GlobalFooter({ siteName }: { siteName?: string }) {
   return (
     <footer className="glass-panel border-t border-white/10 mt-auto">
       <div className="container mx-auto px-6 py-8 flex flex-col md:flex-row items-center justify-between text-sm text-gray-400">
-        <p>© {new Date().getFullYear()} {siteName || 'Anti Gravity'}. All rights reserved.</p>
+        <p>© {new Date().getFullYear()} {siteName || 'Our Blog'}. All rights reserved.</p>
         <div className="flex gap-6 mt-4 md:mt-0">
           <a href="/about" className="hover:text-white transition-colors">About Us</a>
           <a href="/admin/login" className="hover:text-white transition-colors">Editor / Admin Panel</a>

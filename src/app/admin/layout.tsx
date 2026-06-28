@@ -18,7 +18,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [toast, setToast] = useState<{ message: string; visible: boolean } | null>(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [userName, setUserName] = useState('Admin');
-  const [siteName, setSiteName] = useState('Anti Gravity');
+  const [siteName, setSiteName] = useState('Our Blog');
 
   useEffect(() => {
     // Fetch current user

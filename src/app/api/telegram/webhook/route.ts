@@ -39,7 +39,7 @@ export async function POST(request: Request) {
     // Handle commands
     if (text.startsWith('/start')) {
       await sendTelegramMessage(chatId, 
-        `🚀 *Anti Gravity Auto-Blog Bot*\n\n` +
+        `🚀 *Our Blog Auto-Blog Bot*\n\n` +
         `Welcome ${senderName}! Here's what I can do:\n\n` +
         `📝 *Add Keyword:* Just type any topic/keyword and I'll add it to the auto-blog queue.\n\n` +
         `📊 */stats* - View blog statistics\n` +

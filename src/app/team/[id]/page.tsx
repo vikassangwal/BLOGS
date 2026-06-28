@@ -35,7 +35,7 @@ export default function TeamMemberPage({ params }: { params: Promise<{ id: strin
 
   return (
     <div className="min-h-screen py-20 px-6">
-      <title>{member.name} | Anti Gravity</title>
+      <title>{member.name} | Our Blog</title>
       <meta name="description" content={member.bio} />
       
       <div className="max-w-4xl mx-auto">

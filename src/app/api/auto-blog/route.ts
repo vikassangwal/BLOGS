@@ -70,9 +70,12 @@ export async function POST(request: Request) {
           newsContext = `Latest News on this topic: ${item.title}\nLink: ${item.link}\nSnippet: ${item.contentSnippet || item.content || ''}`;
         }
       } catch (rssError) {}
-    } else if (liveNewsSettings.isNewsActive && liveNewsSettings.newsTopics) {
-      // 2. Fallback to random Live News if queue is empty
-      const topics = liveNewsSettings.newsTopics.split(',').map((t: string) => t.trim());
+    } else {
+      // 2. Fallback to random Top News in preferred niches if queue is empty
+      let topics = ['Technology News', 'Education News', 'Career Updates', 'Finance News', 'Govt Jobs India', 'Exam Results India'];
+      if (liveNewsSettings.isNewsActive && liveNewsSettings.newsTopics) {
+          topics = liveNewsSettings.newsTopics.split(',').map((t: string) => t.trim());
+      }
       topic = topics[Math.floor(Math.random() * topics.length)];
       
       try {
@@ -82,14 +85,17 @@ export async function POST(request: Request) {
         const feed = await parser.parseURL(rssUrl);
         
         if (feed.items && feed.items.length > 0) {
-          const item = feed.items[Math.floor(Math.random() * Math.min(5, feed.items.length))];
+          // Pick from top 3 news to ensure it's very recent and top
+          const item = feed.items[Math.floor(Math.random() * Math.min(3, feed.items.length))];
           newsContext = `News Title: ${item.title}\nLink: ${item.link}\nSnippet: ${item.contentSnippet || item.content || ''}`;
+        } else {
+          // If RSS fails to find items, generate a generalized trending topic
+          newsContext = `Generate a deep-researched, highly detailed comprehensive guide or top news analysis about the current trends in ${topic}.`;
         }
       } catch (rssError) {
         console.error('Failed to fetch RSS:', rssError);
+        newsContext = `Generate a highly detailed educational or financial guide about ${topic}.`;
       }
-    } else {
-      return NextResponse.json({ message: 'No pending keywords and Live News is disabled.', status: 'empty' });
     }
 
     // 2. Generate Content
@@ -121,16 +127,16 @@ export async function POST(request: Request) {
     const linkContext = officialLink ? `\nOFFICIAL LINK INSTRUCTION: The official website for this topic is: ${officialLink}. Please include this exact link in the table and content where appropriate.` : '';
 
     // ALWAYS use the Universal SEO Blog Prompt for EVERY topic
-    const articlePrompt = `तुम एक Professional SEO Content Writer, Education & Career Expert, Google Discover Friendly और AdSense Friendly Content Creator हो।
-नीचे दिए गए विषय (Topic) या Live News पर 100% यूनिक, Human-Written, SEO Optimized, Google Ranking Friendly और Publish Ready ब्लॉग तैयार करो।
+    const articlePrompt = `तुम एक Professional SEO Content Writer, Education & Career Expert, Technology Analyst, Google Discover Friendly और AdSense Friendly Content Creator हो।
+नीचे दिए गए विषय (Topic) या Live News पर 100% यूनिक, Human-Written, SEO Optimized, Google Ranking Friendly, Deep-Researched और Publish Ready ब्लॉग तैयार करो। विषय के सभी महत्वपूर्ण पहलुओं (विशेषकर Education, Career, Technology, Finance से जुड़े) को कवर करें, कुछ भी छूटना नहीं चाहिए।
 
 IMPORTANT TECHNICAL RULE: You MUST format your entire response in valid HTML (using <h2>, <h3>, <p>, <table>, <ul>, <li>). Do NOT wrap the response in markdown code blocks like \`\`\`html. The user instruction "HTML Code नहीं लिखना" means do not write visible code for the user to read, but you MUST use HTML tags internally for formatting so the website can render it properly.
 
 क्या करना है:
 1. SEO Title: आकर्षक, क्लिक योग्य और मुख्य Keyword वाला। (Do not use h1 tag, start with h2)
-2. Introduction: 150–250 शब्दों का परिचय, मुख्य Keyword के साथ।
+2. Introduction: 150–250 शब्दों का विस्तृत परिचय, मुख्य Keyword के साथ।
 3. महत्वपूर्ण जानकारी (Table): सबसे पहले एक Professional HTML <table> बनानी है, जिसमें निम्नलिखित 2 कॉलम (विवरण और जानकारी) और पंक्तियाँ (Rows) होनी चाहिए:
-Rows: विभाग/संस्था, पद/विषय, कुल पद, आवेदन का माध्यम, आधिकारिक वेबसाइट, ऑफिशियल नोटिफिकेशन, ऑनलाइन आवेदन, एडमिट कार्ड, रिजल्ट, आवेदन शुरू, अंतिम तिथि, परीक्षा तिथि, चयन प्रक्रिया, आयु सीमा (Age Limit), आवेदन शुल्क (Application Fee), योग्यता (Eligibility), नौकरी का स्थान।
+Rows: विभाग/संस्था, विषय/टॉपिक, मुख्य अपडेट, आधिकारिक वेबसाइट, महत्वपूर्ण तिथियां, अन्य विवरण (यदि लागू हो तो आवेदन शुल्क, आयु सीमा आदि)।
 
 Table Rules:
 - जहां आधिकारिक लिंक या वेबसाइट उपलब्ध हो वहां केवल "<a href='URL'>👉 Click Here</a>" लिखना।

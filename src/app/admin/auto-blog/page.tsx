@@ -155,8 +155,11 @@ export default function AutoBlogAdmin() {
                 onChange={e => setSettings({ ...settings, frequency: e.target.value })}
                 style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--color-border)' }}
               >
-                <option value="hourly">Hourly</option>
-                <option value="daily">Daily</option>
+                <option value="hourly">Every 1 Hour</option>
+                <option value="every2h">Every 2 Hours</option>
+                <option value="every4h">Every 4 Hours</option>
+                <option value="every12h">Every 12 Hours</option>
+                <option value="daily">Daily (Once a day)</option>
                 <option value="weekly">Weekly</option>
               </select>
             </div>

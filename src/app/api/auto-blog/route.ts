@@ -24,9 +24,30 @@ export async function POST(request: Request) {
     
     // Check if auto-blogging is active
     const settings = await prisma.autoBlogSettings.findUnique({ where: { id: 'default' } });
-    if (!settings?.isActive && !isCron) {
-      // If triggered manually from admin, we might bypass the isActive check, but let's assume it should be active.
-      // Actually, allow manual triggers even if paused.
+    if (!settings?.isActive && isCron) {
+      return NextResponse.json({ message: 'Auto-blog is paused' });
+    }
+
+    // Enforce Frequency if triggered by Cron
+    if (isCron && settings?.lastRunAt) {
+      const now = Date.now();
+      const lastRun = new Date(settings.lastRunAt).getTime();
+      const diffHours = (now - lastRun) / (1000 * 60 * 60);
+
+      let shouldRun = false;
+      if (settings.frequency === 'hourly' && diffHours >= 0.95) shouldRun = true;
+      else if (settings.frequency === 'every2h' && diffHours >= 1.95) shouldRun = true;
+      else if (settings.frequency === 'every4h' && diffHours >= 3.95) shouldRun = true;
+      else if (settings.frequency === 'every12h' && diffHours >= 11.95) shouldRun = true;
+      else if (settings.frequency === 'daily' && diffHours >= 23.5) shouldRun = true;
+      else if (settings.frequency === 'weekly' && diffHours >= 24 * 6.5) shouldRun = true;
+      
+      // If there's no frequency set, default to hourly
+      if (!settings.frequency) shouldRun = true;
+
+      if (!shouldRun) {
+        return NextResponse.json({ message: `Skipped: Next run scheduled based on ${settings.frequency} frequency`, status: 'skipped' });
+      }
     }
 
     const aiConfig = await getAIConfig();

@@ -2,6 +2,20 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getAIConfig, generateAIContent } from '@/lib/ai';
 
+async function searchOfficialWebsite(query: string) {
+  try {
+    const res = await fetch('https://html.duckduckgo.com/html/?q=' + encodeURIComponent(query + ' official website'), {
+      headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' }
+    });
+    const html = await res.text();
+    const match = html.match(/class="result__url" href="([^"]+)"/);
+    if(match && match[1]) {
+      return decodeURIComponent(match[1].replace('//duckduckgo.com/l/?uddg=', '').split('&')[0]);
+    }
+  } catch(e) {}
+  return null;
+}
+
 export async function POST(request: Request) {
   try {
     // Basic auth check (can be expanded for secure cron trigger)
@@ -102,8 +116,12 @@ export async function POST(request: Request) {
       ? `\nINTERNAL LINKING INSTRUCTION:\nHere are some existing articles on our website:\n${recentPosts.map(p => `- ${p.title} (URL: /blog/${p.slug})`).join('\n')}\nIf any of these articles are highly relevant to your content, please contextually hyperlink them within your paragraphs using <a href="URL">...</a>.` 
       : '';
 
+    // 2.6 Fetch Official Website Link (Web Search)
+    const officialLink = await searchOfficialWebsite(topic);
+    const linkContext = officialLink ? `\nOFFICIAL LINK INSTRUCTION: The official website for this topic is: ${officialLink}. Please include this exact link in the table and content where appropriate.` : '';
+
     // ALWAYS use the Universal SEO Blog Prompt for EVERY topic
-    const articlePrompt = `तुम एक Professional SEO Content Writer, Blogging Expert, Google Discover Friendly और AdSense Friendly Content Creator हो।
+    const articlePrompt = `तुम एक Professional SEO Content Writer, Education & Career Expert, Google Discover Friendly और AdSense Friendly Content Creator हो।
 नीचे दिए गए विषय (Topic) या Live News पर 100% यूनिक, Human-Written, SEO Optimized, Google Ranking Friendly और Publish Ready ब्लॉग तैयार करो।
 
 IMPORTANT TECHNICAL RULE: You MUST format your entire response in valid HTML (using <h2>, <h3>, <p>, <table>, <ul>, <li>). Do NOT wrap the response in markdown code blocks like \`\`\`html. The user instruction "HTML Code नहीं लिखना" means do not write visible code for the user to read, but you MUST use HTML tags internally for formatting so the website can render it properly.
@@ -112,18 +130,17 @@ IMPORTANT TECHNICAL RULE: You MUST format your entire response in valid HTML (us
 1. SEO Title: आकर्षक, क्लिक योग्य और मुख्य Keyword वाला। (Do not use h1 tag, start with h2)
 2. Introduction: 150–250 शब्दों का परिचय, मुख्य Keyword के साथ।
 3. महत्वपूर्ण जानकारी (Table): सबसे पहले एक Professional HTML <table> बनानी है, जिसमें निम्नलिखित 2 कॉलम (विवरण और जानकारी) और पंक्तियाँ (Rows) होनी चाहिए:
-Rows: विभाग/संस्था, पद/विषय, कुल पद, आवेदन का माध्यम, आधिकारिक वेबसाइट, ऑफिशियल नोटिफिकेशन, ऑनलाइन आवेदन, एडमिट कार्ड, रिजल्ट, आवेदन शुरू, अंतिम तिथि, परीक्षा तिथि, चयन प्रक्रिया, नौकरी का स्थान।
+Rows: विभाग/संस्था, पद/विषय, कुल पद, आवेदन का माध्यम, आधिकारिक वेबसाइट, ऑफिशियल नोटिफिकेशन, ऑनलाइन आवेदन, एडमिट कार्ड, रिजल्ट, आवेदन शुरू, अंतिम तिथि, परीक्षा तिथि, चयन प्रक्रिया, आयु सीमा (Age Limit), आवेदन शुल्क (Application Fee), योग्यता (Eligibility), नौकरी का स्थान।
 
 Table Rules:
 - जहां आधिकारिक लिंक या वेबसाइट उपलब्ध हो वहां केवल "<a href='URL'>👉 Click Here</a>" लिखना।
-- जहां जानकारी उपलब्ध न हो वहां "Coming Soon" लिखना।
+- जहां जानकारी उपलब्ध न हो वहां "Coming Soon" या "Not Specified" लिखना।
 - कोई गलत, अनुमानित या अपुष्ट जानकारी नहीं लिखनी।
 - यदि विषय से संबंधित कोई विशेष (extra) जानकारी हो, तो उसे भी Table में नई पंक्ति (Row) बनाकर लिखें।
-- जहां तक हो सके सही लिंक खोजें और Table में दें।
 4. मुख्य विवरण (Main Content): विषय की पूरी जानकारी सरल और विस्तृत भाषा में।
 5. योग्यता / शर्तें / आवश्यकताएं (यदि लागू हो)
-6. फायदे और नुकसान (Pros & Cons)
-7. प्रक्रिया (Step-by-Step Guide): अगर कोई प्रक्रिया है तो उसे चरणबद्ध तरीके से समझाएं।
+6. आयु सीमा और आवेदन शुल्क (Age Limit & Fees)
+7. प्रक्रिया (Step-by-Step Guide): अगर कोई फॉर्म भरने की प्रक्रिया है तो उसे चरणबद्ध तरीके से समझाएं।
 8. FAQ: 8–15 प्रश्न जिनका उत्तर पहले नहीं दिया गया हो। उत्तर बिल्कुल नहीं लिखना। सभी प्रश्न <ul><li><a href="#">👉 [Question]? (Click Here)</a></li></ul> के रूप में लिखने हैं। 
 9. Conclusion: 100–150 शब्दों का निष्कर्ष।
 
@@ -133,7 +150,7 @@ SEO Rules:
 - Keyword Stuffing नहीं। छोटे Paragraph।
 - ब्लॉग कम से कम 1500–2000+ शब्दों का होना चाहिए (Make it extremely detailed).
 - 100% Original and Human-Written in Hindi/Hinglish.
-- किसी भी जानकारी का अनुमान नहीं लगाना।${internalLinksContext}
+- किसी भी जानकारी का अनुमान नहीं लगाना।${internalLinksContext}${linkContext}
 
 Topic: ${title}
 News Context: ${newsContext}
@@ -270,13 +287,21 @@ Keywords: [kw]`;
           
           if (parsedKeys.twitter) {
             console.log(`[Twitter Auto-Post] Sending tweet... Message: ${message}`);
-            // Telegram Bot API Integration (re-using twitter key for telegram token for simplicity or actual Telegram)
+            // Telegram Bot API Integration
             if (parsedKeys.telegramToken && parsedKeys.telegramChatId) {
-                fetch(`https://api.telegram.org/bot${parsedKeys.telegramToken}/sendMessage`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ chat_id: parsedKeys.telegramChatId, text: message })
-                }).catch(console.error);
+                if (post.featuredImage) {
+                    fetch(`https://api.telegram.org/bot${parsedKeys.telegramToken}/sendPhoto`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ chat_id: parsedKeys.telegramChatId, photo: post.featuredImage, caption: message })
+                    }).catch(console.error);
+                } else {
+                    fetch(`https://api.telegram.org/bot${parsedKeys.telegramToken}/sendMessage`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ chat_id: parsedKeys.telegramChatId, text: message })
+                    }).catch(console.error);
+                }
             }
           }
           

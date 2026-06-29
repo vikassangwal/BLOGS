@@ -94,8 +94,28 @@ export default function BlogPostPage({ params }: { params: Promise<{ slug: strin
       )}
 
       <article style={{ maxWidth: '800px', margin: '0 auto', padding: '4rem 2rem' }}>
-        {/* Translate Toolbar */}
-        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1rem' }}>
+        {/* Translate and TTS Toolbar */}
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1rem', gap: '1rem', flexWrap: 'wrap' }}>
+          <button
+            onClick={() => {
+              if ('speechSynthesis' in window) {
+                if (window.speechSynthesis.speaking) {
+                  window.speechSynthesis.cancel();
+                  return;
+                }
+                const text = contentHtml.replace(/<[^>]+>/g, '');
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = post.content?.includes('है') ? 'hi-IN' : 'en-US';
+                window.speechSynthesis.speak(utterance);
+              } else {
+                alert('Text-to-Speech is not supported in your browser.');
+              }
+            }}
+            style={{ padding: '0.4rem 0.8rem', borderRadius: '8px', background: 'linear-gradient(135deg, #10b981, #059669)', border: 'none', color: '#fff', cursor: 'pointer', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+          >
+            🔊 Listen to Article
+          </button>
+          
           <select 
             onChange={(e) => handleTranslate(e.target.value)}
             disabled={isTranslating}
@@ -206,6 +226,25 @@ export default function BlogPostPage({ params }: { params: Promise<{ slug: strin
             <p style={{ fontSize: '0.9rem', color: 'var(--color-text-secondary)', lineHeight: 1.6, margin: 0 }}>
               {post.author?.name ? `${post.author.name} is a senior editor and subject matter expert.` : 'The Our Blog Team consists of industry experts and AI specialists dedicated to bringing you the most accurate and up-to-date information.'}
             </p>
+          </div>
+        </div>
+
+        {/* Social Share Buttons */}
+        <div style={{ marginTop: '2rem', padding: '1.5rem', background: 'var(--color-bg-secondary)', borderRadius: '16px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
+          <h4 style={{ margin: 0, fontWeight: 700, fontSize: '1.1rem' }}>Share this article</h4>
+          <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center' }}>
+            <a href={`https://api.whatsapp.com/send?text=${encodeURIComponent(post.title + ' ' + (typeof window !== 'undefined' ? window.location.href : ''))}`} target="_blank" rel="noopener noreferrer" style={{ background: '#25D366', color: 'white', padding: '0.6rem 1.2rem', borderRadius: '8px', textDecoration: 'none', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              📱 WhatsApp
+            </a>
+            <a href={`https://t.me/share/url?url=${encodeURIComponent(typeof window !== 'undefined' ? window.location.href : '')}&text=${encodeURIComponent(post.title)}`} target="_blank" rel="noopener noreferrer" style={{ background: '#0088cc', color: 'white', padding: '0.6rem 1.2rem', borderRadius: '8px', textDecoration: 'none', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              ✈️ Telegram
+            </a>
+            <a href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(typeof window !== 'undefined' ? window.location.href : '')}`} target="_blank" rel="noopener noreferrer" style={{ background: '#1877F2', color: 'white', padding: '0.6rem 1.2rem', borderRadius: '8px', textDecoration: 'none', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              📘 Facebook
+            </a>
+            <a href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(post.title)}&url=${encodeURIComponent(typeof window !== 'undefined' ? window.location.href : '')}`} target="_blank" rel="noopener noreferrer" style={{ background: '#1DA1F2', color: 'white', padding: '0.6rem 1.2rem', borderRadius: '8px', textDecoration: 'none', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              🐦 Twitter
+            </a>
           </div>
         </div>
 

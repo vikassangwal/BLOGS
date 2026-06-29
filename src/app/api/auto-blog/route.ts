@@ -286,23 +286,50 @@ Keywords: [kw]`;
           const message = `New Post: ${post.title}!\n\nRead more: ${postUrl}`;
           
           if (parsedKeys.twitter) {
-            console.log(`[Twitter Auto-Post] Sending tweet... Message: ${message}`);
-            // Telegram Bot API Integration
-            if (parsedKeys.telegramToken && parsedKeys.telegramChatId) {
-                if (post.featuredImage) {
-                    fetch(`https://api.telegram.org/bot${parsedKeys.telegramToken}/sendPhoto`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ chat_id: parsedKeys.telegramChatId, photo: post.featuredImage, caption: message })
-                    }).catch(console.error);
-                } else {
-                    fetch(`https://api.telegram.org/bot${parsedKeys.telegramToken}/sendMessage`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ chat_id: parsedKeys.telegramChatId, text: message })
+            console.log(`[Twitter Auto-Post] Sending tweet...`);
+            fetch('https://api.twitter.com/2/tweets', {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${parsedKeys.twitter}`
+                },
+                body: JSON.stringify({ text: message })
+            }).catch(console.error);
+          }
+          
+          if (parsedKeys.instagram && parsedKeys.instagramAccountId && post.featuredImage) {
+            console.log(`[Instagram Auto-Post] Sending image...`);
+            // Step 1: Create Media Container
+            fetch(`https://graph.facebook.com/v19.0/${parsedKeys.instagramAccountId}/media?image_url=${encodeURIComponent(post.featuredImage)}&caption=${encodeURIComponent(message)}&access_token=${parsedKeys.instagram}`, {
+                method: 'POST'
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data && data.id) {
+                    // Step 2: Publish Media Container
+                    fetch(`https://graph.facebook.com/v19.0/${parsedKeys.instagramAccountId}/media_publish?creation_id=${data.id}&access_token=${parsedKeys.instagram}`, {
+                        method: 'POST'
                     }).catch(console.error);
                 }
-            }
+            })
+            .catch(console.error);
+          }
+
+          // Telegram Bot API Integration
+          if (parsedKeys.telegramToken && parsedKeys.telegramChatId) {
+              if (post.featuredImage) {
+                  fetch(`https://api.telegram.org/bot${parsedKeys.telegramToken}/sendPhoto`, {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ chat_id: parsedKeys.telegramChatId, photo: post.featuredImage, caption: message })
+                  }).catch(console.error);
+              } else {
+                  fetch(`https://api.telegram.org/bot${parsedKeys.telegramToken}/sendMessage`, {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ chat_id: parsedKeys.telegramChatId, text: message })
+                  }).catch(console.error);
+              }
           }
           
           if (parsedKeys.onesignalAppId && parsedKeys.onesignalApiKey) {

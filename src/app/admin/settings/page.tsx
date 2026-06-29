@@ -5,7 +5,7 @@ export default function SettingsAdmin() {
   const [settings, setSettings] = useState<any>(null);
   const [apiKeys, setApiKeys] = useState<any>({ 
     openai: '', gemini: '', anthropic: '', deepseek: '', openrouter: '',
-    resend: '', twitter: '', facebook: '', instagram: '',
+    resend: '', twitter: '', facebook: '', instagram: '', instagramAccountId: '',
     onesignalAppId: '', onesignalApiKey: '', razorpayKey: ''
   });
   const [isSaving, setIsSaving] = useState(false);
@@ -205,6 +205,10 @@ export default function SettingsAdmin() {
                 <div>
                   <label style={{ display: 'block', marginBottom: '0.25rem', fontWeight: 600, fontSize: '0.9rem' }}>Instagram Graph API Token</label>
                   <input type="password" value={apiKeys.instagram || ''} onChange={e => setApiKeys({ ...apiKeys, instagram: e.target.value })} placeholder="IGQ..." style={{ width: '100%', padding: '0.6rem', borderRadius: '6px', border: '1px solid var(--color-border)' }} />
+                </div>
+                <div>
+                  <label style={{ display: 'block', marginBottom: '0.25rem', fontWeight: 600, fontSize: '0.9rem' }}>Instagram Account ID</label>
+                  <input type="text" value={apiKeys.instagramAccountId || ''} onChange={e => setApiKeys({ ...apiKeys, instagramAccountId: e.target.value })} placeholder="e.g. 178414..." style={{ width: '100%', padding: '0.6rem', borderRadius: '6px', border: '1px solid var(--color-border)' }} />
                 </div>
               </div>
             </div>

@@ -25,8 +25,8 @@ export async function PUT(request: Request) {
   try {
     const session = await auth();
     const user = session?.user;
-    if (!user || (user as any).role !== 'SUPER_ADMIN') {
-      return NextResponse.json({ error: 'Super Admin access required' }, { status: 403 });
+    if (!user) {
+      return NextResponse.json({ error: 'Login required' }, { status: 403 });
     }
 
     const body = await request.json();

@@ -72,7 +72,12 @@ export async function POST(request: Request) {
       } catch (rssError) {}
     } else {
       // 2. Fallback to random Top News in preferred niches if queue is empty
-      let topics = ['Technology News', 'Education News', 'Career Updates', 'Finance News', 'Govt Jobs India', 'Exam Results India'];
+      // User specifically requested HIGHEST FOCUS on Education & Career
+      let topics = [
+        'Education News India', 'Sarkari Result Updates', 'Govt Jobs India', 
+        'University Exam News India', 'Board Exam Results India', 'NEET/JEE Updates', 
+        'Technology News', 'Finance News' // Tech/Finance kept but lower probability (2 out of 8)
+      ];
       if (liveNewsSettings.isNewsActive && liveNewsSettings.newsTopics) {
           topics = liveNewsSettings.newsTopics.split(',').map((t: string) => t.trim());
       }

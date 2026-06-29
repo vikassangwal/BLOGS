@@ -12,7 +12,7 @@ export async function loginUser(formData: FormData) {
     await signIn('credentials', {
       email,
       password,
-      redirect: false,
+      redirectTo: '/admin',
     });
     
     return { success: true };

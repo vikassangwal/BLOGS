@@ -18,14 +18,28 @@ export default function LoginPage() {
     setError('');
  
     const formData = new FormData(e.currentTarget);
-    const result = await loginUser(formData);
- 
-    if (result && result.error) {
-      setError(result.error);
+    const email = formData.get('email');
+    const password = formData.get('password');
+
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.error || 'Login failed');
+        setLoading(false);
+      } else {
+        // Success! The API sets the httpOnly cookie.
+        window.location.href = '/admin'; // Force full reload to update layouts
+      }
+    } catch (err) {
+      setError('Something went wrong. Please try again.');
       setLoading(false);
-    } else {
-      router.push('/admin'); // Redirect to admin dashboard
-      router.refresh();
     }
   }
  

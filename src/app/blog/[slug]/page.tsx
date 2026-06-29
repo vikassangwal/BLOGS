@@ -17,6 +17,7 @@ export default function BlogPostPage({ params }: { params: Promise<{ slug: strin
   const [translatedHtml, setTranslatedHtml] = useState<string | null>(null);
   const [isTranslating, setIsTranslating] = useState(false);
   const [isUnlocked, setIsUnlocked] = useState(false);
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
 
   useEffect(() => {
     // Fetch post, ads, and related posts in parallel
@@ -57,6 +58,79 @@ export default function BlogPostPage({ params }: { params: Promise<{ slug: strin
       alert('Translation failed.');
     } finally {
       setIsTranslating(false);
+    }
+  };
+
+  const handlePayment = async () => {
+    setIsProcessingPayment(true);
+    try {
+      // 1. Create order
+      const orderRes = await fetch('/api/payments/razorpay', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ postId: post.id, amount: 99 }) // ₹99 premium access
+      });
+      const orderData = await orderRes.json();
+
+      if (orderData.error) {
+        alert(orderData.error);
+        setIsProcessingPayment(false);
+        return;
+      }
+
+      // 2. Initialize Razorpay checkout
+      const options = {
+        key: orderData.keyId,
+        amount: orderData.amount,
+        currency: orderData.currency,
+        name: 'Our Blog Premium',
+        description: 'Unlock Premium Article',
+        order_id: orderData.id,
+        handler: async function (response: any) {
+          // 3. Verify payment
+          try {
+            const verifyRes = await fetch('/api/payments/verify', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+                postId: post.id
+              })
+            });
+            const verifyData = await verifyRes.json();
+            if (verifyData.success) {
+              setIsUnlocked(true);
+              alert('Payment Successful! Content unlocked.');
+            } else {
+              alert('Payment verification failed.');
+            }
+          } catch (e) {
+            alert('Verification Error');
+          }
+        },
+        prefill: {
+          name: 'Reader',
+          email: 'reader@example.com',
+          contact: ''
+        },
+        theme: {
+          color: '#f59e0b'
+        }
+      };
+
+      const rzp1 = new (window as any).Razorpay(options);
+      rzp1.on('payment.failed', function (response: any) {
+        alert(response.error.description);
+      });
+      rzp1.open();
+
+    } catch (err) {
+      console.error(err);
+      alert('Could not initiate payment.');
+    } finally {
+      setIsProcessingPayment(false);
     }
   };
 
@@ -192,10 +266,11 @@ export default function BlogPostPage({ params }: { params: Promise<{ slug: strin
                 <h3 style={{ fontSize: '1.5rem', fontWeight: 800, margin: '0 0 1rem 0' }}>👑 Premium Content</h3>
                 <p style={{ color: 'var(--color-text-secondary)', marginBottom: '1.5rem' }}>This article is exclusive to premium subscribers. Unlock it to read the rest.</p>
                 <button 
-                  onClick={() => setIsUnlocked(true)} 
+                  onClick={handlePayment} 
+                  disabled={isProcessingPayment}
                   className="btn-primary" style={{ width: '100%', background: 'linear-gradient(135deg, #f59e0b, #d97706)', border: 'none', fontWeight: 800 }}
                 >
-                  Unlock via Razorpay (Demo)
+                  {isProcessingPayment ? 'Processing...' : 'Unlock via Razorpay (₹99)'}
                 </button>
               </div>
             </div>

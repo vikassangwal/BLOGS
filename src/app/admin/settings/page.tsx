@@ -6,7 +6,7 @@ export default function SettingsAdmin() {
   const [apiKeys, setApiKeys] = useState<any>({ 
     openai: '', gemini: '', anthropic: '', deepseek: '', openrouter: '',
     resend: '', twitter: '', facebook: '', instagram: '', instagramAccountId: '',
-    onesignalAppId: '', onesignalApiKey: '', razorpayKey: ''
+    onesignalAppId: '', onesignalApiKey: '', razorpayKey: '', razorpaySecret: ''
   });
   const [isSaving, setIsSaving] = useState(false);
   const [activeTab, setActiveTab] = useState('general');
@@ -178,7 +178,9 @@ export default function SettingsAdmin() {
               <h3 style={{ margin: '0 0 1rem 0', fontSize: '1.2rem', fontWeight: 700 }}>Premium Content (Razorpay)</h3>
               <p style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)', marginBottom: '1rem' }}>Used to unlock premium content for blogs with the "Premium" tag.</p>
               <label style={{ display: 'block', marginBottom: '0.25rem', fontWeight: 600, fontSize: '0.9rem' }}>Razorpay Key ID</label>
-              <input type="password" value={apiKeys.razorpayKey || ''} onChange={e => setApiKeys({ ...apiKeys, razorpayKey: e.target.value })} placeholder="rzp_..." style={{ width: '100%', padding: '0.6rem', borderRadius: '6px', border: '1px solid var(--color-border)' }} />
+              <input type="text" value={apiKeys.razorpayKey || ''} onChange={e => setApiKeys({ ...apiKeys, razorpayKey: e.target.value })} placeholder="rzp_..." style={{ width: '100%', padding: '0.6rem', borderRadius: '6px', border: '1px solid var(--color-border)', marginBottom: '1rem' }} />
+              <label style={{ display: 'block', marginBottom: '0.25rem', fontWeight: 600, fontSize: '0.9rem' }}>Razorpay Key Secret</label>
+              <input type="password" value={apiKeys.razorpaySecret || ''} onChange={e => setApiKeys({ ...apiKeys, razorpaySecret: e.target.value })} placeholder="secret..." style={{ width: '100%', padding: '0.6rem', borderRadius: '6px', border: '1px solid var(--color-border)' }} />
             </div>
 
             <hr style={{ border: 'none', borderTop: '1px solid var(--color-border)' }} />

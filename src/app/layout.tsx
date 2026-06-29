@@ -66,6 +66,7 @@ export default async function RootLayout({
           src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"
           strategy="lazyOnload"
         />
+        <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
         <Script id="google-translate-init" strategy="lazyOnload">
           {`
             window.googleTranslateElementInit = function() {

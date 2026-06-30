@@ -1,17 +1,16 @@
-import { NextResponse } from 'next/server';
+import { NextResponse, NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { auth } from '@/auth';
+import { getToken } from 'next-auth/jwt';
 
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
   try {
-    const session = await auth();
-    const user = session?.user;
-
+    const token = await getToken({ req: request, secret: process.env.AUTH_SECRET });
+    
     const settings = await prisma.siteSettings.findUnique({ where: { id: 'default' } });
     if (!settings) return NextResponse.json({});
 
     // Mask API key if not super admin
-    if (!user || (user as any).role !== 'SUPER_ADMIN') {
+    if (!token || token.role !== 'SUPER_ADMIN') {
       settings.aiApiKey = settings.aiApiKey ? '********' : '';
     }
 
@@ -21,10 +20,10 @@ export async function GET(request: Request) {
   }
 }
 
-export const PUT = auth(async (request: any) => {
+export async function PUT(request: NextRequest) {
   try {
-    const user = request.auth?.user;
-    if (!user) {
+    const token = await getToken({ req: request, secret: process.env.AUTH_SECRET });
+    if (!token) {
       return NextResponse.json({ error: 'Login required' }, { status: 403 });
     }
 
@@ -59,4 +58,4 @@ export const PUT = auth(async (request: any) => {
     console.error('Settings Update Error:', error);
     return NextResponse.json({ error: error.message || 'Failed to update settings' }, { status: 500 });
   }
-});
+}

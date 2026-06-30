@@ -79,6 +79,23 @@ export async function getAIConfig(): Promise<AIConfig | null> {
   }
 }
 
+async function fetchWithRetry(url: string, options: any, maxRetries = 3): Promise<Response> {
+  let attempt = 0;
+  while (attempt < maxRetries) {
+    const res = await fetch(url, options);
+    if (res.status === 429) {
+      attempt++;
+      if (attempt >= maxRetries) return res;
+      const waitTime = Math.pow(2, attempt) * 1000; // 2s, 4s, 8s
+      console.warn(`[AI API] Rate limit hit (429). Retrying in ${waitTime}ms... (Attempt ${attempt}/${maxRetries})`);
+      await new Promise(resolve => setTimeout(resolve, waitTime));
+    } else {
+      return res;
+    }
+  }
+  return fetch(url, options);
+}
+
 /**
  * Call AI API to generate content
  */
@@ -90,7 +107,7 @@ export async function generateAIContent(
 ): Promise<string> {
   
   if (config.provider === 'openai') {
-    const res = await fetch('https://api.openai.com/v1/chat/completions', {
+    const res = await fetchWithRetry('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -112,7 +129,7 @@ export async function generateAIContent(
   }
   
   if (config.provider === 'gemini') {
-    const res = await fetch(
+    const res = await fetchWithRetry(
       `https://generativelanguage.googleapis.com/v1beta/models/${config.model}:generateContent?key=${config.apiKey}`,
       {
         method: 'POST',
@@ -131,7 +148,7 @@ export async function generateAIContent(
   }
   
   if (config.provider === 'anthropic') {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
+    const res = await fetchWithRetry('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -151,7 +168,7 @@ export async function generateAIContent(
   }
   
   if (config.provider === 'deepseek') {
-    const res = await fetch('https://api.deepseek.com/chat/completions', {
+    const res = await fetchWithRetry('https://api.deepseek.com/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -173,7 +190,7 @@ export async function generateAIContent(
   }
   
   if (config.provider === 'openrouter') {
-    const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+    const res = await fetchWithRetry('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

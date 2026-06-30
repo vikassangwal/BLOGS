@@ -440,13 +440,29 @@ function BlogEditor() {
           <div style={{ background: 'var(--color-bg-primary)', width: '100%', maxWidth: '800px', height: '100%', maxHeight: '90vh', borderRadius: '16px', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
             <div style={{ padding: '1.5rem', borderBottom: '1px solid var(--color-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <h2 style={{ margin: 0 }}>Preview</h2>
-              <button onClick={() => setIsPreviewOpen(false)} style={{ background: 'none', border: 'none', color: 'var(--color-text-primary)', fontSize: '1.5rem', cursor: 'pointer' }}>✕</button>
+              <div>
+                <button onClick={() => setIsPreviewOpen(false)} className="btn-primary" style={{ marginRight: '1rem', padding: '0.4rem 1rem', fontSize: '0.9rem' }}>✏️ Edit Post</button>
+                <button onClick={() => setIsPreviewOpen(false)} style={{ background: 'none', border: 'none', color: 'var(--color-text-primary)', fontSize: '1.5rem', cursor: 'pointer' }}>✕</button>
+              </div>
             </div>
             <div style={{ flex: 1, overflowY: 'auto', padding: '2rem' }}>
               <h1 style={{ fontSize: '2.5rem', fontWeight: 800, marginBottom: '1rem' }}>{formData.title || 'Untitled Post'}</h1>
               {formData.subtitle && <h2 style={{ fontSize: '1.5rem', color: 'var(--color-text-secondary)', marginBottom: '1rem' }}>{formData.subtitle}</h2>}
               {formData.featuredImage && <img src={formData.featuredImage} alt="Featured" style={{ width: '100%', borderRadius: '12px', marginBottom: '2rem' }} />}
-              <div dangerouslySetInnerHTML={{ __html: formData.content }} className="blog-content" style={{ fontSize: '1.1rem', lineHeight: 1.8 }} />
+              <style>{`
+                .admin-preview-content a::after {
+                  content: " (" attr(href) ")";
+                  font-size: 0.85em;
+                  color: #0ea5e9;
+                  margin-left: 4px;
+                  font-family: monospace;
+                  word-break: break-all;
+                  background: rgba(14, 165, 233, 0.1);
+                  padding: 2px 4px;
+                  border-radius: 4px;
+                }
+              `}</style>
+              <div dangerouslySetInnerHTML={{ __html: formData.content }} className="blog-content admin-preview-content" style={{ fontSize: '1.1rem', lineHeight: 1.8 }} />
             </div>
           </div>
         </div>

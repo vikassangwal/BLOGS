@@ -59,7 +59,7 @@ export default function GlobalHeader({ siteName }: { siteName?: string }) {
               );
             })}
           </nav>
-          <div id="google_translate_element" className="hidden sm:block [&>div]:!mb-0 scale-90 origin-right"></div>
+          <div id="google_translate_element" className="[&>div]:!mb-0 scale-75 sm:scale-90 origin-right"></div>
           <ThemeToggle />
         </div>
       </div>

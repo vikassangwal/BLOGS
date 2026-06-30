@@ -2,9 +2,12 @@ import { NextResponse, NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getToken } from 'next-auth/jwt';
 
+// Must match the exact same secret chain as auth.ts
+const AUTH_SECRET = process.env.AUTH_SECRET || process.env.JWT_SECRET || 'fallback-secret-for-dev';
+
 export async function GET(request: NextRequest) {
   try {
-    const token = await getToken({ req: request, secret: process.env.AUTH_SECRET });
+    const token = await getToken({ req: request, secret: AUTH_SECRET });
     
     const settings = await prisma.siteSettings.findUnique({ where: { id: 'default' } });
     if (!settings) return NextResponse.json({});
@@ -22,7 +25,7 @@ export async function GET(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   try {
-    const token = await getToken({ req: request, secret: process.env.AUTH_SECRET });
+    const token = await getToken({ req: request, secret: AUTH_SECRET });
     if (!token) {
       return NextResponse.json({ error: 'Login required' }, { status: 403 });
     }

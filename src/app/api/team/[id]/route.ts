@@ -1,8 +1,8 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { auth } from '@/auth';
+import { verifyToken } from '@/lib/auth';
 
-export async function GET(request: Request, context: { params: Promise<{ id: string }> }) {
+export async function GET(request: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
     const params = await context.params;
     const member = await prisma.teamMember.findUnique({
@@ -15,10 +15,10 @@ export async function GET(request: Request, context: { params: Promise<{ id: str
   }
 }
 
-export async function PUT(request: Request, context: { params: Promise<{ id: string }> }) {
+export async function PUT(request: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
-    const session = await auth();
-    const user = session?.user;
+    const authToken = request.cookies.get('automata_auth_token')?.value;
+    const user = authToken ? verifyToken(authToken) : null;
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const params = await context.params;
@@ -36,10 +36,10 @@ export async function PUT(request: Request, context: { params: Promise<{ id: str
   }
 }
 
-export async function DELETE(request: Request, context: { params: Promise<{ id: string }> }) {
+export async function DELETE(request: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
-    const session = await auth();
-    const user = session?.user;
+    const authToken = request.cookies.get('automata_auth_token')?.value;
+    const user = authToken ? verifyToken(authToken) : null;
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const params = await context.params;

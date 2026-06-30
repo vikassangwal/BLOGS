@@ -41,10 +41,14 @@ export default function SettingsAdmin() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
-      if (res.ok) alert('Settings saved successfully');
-      else alert('Failed to save settings. You must be a Super Admin.');
-    } catch (err) {
-      alert('An error occurred');
+      const data = await res.json();
+      if (res.ok) {
+        alert('Settings saved successfully');
+      } else {
+        alert('Error: ' + (data.error || 'Failed to save settings'));
+      }
+    } catch (err: any) {
+      alert('An error occurred: ' + err.message);
     } finally {
       setIsSaving(false);
     }

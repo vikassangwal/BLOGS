@@ -153,9 +153,9 @@ export default function BlogListingPage() {
         ) : (
           <>
             <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
-              gap: '2rem'
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '1.5rem'
             }}>
               {posts.map((post, idx) => (
                 <Link
@@ -164,43 +164,53 @@ export default function BlogListingPage() {
                   style={{ textDecoration: 'none', color: 'inherit' }}
                 >
                   <article className="minimal-card" style={{
-                    height: '100%',
                     display: 'flex',
-                    flexDirection: 'column',
+                    flexDirection: 'row', // Horizontal layout
+                    alignItems: 'center',
                     animation: `slideUp 0.4s ease forwards ${idx * 0.1}s`,
                     opacity: 0,
                     transform: 'translateY(20px)',
                     overflow: 'hidden',
                     background: 'rgba(255,255,255,0.03)',
-                    borderRadius: '20px',
+                    borderRadius: '16px',
                     border: '1px solid var(--color-border)',
-                    transition: 'transform 0.3s, box-shadow 0.3s'
+                    transition: 'transform 0.3s, box-shadow 0.3s',
+                    padding: '1rem',
+                    gap: '1.5rem'
                   }}
                   onMouseEnter={e => {
-                    e.currentTarget.style.transform = 'translateY(-8px)';
-                    e.currentTarget.style.boxShadow = '0 20px 40px rgba(0,0,0,0.08)';
+                    e.currentTarget.style.transform = 'translateY(-4px)';
+                    e.currentTarget.style.boxShadow = '0 10px 30px rgba(0,0,0,0.08)';
                   }}
                   onMouseLeave={e => {
                     e.currentTarget.style.transform = 'translateY(0)';
                     e.currentTarget.style.boxShadow = 'none';
                   }}
                   >
-                    {/* Image */}
-                    <div style={{ height: '200px', position: 'relative', background: 'var(--color-bg-secondary)' }}>
+                    {/* Image Thumbnail */}
+                    <div style={{ 
+                      width: '180px', 
+                      height: '120px', 
+                      position: 'relative', 
+                      background: 'var(--color-bg-secondary)',
+                      borderRadius: '12px',
+                      overflow: 'hidden',
+                      flexShrink: 0
+                    }}>
                       {post.featuredImage ? (
-                        <Image src={post.featuredImage} alt={post.title} fill  sizes="(max-width: 768px) 100vw, 50vw" />
+                        <Image src={post.featuredImage} alt={post.title} fill style={{ objectFit: 'cover' }} sizes="(max-width: 768px) 150px, 180px" />
                       ) : (
                         <div style={{ width: '100%', height: '100%', background: 'linear-gradient(135deg, var(--color-accent), #002244)', opacity: 0.8 }} />
                       )}
                       {post.tags?.[0] && (
                         <span style={{
                           position: 'absolute',
-                          top: '1rem',
-                          right: '1rem',
+                          top: '0.5rem',
+                          right: '0.5rem',
                           background: 'rgba(0,0,0,0.6)',
-                          padding: '0.4rem 0.8rem',
-                          borderRadius: '20px',
-                          fontSize: '0.75rem',
+                          padding: '0.2rem 0.5rem',
+                          borderRadius: '10px',
+                          fontSize: '0.65rem',
                           fontWeight: 600,
                           backdropFilter: 'blur(10px)',
                           color: '#fff'
@@ -211,20 +221,16 @@ export default function BlogListingPage() {
                     </div>
 
                     {/* Content */}
-                    <div style={{ padding: '1.5rem', flex: 1, display: 'flex', flexDirection: 'column' }}>
-                      <p style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', marginBottom: '0.5rem' }}>
+                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                      <p style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', marginBottom: '0.3rem' }}>
                         {new Date(post.publishedAt || post.createdAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
                       </p>
-                      <h2 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '0.8rem', lineHeight: 1.4 }}>
+                      <h2 style={{ fontSize: '1.2rem', fontWeight: 700, marginBottom: '0.5rem', lineHeight: 1.3 }}>
                         {post.title}
                       </h2>
-                      <p style={{ fontSize: '0.9rem', color: 'var(--color-text-secondary)', lineHeight: 1.6, flex: 1 }}>
+                      <p style={{ fontSize: '0.9rem', color: 'var(--color-text-secondary)', lineHeight: 1.5, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                         {post.excerpt}
                       </p>
-                      
-                      <div style={{ marginTop: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--color-accent)', fontWeight: 600, fontSize: '0.9rem' }}>
-                        Read Article <span style={{ transition: 'transform 0.2s' }}>→</span>
-                      </div>
                     </div>
                   </article>
                 </Link>

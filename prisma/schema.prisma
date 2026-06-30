@@ -190,6 +190,8 @@ model AutoBlogSettings {
   imageSource     String   @default("unsplash")  // unsplash, ai, none
   autoPublish     Boolean  @default(true)
   embedYoutube    Boolean  @default(true)
+  isNewsActive    Boolean  @default(false)
+  newsTopics      String?  @db.Text
   updatedAt       DateTime @updatedAt
 }
 

@@ -79,14 +79,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'AI Provider not configured.' }, { status: 400 });
     }
 
-    // Check SiteSettings for Live News Settings
+    // Check SiteSettings for API Keys (live news settings moved to AutoBlogSettings)
     const siteSettings = await prisma.siteSettings.findUnique({ where: { id: 'default' } });
-    let liveNewsSettings: any = {};
-    try {
-      if (siteSettings?.aiApiKey?.startsWith('{')) {
-        liveNewsSettings = JSON.parse(siteSettings.aiApiKey);
-      }
-    } catch(e) {}
 
     let topic = 'Business';
     let newsContext = '';
@@ -123,8 +117,8 @@ export async function POST(request: Request) {
         'University Exam News India', 'Board Exam Results India', 'NEET/JEE Updates', 
         'Technology News', 'Finance News' // Tech/Finance kept but lower probability (2 out of 8)
       ];
-      if (liveNewsSettings.isNewsActive && liveNewsSettings.newsTopics) {
-          topics = liveNewsSettings.newsTopics.split(',').map((t: string) => t.trim());
+      if (settings?.isNewsActive && settings?.newsTopics) {
+          topics = settings.newsTopics.split(',').map((t: string) => t.trim());
       }
       topic = topics[Math.floor(Math.random() * topics.length)];
       

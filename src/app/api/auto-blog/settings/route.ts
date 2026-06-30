@@ -24,7 +24,7 @@ export async function PUT(request: NextRequest) {
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const body = await request.json();
-    const { isActive, frequency, maxPostsPerRun, maxPostsPerDay, imageSource, autoPublish, embedYoutube } = body;
+    const { isActive, frequency, maxPostsPerRun, maxPostsPerDay, imageSource, autoPublish, embedYoutube, isNewsActive, newsTopics } = body;
 
     const updated = await prisma.autoBlogSettings.upsert({
       where: { id: 'default' },
@@ -36,6 +36,8 @@ export async function PUT(request: NextRequest) {
         imageSource,
         autoPublish: autoPublish !== undefined ? autoPublish : undefined,
         embedYoutube: embedYoutube !== undefined ? embedYoutube : undefined,
+        isNewsActive: isNewsActive !== undefined ? isNewsActive : undefined,
+        newsTopics,
       },
       create: {
         id: 'default',
@@ -46,6 +48,8 @@ export async function PUT(request: NextRequest) {
         imageSource: imageSource || 'unsplash',
         autoPublish: autoPublish !== undefined ? autoPublish : true,
         embedYoutube: embedYoutube !== undefined ? embedYoutube : true,
+        isNewsActive: !!isNewsActive,
+        newsTopics: newsTopics || '',
       }
     });
 

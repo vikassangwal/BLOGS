@@ -9,9 +9,10 @@ interface Message {
 interface BlogChatbotProps {
   postTitle?: string;
   postId?: string;
+  postTags?: any[];
 }
 
-export default function BlogChatbot({ postTitle, postId }: BlogChatbotProps) {
+export default function BlogChatbot({ postTitle, postId, postTags }: BlogChatbotProps) {
   const [isOpen, setIsOpen] = useState(false);
   const initialMsg = postTitle 
     ? `Hi! I am the AI assistant for "${postTitle}". What would you like to know?` 
@@ -26,6 +27,24 @@ export default function BlogChatbot({ postTitle, postId }: BlogChatbotProps) {
   const chatRef = useRef<HTMLDivElement>(null);
 
   const [isDismissed, setIsDismissed] = useState(false);
+
+  // Determine WhatsApp Group Link
+  let whatsappLink = '#'; // Update with actual generic group link
+  let groupName = 'Join Our WhatsApp Group';
+  
+  if (postTags && postTags.length > 0) {
+    const tagNames = postTags.map(t => (t.tag?.name || t.name || '').toLowerCase());
+    if (tagNames.some(t => t.includes('finance') || t.includes('earning') || t.includes('money'))) {
+      whatsappLink = '#finance-link'; // Update with actual finance group link
+      groupName = 'Join Finance Group';
+    } else if (tagNames.some(t => t.includes('education') || t.includes('study') || t.includes('career') || t.includes('exam') || t.includes('job'))) {
+      whatsappLink = '#study-link'; // Update with actual study group link
+      groupName = 'Join Study & Jobs Group';
+    } else if (tagNames.some(t => t.includes('tech'))) {
+      whatsappLink = '#tech-link'; // Update with actual tech group link
+      groupName = 'Join Tech Updates Group';
+    }
+  }
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -81,53 +100,83 @@ export default function BlogChatbot({ postTitle, postId }: BlogChatbotProps) {
     <>
       {/* Floating Button */}
       {!isOpen && (
-        <div style={{ position: 'fixed', bottom: '2rem', right: '2rem', zIndex: 9999 }}>
-          <button
-            onClick={() => setIsDismissed(true)}
+        <div style={{ position: 'fixed', bottom: '2rem', right: '2rem', zIndex: 9999, display: 'flex', flexDirection: 'column', gap: '1rem', alignItems: 'flex-end' }}>
+          
+          {/* Dynamic WhatsApp Group Button */}
+          <a
+            href={whatsappLink}
+            target="_blank"
+            rel="noopener noreferrer"
             style={{
-              position: 'absolute',
-              top: '-8px',
-              right: '-8px',
-              background: '#ef4444',
-              color: 'white',
-              border: 'none',
-              borderRadius: '50%',
-              width: '24px',
-              height: '24px',
-              fontSize: '12px',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
-              zIndex: 10
-            }}
-            title="Hide Chatbot"
-          >
-            ✕
-          </button>
-          <button
-            onClick={() => setIsOpen(true)}
-            style={{
-              width: '60px',
-              height: '60px',
-              borderRadius: '50%',
-              background: 'linear-gradient(135deg, var(--color-accent) 0%, #004999 100%)',
+              background: '#25D366',
               color: '#fff',
-              border: 'none',
-              boxShadow: '0 8px 32px rgba(0, 102, 204, 0.4)',
-              cursor: 'pointer',
-              fontSize: '1.8rem',
+              padding: '0.6rem 1.2rem',
+              borderRadius: '30px',
+              textDecoration: 'none',
+              fontWeight: 600,
+              fontSize: '0.9rem',
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'center',
-              transition: 'transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
+              gap: '0.5rem',
+              boxShadow: '0 4px 12px rgba(37, 211, 102, 0.4)',
+              transition: 'transform 0.2s',
+              whiteSpace: 'nowrap'
             }}
-            onMouseEnter={(e) => (e.currentTarget.style.transform = 'scale(1.1)')}
+            onMouseEnter={(e) => (e.currentTarget.style.transform = 'scale(1.05)')}
             onMouseLeave={(e) => (e.currentTarget.style.transform = 'scale(1)')}
           >
-            💬
-          </button>
+            <span style={{ fontSize: '1.2rem' }}>📱</span> {groupName}
+          </a>
+
+          {/* Chatbot Button Container */}
+          <div style={{ position: 'relative' }}>
+            <button
+              onClick={() => setIsDismissed(true)}
+              style={{
+                position: 'absolute',
+                top: '-8px',
+                right: '-8px',
+                background: '#ef4444',
+                color: 'white',
+                border: 'none',
+                borderRadius: '50%',
+                width: '24px',
+                height: '24px',
+                fontSize: '12px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+                zIndex: 10
+              }}
+              title="Hide Chatbot"
+            >
+              ✕
+            </button>
+            <button
+              onClick={() => setIsOpen(true)}
+              style={{
+                width: '60px',
+                height: '60px',
+                borderRadius: '50%',
+                background: 'linear-gradient(135deg, var(--color-accent) 0%, #004999 100%)',
+                color: '#fff',
+                border: 'none',
+                boxShadow: '0 8px 32px rgba(0, 102, 204, 0.4)',
+                cursor: 'pointer',
+                fontSize: '1.8rem',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                transition: 'transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.transform = 'scale(1.1)')}
+              onMouseLeave={(e) => (e.currentTarget.style.transform = 'scale(1)')}
+            >
+              💬
+            </button>
+          </div>
         </div>
       )}
 

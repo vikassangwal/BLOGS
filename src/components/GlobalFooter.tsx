@@ -16,8 +16,8 @@ export default function GlobalFooter({ siteName }: { siteName?: string }) {
         <div className="flex gap-6 mt-4 md:mt-0">
           <a href="/about" className="hover:text-white transition-colors">About Us</a>
           <a href="/admin/login" className="hover:text-white transition-colors">Editor / Admin Panel</a>
-          <a href="#" className="hover:text-white transition-colors">Privacy Policy</a>
-          <a href="#" className="hover:text-white transition-colors">Terms of Service</a>
+          <a href="/privacy-policy" className="hover:text-white transition-colors">Privacy Policy</a>
+          <a href="/terms-of-service" className="hover:text-white transition-colors">Terms of Service</a>
         </div>
       </div>
     </footer>

@@ -320,8 +320,8 @@ export default function BlogPostClient({ post, ads, relatedPosts }: BlogPostClie
         )}
       </article>
 
-      {/* Floating Chatbot */}
-      <BlogChatbot postId={post.id} postTitle={post.title} />
+      {/* Floating Chatbot & WhatsApp */}
+      <BlogChatbot postId={post.id} postTitle={post.title} postTags={post.tags} />
 
       <style>{`
         .blog-content h2 { fontSize: 2rem; fontWeight: 700; margin: 2.5rem 0 1rem; color: var(--color-text-primary); letter-spacing: -0.5px; }

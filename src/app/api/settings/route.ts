@@ -1,19 +1,23 @@
 import { NextResponse, NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getToken } from 'next-auth/jwt';
+import { verifyToken } from '@/lib/auth';
 
-// Must match the exact same secret chain as auth.ts
-const AUTH_SECRET = process.env.AUTH_SECRET || process.env.JWT_SECRET || 'fallback-secret-for-dev';
+// Helper: extract user from the custom automata_auth_token cookie
+function getUserFromRequest(request: NextRequest) {
+  const token = request.cookies.get('automata_auth_token')?.value;
+  if (!token) return null;
+  return verifyToken(token);
+}
 
 export async function GET(request: NextRequest) {
   try {
-    const token = await getToken({ req: request, secret: AUTH_SECRET });
-    
+    const user = getUserFromRequest(request);
+
     const settings = await prisma.siteSettings.findUnique({ where: { id: 'default' } });
     if (!settings) return NextResponse.json({});
 
     // Mask API key if not super admin
-    if (!token || token.role !== 'SUPER_ADMIN') {
+    if (!user || user.role !== 'SUPER_ADMIN') {
       settings.aiApiKey = settings.aiApiKey ? '********' : '';
     }
 
@@ -25,8 +29,8 @@ export async function GET(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   try {
-    const token = await getToken({ req: request, secret: AUTH_SECRET });
-    if (!token) {
+    const user = getUserFromRequest(request);
+    if (!user) {
       return NextResponse.json({ error: 'Login required' }, { status: 403 });
     }
 

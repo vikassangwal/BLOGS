@@ -192,6 +192,19 @@ model AutoBlogSettings {
   embedYoutube    Boolean  @default(true)
   isNewsActive    Boolean  @default(false)
   newsTopics      String?  @db.Text
+  
+  // Multi-Agent Settings
+  researcherModel String   @default("google/gemini-2.5-flash")
+  writerModel     String   @default("openai/gpt-4o-mini")
+  seoModel        String   @default("openai/gpt-4o-mini")
+  
+  // Social Media Auto-Post Settings
+  instagramToken  String?
+  instagramAccountId String?
+  whatsappToken   String?
+  whatsappPhoneId String?
+  whatsappGroupId String? // The target group/number to post to
+
   updatedAt       DateTime @updatedAt
 }
 

@@ -193,6 +193,7 @@ export default function AutoBlogAdmin() {
                 style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--color-border)' }}
               >
                 <option value="unsplash">Unsplash (Auto-fetch)</option>
+                <option value="pollinations">Pollinations.ai (Free AI Generator)</option>
                 <option value="none">None</option>
               </select>
             </div>
@@ -244,6 +245,105 @@ export default function AutoBlogAdmin() {
                 style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--color-border)', minHeight: '80px' }}
               />
               <p style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', marginTop: '0.5rem' }}>The system will pick a random topic from this list on every run to fetch live news.</p>
+            </div>
+
+            <hr style={{ border: 'none', borderTop: '1px solid var(--color-border)', margin: '1rem 0' }} />
+            
+            <h3 style={{ fontSize: '1.1rem', fontWeight: 700, margin: '0' }}>🤖 Multi-Agent AI Configuration</h3>
+            <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.85rem', margin: '-1rem 0 0 0' }}>Select which OpenRouter models to use for each step of the pipeline.</p>
+
+            <div>
+              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, color: 'var(--color-text-primary)' }}>Researcher Agent Model</label>
+              <input
+                type="text"
+                value={settings.researcherModel || 'google/gemini-2.5-flash'}
+                onChange={e => setSettings({ ...settings, researcherModel: e.target.value })}
+                placeholder="google/gemini-2.5-flash"
+                style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--color-border)' }}
+              />
+            </div>
+            
+            <div>
+              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, color: 'var(--color-text-primary)' }}>Writer Agent Model</label>
+              <input
+                type="text"
+                value={settings.writerModel || 'openai/gpt-4o-mini'}
+                onChange={e => setSettings({ ...settings, writerModel: e.target.value })}
+                placeholder="openai/gpt-4o-mini"
+                style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--color-border)' }}
+              />
+            </div>
+
+            <div>
+              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, color: 'var(--color-text-primary)' }}>SEO Expert Model</label>
+              <input
+                type="text"
+                value={settings.seoModel || 'openai/gpt-4o-mini'}
+                onChange={e => setSettings({ ...settings, seoModel: e.target.value })}
+                placeholder="openai/gpt-4o-mini"
+                style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--color-border)' }}
+              />
+            </div>
+
+            <hr style={{ border: 'none', borderTop: '1px solid var(--color-border)', margin: '1rem 0' }} />
+            
+            <h3 style={{ fontSize: '1.1rem', fontWeight: 700, margin: '0' }}>📱 Auto Social Media Posting</h3>
+            <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.85rem', margin: '-1rem 0 0 0' }}>Leave blank to disable. Requires Meta API access tokens.</p>
+
+            <div>
+              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, color: 'var(--color-text-primary)' }}>Instagram Graph API Token</label>
+              <input
+                type="password"
+                value={settings.instagramToken || ''}
+                onChange={e => setSettings({ ...settings, instagramToken: e.target.value })}
+                placeholder="EAAGm0..."
+                style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--color-border)' }}
+              />
+            </div>
+
+            <div>
+              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, color: 'var(--color-text-primary)' }}>Instagram Account ID</label>
+              <input
+                type="text"
+                value={settings.instagramAccountId || ''}
+                onChange={e => setSettings({ ...settings, instagramAccountId: e.target.value })}
+                placeholder="178414..."
+                style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--color-border)' }}
+              />
+            </div>
+
+            <div>
+              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, color: 'var(--color-text-primary)' }}>WhatsApp Cloud API Token</label>
+              <input
+                type="password"
+                value={settings.whatsappToken || ''}
+                onChange={e => setSettings({ ...settings, whatsappToken: e.target.value })}
+                placeholder="EAAGm0..."
+                style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--color-border)' }}
+              />
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <div>
+                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, color: 'var(--color-text-primary)' }}>WhatsApp Phone ID</label>
+                <input
+                  type="text"
+                  value={settings.whatsappPhoneId || ''}
+                  onChange={e => setSettings({ ...settings, whatsappPhoneId: e.target.value })}
+                  placeholder="104..."
+                  style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--color-border)' }}
+                />
+              </div>
+              <div>
+                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, color: 'var(--color-text-primary)' }}>Target Group/Phone Number</label>
+                <input
+                  type="text"
+                  value={settings.whatsappGroupId || ''}
+                  onChange={e => setSettings({ ...settings, whatsappGroupId: e.target.value })}
+                  placeholder="919876543210"
+                  style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--color-border)' }}
+                />
+              </div>
             </div>
 
             <button type="submit" disabled={isSaving} className="btn-primary" style={{ marginTop: '1rem' }}>

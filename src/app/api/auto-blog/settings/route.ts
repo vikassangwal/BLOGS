@@ -24,7 +24,11 @@ export async function PUT(request: NextRequest) {
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const body = await request.json();
-    const { isActive, frequency, maxPostsPerRun, maxPostsPerDay, imageSource, autoPublish, embedYoutube, isNewsActive, newsTopics } = body;
+    const { 
+      isActive, frequency, maxPostsPerRun, maxPostsPerDay, imageSource, autoPublish, embedYoutube, isNewsActive, newsTopics,
+      researcherModel, writerModel, seoModel,
+      instagramToken, instagramAccountId, whatsappToken, whatsappPhoneId, whatsappGroupId
+    } = body;
 
     const updated = await prisma.autoBlogSettings.upsert({
       where: { id: 'default' },
@@ -38,6 +42,14 @@ export async function PUT(request: NextRequest) {
         embedYoutube: embedYoutube !== undefined ? embedYoutube : undefined,
         isNewsActive: isNewsActive !== undefined ? isNewsActive : undefined,
         newsTopics,
+        researcherModel: researcherModel || undefined,
+        writerModel: writerModel || undefined,
+        seoModel: seoModel || undefined,
+        instagramToken: instagramToken !== undefined ? instagramToken : undefined,
+        instagramAccountId: instagramAccountId !== undefined ? instagramAccountId : undefined,
+        whatsappToken: whatsappToken !== undefined ? whatsappToken : undefined,
+        whatsappPhoneId: whatsappPhoneId !== undefined ? whatsappPhoneId : undefined,
+        whatsappGroupId: whatsappGroupId !== undefined ? whatsappGroupId : undefined,
       },
       create: {
         id: 'default',
@@ -50,6 +62,14 @@ export async function PUT(request: NextRequest) {
         embedYoutube: embedYoutube !== undefined ? embedYoutube : true,
         isNewsActive: !!isNewsActive,
         newsTopics: newsTopics || '',
+        researcherModel: researcherModel || 'google/gemini-2.5-flash',
+        writerModel: writerModel || 'openai/gpt-4o-mini',
+        seoModel: seoModel || 'openai/gpt-4o-mini',
+        instagramToken,
+        instagramAccountId,
+        whatsappToken,
+        whatsappPhoneId,
+        whatsappGroupId,
       }
     });
 

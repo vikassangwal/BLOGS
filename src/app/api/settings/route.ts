@@ -31,22 +31,33 @@ export async function PUT(request: Request) {
 
     const body = await request.json();
     
-    // Don't update API key if it's masked
-    if (body.aiApiKey === '********') {
-      delete body.aiApiKey;
+    // Explicitly select fields to prevent Prisma errors from extra properties
+    const updateData: any = {
+      siteName: body.siteName,
+      siteTagline: body.siteTagline,
+      adminEmail: body.adminEmail,
+      aiProvider: body.aiProvider,
+      aiModel: body.aiModel,
+      seoTitle: body.seoTitle,
+      seoDescription: body.seoDescription,
+    };
+
+    if (body.aiApiKey && body.aiApiKey !== '********') {
+      updateData.aiApiKey = body.aiApiKey;
     }
 
     const settings = await prisma.siteSettings.upsert({
       where: { id: 'default' },
-      update: body,
-      create: { id: 'default', ...body }
+      update: updateData,
+      create: { id: 'default', ...updateData }
     });
 
     // Mask before returning
     settings.aiApiKey = settings.aiApiKey ? '********' : '';
 
     return NextResponse.json({ success: true, settings });
-  } catch (error) {
-    return NextResponse.json({ error: 'Failed to update settings' }, { status: 500 });
+  } catch (error: any) {
+    console.error('Settings Update Error:', error);
+    return NextResponse.json({ error: error.message || 'Failed to update settings' }, { status: 500 });
   }
 }

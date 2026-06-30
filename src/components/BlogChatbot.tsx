@@ -10,9 +10,10 @@ interface BlogChatbotProps {
   postTitle?: string;
   postId?: string;
   postTags?: any[];
+  whatsappLinks?: any[];
 }
 
-export default function BlogChatbot({ postTitle, postId, postTags }: BlogChatbotProps) {
+export default function BlogChatbot({ postTitle, postId, postTags, whatsappLinks }: BlogChatbotProps) {
   const [isOpen, setIsOpen] = useState(false);
   const initialMsg = postTitle 
     ? `Hi! I am the AI assistant for "${postTitle}". What would you like to know?` 
@@ -28,22 +29,34 @@ export default function BlogChatbot({ postTitle, postId, postTags }: BlogChatbot
 
   const [isDismissed, setIsDismissed] = useState(false);
 
-  // Determine WhatsApp Group Link
-  let whatsappLink = '#'; // Update with actual generic group link
+  // Determine WhatsApp Group Link from DB
+  const links = whatsappLinks || [];
+  
+  // Helper to find a link by label keyword
+  const findLink = (keyword: string) => {
+    return links.find(l => l.label.toLowerCase().includes(keyword))?.url;
+  };
+
+  let whatsappLink = findLink('general') || '#';
   let groupName = 'Join Our WhatsApp Group';
   
   if (postTags && postTags.length > 0) {
     const tagNames = postTags.map(t => (t.tag?.name || t.name || '').toLowerCase());
     if (tagNames.some(t => t.includes('finance') || t.includes('earning') || t.includes('money'))) {
-      whatsappLink = '#finance-link'; // Update with actual finance group link
+      whatsappLink = findLink('finance') || findLink('earn') || whatsappLink;
       groupName = 'Join Finance Group';
     } else if (tagNames.some(t => t.includes('education') || t.includes('study') || t.includes('career') || t.includes('exam') || t.includes('job'))) {
-      whatsappLink = '#study-link'; // Update with actual study group link
+      whatsappLink = findLink('study') || findLink('education') || findLink('job') || whatsappLink;
       groupName = 'Join Study & Jobs Group';
     } else if (tagNames.some(t => t.includes('tech'))) {
-      whatsappLink = '#tech-link'; // Update with actual tech group link
+      whatsappLink = findLink('tech') || whatsappLink;
       groupName = 'Join Tech Updates Group';
     }
+  }
+
+  // If we still don't have a valid link, fallback to the first active whatsapp link or hidden
+  if (whatsappLink === '#' && links.length > 0) {
+    whatsappLink = links[0].url;
   }
 
   useEffect(() => {
@@ -102,31 +115,33 @@ export default function BlogChatbot({ postTitle, postId, postTags }: BlogChatbot
       {!isOpen && (
         <div style={{ position: 'fixed', bottom: '2rem', right: '2rem', zIndex: 9999, display: 'flex', flexDirection: 'column', gap: '1rem', alignItems: 'flex-end' }}>
           
-          {/* Dynamic WhatsApp Group Button */}
-          <a
-            href={whatsappLink}
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{
-              background: '#25D366',
-              color: '#fff',
-              padding: '0.6rem 1.2rem',
-              borderRadius: '30px',
-              textDecoration: 'none',
-              fontWeight: 600,
-              fontSize: '0.9rem',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              boxShadow: '0 4px 12px rgba(37, 211, 102, 0.4)',
-              transition: 'transform 0.2s',
-              whiteSpace: 'nowrap'
-            }}
-            onMouseEnter={(e) => (e.currentTarget.style.transform = 'scale(1.05)')}
-            onMouseLeave={(e) => (e.currentTarget.style.transform = 'scale(1)')}
-          >
-            <span style={{ fontSize: '1.2rem' }}>📱</span> {groupName}
-          </a>
+          {/* Dynamic WhatsApp Group Button (only show if link is configured) */}
+          {whatsappLink !== '#' && (
+            <a
+              href={whatsappLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                background: '#25D366',
+                color: '#fff',
+                padding: '0.6rem 1.2rem',
+                borderRadius: '30px',
+                textDecoration: 'none',
+                fontWeight: 600,
+                fontSize: '0.9rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                boxShadow: '0 4px 12px rgba(37, 211, 102, 0.4)',
+                transition: 'transform 0.2s',
+                whiteSpace: 'nowrap'
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.transform = 'scale(1.05)')}
+              onMouseLeave={(e) => (e.currentTarget.style.transform = 'scale(1)')}
+            >
+              <span style={{ fontSize: '1.2rem' }}>📱</span> {groupName}
+            </a>
+          )}
 
           {/* Chatbot Button Container */}
           <div style={{ position: 'relative' }}>

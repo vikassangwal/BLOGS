@@ -11,9 +11,10 @@ interface BlogPostClientProps {
   post: any;
   ads: any[];
   relatedPosts: any[];
+  whatsappLinks?: any[];
 }
 
-export default function BlogPostClient({ post, ads, relatedPosts }: BlogPostClientProps) {
+export default function BlogPostClient({ post, ads, relatedPosts, whatsappLinks }: BlogPostClientProps) {
   const [translatedHtml, setTranslatedHtml] = useState<string | null>(null);
   const [isTranslating, setIsTranslating] = useState(false);
   const [isUnlocked, setIsUnlocked] = useState(false);
@@ -321,7 +322,7 @@ export default function BlogPostClient({ post, ads, relatedPosts }: BlogPostClie
       </article>
 
       {/* Floating Chatbot & WhatsApp */}
-      <BlogChatbot postId={post.id} postTitle={post.title} postTags={post.tags} />
+      <BlogChatbot postId={post.id} postTitle={post.title} postTags={post.tags} whatsappLinks={whatsappLinks} />
 
       <style>{`
         .blog-content h2 { fontSize: 2rem; fontWeight: 700; margin: 2.5rem 0 1rem; color: var(--color-text-primary); letter-spacing: -0.5px; }

@@ -72,7 +72,7 @@ export default async function BlogPostPage({ params }: Props) {
   const slug = resolvedParams.slug;
 
   // Fetch all necessary data server-side for immediate HTML rendering (SEO)
-  const [post, ads, relatedPostsRaw, siteSettings] = await Promise.all([
+  const [post, ads, relatedPostsRaw, siteSettings, whatsappLinks] = await Promise.all([
     prisma.blogPost.findUnique({
       where: { slug },
       include: { 
@@ -87,7 +87,8 @@ export default async function BlogPostPage({ params }: Props) {
       take: 3,
       select: { id: true, title: true, slug: true, excerpt: true, content: true, featuredImage: true }
     }),
-    prisma.siteSettings.findUnique({ where: { id: 'default' } })
+    prisma.siteSettings.findUnique({ where: { id: 'default' } }),
+    prisma.socialLink.findMany({ where: { platform: 'whatsapp', isActive: true } })
   ]);
 
   if (!post) {
@@ -141,6 +142,7 @@ export default async function BlogPostPage({ params }: Props) {
         post={post} 
         ads={ads} 
         relatedPosts={relatedPostsRaw} 
+        whatsappLinks={whatsappLinks} 
       />
     </>
   );

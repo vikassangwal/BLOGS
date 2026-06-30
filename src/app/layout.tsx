@@ -14,8 +14,13 @@ export async function generateMetadata(): Promise<Metadata> {
   } catch (e) {}
 
   return {
-    title: settings?.seoTitle || settings?.siteName || 'Our Blog | Premium AI Blogging',
+    metadataBase: new URL('https://knowora.in'),
+    title: settings?.seoTitle || settings?.siteName || 'Knowora | Premium Knowledge Base',
     description: settings?.seoDescription || settings?.siteTagline || 'A dedicated platform for fully automated AI blogging and lead generation.',
+    openGraph: {
+      type: 'website',
+      siteName: settings?.siteName || 'Knowora',
+    }
   };
 }
 

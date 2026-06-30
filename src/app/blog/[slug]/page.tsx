@@ -1,379 +1,147 @@
-'use client';
-import React, { useEffect, useState } from 'react';
-import Image from 'next/image';
+import { Metadata, ResolvingMetadata } from 'next';
 import { notFound } from 'next/navigation';
-import Head from 'next/head';
-import LeadCaptureForm from '@/components/LeadCaptureForm';
-import SmartBanners from '@/components/SmartBanners';
-import BlogChatbot from '@/components/BlogChatbot';
-import AdInjector from '@/components/AdInjector';
-import AdBanner from '@/components/AdBanner';
-export default function BlogPostPage({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = React.use(params);
-  const [post, setPost] = useState<any>(null);
-  const [ads, setAds] = useState<any[]>([]);
-  const [relatedPosts, setRelatedPosts] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [translatedHtml, setTranslatedHtml] = useState<string | null>(null);
-  const [isTranslating, setIsTranslating] = useState(false);
-  const [isUnlocked, setIsUnlocked] = useState(false);
-  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+import { prisma } from '@/lib/prisma';
+import BlogPostClient from '@/components/BlogPostClient';
 
-  useEffect(() => {
-    // Fetch post, ads, and related posts in parallel
-    Promise.all([
-      fetch(`/api/blog/${slug}`).then(res => res.ok ? res.json() : null),
-      fetch('/api/ads').then(res => res.ok ? res.json() : []),
-      fetch('/api/blog?published=true&limit=3').then(res => res.ok ? res.json() : { posts: [] })
-    ]).then(([postData, adsData, relatedData]) => {
-      if (!postData) notFound();
-      setPost(postData);
-      setAds(Array.isArray(adsData) ? adsData : []);
-      // Exclude current post from related posts
-      const related = (relatedData?.posts || []).filter((p: any) => p.id !== postData.id).slice(0, 3);
-      setRelatedPosts(related);
-      setIsLoading(false);
-    }).catch(() => {
-      setIsLoading(false);
-      notFound();
-    });
-  }, [slug]);
+type Props = {
+  params: Promise<{ slug: string }>;
+};
 
-  const handleTranslate = async (lang: string) => {
-    if (!lang) return;
-    setIsTranslating(true);
-    try {
-      const res = await fetch('/api/ai/translate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ htmlContent: post.content, targetLanguage: lang })
-      });
-      const data = await res.json();
-      if (data.translatedHtml) {
-        setTranslatedHtml(data.translatedHtml);
-      } else {
-        alert('Translation failed. Please check AI API configuration.');
-      }
-    } catch (err) {
-      alert('Translation failed.');
-    } finally {
-      setIsTranslating(false);
-    }
-  };
+// 1. DYNAMIC METADATA (OPEN GRAPH, TWITTER CARDS, SEO)
+export async function generateMetadata(
+  { params }: Props,
+  parent: ResolvingMetadata
+): Promise<Metadata> {
+  const resolvedParams = await params;
+  const slug = resolvedParams.slug;
 
-  const handlePayment = async () => {
-    setIsProcessingPayment(true);
-    try {
-      // 1. Create order
-      const orderRes = await fetch('/api/payments/razorpay', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ postId: post.id, amount: 99 }) // ₹99 premium access
-      });
-      const orderData = await orderRes.json();
+  const post = await prisma.blogPost.findUnique({
+    where: { slug },
+    include: { tags: { include: { tag: true } } }
+  });
 
-      if (orderData.error) {
-        alert(orderData.error);
-        setIsProcessingPayment(false);
-        return;
-      }
-
-      // 2. Initialize Razorpay checkout
-      const options = {
-        key: orderData.keyId,
-        amount: orderData.amount,
-        currency: orderData.currency,
-        name: 'Our Blog Premium',
-        description: 'Unlock Premium Article',
-        order_id: orderData.id,
-        handler: async function (response: any) {
-          // 3. Verify payment
-          try {
-            const verifyRes = await fetch('/api/payments/verify', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                razorpay_order_id: response.razorpay_order_id,
-                razorpay_payment_id: response.razorpay_payment_id,
-                razorpay_signature: response.razorpay_signature,
-                postId: post.id
-              })
-            });
-            const verifyData = await verifyRes.json();
-            if (verifyData.success) {
-              setIsUnlocked(true);
-              alert('Payment Successful! Content unlocked.');
-            } else {
-              alert('Payment verification failed.');
-            }
-          } catch (e) {
-            alert('Verification Error');
-          }
-        },
-        prefill: {
-          name: 'Reader',
-          email: 'reader@example.com',
-          contact: ''
-        },
-        theme: {
-          color: '#f59e0b'
-        }
-      };
-
-      const rzp1 = new (window as any).Razorpay(options);
-      rzp1.on('payment.failed', function (response: any) {
-        alert(response.error.description);
-      });
-      rzp1.open();
-
-    } catch (err) {
-      console.error(err);
-      alert('Could not initiate payment.');
-    } finally {
-      setIsProcessingPayment(false);
-    }
-  };
-
-  if (isLoading) {
-    return (
-      <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{ fontSize: '1.5rem', fontWeight: 600, color: 'var(--color-accent)' }}>Loading...</div>
-      </div>
-    );
+  if (!post) {
+    return { title: 'Post Not Found' };
   }
 
-  if (!post) return null;
+  const siteSettings = await prisma.siteSettings.findUnique({ where: { id: 'default' } });
+  const siteName = siteSettings?.siteName || 'Knowora';
 
-  const headerAd = ads.find(a => a.position === 'header');
-  const footerAd = ads.find(a => a.position === 'footer');
+  const title = post.seoTitle || post.title;
+  const description = post.seoDescription || post.excerpt || '';
+  const url = `https://knowora.in/blog/${post.slug}`;
+  const imageUrl = post.featuredImage || 'https://knowora.in/default-og.png'; // Fallback
 
-  const isPremium = post.tags?.includes('Premium');
-  let contentHtml = translatedHtml || post.content || '';
-  
-  if (isPremium && !isUnlocked) {
-    // Show only the first 30% of content
-    const charLimit = Math.floor(contentHtml.length * 0.3);
-    contentHtml = contentHtml.substring(0, charLimit) + '...';
+  return {
+    title: title,
+    description: description,
+    keywords: post.seoKeywords || '',
+    alternates: {
+      canonical: url,
+    },
+    openGraph: {
+      title: title,
+      description: description,
+      url: url,
+      siteName: siteName,
+      images: [
+        {
+          url: imageUrl,
+          width: 1200,
+          height: 630,
+          alt: title,
+        },
+      ],
+      locale: 'en_IN',
+      type: 'article',
+      publishedTime: post.publishedAt?.toISOString() || post.createdAt.toISOString(),
+      authors: post.authorId ? ['Author'] : [],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: title,
+      description: description,
+      images: [imageUrl],
+    },
+  };
+}
+
+// 2. SERVER COMPONENT (DATA FETCHING & SCHEMA INJECTION)
+export default async function BlogPostPage({ params }: Props) {
+  const resolvedParams = await params;
+  const slug = resolvedParams.slug;
+
+  // Fetch all necessary data server-side for immediate HTML rendering (SEO)
+  const [post, ads, relatedPostsRaw, siteSettings] = await Promise.all([
+    prisma.blogPost.findUnique({
+      where: { slug },
+      include: { 
+        tags: { include: { tag: true } },
+        author: { select: { name: true, image: true } }
+      }
+    }),
+    prisma.adPlacement.findMany({ where: { isActive: true } }),
+    prisma.blogPost.findMany({
+      where: { status: 'Published', slug: { not: slug } },
+      orderBy: { publishedAt: 'desc' },
+      take: 3,
+      select: { id: true, title: true, slug: true, excerpt: true, content: true, featuredImage: true }
+    }),
+    prisma.siteSettings.findUnique({ where: { id: 'default' } })
+  ]);
+
+  if (!post) {
+    notFound();
   }
+
+  // Record a view (fire and forget, don't await)
+  prisma.blogPost.update({
+    where: { id: post.id },
+    data: { viewCount: { increment: 1 } }
+  }).catch(() => {});
+
+  const siteName = siteSettings?.siteName || 'Knowora';
+  const url = `https://knowora.in/blog/${post.slug}`;
+  const imageUrl = post.featuredImage || 'https://knowora.in/default-og.png';
+
+  // 3. JSON-LD STRUCTURED DATA (NEWS ARTICLE SCHEMA)
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'NewsArticle',
+    headline: post.seoTitle || post.title,
+    image: [imageUrl],
+    datePublished: post.publishedAt?.toISOString() || post.createdAt.toISOString(),
+    dateModified: post.updatedAt.toISOString(),
+    author: [{
+      '@type': 'Person',
+      name: post.author?.name || `${siteName} Team`,
+      url: `https://knowora.in/author/${post.authorId || 'admin'}`
+    }],
+    publisher: {
+      '@type': 'Organization',
+      name: siteName,
+      logo: {
+        '@type': 'ImageObject',
+        url: 'https://knowora.in/logo.png'
+      }
+    },
+    description: post.seoDescription || post.excerpt
+  };
 
   return (
-    <div style={{ background: 'var(--color-bg-primary)', color: 'var(--color-text-primary)' }}>
-      <title>{post.seoTitle || post.title}</title>
-      <meta name="description" content={post.seoDescription || post.excerpt} />
-      {post.seoKeywords && <meta name="keywords" content={post.seoKeywords} />}
-
-      {/* Header Ad */}
-      {headerAd && (
-        <div className="ad-container" style={{ textAlign: 'center', padding: '1rem', background: 'var(--color-bg-secondary)' }} dangerouslySetInnerHTML={{ __html: headerAd.adCode }} />
-      )}
-
-      <article style={{ maxWidth: '800px', margin: '0 auto', padding: '4rem 2rem' }}>
-        {/* Translate and TTS Toolbar */}
-        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1rem', gap: '1rem', flexWrap: 'wrap' }}>
-          <button
-            onClick={() => {
-              if ('speechSynthesis' in window) {
-                if (window.speechSynthesis.speaking) {
-                  window.speechSynthesis.cancel();
-                  return;
-                }
-                const text = contentHtml.replace(/<[^>]+>/g, '');
-                const utterance = new SpeechSynthesisUtterance(text);
-                utterance.lang = post.content?.includes('है') ? 'hi-IN' : 'en-US';
-                window.speechSynthesis.speak(utterance);
-              } else {
-                alert('Text-to-Speech is not supported in your browser.');
-              }
-            }}
-            style={{ padding: '0.4rem 0.8rem', borderRadius: '8px', background: 'linear-gradient(135deg, #10b981, #059669)', border: 'none', color: '#fff', cursor: 'pointer', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.5rem' }}
-          >
-            🔊 Listen to Article
-          </button>
-          
-          <select 
-            onChange={(e) => handleTranslate(e.target.value)}
-            disabled={isTranslating}
-            style={{ padding: '0.4rem 0.8rem', borderRadius: '8px', background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)' }}
-          >
-            <option value="">{isTranslating ? 'Translating...' : 'Translate with AI'}</option>
-            <option value="Hindi">Hindi (हिन्दी)</option>
-            <option value="Spanish">Spanish (Español)</option>
-            <option value="French">French (Français)</option>
-            <option value="German">German (Deutsch)</option>
-          </select>
-        </div>
-
-        {/* Post Header */}
-        <header style={{ marginBottom: '3rem', textAlign: 'center' }}>
-          {post.tags?.length > 0 && (
-            <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
-              {post.tags.map((tag: string) => (
-                <span key={tag} style={{ background: tag === 'Premium' ? 'linear-gradient(135deg, #f59e0b, #d97706)' : 'var(--color-bg-secondary)', padding: '0.4rem 1rem', borderRadius: '20px', fontSize: '0.8rem', fontWeight: 600, color: tag === 'Premium' ? '#fff' : 'var(--color-accent)' }}>
-                  {tag === 'Premium' ? '👑 Premium' : tag}
-                </span>
-              ))}
-            </div>
-          )}
-          <h1 style={{ fontSize: '3.5rem', fontWeight: 800, lineHeight: 1.2, letterSpacing: '-1px', marginBottom: post.subtitle ? '0.5rem' : '1.5rem' }}>
-            {post.title}
-          </h1>
-          {post.subtitle && (
-            <h2 style={{ fontSize: '1.5rem', fontWeight: 400, color: 'var(--color-text-secondary)', marginBottom: '1.5rem' }}>
-              {post.subtitle}
-            </h2>
-          )}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '1rem', color: 'var(--color-text-secondary)', fontSize: '0.9rem' }}>
-            {post.author?.name && (
-              <span style={{ fontWeight: 600, color: 'var(--color-text-primary)' }}>{post.author.name}</span>
-            )}
-            <span>•</span>
-            <time>{new Date(post.publishedAt || post.createdAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</time>
-            <span>•</span>
-            <span>{Math.ceil((post.content?.length || 0) / 1000)} min read</span>
-            {post.autoGenerated && (
-              <>
-                <span>•</span>
-                <span style={{ background: '#f3e8ff', color: '#9333ea', padding: '0.2rem 0.6rem', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 600 }}>✨ AI Generated</span>
-              </>
-            )}
-          </div>
-        </header>
-
-        {/* Featured Image */}
-        {post.featuredImage && (
-          <figure style={{ margin: '0 -2rem 3rem', borderRadius: '24px', overflow: 'hidden', boxShadow: '0 20px 40px rgba(0,0,0,0.1)', position: 'relative', height: '400px' }}>
-            <Image src={post.featuredImage} alt={post.title} fill style={{ objectFit: 'cover' }} sizes="(max-width: 768px) 100vw, 800px" />
-          </figure>
-        )}
-
-        {/* Post Content */}
-        <div style={{ position: 'relative' }}>
-          <AdBanner dataAdSlot="top-content" />
-          <AdInjector htmlContent={contentHtml} />
-          <AdBanner dataAdSlot="bottom-content" />
-          
-          {/* Premium Paywall Blur */}
-          {isPremium && !isUnlocked && (
-            <div style={{ 
-              position: 'absolute', bottom: 0, left: 0, right: 0, height: '400px',
-              background: 'linear-gradient(to bottom, transparent, var(--color-bg-primary) 80%)',
-              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-end', paddingBottom: '2rem'
-            }}>
-              <div style={{ 
-                background: 'rgba(255, 255, 255, 0.05)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.1)',
-                padding: '2rem', borderRadius: '16px', textAlign: 'center', maxWidth: '400px', width: '100%'
-              }}>
-                <h3 style={{ fontSize: '1.5rem', fontWeight: 800, margin: '0 0 1rem 0' }}>👑 Premium Content</h3>
-                <p style={{ color: 'var(--color-text-secondary)', marginBottom: '1.5rem' }}>This article is exclusive to premium subscribers. Unlock it to read the rest.</p>
-                <button 
-                  onClick={handlePayment} 
-                  disabled={isProcessingPayment}
-                  className="btn-primary" style={{ width: '100%', background: 'linear-gradient(135deg, #f59e0b, #d97706)', border: 'none', fontWeight: 800 }}
-                >
-                  {isProcessingPayment ? 'Processing...' : 'Unlock via Razorpay (₹99)'}
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* YMYL Disclaimer */}
-        {(post.tags?.includes('Finance & Earning') || post.tags?.includes('Education & Career')) && (
-          <div style={{ marginTop: '3rem', padding: '1.5rem', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.2)', borderRadius: '12px', color: '#fca5a5' }}>
-            <h4 style={{ fontWeight: 700, marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <span>⚠️</span> Disclaimer
-            </h4>
-            <p style={{ fontSize: '0.9rem', margin: 0, lineHeight: 1.6 }}>
-              यह जानकारी केवल शैक्षिक उद्देश्यों के लिए है। (This information is for educational purposes only.) Please consult with a certified professional before making any financial or career-altering decisions.
-            </p>
-          </div>
-        )}
-
-        {/* Author Box */}
-        <div style={{ marginTop: '3rem', padding: '2rem', background: 'rgba(255, 255, 255, 0.03)', border: '1px solid var(--color-border)', borderRadius: '16px', display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
-          <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: 'linear-gradient(135deg, var(--color-accent), #c084fc)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2rem', color: '#fff', fontWeight: 'bold', flexShrink: 0 }}>
-            {post.author?.name ? post.author.name.substring(0, 1).toUpperCase() : 'AG'}
-          </div>
-          <div>
-            <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--color-text-primary)', marginBottom: '0.5rem' }}>
-              Written by {post.author?.name || 'Our Blog Team'}
-            </h3>
-            <p style={{ fontSize: '0.9rem', color: 'var(--color-text-secondary)', lineHeight: 1.6, margin: 0 }}>
-              {post.author?.name ? `${post.author.name} is a senior editor and subject matter expert.` : 'The Our Blog Team consists of industry experts and AI specialists dedicated to bringing you the most accurate and up-to-date information.'}
-            </p>
-          </div>
-        </div>
-
-        {/* Social Share Buttons */}
-        <div style={{ marginTop: '2rem', padding: '1.5rem', background: 'var(--color-bg-secondary)', borderRadius: '16px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
-          <h4 style={{ margin: 0, fontWeight: 700, fontSize: '1.1rem' }}>Share this article</h4>
-          <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center' }}>
-            <a href={`https://api.whatsapp.com/send?text=${encodeURIComponent(post.title + ' ' + (typeof window !== 'undefined' ? window.location.href : ''))}`} target="_blank" rel="noopener noreferrer" style={{ background: '#25D366', color: 'white', padding: '0.6rem 1.2rem', borderRadius: '8px', textDecoration: 'none', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              📱 WhatsApp
-            </a>
-            <a href={`https://t.me/share/url?url=${encodeURIComponent(typeof window !== 'undefined' ? window.location.href : '')}&text=${encodeURIComponent(post.title)}`} target="_blank" rel="noopener noreferrer" style={{ background: '#0088cc', color: 'white', padding: '0.6rem 1.2rem', borderRadius: '8px', textDecoration: 'none', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              ✈️ Telegram
-            </a>
-            <a href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(typeof window !== 'undefined' ? window.location.href : '')}`} target="_blank" rel="noopener noreferrer" style={{ background: '#1877F2', color: 'white', padding: '0.6rem 1.2rem', borderRadius: '8px', textDecoration: 'none', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              📘 Facebook
-            </a>
-            <a href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(post.title)}&url=${encodeURIComponent(typeof window !== 'undefined' ? window.location.href : '')}`} target="_blank" rel="noopener noreferrer" style={{ background: '#1DA1F2', color: 'white', padding: '0.6rem 1.2rem', borderRadius: '8px', textDecoration: 'none', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              🐦 Twitter
-            </a>
-          </div>
-        </div>
-
-        {/* Smart Banners */}
-        <SmartBanners />
-
-        {/* Lead Capture */}
-        <div style={{ marginTop: '4rem' }}>
-          <LeadCaptureForm postId={post.id} />
-        </div>
-
-        {/* Footer Ad */}
-        {footerAd && (
-          <div className="ad-container" style={{ textAlign: 'center', marginTop: '3rem' }} dangerouslySetInnerHTML={{ __html: footerAd.adCode }} />
-        )}
-
-        {/* Related Posts */}
-        {relatedPosts.length > 0 && (
-          <div style={{ marginTop: '4rem', borderTop: '1px solid var(--color-border)', paddingTop: '3rem' }}>
-            <h3 style={{ fontSize: '1.8rem', fontWeight: 800, color: 'var(--color-text-primary)', marginBottom: '2rem' }}>Related Articles</h3>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '2rem' }}>
-              {relatedPosts.map((rp: any) => (
-                <a href={`/blog/${rp.slug}`} key={rp.id} style={{ textDecoration: 'none', color: 'inherit', display: 'flex', flexDirection: 'column', background: 'rgba(255, 255, 255, 0.03)', borderRadius: '16px', overflow: 'hidden', border: '1px solid var(--color-border)', transition: 'all 0.3s ease' }} className="minimal-card">
-                  <div style={{ width: '100%', height: '180px', background: rp.featuredImage ? `url(${rp.featuredImage}) center/cover` : 'linear-gradient(135deg, #1e1e2f, #2d2b42)' }} />
-                  <div style={{ padding: '1.5rem', flex: 1, display: 'flex', flexDirection: 'column' }}>
-                    <h4 style={{ fontSize: '1.2rem', fontWeight: 700, margin: '0 0 0.5rem 0', color: 'var(--color-text-primary)', lineHeight: 1.4 }}>{rp.title}</h4>
-                    <p style={{ fontSize: '0.9rem', color: 'var(--color-text-secondary)', margin: '0 0 1rem 0', flex: 1, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{rp.excerpt || rp.content.replace(/<[^>]+>/g, '').substring(0, 100) + '...'}</p>
-                    <span style={{ color: 'var(--color-accent)', fontWeight: 600, fontSize: '0.9rem' }}>Read Article →</span>
-                  </div>
-                </a>
-              ))}
-            </div>
-          </div>
-        )}
-      </article>
-
-      {/* Floating Chatbot */}
-      <BlogChatbot postId={post.id} postTitle={post.title} />
-
-      <style>{`
-        .blog-content h2 { fontSize: 2rem; fontWeight: 700; margin: 2.5rem 0 1rem; color: var(--color-text-primary); letter-spacing: -0.5px; }
-        .blog-content h3 { fontSize: 1.5rem; fontWeight: 600; margin: 2rem 0 1rem; color: var(--color-text-primary); }
-        .blog-content p { margin-bottom: 1.5rem; }
-        .blog-content ul { margin: 0 0 1.5rem 2rem; list-style-type: disc; }
-        .blog-content li { margin-bottom: 0.5rem; }
-        .blog-content strong { color: var(--color-text-primary); }
-        .blog-content a { color: var(--color-accent); text-decoration: none; border-bottom: 1px solid transparent; transition: border-color 0.2s; }
-        .blog-content a:hover { border-bottom-color: var(--color-accent); }
-        .blog-content blockquote { border-left: 4px solid var(--color-accent); margin: 2rem 0; padding-left: 1.5rem; font-style: italic; color: var(--color-text-secondary); background: rgba(255,255,255,0.05); border-radius: 8px; }
-        .blog-content table { width: 100%; border-collapse: collapse; margin: 2rem 0; font-size: 0.95rem; text-align: left; background: rgba(255,255,255,0.02); border-radius: 8px; overflow: hidden; border-spacing: 0; }
-        .blog-content th, .blog-content td { padding: 12px 15px; border-bottom: 1px solid var(--color-border); }
-        .blog-content th { background-color: rgba(255,255,255,0.05); font-weight: bold; color: var(--color-text-primary); }
-        .blog-content tr:last-of-type td { border-bottom: none; }
-      `}</style>
-    </div>
+    <>
+      {/* Inject JSON-LD into the head of the document */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      
+      {/* Pass data to the Client Component for interactivity */}
+      <BlogPostClient 
+        post={post} 
+        ads={ads} 
+        relatedPosts={relatedPostsRaw} 
+      />
+    </>
   );
 }

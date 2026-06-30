@@ -158,6 +158,13 @@ export async function POST(request: Request) {
 
 IMPORTANT TECHNICAL RULE: You MUST format your entire response in valid HTML (using <h2>, <h3>, <p>, <table>, <ul>, <li>). Do NOT wrap the response in markdown code blocks like \`\`\`html. The user instruction "HTML Code नहीं लिखना" means do not write visible code for the user to read, but you MUST use HTML tags internally for formatting so the website can render it properly.
 
+Google Spam Policy & Safety Rules (CRITICAL):
+1. Helpful Content Update (HCU) Compliance: Provide original insights, expert analysis, and high-quality information. Add real value to the reader. Do NOT just spin or paraphrase existing news. 
+2. Plagiarism-Free: Content MUST be 100% original, completely unique, and pass all plagiarism/AI detection checks. Do NOT copy-paste sentences from the news context.
+3. Strict Safety Guidelines: Strictly prohibit any adult content (NSFW), hate speech, violence, or copyright violations. Keep the content 100% family-friendly and professional.
+4. Transparency Disclaimer: You MUST append the following HTML snippet exactly at the very end of every article to protect the website from Google penalties:
+<div style="margin-top: 30px; padding: 15px; background-color: #f8f9fa; border-left: 4px solid #6c757d; border-radius: 4px; font-size: 0.9em; color: #555;"><strong>Disclaimer:</strong> यह समाचार/जानकारी AI द्वारा संकलित की गई है। हमारा उद्देश्य केवल सटीक और लाभकारी जानकारी प्रदान करना है। किसी भी निर्णय को लेने से पहले कृपया आधिकारिक वेबसाइट या स्रोतों की पुष्टि अवश्य कर लें।</div>
+
 क्या करना है:
 1. SEO Title: आकर्षक, क्लिक योग्य और मुख्य Keyword वाला। (Do not use h1 tag, start with h2)
 2. Introduction: 150–250 शब्दों का विस्तृत परिचय, मुख्य Keyword के साथ।
@@ -213,7 +220,7 @@ Keywords: [kw]`;
 
     // Ensure topic is in keywords
     if (!seoKeywords.toLowerCase().includes(topic.toLowerCase())) {
-      seoKeywords += `, ${topic}`;
+      seoKeywords += `, \${topic}`;
     }
 
     // Excerpt
@@ -223,7 +230,7 @@ Keywords: [kw]`;
     let featuredImage = null;
     if (settings?.imageSource === 'unsplash') {
       const encodedTopic = encodeURIComponent(topic.split(' ')[0] || 'business');
-      featuredImage = `https://source.unsplash.com/1200x630/?${encodedTopic}`;
+      featuredImage = `https://source.unsplash.com/1200x630/?\${encodedTopic}`;
     }
 
     // 3.5 Auto YouTube Video Embed
@@ -231,7 +238,7 @@ Keywords: [kw]`;
     if (settings?.embedYoutube !== false) {
       try {
         const ytSearchQuery = encodeURIComponent(topic + ' Hindi');
-        const ytSearchUrl = `https://www.youtube.com/results?search_query=${ytSearchQuery}`;
+        const ytSearchUrl = `https://www.youtube.com/results?search_query=\${ytSearchQuery}`;
         const ytRes = await fetch(ytSearchUrl, {
           headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' }
         });
@@ -243,7 +250,7 @@ Keywords: [kw]`;
 <div style="margin:2rem 0;text-align:center;">
   <h3>📺 इस विषय पर वीडियो देखें</h3>
   <div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;max-width:100%;border-radius:12px;">
-    <iframe src="https://www.youtube.com/embed/${videoId}" style="position:absolute;top:0;left:0;width:100%;height:100%;border:none;border-radius:12px;" allowfullscreen loading="lazy"></iframe>
+    <iframe src="https://www.youtube.com/embed/\${videoId}" style="position:absolute;top:0;left:0;width:100%;height:100%;border:none;border-radius:12px;" allowfullscreen loading="lazy"></iframe>
   </div>
 </div>`;
           // Insert YouTube video after the first 40% of content
@@ -254,7 +261,7 @@ Keywords: [kw]`;
           } else {
             finalContent += youtubeEmbed;
           }
-          console.log(`[YouTube Embed] Added video: ${videoId} for topic: ${topic}`);
+          console.log(`[YouTube Embed] Added video: \${videoId} for topic: \${topic}`);
         }
       } catch (ytError) {
         console.error('[YouTube Embed] Failed:', ytError);
@@ -264,7 +271,7 @@ Keywords: [kw]`;
     // 4. Create Post
     let slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
     const existingSlug = await prisma.blogPost.findUnique({ where: { slug } });
-    if (existingSlug) slug = `${slug}-${Date.now()}`;
+    if (existingSlug) slug = `\${slug}-\${Date.now()}`;
 
     const superAdmin = await prisma.user.findFirst({ where: { role: 'SUPER_ADMIN' } });
 
@@ -314,8 +321,8 @@ Keywords: [kw]`;
         const siteSettingsObj = await prisma.siteSettings.findUnique({ where: { id: 'default' } });
         if (siteSettingsObj?.aiApiKey?.startsWith('{')) {
           const parsedKeys = JSON.parse(siteSettingsObj.aiApiKey);
-          const postUrl = `https://antigravity.com/blog/${post.slug}`;
-          const message = `New Post: ${post.title}!\n\nRead more: ${postUrl}`;
+          const postUrl = `https://antigravity.com/blog/\${post.slug}`;
+          const message = `New Post: \${post.title}!\n\nRead more: \${postUrl}`;
           
           if (parsedKeys.twitter) {
             console.log(`[Twitter Auto-Post] Sending tweet...`);
@@ -323,7 +330,7 @@ Keywords: [kw]`;
                 method: 'POST',
                 headers: { 
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${parsedKeys.twitter}`
+                    'Authorization': `Bearer \${parsedKeys.twitter}`
                 },
                 body: JSON.stringify({ text: message })
             }).catch(console.error);
@@ -332,14 +339,14 @@ Keywords: [kw]`;
           if (parsedKeys.instagram && parsedKeys.instagramAccountId && post.featuredImage) {
             console.log(`[Instagram Auto-Post] Sending image...`);
             // Step 1: Create Media Container
-            fetch(`https://graph.facebook.com/v19.0/${parsedKeys.instagramAccountId}/media?image_url=${encodeURIComponent(post.featuredImage)}&caption=${encodeURIComponent(message)}&access_token=${parsedKeys.instagram}`, {
+            fetch(`https://graph.facebook.com/v19.0/\${parsedKeys.instagramAccountId}/media?image_url=\${encodeURIComponent(post.featuredImage)}&caption=\${encodeURIComponent(message)}&access_token=\${parsedKeys.instagram}`, {
                 method: 'POST'
             })
             .then(res => res.json())
             .then(data => {
                 if (data && data.id) {
                     // Step 2: Publish Media Container
-                    fetch(`https://graph.facebook.com/v19.0/${parsedKeys.instagramAccountId}/media_publish?creation_id=${data.id}&access_token=${parsedKeys.instagram}`, {
+                    fetch(`https://graph.facebook.com/v19.0/\${parsedKeys.instagramAccountId}/media_publish?creation_id=\${data.id}&access_token=\${parsedKeys.instagram}`, {
                         method: 'POST'
                     }).catch(console.error);
                 }
@@ -350,13 +357,13 @@ Keywords: [kw]`;
           // Telegram Bot API Integration
           if (parsedKeys.telegramToken && parsedKeys.telegramChatId) {
               if (post.featuredImage) {
-                  fetch(`https://api.telegram.org/bot${parsedKeys.telegramToken}/sendPhoto`, {
+                  fetch(`https://api.telegram.org/bot\${parsedKeys.telegramToken}/sendPhoto`, {
                       method: 'POST',
                       headers: { 'Content-Type': 'application/json' },
                       body: JSON.stringify({ chat_id: parsedKeys.telegramChatId, photo: post.featuredImage, caption: message })
                   }).catch(console.error);
               } else {
-                  fetch(`https://api.telegram.org/bot${parsedKeys.telegramToken}/sendMessage`, {
+                  fetch(`https://api.telegram.org/bot\${parsedKeys.telegramToken}/sendMessage`, {
                       method: 'POST',
                       headers: { 'Content-Type': 'application/json' },
                       body: JSON.stringify({ chat_id: parsedKeys.telegramChatId, text: message })
@@ -370,7 +377,7 @@ Keywords: [kw]`;
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Basic ${parsedKeys.onesignalApiKey}`
+                'Authorization': `Basic \${parsedKeys.onesignalApiKey}`
               },
               body: JSON.stringify({
                 app_id: parsedKeys.onesignalAppId,
@@ -437,41 +444,5 @@ Keywords: [kw]`;
     }
 
     return NextResponse.json({ error: 'Auto-blogging failed' }, { status: 500 });
-  }
-}
-
-export async function GET(request: Request) {
-  try {
-    const { searchParams } = new URL(request.url);
-    if (searchParams.get('trigger') === 'cron') {
-      const authHeader = request.headers.get('authorization');
-      // Require CRON_SECRET if it's set in env
-      if (process.env.CRON_SECRET && authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-        return NextResponse.json({ error: 'Unauthorized cron' }, { status: 401 });
-      }
-      
-      // Call the POST function directly to reuse logic
-      return POST(request);
-    }
-
-    const [totalKeywords, pendingKeywords, usedKeywords, totalAutoPosts, logs] = await Promise.all([
-      prisma.autoBlogKeyword.count(),
-      prisma.autoBlogKeyword.count({ where: { status: 'pending' } }),
-      prisma.autoBlogKeyword.count({ where: { status: 'used' } }),
-      prisma.blogPost.count({ where: { autoGenerated: true } }),
-      prisma.autoBlogLog.findMany({ orderBy: { createdAt: 'desc' }, take: 5 })
-    ]);
-
-    return NextResponse.json({
-      stats: {
-        totalKeywords,
-        pendingKeywords,
-        usedKeywords,
-        totalAutoPosts
-      },
-      logs
-    });
-  } catch (error) {
-    return NextResponse.json({ error: 'Failed to fetch stats' }, { status: 500 });
   }
 }

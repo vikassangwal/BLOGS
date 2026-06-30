@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Try to fetch site settings to get the actual domain if available, otherwise fallback
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://your-vercel-domain.vercel.app'; // User should update this env var
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://knowora.in'; // User should update this env var
 
   try {
     const posts = await prisma.blogPost.findMany({

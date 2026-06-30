@@ -21,10 +21,9 @@ export async function GET(request: Request) {
   }
 }
 
-export async function PUT(request: Request) {
+export const PUT = auth(async (request: any) => {
   try {
-    const session = await auth();
-    const user = session?.user;
+    const user = request.auth?.user;
     if (!user) {
       return NextResponse.json({ error: 'Login required' }, { status: 403 });
     }
@@ -60,4 +59,4 @@ export async function PUT(request: Request) {
     console.error('Settings Update Error:', error);
     return NextResponse.json({ error: error.message || 'Failed to update settings' }, { status: 500 });
   }
-}
+});

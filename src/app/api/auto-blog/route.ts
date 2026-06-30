@@ -108,21 +108,49 @@ export async function POST(request: NextRequest) {
     }
 
     // 3. INITIALIZE MULTI-AGENT AI CONFIG
-    let baseConfig = await getAIConfig();
-    if (!baseConfig) {
-      // Create a fallback config based on site settings if possible
-      const siteSettings = await prisma.siteSettings.findUnique({ where: { id: 'default' } });
-      if (siteSettings?.aiApiKey) {
-        baseConfig = { provider: siteSettings.aiProvider as any, apiKey: siteSettings.aiApiKey, model: siteSettings.aiModel };
-      } else {
-        return NextResponse.json({ success: false, error: 'AI is not configured. Please add an API key in settings.' });
+    // Read all saved API keys from SiteSettings.aiApiKey (JSON blob)
+    const siteSettings = await prisma.siteSettings.findUnique({ where: { id: 'default' } });
+    let savedKeys: Record<string, string> = {};
+    try {
+      if (siteSettings?.aiApiKey?.startsWith('{')) {
+        savedKeys = JSON.parse(siteSettings.aiApiKey);
       }
+    } catch(e) {}
+
+    // Helper: Build an AI config for a specific agent based on its provider and model
+    function buildAgentConfig(providerKey: string, modelKey: string, fallbackProvider: string, fallbackModel: string) {
+      const provider = savedKeys[providerKey] || fallbackProvider;
+      const model = savedKeys[modelKey] || fallbackModel;
+      
+      // Determine which API key to use based on the provider
+      let apiKey = '';
+      if (provider === 'openrouter') apiKey = savedKeys.openrouter || '';
+      else if (provider === 'openai') apiKey = savedKeys.openai || '';
+      else if (provider === 'gemini') apiKey = savedKeys.gemini || '';
+      else if (provider === 'anthropic') apiKey = savedKeys.anthropic || '';
+      else if (provider === 'deepseek') apiKey = savedKeys.deepseek || '';
+      
+      // Fallback: if that provider's key is empty, try openrouter as universal fallback
+      if (!apiKey && savedKeys.openrouter) {
+        apiKey = savedKeys.openrouter;
+        return { provider: 'openrouter' as any, apiKey, model };
+      }
+      // Last resort: try the default config
+      if (!apiKey && siteSettings?.aiApiKey && !siteSettings.aiApiKey.startsWith('{')) {
+        apiKey = siteSettings.aiApiKey;
+      }
+      
+      return { provider: provider as any, apiKey, model };
     }
 
-    // We will create distinct configs for each agent by overriding the model
-    const researcherConfig = { ...baseConfig, model: settings.researcherModel || baseConfig.model };
-    const writerConfig = { ...baseConfig, model: settings.writerModel || baseConfig.model };
-    const seoConfig = { ...baseConfig, model: settings.seoModel || baseConfig.model };
+    const researcherConfig = buildAgentConfig('researcherProvider', 'researcherModel', 'openrouter', settings.researcherModel || 'google/gemini-2.5-flash');
+    const writerConfig = buildAgentConfig('writerProvider', 'writerModel', 'openrouter', settings.writerModel || 'openai/gpt-4o-mini');
+    const seoConfig = buildAgentConfig('seoProvider', 'seoModel', 'openrouter', settings.seoModel || 'openai/gpt-4o-mini');
+
+    // Verify at least one agent has a valid API key
+    if (!researcherConfig.apiKey && !writerConfig.apiKey && !seoConfig.apiKey) {
+      return NextResponse.json({ success: false, error: 'AI is not configured. Please add at least one API key in Settings > AI Configuration.' });
+    }
 
     // Set Language Rules
     const langInstructions = "Write completely in Hindi (Devanagari script), but keep technical words in English.";

@@ -114,49 +114,154 @@ export default function SettingsAdmin() {
 
         {activeTab === 'ai' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', background: 'rgba(255, 255, 255, 0.05)', padding: '2rem', borderRadius: '16px', border: '1px solid var(--color-border)' }}>
-            <div style={{ background: 'rgba(255, 255, 255, 0.02)', padding: '1rem', borderRadius: '8px', fontSize: '0.9rem', color: 'var(--color-text-secondary)' }}>
-              <strong>Note:</strong> API keys are masked for security. If you see '********', a key is already set.
-            </div>
             
-            <div>
-              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>AI Provider</label>
-              <select value={settings.aiProvider || 'openai'} onChange={e => setSettings({ ...settings, aiProvider: e.target.value })} style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--color-border)' }}>
-                <option value="openai">OpenAI</option>
-                <option value="gemini">Google Gemini</option>
-                <option value="anthropic">Anthropic (Claude)</option>
-                <option value="deepseek">DeepSeek</option>
-                <option value="openrouter">OpenRouter (Supports All Models)</option>
-              </select>
+            {/* INFO BOX */}
+            <div style={{ background: 'linear-gradient(135deg, rgba(0,102,204,0.1), rgba(147,51,234,0.1))', padding: '1rem 1.2rem', borderRadius: '12px', fontSize: '0.9rem', color: 'var(--color-text-secondary)', border: '1px solid rgba(0,102,204,0.2)' }}>
+              <strong style={{ color: 'var(--color-text-primary)' }}>💡 Multiple AI Support:</strong> आप एक साथ कई AI Providers की API Keys सेव कर सकते हैं। हर Agent (Researcher, Writer, SEO) के लिए अलग-अलग AI चुन सकते हैं।
             </div>
+
+            {/* ================================================ */}
+            {/* SECTION 1: ALL API KEYS */}
+            {/* ================================================ */}
+            <h3 style={{ margin: '0', fontSize: '1.15rem', fontWeight: 700 }}>🔑 API Keys (सभी AI Providers)</h3>
+            <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.85rem', margin: '-1rem 0 0 0' }}>जितनी चाहें उतनी API Keys डालें। जो भी Key डालेंगे वो Provider Auto-Blogging में उपलब्ध हो जाएगा।</p>
             
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <div>
-                <label style={{ display: 'block', marginBottom: '0.25rem', fontWeight: 600, fontSize: '0.9rem' }}>OpenAI API Key</label>
-                <input type="password" value={apiKeys.openai || ''} onChange={e => setApiKeys({ ...apiKeys, openai: e.target.value })} placeholder="sk-..." style={{ width: '100%', padding: '0.6rem', borderRadius: '6px', border: '1px solid var(--color-border)' }} />
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <div style={{ background: 'rgba(255,255,255,0.02)', padding: '1rem', borderRadius: '10px', border: '1px solid var(--color-border)' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem', fontWeight: 700, fontSize: '0.95rem' }}>
+                  <span style={{ background: '#10A37F', color: '#fff', padding: '2px 8px', borderRadius: '6px', fontSize: '0.7rem' }}>OpenAI</span> API Key
+                </label>
+                <input type="password" value={apiKeys.openai || ''} onChange={e => setApiKeys({ ...apiKeys, openai: e.target.value })} placeholder="sk-..." style={{ width: '100%', padding: '0.7rem', borderRadius: '8px', border: '1px solid var(--color-border)' }} />
+                <p style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', margin: '0.3rem 0 0' }}>Models: gpt-4o, gpt-4o-mini, gpt-4-turbo</p>
               </div>
-              <div>
-                <label style={{ display: 'block', marginBottom: '0.25rem', fontWeight: 600, fontSize: '0.9rem' }}>Google Gemini API Key</label>
-                <input type="password" value={apiKeys.gemini || ''} onChange={e => setApiKeys({ ...apiKeys, gemini: e.target.value })} placeholder="AIzaSy..." style={{ width: '100%', padding: '0.6rem', borderRadius: '6px', border: '1px solid var(--color-border)' }} />
+              <div style={{ background: 'rgba(255,255,255,0.02)', padding: '1rem', borderRadius: '10px', border: '1px solid var(--color-border)' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem', fontWeight: 700, fontSize: '0.95rem' }}>
+                  <span style={{ background: '#4285F4', color: '#fff', padding: '2px 8px', borderRadius: '6px', fontSize: '0.7rem' }}>Google</span> Gemini API Key
+                </label>
+                <input type="password" value={apiKeys.gemini || ''} onChange={e => setApiKeys({ ...apiKeys, gemini: e.target.value })} placeholder="AIzaSy..." style={{ width: '100%', padding: '0.7rem', borderRadius: '8px', border: '1px solid var(--color-border)' }} />
+                <p style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', margin: '0.3rem 0 0' }}>Models: gemini-2.5-flash, gemini-2.5-pro</p>
               </div>
-              <div>
-                <label style={{ display: 'block', marginBottom: '0.25rem', fontWeight: 600, fontSize: '0.9rem' }}>Anthropic Claude API Key</label>
-                <input type="password" value={apiKeys.anthropic || ''} onChange={e => setApiKeys({ ...apiKeys, anthropic: e.target.value })} placeholder="sk-ant-..." style={{ width: '100%', padding: '0.6rem', borderRadius: '6px', border: '1px solid var(--color-border)' }} />
+              <div style={{ background: 'rgba(255,255,255,0.02)', padding: '1rem', borderRadius: '10px', border: '1px solid var(--color-border)' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem', fontWeight: 700, fontSize: '0.95rem' }}>
+                  <span style={{ background: '#D97706', color: '#fff', padding: '2px 8px', borderRadius: '6px', fontSize: '0.7rem' }}>Claude</span> Anthropic API Key
+                </label>
+                <input type="password" value={apiKeys.anthropic || ''} onChange={e => setApiKeys({ ...apiKeys, anthropic: e.target.value })} placeholder="sk-ant-..." style={{ width: '100%', padding: '0.7rem', borderRadius: '8px', border: '1px solid var(--color-border)' }} />
+                <p style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', margin: '0.3rem 0 0' }}>Models: claude-3-5-sonnet, claude-3-haiku</p>
               </div>
-              <div>
-                <label style={{ display: 'block', marginBottom: '0.25rem', fontWeight: 600, fontSize: '0.9rem' }}>DeepSeek API Key</label>
-                <input type="password" value={apiKeys.deepseek || ''} onChange={e => setApiKeys({ ...apiKeys, deepseek: e.target.value })} placeholder="sk-..." style={{ width: '100%', padding: '0.6rem', borderRadius: '6px', border: '1px solid var(--color-border)' }} />
-              </div>
-              <div>
-                <label style={{ display: 'block', marginBottom: '0.25rem', fontWeight: 600, fontSize: '0.9rem' }}>OpenRouter API Key (Recommended)</label>
-                <input type="password" value={apiKeys.openrouter || ''} onChange={e => setApiKeys({ ...apiKeys, openrouter: e.target.value })} placeholder="sk-or-v1-..." style={{ width: '100%', padding: '0.6rem', borderRadius: '6px', border: '1px solid var(--color-border)' }} />
+              <div style={{ background: 'rgba(255,255,255,0.02)', padding: '1rem', borderRadius: '10px', border: '1px solid var(--color-border)' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem', fontWeight: 700, fontSize: '0.95rem' }}>
+                  <span style={{ background: '#0066FF', color: '#fff', padding: '2px 8px', borderRadius: '6px', fontSize: '0.7rem' }}>DeepSeek</span> API Key
+                </label>
+                <input type="password" value={apiKeys.deepseek || ''} onChange={e => setApiKeys({ ...apiKeys, deepseek: e.target.value })} placeholder="sk-..." style={{ width: '100%', padding: '0.7rem', borderRadius: '8px', border: '1px solid var(--color-border)' }} />
+                <p style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', margin: '0.3rem 0 0' }}>Models: deepseek-chat, deepseek-reasoner</p>
               </div>
             </div>
 
-            <div>
-              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>Preferred Model</label>
-              <input type="text" value={settings.aiModel || ''} onChange={e => setSettings({ ...settings, aiModel: e.target.value })} placeholder="e.g. gpt-4o, gemini-1.5-pro, claude-3-5-sonnet" style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--color-border)' }} />
-              <p style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', marginTop: '0.5rem' }}>Make sure the model name matches the provider's API.</p>
+            <div style={{ background: 'linear-gradient(135deg, rgba(147,51,234,0.1), rgba(236,72,153,0.1))', padding: '1rem', borderRadius: '10px', border: '1px solid rgba(147,51,234,0.3)' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem', fontWeight: 700, fontSize: '1rem' }}>
+                <span style={{ background: 'linear-gradient(135deg, #9333EA, #EC4899)', color: '#fff', padding: '3px 10px', borderRadius: '6px', fontSize: '0.75rem' }}>⭐ OpenRouter</span> API Key (सबसे ज़रूरी — सभी AI एक Key में)
+              </label>
+              <input type="password" value={apiKeys.openrouter || ''} onChange={e => setApiKeys({ ...apiKeys, openrouter: e.target.value })} placeholder="sk-or-v1-..." style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid rgba(147,51,234,0.3)', background: 'rgba(255,255,255,0.03)' }} />
+              <p style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', margin: '0.4rem 0 0' }}>OpenRouter एक Key से सभी AI Models चला सकते हैं — GPT-4o, Gemini, Claude, Llama, Mixtral, DeepSeek और 100+ Models!</p>
             </div>
+
+            {/* ================================================ */}
+            {/* SECTION 2: DEFAULT PROVIDER + MODEL */}
+            {/* ================================================ */}
+            <hr style={{ border: 'none', borderTop: '1px solid var(--color-border)', margin: '0.5rem 0' }} />
+            <h3 style={{ margin: '0', fontSize: '1.15rem', fontWeight: 700 }}>⚙️ Default AI Provider & Model</h3>
+            <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.85rem', margin: '-1rem 0 0 0' }}>Chatbot और Blog Editor में AI के लिए यह Default Provider इस्तेमाल होगा।</p>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <div>
+                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>Default AI Provider</label>
+                <select value={settings.aiProvider || 'openrouter'} onChange={e => setSettings({ ...settings, aiProvider: e.target.value })} style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--color-border)' }}>
+                  <option value="openrouter">OpenRouter (All Models)</option>
+                  <option value="openai">OpenAI</option>
+                  <option value="gemini">Google Gemini</option>
+                  <option value="anthropic">Anthropic (Claude)</option>
+                  <option value="deepseek">DeepSeek</option>
+                </select>
+              </div>
+              <div>
+                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>Default Model</label>
+                <input type="text" value={settings.aiModel || ''} onChange={e => setSettings({ ...settings, aiModel: e.target.value })} placeholder="e.g. openai/gpt-4o-mini" style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--color-border)' }} />
+              </div>
+            </div>
+
+            {/* ================================================ */}
+            {/* SECTION 3: MULTI-AGENT CONFIGURATION */}
+            {/* ================================================ */}
+            <hr style={{ border: 'none', borderTop: '1px solid var(--color-border)', margin: '0.5rem 0' }} />
+            <h3 style={{ margin: '0', fontSize: '1.15rem', fontWeight: 700 }}>🤖 Multi-Agent AI Configuration (Auto-Blog)</h3>
+            <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.85rem', margin: '-1rem 0 0 0' }}>Auto-Blogging में हर Agent (Researcher, Writer, SEO) के लिए अलग Provider और Model चुनें।</p>
+
+            {/* Agent 1: Researcher */}
+            <div style={{ background: 'rgba(59,130,246,0.08)', padding: '1.2rem', borderRadius: '12px', border: '1px solid rgba(59,130,246,0.2)' }}>
+              <h4 style={{ margin: '0 0 0.8rem', fontSize: '1rem', fontWeight: 700, color: '#3B82F6' }}>🔍 Agent 1: Researcher (रिसर्चर)</h4>
+              <p style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', margin: '0 0 0.8rem' }}>यह AI इंटरनेट से facts, data और trends रिसर्च करके लाएगा।</p>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.8rem' }}>
+                <div>
+                  <label style={{ display: 'block', marginBottom: '0.3rem', fontWeight: 600, fontSize: '0.85rem' }}>Provider</label>
+                  <select value={apiKeys.researcherProvider || 'openrouter'} onChange={e => setApiKeys({ ...apiKeys, researcherProvider: e.target.value })} style={{ width: '100%', padding: '0.7rem', borderRadius: '8px', border: '1px solid var(--color-border)' }}>
+                    <option value="openrouter">OpenRouter</option>
+                    <option value="openai">OpenAI</option>
+                    <option value="gemini">Google Gemini</option>
+                    <option value="anthropic">Anthropic (Claude)</option>
+                    <option value="deepseek">DeepSeek</option>
+                  </select>
+                </div>
+                <div>
+                  <label style={{ display: 'block', marginBottom: '0.3rem', fontWeight: 600, fontSize: '0.85rem' }}>Model Name</label>
+                  <input type="text" value={apiKeys.researcherModel || 'google/gemini-2.5-flash'} onChange={e => setApiKeys({ ...apiKeys, researcherModel: e.target.value })} placeholder="google/gemini-2.5-flash" style={{ width: '100%', padding: '0.7rem', borderRadius: '8px', border: '1px solid var(--color-border)' }} />
+                </div>
+              </div>
+            </div>
+
+            {/* Agent 2: Writer */}
+            <div style={{ background: 'rgba(16,185,129,0.08)', padding: '1.2rem', borderRadius: '12px', border: '1px solid rgba(16,185,129,0.2)' }}>
+              <h4 style={{ margin: '0 0 0.8rem', fontSize: '1rem', fontWeight: 700, color: '#10B981' }}>✍️ Agent 2: Writer (लेखक)</h4>
+              <p style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', margin: '0 0 0.8rem' }}>यह AI शानदार ब्लॉग लिखेगा — हिंदी/इंग्लिश, SEO-optimized।</p>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.8rem' }}>
+                <div>
+                  <label style={{ display: 'block', marginBottom: '0.3rem', fontWeight: 600, fontSize: '0.85rem' }}>Provider</label>
+                  <select value={apiKeys.writerProvider || 'openrouter'} onChange={e => setApiKeys({ ...apiKeys, writerProvider: e.target.value })} style={{ width: '100%', padding: '0.7rem', borderRadius: '8px', border: '1px solid var(--color-border)' }}>
+                    <option value="openrouter">OpenRouter</option>
+                    <option value="openai">OpenAI</option>
+                    <option value="gemini">Google Gemini</option>
+                    <option value="anthropic">Anthropic (Claude)</option>
+                    <option value="deepseek">DeepSeek</option>
+                  </select>
+                </div>
+                <div>
+                  <label style={{ display: 'block', marginBottom: '0.3rem', fontWeight: 600, fontSize: '0.85rem' }}>Model Name</label>
+                  <input type="text" value={apiKeys.writerModel || 'openai/gpt-4o-mini'} onChange={e => setApiKeys({ ...apiKeys, writerModel: e.target.value })} placeholder="openai/gpt-4o-mini" style={{ width: '100%', padding: '0.7rem', borderRadius: '8px', border: '1px solid var(--color-border)' }} />
+                </div>
+              </div>
+            </div>
+
+            {/* Agent 3: SEO Expert */}
+            <div style={{ background: 'rgba(245,158,11,0.08)', padding: '1.2rem', borderRadius: '12px', border: '1px solid rgba(245,158,11,0.2)' }}>
+              <h4 style={{ margin: '0 0 0.8rem', fontSize: '1rem', fontWeight: 700, color: '#F59E0B' }}>📊 Agent 3: SEO Expert</h4>
+              <p style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', margin: '0 0 0.8rem' }}>यह AI Title, Description, Keywords, Slug बनाएगा — Google Ranking के लिए।</p>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.8rem' }}>
+                <div>
+                  <label style={{ display: 'block', marginBottom: '0.3rem', fontWeight: 600, fontSize: '0.85rem' }}>Provider</label>
+                  <select value={apiKeys.seoProvider || 'openrouter'} onChange={e => setApiKeys({ ...apiKeys, seoProvider: e.target.value })} style={{ width: '100%', padding: '0.7rem', borderRadius: '8px', border: '1px solid var(--color-border)' }}>
+                    <option value="openrouter">OpenRouter</option>
+                    <option value="openai">OpenAI</option>
+                    <option value="gemini">Google Gemini</option>
+                    <option value="anthropic">Anthropic (Claude)</option>
+                    <option value="deepseek">DeepSeek</option>
+                  </select>
+                </div>
+                <div>
+                  <label style={{ display: 'block', marginBottom: '0.3rem', fontWeight: 600, fontSize: '0.85rem' }}>Model Name</label>
+                  <input type="text" value={apiKeys.seoModel || 'openai/gpt-4o-mini'} onChange={e => setApiKeys({ ...apiKeys, seoModel: e.target.value })} placeholder="openai/gpt-4o-mini" style={{ width: '100%', padding: '0.7rem', borderRadius: '8px', border: '1px solid var(--color-border)' }} />
+                </div>
+              </div>
+            </div>
+
           </div>
         )}
 

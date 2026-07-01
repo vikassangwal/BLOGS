@@ -20,7 +20,10 @@ export async function generateMetadata(): Promise<Metadata> {
     openGraph: {
       type: 'website',
       siteName: settings?.siteName || 'Knowora',
-    }
+    },
+    verification: {
+      google: '9xaLxx5SOf8hmaKdfKQ5Dgp5Y4abmT27VqN8CIlPdIM',
+    },
   };
 }
 

@@ -77,7 +77,7 @@ export default async function BlogPostPage({ params }: Props) {
       where: { slug },
       include: { 
         tags: { include: { tag: true } },
-        author: { select: { name: true, image: true } }
+        author: { select: { name: true } }
       }
     }),
     prisma.adPlacement.findMany({ where: { isActive: true } }),

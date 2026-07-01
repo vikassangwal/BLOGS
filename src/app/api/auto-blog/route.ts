@@ -4,6 +4,7 @@ import { getAIConfig, generateAIContent } from '@/lib/ai';
 import Parser from 'rss-parser';
 
 export const maxDuration = 60; // Vercel hobby allows up to 60s for serverless
+export const dynamic = 'force-dynamic'; // Prevent caching for cron jobs
 
 // -------------------------------------------------------------
 // HELPER: Fetch Google Trends RSS for India
@@ -122,10 +123,22 @@ export async function POST(request: NextRequest) {
       }
       
       const trends = await getTrendingTopics();
-      const educationalKeywords = ['exam', 'result', 'recruitment', 'jobs', 'yojna', 'admit card', 'vacancy', 'school', 'board'];
-      const topPriority = trends.find(t => educationalKeywords.some(ed => t.toLowerCase().includes(ed)));
       
-      targetTopic = topPriority || trends[Math.floor(Math.random() * Math.min(trends.length, 5))];
+      // Prevent duplicate blogs by checking if the trend was already processed
+      for (const trend of trends) {
+        const existingLog = await prisma.autoBlogLog.findFirst({
+          where: { keyword: trend, status: 'success' }
+        });
+        if (!existingLog) {
+          targetTopic = trend;
+          break;
+        }
+      }
+
+      // Fallback if all trends were used
+      if (!targetTopic) {
+         targetTopic = trends[Math.floor(Math.random() * Math.min(trends.length, 5))];
+      }
     }
 
     // 3. INITIALIZE MULTI-AGENT AI CONFIG

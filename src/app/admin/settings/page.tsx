@@ -6,7 +6,8 @@ export default function SettingsAdmin() {
   const [apiKeys, setApiKeys] = useState<any>({ 
     openai: '', gemini: '', anthropic: '', deepseek: '', openrouter: '',
     resend: '', twitter: '', facebook: '', instagram: '', instagramAccountId: '',
-    onesignalAppId: '', onesignalApiKey: '', razorpayKey: '', razorpaySecret: ''
+    onesignalAppId: '', onesignalApiKey: '', razorpayKey: '', razorpaySecret: '',
+    telegramToken: '', telegramChatId: ''
   });
   const [isSaving, setIsSaving] = useState(false);
   const [activeTab, setActiveTab] = useState('general');
@@ -336,6 +337,14 @@ export default function SettingsAdmin() {
             <div>
               <h3 style={{ margin: '0 0 1rem 0', fontSize: '1.2rem', fontWeight: 700 }}>Social Media Auto-Poster</h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div>
+                  <label style={{ display: 'block', marginBottom: '0.25rem', fontWeight: 600, fontSize: '0.9rem' }}>Telegram Bot Token</label>
+                  <input type="password" value={apiKeys.telegramToken || ''} onChange={e => setApiKeys({ ...apiKeys, telegramToken: e.target.value })} placeholder="123456789:ABCdef..." style={{ width: '100%', padding: '0.6rem', borderRadius: '6px', border: '1px solid var(--color-border)' }} />
+                </div>
+                <div>
+                  <label style={{ display: 'block', marginBottom: '0.25rem', fontWeight: 600, fontSize: '0.9rem' }}>Telegram Channel/Chat ID</label>
+                  <input type="text" value={apiKeys.telegramChatId || ''} onChange={e => setApiKeys({ ...apiKeys, telegramChatId: e.target.value })} placeholder="@yourchannel or -100123456" style={{ width: '100%', padding: '0.6rem', borderRadius: '6px', border: '1px solid var(--color-border)' }} />
+                </div>
                 <div>
                   <label style={{ display: 'block', marginBottom: '0.25rem', fontWeight: 600, fontSize: '0.9rem' }}>Twitter / X API Token</label>
                   <input type="password" value={apiKeys.twitter || ''} onChange={e => setApiKeys({ ...apiKeys, twitter: e.target.value })} placeholder="Bearer Token..." style={{ width: '100%', padding: '0.6rem', borderRadius: '6px', border: '1px solid var(--color-border)' }} />

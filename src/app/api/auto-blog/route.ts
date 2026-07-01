@@ -309,6 +309,24 @@ export async function POST(request: NextRequest) {
       await postToInstagram(settings.instagramToken, settings.instagramAccountId, featuredImage, socialCaption);
     }
 
+    // 3. Telegram
+    if (savedKeys.telegramToken && savedKeys.telegramChatId) {
+      try {
+        const telegramUrl = `https://api.telegram.org/bot${savedKeys.telegramToken}/sendMessage`;
+        await fetch(telegramUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            chat_id: savedKeys.telegramChatId,
+            text: socialCaption,
+            parse_mode: 'HTML'
+          })
+        });
+      } catch (err) {
+        console.error('Telegram broadcast failed:', err);
+      }
+    }
+
     return NextResponse.json({ success: true, post: newPost });
 
   } catch (error: any) {

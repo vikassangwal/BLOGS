@@ -38,7 +38,8 @@ async function getPostsByTag(tag: string) {
 
 export default async function HomePage() {
   // Fetch all categories in parallel on the server
-  const [techPosts, eduPosts, financePosts, whatsappLinks] = await Promise.all([
+  const [allPosts, techPosts, eduPosts, financePosts, whatsappLinks] = await Promise.all([
+    prisma.blogPost.findMany({ where: { status: 'Published' }, orderBy: { publishedAt: 'desc' }, take: 10, select: { id: true, title: true, slug: true, publishedAt: true, featuredImage: true } }),
     getPostsByTag('Technology'),
     getPostsByTag('Education & Career'),
     getPostsByTag('Finance & Earning'),
@@ -133,7 +134,7 @@ export default async function HomePage() {
       </div>
 
       {/* Latest & Trending Sections */}
-      <div className="max-w-6xl w-full mx-auto mt-20 pb-20">
+      <div className="max-w-6xl w-full mx-auto mt-20 pb-10">
         {(techPosts.length > 0 || eduPosts.length > 0 || financePosts.length > 0) ? (
           <>
             <CategorySection title="Trending in Technology" posts={techPosts} tag="Technology" />
@@ -142,10 +143,33 @@ export default async function HomePage() {
           </>
         ) : (
           <div className="text-center text-gray-500 mt-20 p-10 glass-panel rounded-2xl animate-fade-in">
-            <p>No articles available yet. Check back soon!</p>
+            <p>More categorized articles coming soon!</p>
           </div>
         )}
       </div>
+
+      {/* Marquee Ticker Section (ptti k rup me) */}
+      {allPosts.length > 0 && (
+        <div className="w-full mt-10 mb-20 overflow-hidden bg-blue-900/20 py-4 border-y border-blue-500/20 backdrop-blur-md relative flex items-center">
+          <div className="absolute left-0 w-20 h-full bg-gradient-to-r from-[var(--color-bg-primary)] to-transparent z-10 pointer-events-none"></div>
+          <div className="absolute right-0 w-20 h-full bg-gradient-to-l from-[var(--color-bg-primary)] to-transparent z-10 pointer-events-none"></div>
+          <div className="whitespace-nowrap flex gap-8 items-center" style={{ animation: 'marquee 30s linear infinite' }}>
+            {/* Double the array for infinite scroll effect */}
+            {[...allPosts, ...allPosts].map((post, i) => (
+              <Link href={`/blog/${post.slug}`} key={`${post.id}-${i}`} className="inline-flex items-center gap-3 px-4 py-2 hover:bg-white/5 rounded-full transition-colors shrink-0">
+                <span className="text-blue-400">⚡</span>
+                <span className="text-sm font-semibold text-gray-200 hover:text-white transition-colors">{post.title}</span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+      <style dangerouslySetInnerHTML={{__html: `
+        @keyframes marquee {
+          0% { transform: translateX(0%); }
+          100% { transform: translateX(-50%); }
+        }
+      `}} />
       
       {/* Global AI Chatbot */}
       <BlogChatbot whatsappLinks={whatsappLinks} />

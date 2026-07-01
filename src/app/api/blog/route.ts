@@ -28,7 +28,7 @@ export async function GET(request: Request) {
       where.publishedAt = { lte: new Date() };
     }
     if (tag) {
-      where.tags = { some: { tag: { slug: tag } } };
+      where.tags = { some: { tag: { name: tag } } };
     }
 
     const [posts, total] = await Promise.all([

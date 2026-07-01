@@ -110,6 +110,25 @@ export default async function HomePage() {
             Read Our Articles
           </Link>
         </div>
+
+        {/* Quick Category Links */}
+        <div className="mt-10 flex flex-wrap justify-center gap-3">
+          <Link href="/blog?tag=Technology" className="px-5 py-2.5 glass-panel hover:bg-blue-500/10 border border-white/10 hover:border-blue-500/30 rounded-full text-sm font-medium transition-all text-gray-300 hover:text-white">
+            💻 Technology
+          </Link>
+          <Link href="/blog?tag=Education%20%26%20Career" className="px-5 py-2.5 glass-panel hover:bg-blue-500/10 border border-white/10 hover:border-blue-500/30 rounded-full text-sm font-medium transition-all text-gray-300 hover:text-white">
+            🎓 Education & Career
+          </Link>
+          <Link href="/blog?tag=Finance%20%26%20Earning" className="px-5 py-2.5 glass-panel hover:bg-blue-500/10 border border-white/10 hover:border-blue-500/30 rounded-full text-sm font-medium transition-all text-gray-300 hover:text-white">
+            💰 Finance & Earning
+          </Link>
+          <Link href="/blog?tag=News" className="px-5 py-2.5 glass-panel hover:bg-blue-500/10 border border-white/10 hover:border-blue-500/30 rounded-full text-sm font-medium transition-all text-gray-300 hover:text-white">
+            📰 News
+          </Link>
+          <Link href="/blog" className="px-5 py-2.5 glass-panel hover:bg-blue-500/10 border border-white/10 hover:border-blue-500/30 rounded-full text-sm font-medium transition-all text-gray-300 hover:text-white">
+            ✨ View All
+          </Link>
+        </div>
       </div>
 
       {/* Latest & Trending Sections */}

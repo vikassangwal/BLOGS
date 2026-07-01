@@ -184,7 +184,9 @@ export async function POST(request: NextRequest) {
     2. Format using strict HTML tags: <h2>, <h3>, <p>, <ul>, <li>, <strong>, <blockquote>, <table>.
     3. Do NOT wrap the output in markdown code blocks like \`\`\`html. Output raw HTML only.
     4. Make the content highly readable and scannable with engaging subheadings.
-    5. Add a compelling introduction and a strong conclusion.`;
+    5. Add a compelling introduction and a strong conclusion.
+    6. IF the topic is about Finance/Earning/Money, you MUST include sections on "How to make money (पैसे कैसे कमाएं)" and "Money Management Tips (पैसे कैसे मैनेज करें)".
+    7. IF the topic is about Technology/Gadgets/Mobiles, you MUST embed realistic images of the gadgets using this HTML tag: <img src="https://image.pollinations.ai/prompt/Realistic%20Photo%20Of%20[GADGET_NAME_HERE]?width=800&height=400&nologo=true" alt="Gadget Image" class="w-full rounded-xl my-4" />`;
 
     let articleHtml = await generateAIContent(writerConfig, "You are an expert blog writer.", writerPrompt, 3500);
     articleHtml = articleHtml.replace(/^```html\n?|```$/g, '').trim();

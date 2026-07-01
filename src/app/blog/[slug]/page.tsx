@@ -3,6 +3,8 @@ import { notFound } from 'next/navigation';
 import { prisma } from '@/lib/prisma';
 import BlogPostClient from '@/components/BlogPostClient';
 
+export const revalidate = 600; // Cache for 10 minutes
+
 type Props = {
   params: Promise<{ slug: string }>;
 };

@@ -46,10 +46,14 @@ export default async function RootLayout({
     <html lang="en">
       <head>
         <link rel="manifest" href="/manifest.json" />
-        {/* Google AdSense Global Script (Replace with actual publisher ID) */}
-        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossOrigin="anonymous"></script>
       </head>
       <body className="antialiased min-h-screen flex flex-col relative transition-colors duration-300">
+        {/* Google AdSense Global Script */}
+        <Script 
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" 
+          crossOrigin="anonymous" 
+          strategy="lazyOnload" 
+        />
         <div className="bg-mesh"></div>
         <Suspense fallback={<div className="h-20 w-full" />}>
           <GlobalHeader siteName={siteName} />

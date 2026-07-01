@@ -1,6 +1,7 @@
 'use client';
 import React from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
+import Image from 'next/image';
 import ThemeToggle from './ThemeToggle';
 
 export default function GlobalHeader({ siteName }: { siteName?: string }) {
@@ -36,8 +37,8 @@ export default function GlobalHeader({ siteName }: { siteName?: string }) {
   return (
     <header className="sticky top-0 z-50 glass-panel w-full" style={{ borderBottom: '1px solid var(--color-border)' }}>
       <div className="container mx-auto px-4 md:px-6 h-16 md:h-20 flex items-center justify-between">
-        <a href="/" className="flex items-center" style={{ zIndex: 60 }}>
-          <img src="/logo.png" alt={siteName || 'Knowora'} className="h-12 md:h-14 w-auto object-contain" />
+        <a href="/" className="flex items-center" style={{ zIndex: 60, position: 'relative', height: '48px', width: '200px' }}>
+          <Image src="/logo.png" alt={siteName || 'Knowora'} fill style={{ objectFit: 'contain', objectPosition: 'left' }} priority />
         </a>
         
         {/* Desktop & Mobile Shared Actions */}

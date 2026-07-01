@@ -114,7 +114,7 @@ export default function BlogListingPage() {
           >
             All
           </button>
-          {tags.map(tag => (
+          {tags.slice(0, 3).map(tag => (
             <button
               key={tag}
               onClick={() => setActiveTag(tag)}
@@ -184,41 +184,53 @@ export default function BlogListingPage() {
                   }}
                   >
                     {/* Image Thumbnail */}
-                    <div className="blog-list-image" style={{ 
-                      position: 'relative', 
-                      background: 'var(--color-bg-secondary)',
-                      borderRadius: '12px',
-                      overflow: 'hidden',
-                      flexShrink: 0
-                    }}>
-                      {post.featuredImage ? (
+                    {post.featuredImage && (
+                      <div className="blog-list-image" style={{ 
+                        position: 'relative', 
+                        background: 'var(--color-bg-secondary)',
+                        borderRadius: '12px',
+                        overflow: 'hidden',
+                        flexShrink: 0
+                      }}>
                         <Image src={post.featuredImage} alt={post.title} fill style={{ objectFit: 'cover' }} sizes="(max-width: 768px) 150px, 180px" />
-                      ) : (
-                        <div style={{ width: '100%', height: '100%', background: 'linear-gradient(135deg, var(--color-accent), #002244)', opacity: 0.8 }} />
-                      )}
-                      {post.tags?.[0] && (
-                        <span style={{
-                          position: 'absolute',
-                          top: '0.5rem',
-                          right: '0.5rem',
-                          background: 'rgba(0,0,0,0.6)',
-                          padding: '0.2rem 0.5rem',
-                          borderRadius: '10px',
-                          fontSize: '0.65rem',
-                          fontWeight: 600,
-                          backdropFilter: 'blur(10px)',
-                          color: '#fff'
-                        }}>
-                          {post.tags[0]}
-                        </span>
-                      )}
-                    </div>
+                        {post.tags?.[0] && (
+                          <span style={{
+                            position: 'absolute',
+                            top: '10px',
+                            left: '10px',
+                            background: 'rgba(0,0,0,0.6)',
+                            color: '#fff',
+                            padding: '0.2rem 0.6rem',
+                            borderRadius: '12px',
+                            fontSize: '0.7rem',
+                            fontWeight: 600,
+                            backdropFilter: 'blur(4px)'
+                          }}>
+                            {post.tags[0]}
+                          </span>
+                        )}
+                      </div>
+                    )}
 
                     {/* Content */}
                     <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-                      <p style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', marginBottom: '0.3rem' }}>
-                        {new Date(post.publishedAt || post.createdAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
-                      </p>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.3rem', flexWrap: 'wrap' }}>
+                        {!post.featuredImage && post.tags?.[0] && (
+                          <span style={{
+                            background: 'var(--color-bg-secondary)',
+                            color: 'var(--color-accent)',
+                            padding: '0.2rem 0.6rem',
+                            borderRadius: '12px',
+                            fontSize: '0.7rem',
+                            fontWeight: 600
+                          }}>
+                            {post.tags[0]}
+                          </span>
+                        )}
+                        <p style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', margin: 0 }}>
+                          {new Date(post.publishedAt || post.createdAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                        </p>
+                      </div>
                       <h2 style={{ fontSize: '1.2rem', fontWeight: 700, marginBottom: '0.5rem', lineHeight: 1.3 }}>
                         {post.title}
                       </h2>

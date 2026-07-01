@@ -1,17 +1,31 @@
 'use client';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, Suspense } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useSearchParams } from 'next/navigation';
 import LeadCaptureForm from '@/components/LeadCaptureForm';
 
-export default function BlogListingPage() {
+function BlogListContent() {
+  const searchParams = useSearchParams();
+  const initialTag = searchParams ? searchParams.get('tag') || '' : '';
+  
   const [posts, setPosts] = useState<any[]>([]);
   const [tags, setTags] = useState<string[]>([]);
-  const [activeTag, setActiveTag] = useState('');
+  const [activeTag, setActiveTag] = useState(initialTag);
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Sync activeTag if URL changes externally
+  useEffect(() => {
+    if (searchParams) {
+      const tag = searchParams.get('tag');
+      if (tag !== null && tag !== activeTag) {
+        setActiveTag(tag);
+      }
+    }
+  }, [searchParams]);
 
   const fetchPosts = async () => {
     setIsLoading(true);
@@ -300,5 +314,13 @@ export default function BlogListingPage() {
         }
       `}</style>
     </div>
+  );
+}
+
+export default function BlogListingPage() {
+  return (
+    <Suspense fallback={<div style={{ minHeight: '100vh', background: 'var(--color-bg-primary)' }}></div>}>
+      <BlogListContent />
+    </Suspense>
   );
 }

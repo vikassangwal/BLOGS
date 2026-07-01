@@ -155,6 +155,15 @@ export default function SettingsAdmin() {
                 <input type="password" value={apiKeys.deepseek || ''} onChange={e => setApiKeys({ ...apiKeys, deepseek: e.target.value })} placeholder="sk-..." style={{ width: '100%', padding: '0.7rem', borderRadius: '8px', border: '1px solid var(--color-border)' }} />
                 <p style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', margin: '0.3rem 0 0' }}>Models: deepseek-chat, deepseek-reasoner</p>
               </div>
+
+              {/* IMAGE GENERATION API */}
+              <div style={{ background: 'rgba(255,255,255,0.02)', padding: '1rem', borderRadius: '10px', border: '1px solid var(--color-border)', gridColumn: '1 / -1' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem', fontWeight: 700, fontSize: '0.95rem' }}>
+                  <span style={{ background: '#F59E0B', color: '#fff', padding: '2px 8px', borderRadius: '6px', fontSize: '0.7rem' }}>Image Gen</span> Auto-Image API Key (DALL-E / Fal.ai / Unsplash)
+                </label>
+                <input type="password" value={apiKeys.imageGenApi || ''} onChange={e => setApiKeys({ ...apiKeys, imageGenApi: e.target.value })} placeholder="Enter API Key for Image Generation..." style={{ width: '100%', padding: '0.7rem', borderRadius: '8px', border: '1px solid var(--color-border)' }} />
+                <p style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', margin: '0.3rem 0 0' }}>Auto-Blog में AI Images जनरेट करने के लिए। (अगर Pollinations.ai इस्तेमाल कर रहे हैं तो इसे खाली छोड़ दें, वो फ्री है)।</p>
+              </div>
             </div>
 
             <div style={{ background: 'linear-gradient(135deg, rgba(147,51,234,0.1), rgba(236,72,153,0.1))', padding: '1rem', borderRadius: '10px', border: '1px solid rgba(147,51,234,0.3)' }}>

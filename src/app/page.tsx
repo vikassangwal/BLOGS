@@ -38,10 +38,11 @@ async function getPostsByTag(tag: string) {
 
 export default async function HomePage() {
   // Fetch all categories in parallel on the server
-  const [techPosts, eduPosts, financePosts] = await Promise.all([
+  const [techPosts, eduPosts, financePosts, whatsappLinks] = await Promise.all([
     getPostsByTag('Technology'),
     getPostsByTag('Education & Career'),
-    getPostsByTag('Finance & Earning')
+    getPostsByTag('Finance & Earning'),
+    prisma.socialLink.findMany({ where: { platform: 'whatsapp', isActive: true } })
   ]);
 
   const CategorySection = ({ title, posts, tag }: { title: string, posts: any[], tag: string }) => {
@@ -147,7 +148,7 @@ export default async function HomePage() {
       </div>
       
       {/* Global AI Chatbot */}
-      <BlogChatbot />
+      <BlogChatbot whatsappLinks={whatsappLinks} />
     </div>
   );
 }

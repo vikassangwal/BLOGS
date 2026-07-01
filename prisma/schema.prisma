@@ -204,6 +204,17 @@ model AutoBlogSettings {
   whatsappToken   String?
   whatsappPhoneId String?
   whatsappGroupId String? // The target group/number to post to
+  twitter         String?
+  telegramToken   String?
+  telegramChatId  String?
+
+  // Notification & Email Settings
+  onesignalAppId  String?
+  onesignalApiKey String?
+  smtpHost        String?
+  smtpPort        Int?
+  smtpUser        String?
+  smtpPass        String?
 
   updatedAt       DateTime @updatedAt
 }

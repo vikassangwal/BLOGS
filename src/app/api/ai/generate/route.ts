@@ -76,6 +76,28 @@ export async function POST(request: NextRequest) {
     let userPrompt = '';
     let maxTokens = 2000;
 
+    // Fetch recent posts for internal linking (only for article/improve)
+    let recentPostsHtml = '';
+    let youtubeInstruction = '';
+    if (type === 'article' || type === 'improve') {
+      try {
+        const recentPosts = await prisma.blogPost.findMany({
+          where: { status: 'Published' },
+          orderBy: { publishedAt: 'desc' },
+          take: 5,
+          select: { title: true, slug: true }
+        });
+        if (recentPosts.length > 0) {
+          recentPostsHtml = `\nAUTO-INTERNAL LINKING:\nYou MUST naturally hyperlink the following related articles into the body text. Use these exact <a> tags when relevant:\n` + recentPosts.map(p => `- <a href="https://www.knowora.in/blog/${p.slug}">${p.title}</a>`).join('\n');
+        }
+        
+        const autoSettings = await prisma.autoBlogSettings.findUnique({ where: { id: 'default' } });
+        if (autoSettings?.embedYoutube !== false) {
+          youtubeInstruction = `\nYOUTUBE VIDEO EMBED:\nYou MUST embed a relevant YouTube video exactly in the middle of the article. Use this exact HTML format replacing [SEARCH_KEYWORD]:\n<div class="my-8 aspect-video rounded-xl overflow-hidden shadow-lg border border-gray-200/20">\n  <iframe width="100%" height="100%" src="https://www.youtube.com/embed?listType=search&list=[SEARCH_KEYWORD]" frameborder="0" allowfullscreen></iframe>\n</div>`;
+        }
+      } catch (e) {}
+    }
+
     switch (type) {
       case 'title':
         systemPrompt = 'You are an expert SEO copywriter. Generate 5 highly engaging, click-worthy, SEO-optimized blog post titles for the given topic. Return ONLY the titles, one per line.';
@@ -88,7 +110,7 @@ export async function POST(request: NextRequest) {
         maxTokens = 800;
         break;
       case 'article':
-        systemPrompt = 'You are an expert blog writer. Write a comprehensive, SEO-optimized article (1000+ words). Use appropriate HTML formatting (h2, h3, p, ul, li, strong, em). Ensure the tone is professional yet engaging. Do not include a title tag (h1), start with an h2 or introductory paragraph. Return ONLY the HTML content.';
+        systemPrompt = 'You are an expert blog writer. Write a comprehensive, SEO-optimized article (1000+ words). Use appropriate HTML formatting (h2, h3, p, ul, li, strong, em). Ensure the tone is professional yet engaging. Do not include a title tag (h1), start with an h2 or introductory paragraph. Return ONLY the HTML content.' + recentPostsHtml + youtubeInstruction;
         userPrompt = `Title: ${title}\nTopic: ${topic}\n\nPlease write the full article.`;
         maxTokens = 4000;
         break;
@@ -115,7 +137,7 @@ Table Rules:
 3. अगर Text में कोई और Link (URL) दिया गया है (Table के बाहर भी), तो उस Link को सीधा (नंगा) नहीं दिखाना है। उसे हमेशा <a href="URL">👉 Click Here</a> के रूप में ही लिखना है।
 4. Content को SEO Friendly, Human Written और छोटे Paragraphs में लिखें।
 5. सभी Heading (H2, H3) बहुत ही आकर्षक (Catchy) होनी चाहिए।
-6. केवल शुद्ध HTML आउटपुट दें, कोई एक्स्ट्रा बात न लिखें।`;
+6. केवल शुद्ध HTML आउटपुट दें, कोई एक्स्ट्रा बात न लिखें।` + recentPostsHtml + youtubeInstruction;
         userPrompt = content || '';
         maxTokens = 4000;
         break;

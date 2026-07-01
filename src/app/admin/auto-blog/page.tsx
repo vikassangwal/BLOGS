@@ -346,7 +346,78 @@ export default function AutoBlogAdmin() {
               </div>
             </div>
 
-            <button type="submit" disabled={isSaving} className="btn-primary" style={{ marginTop: '1rem' }}>
+            <hr style={{ border: 'none', borderTop: '1px solid var(--color-border)', margin: '1rem 0' }} />
+            
+            <h3 style={{ fontSize: '1.1rem', fontWeight: 700, margin: '0' }}>🔔 Push Notifications (OneSignal)</h3>
+            
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <div>
+                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, color: 'var(--color-text-primary)' }}>OneSignal App ID</label>
+                <input
+                  type="text"
+                  value={settings.onesignalAppId || ''}
+                  onChange={e => setSettings({ ...settings, onesignalAppId: e.target.value })}
+                  style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--color-border)' }}
+                />
+              </div>
+              <div>
+                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, color: 'var(--color-text-primary)' }}>OneSignal REST API Key</label>
+                <input
+                  type="password"
+                  value={settings.onesignalApiKey || ''}
+                  onChange={e => setSettings({ ...settings, onesignalApiKey: e.target.value })}
+                  style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--color-border)' }}
+                />
+              </div>
+            </div>
+
+            <hr style={{ border: 'none', borderTop: '1px solid var(--color-border)', margin: '1rem 0' }} />
+            
+            <h3 style={{ fontSize: '1.1rem', fontWeight: 700, margin: '0' }}>📧 Email Newsletter (SMTP)</h3>
+            
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <div>
+                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, color: 'var(--color-text-primary)' }}>SMTP Host (e.g. smtp.gmail.com)</label>
+                <input
+                  type="text"
+                  value={settings.smtpHost || ''}
+                  onChange={e => setSettings({ ...settings, smtpHost: e.target.value })}
+                  style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--color-border)' }}
+                />
+              </div>
+              <div>
+                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, color: 'var(--color-text-primary)' }}>SMTP Port (e.g. 465)</label>
+                <input
+                  type="number"
+                  value={settings.smtpPort || ''}
+                  onChange={e => setSettings({ ...settings, smtpPort: parseInt(e.target.value) || 465 })}
+                  style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--color-border)' }}
+                />
+              </div>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginTop: '1rem' }}>
+              <div>
+                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, color: 'var(--color-text-primary)' }}>SMTP User / Email</label>
+                <input
+                  type="text"
+                  value={settings.smtpUser || ''}
+                  onChange={e => setSettings({ ...settings, smtpUser: e.target.value })}
+                  style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--color-border)' }}
+                />
+              </div>
+              <div>
+                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, color: 'var(--color-text-primary)' }}>SMTP Password / App Password</label>
+                <input
+                  type="password"
+                  value={settings.smtpPass || ''}
+                  onChange={e => setSettings({ ...settings, smtpPass: e.target.value })}
+                  style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--color-border)' }}
+                />
+              </div>
+            </div>
+
+            <button type="submit" disabled={isSaving} className="btn-primary" style={{ marginTop: '2rem', width: '100%' }}>
               {isSaving ? 'Saving...' : 'Save Settings'}
             </button>
           </form>

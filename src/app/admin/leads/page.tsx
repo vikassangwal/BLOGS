@@ -7,6 +7,7 @@ export default function LeadsAdmin() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
+  const [isSendingNewsletter, setIsSendingNewsletter] = useState(false);
 
   const fetchLeads = async () => {
     setIsLoading(true);
@@ -39,6 +40,24 @@ export default function LeadsAdmin() {
     window.location.href = '/api/leads/export';
   };
 
+  const handleSendNewsletter = async () => {
+    if (!confirm('Are you sure you want to send a newsletter to ALL leads right now?')) return;
+    setIsSendingNewsletter(true);
+    try {
+      const res = await fetch('/api/newsletter', { method: 'POST' });
+      const data = await res.json();
+      if (data.success) {
+        alert(data.message);
+      } else {
+        alert('Error: ' + data.error);
+      }
+    } catch (e) {
+      alert('Failed to send newsletter. Check SMTP settings.');
+    } finally {
+      setIsSendingNewsletter(false);
+    }
+  };
+
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
@@ -46,9 +65,14 @@ export default function LeadsAdmin() {
           <h1 style={{ fontSize: '2rem', fontWeight: 800, margin: '0 0 0.5rem 0', color: 'var(--color-text-primary)' }}>Lead Management</h1>
           <p style={{ color: 'var(--color-text-secondary)', margin: 0 }}>View and export leads captured from the blog and chatbot.</p>
         </div>
-        <button onClick={handleExport} className="btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          📥 Export CSV
-        </button>
+        <div style={{ display: 'flex', gap: '1rem' }}>
+          <button onClick={handleSendNewsletter} disabled={isSendingNewsletter} className="btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: '#ec4899', border: 'none' }}>
+            {isSendingNewsletter ? 'Sending...' : '🚀 Send Newsletter Blast'}
+          </button>
+          <button onClick={handleExport} className="btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            📥 Export CSV
+          </button>
+        </div>
       </div>
 
       <div style={{ background: 'rgba(255, 255, 255, 0.05)', padding: '1.5rem', borderRadius: '16px', border: '1px solid var(--color-border)', marginBottom: '2rem' }}>

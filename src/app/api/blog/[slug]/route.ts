@@ -196,6 +196,25 @@ export async function PUT(request: NextRequest, context: { params: Promise<{ slu
               })
             }).catch(() => {});
           }
+          
+          // 5. OneSignal Push Notifications
+          if (savedKeys.onesignalAppId && savedKeys.onesignalApiKey) {
+            await fetch('https://onesignal.com/api/v1/notifications', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Basic ${savedKeys.onesignalApiKey}`
+              },
+              body: JSON.stringify({
+                app_id: savedKeys.onesignalAppId,
+                included_segments: ['Subscribed Users'],
+                headings: { en: actualTitle },
+                contents: { en: excerpt || updatedPost.excerpt || 'Read our latest post!' },
+                url: `https://www.knowora.in/blog/${updatedPost.slug}`,
+                big_picture: socialImageUrl
+              })
+            }).catch(() => {});
+          }
         }
       } catch (err) {
         console.error('Failed to trigger social media auto-post', err);

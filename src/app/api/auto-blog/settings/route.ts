@@ -27,7 +27,8 @@ export async function PUT(request: NextRequest) {
     const { 
       isActive, frequency, maxPostsPerRun, maxPostsPerDay, imageSource, autoPublish, embedYoutube, isNewsActive, newsTopics,
       researcherModel, writerModel, seoModel,
-      instagramToken, instagramAccountId, whatsappToken, whatsappPhoneId, whatsappGroupId
+      instagramToken, instagramAccountId, whatsappToken, whatsappPhoneId, whatsappGroupId,
+      onesignalAppId, onesignalApiKey, smtpHost, smtpPort, smtpUser, smtpPass
     } = body;
 
     const updated = await prisma.autoBlogSettings.upsert({
@@ -50,6 +51,12 @@ export async function PUT(request: NextRequest) {
         whatsappToken: whatsappToken !== undefined ? whatsappToken : undefined,
         whatsappPhoneId: whatsappPhoneId !== undefined ? whatsappPhoneId : undefined,
         whatsappGroupId: whatsappGroupId !== undefined ? whatsappGroupId : undefined,
+        onesignalAppId: onesignalAppId !== undefined ? onesignalAppId : undefined,
+        onesignalApiKey: onesignalApiKey !== undefined ? onesignalApiKey : undefined,
+        smtpHost: smtpHost !== undefined ? smtpHost : undefined,
+        smtpPort: smtpPort !== undefined ? parseInt(smtpPort.toString()) : undefined,
+        smtpUser: smtpUser !== undefined ? smtpUser : undefined,
+        smtpPass: smtpPass !== undefined ? smtpPass : undefined,
       },
       create: {
         id: 'default',
@@ -70,6 +77,12 @@ export async function PUT(request: NextRequest) {
         whatsappToken,
         whatsappPhoneId,
         whatsappGroupId,
+        onesignalAppId,
+        onesignalApiKey,
+        smtpHost,
+        smtpPort: smtpPort ? parseInt(smtpPort.toString()) : undefined,
+        smtpUser,
+        smtpPass,
       }
     });
 

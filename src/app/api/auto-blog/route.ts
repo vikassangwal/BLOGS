@@ -189,6 +189,22 @@ export async function POST(request: NextRequest) {
     // Set Language Rules
     const langInstructions = "Write completely in Hindi (Devanagari script), but keep technical words in English.";
 
+    // Fetch recent posts for Auto-Internal Linking
+    let recentPostsHtml = '';
+    try {
+      const recentPosts = await prisma.blogPost.findMany({
+        where: { status: 'Published' },
+        orderBy: { publishedAt: 'desc' },
+        take: 5,
+        select: { title: true, slug: true }
+      });
+      if (recentPosts.length > 0) {
+        recentPostsHtml = recentPosts.map(p => `- <a href="https://www.knowora.in/blog/${p.slug}">${p.title}</a>`).join('\n');
+      }
+    } catch (e) {
+      console.error('Failed to fetch recent posts for internal linking', e);
+    }
+
     // -------------------------------------------------------------
     // AGENT 1: THE RESEARCHER
     // -------------------------------------------------------------
@@ -220,7 +236,22 @@ export async function POST(request: NextRequest) {
     4. Make the content highly readable and scannable with engaging subheadings.
     5. Add a compelling introduction and a strong conclusion.
     6. IF the topic is about Finance/Earning/Money, you MUST include sections on "How to make money (पैसे कैसे कमाएं)" and "Money Management Tips (पैसे कैसे मैनेज करें)".
-    7. IF the topic is about Technology/Gadgets/Mobiles, you MUST embed realistic images of the gadgets using this HTML tag: <img src="https://image.pollinations.ai/prompt/Realistic%20Photo%20Of%20[GADGET_NAME_HERE]?width=800&height=400&nologo=true" alt="Gadget Image" class="w-full rounded-xl my-4" />`;
+    7. IF the topic is about Technology/Gadgets/Mobiles, you MUST embed realistic images of the gadgets using this HTML tag: <img src="https://image.pollinations.ai/prompt/Realistic%20Photo%20Of%20[GADGET_NAME_HERE]?width=800&height=400&nologo=true" alt="Gadget Image" class="w-full rounded-xl my-4" />
+    
+    ${recentPostsHtml ? `
+    AUTO-INTERNAL LINKING:
+    You MUST naturally hyperlink the following related articles into the body text of your article. Use exact <a> tags provided below when the topic naturally fits in a sentence:
+    ${recentPostsHtml}
+    ` : ''}
+
+    ${settings.embedYoutube !== false ? `
+    YOUTUBE VIDEO EMBED:
+    You MUST embed a highly relevant YouTube video exactly in the middle of the article (after the 2nd or 3rd <h2> tag).
+    Use this exact HTML code format, replacing [SEARCH_KEYWORD] with a highly specific English search term related to the blog topic:
+    <div class="my-8 aspect-video rounded-xl overflow-hidden shadow-lg border border-gray-200/20">
+      <iframe width="100%" height="100%" src="https://www.youtube.com/embed?listType=search&list=[SEARCH_KEYWORD]" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+    </div>
+    ` : ''}`;
 
     let articleHtml = await generateAIContent(writerConfig, "You are an expert blog writer.", writerPrompt, 3500);
     articleHtml = articleHtml.replace(/^```html\n?|```$/g, '').trim();

@@ -33,11 +33,14 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
   let settings = null;
+  let autoBlogSettings = null;
   try {
     settings = await prisma.siteSettings.findUnique({ where: { id: 'default' } });
+    autoBlogSettings = await prisma.autoBlogSettings.findUnique({ where: { id: 'default' } });
   } catch (e) {}
 
   const siteName = settings?.siteName || 'Our Blog';
+  const onesignalAppId = autoBlogSettings?.onesignalAppId || '';
 
   return (
     <html lang="en">
@@ -45,18 +48,6 @@ export default async function RootLayout({
         <link rel="manifest" href="/manifest.json" />
         {/* Google AdSense Global Script (Replace with actual publisher ID) */}
         <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossOrigin="anonymous"></script>
-        {/* OneSignal Push Notifications */}
-        <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
-        <script dangerouslySetInnerHTML={{
-          __html: `
-            window.OneSignalDeferred = window.OneSignalDeferred || [];
-            OneSignalDeferred.push(function(OneSignal) {
-              OneSignal.init({
-                appId: "YOUR_ONESIGNAL_APP_ID",
-              });
-            });
-          `
-        }} />
       </head>
       <body className="antialiased min-h-screen flex flex-col relative transition-colors duration-300">
         <div className="bg-mesh"></div>
@@ -88,19 +79,23 @@ export default async function RootLayout({
         </Script>
 
         {/* OneSignal SDK */}
-        <Script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" strategy="beforeInteractive" />
-        <Script id="onesignal-init" strategy="lazyOnload">
-          {`
-            window.OneSignalDeferred = window.OneSignalDeferred || [];
-            window.OneSignalDeferred.push(async function(OneSignal) {
-              await OneSignal.init({
-                appId: "${settings?.aiApiKey?.includes('onesignalAppId') ? JSON.parse(settings.aiApiKey).onesignalAppId : ''}",
-                safari_web_id: "web.onesignal.auto.11111111-1111-1111-1111-111111111111",
-                notifyButton: { enable: true },
-              });
-            });
-          `}
-        </Script>
+        {onesignalAppId && (
+          <>
+            <Script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" strategy="beforeInteractive" />
+            <Script id="onesignal-init" strategy="lazyOnload">
+              {`
+                window.OneSignalDeferred = window.OneSignalDeferred || [];
+                window.OneSignalDeferred.push(async function(OneSignal) {
+                  await OneSignal.init({
+                    appId: "${onesignalAppId}",
+                    safari_web_id: "web.onesignal.auto.11111111-1111-1111-1111-111111111111",
+                    notifyButton: { enable: true },
+                  });
+                });
+              `}
+            </Script>
+          </>
+        )}
       </body>
     </html>
   );

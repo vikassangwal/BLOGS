@@ -31,7 +31,9 @@ export default function BlogListingPage() {
       // Extract unique tags from current data if tags aren't loaded yet
       if (tags.length === 0) {
         const allTags = new Set<string>();
-        data.posts?.forEach((p: any) => p.tags?.forEach((t: string) => allTags.add(t)));
+        data.posts?.forEach((p: any) => p.tags?.forEach((t: string) => {
+          if (t && t !== '${topic}') allTags.add(t);
+        }));
         setTags(Array.from(allTags));
       }
     } catch (error) {
@@ -62,15 +64,26 @@ export default function BlogListingPage() {
         background: 'linear-gradient(to bottom, rgba(0,102,204,0.05) 0%, rgba(0,0,0,0) 100%)',
         textAlign: 'center'
       }}>
-        <h1 style={{ fontSize: '3.5rem', fontWeight: 800, marginBottom: '1rem', letterSpacing: '-1px' }}>
-          Insights & <span style={{ color: 'var(--color-accent)' }}>Innovations</span>
+        <h1 style={{ fontSize: '3rem', fontWeight: 800, marginBottom: '0.5rem', letterSpacing: '-1px' }}>
+          {activeTag ? (
+            <>
+              {activeTag} <span style={{ color: 'var(--color-accent)' }}>Articles</span>
+            </>
+          ) : (
+            <>
+              Insights & <span style={{ color: 'var(--color-accent)' }}>Innovations</span>
+            </>
+          )}
         </h1>
-        <p style={{ fontSize: '1.2rem', color: 'var(--color-text-secondary)', maxWidth: '600px', margin: '0 auto 2.5rem' }}>
-          Discover the latest articles on AI, automation, business growth, and technology trends.
+        <p style={{ fontSize: '1.1rem', color: 'var(--color-text-secondary)', maxWidth: '600px', margin: '0 auto 2rem' }}>
+          {activeTag 
+            ? `Discover the latest and most trending articles about ${activeTag}.`
+            : `Discover the latest articles on AI, automation, business growth, and technology trends.`
+          }
         </p>
 
         {/* Search Bar */}
-        <div style={{ maxWidth: '500px', margin: '0 auto', position: 'relative' }}>
+        <div style={{ maxWidth: '400px', margin: '0 auto', position: 'relative' }}>
           <input
             type="text"
             placeholder="Search articles..."
@@ -78,12 +91,12 @@ export default function BlogListingPage() {
             onChange={(e) => setSearch(e.target.value)}
             style={{
               width: '100%',
-              padding: '1rem 1.5rem',
-              borderRadius: '30px',
+              padding: '0.8rem 1.2rem',
+              borderRadius: '25px',
               border: '1px solid var(--color-border)',
               background: 'rgba(255,255,255,0.03)',
               color: 'var(--color-text-primary)',
-              fontSize: '1rem',
+              fontSize: '0.9rem',
               outline: 'none',
               boxShadow: '0 4px 20px rgba(0,0,0,0.05)',
               transition: 'box-shadow 0.2s, border-color 0.2s'

@@ -179,11 +179,11 @@ export default function BlogPostClient({ post, ads, relatedPosts, whatsappLinks 
               )})}
             </div>
           )}
-          <h1 style={{ fontSize: '3.5rem', fontWeight: 800, lineHeight: 1.2, letterSpacing: '-1px', marginBottom: post.subtitle ? '0.5rem' : '1.5rem' }}>
+          <h1 style={{ fontSize: 'clamp(2rem, 5vw, 3rem)', fontWeight: 800, lineHeight: 1.2, letterSpacing: '-1px', marginBottom: post.subtitle ? '0.2rem' : '0.5rem' }}>
             {post.title}
           </h1>
           {post.subtitle && (
-            <h2 style={{ fontSize: '1.5rem', fontWeight: 400, color: 'var(--color-text-secondary)', marginBottom: '1.5rem' }}>
+            <h2 style={{ fontSize: '1.25rem', fontWeight: 400, color: 'var(--color-text-secondary)', marginBottom: '1rem' }}>
               {post.subtitle}
             </h2>
           )}
@@ -206,7 +206,7 @@ export default function BlogPostClient({ post, ads, relatedPosts, whatsappLinks 
 
         {/* Featured Image */}
         {post.featuredImage && (
-          <figure style={{ margin: '0 -2rem 3rem', borderRadius: '24px', overflow: 'hidden', boxShadow: '0 20px 40px rgba(0,0,0,0.1)', position: 'relative', height: '400px' }}>
+          <figure style={{ margin: '0 0 2rem', borderRadius: '24px', overflow: 'hidden', boxShadow: '0 20px 40px rgba(0,0,0,0.1)', position: 'relative', width: '100%', aspectRatio: '16/9' }}>
             <Image src={post.featuredImage} alt={post.title} fill style={{ objectFit: 'cover' }} sizes="(max-width: 768px) 100vw, 800px" priority />
           </figure>
         )}

@@ -31,13 +31,18 @@ export default function GlobalHeader({ siteName }: { siteName?: string }) {
     { name: 'About Us', href: '/about', path: '/about' },
   ];
 
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
+
   return (
     <header className="sticky top-0 z-50 glass-panel w-full" style={{ borderBottom: '1px solid var(--color-border)' }}>
-      <div className="container mx-auto px-6 h-20 flex items-center justify-between">
-        <a href="/" className="text-2xl font-bold tracking-tight premium-gradient-text">
+      <div className="container mx-auto px-4 md:px-6 h-16 md:h-20 flex items-center justify-between">
+        <a href="/" className="text-xl md:text-2xl font-bold tracking-tight premium-gradient-text" style={{ zIndex: 60 }}>
           {siteName || 'Our Blog'}
         </a>
-        <div className="flex items-center gap-6">
+        
+        {/* Desktop & Mobile Shared Actions */}
+        <div className="flex items-center gap-3 md:gap-6" style={{ zIndex: 60 }}>
+          {/* Desktop Nav */}
           <nav className="hidden md:flex gap-6 items-center font-medium text-sm" style={{ color: 'var(--color-text-secondary)' }}>
             {navLinks.map((link) => {
               const active = isActive(link.path, link.tag);
@@ -59,10 +64,71 @@ export default function GlobalHeader({ siteName }: { siteName?: string }) {
               );
             })}
           </nav>
-          <div id="google_translate_element" className="[&>div]:!mb-0 scale-75 sm:scale-90 origin-right"></div>
+
+          {/* Search Icon */}
+          <a href="/blog" title="Search Blogs" className="flex items-center justify-center p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--color-text-primary)' }}>
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+          </a>
+
+          {/* Language Translate */}
+          <div id="google_translate_element" className="[&>div]:!mb-0 scale-75 origin-right"></div>
+          
+          {/* Theme Toggle */}
           <ThemeToggle />
+
+          {/* Hamburger Menu (Mobile) */}
+          <button 
+            className="md:hidden flex items-center justify-center p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            aria-label="Toggle Menu"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--color-text-primary)' }}>
+              {isMobileMenuOpen ? (
+                <>
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </>
+              ) : (
+                <>
+                  <line x1="3" y1="12" x2="21" y2="12"></line>
+                  <line x1="3" y1="6" x2="21" y2="6"></line>
+                  <line x1="3" y1="18" x2="21" y2="18"></line>
+                </>
+              )}
+            </svg>
+          </button>
         </div>
       </div>
+
+      {/* Mobile Menu Overlay */}
+      {isMobileMenuOpen && (
+        <div className="md:hidden absolute top-full left-0 w-full glass-panel shadow-lg" style={{ borderBottom: '1px solid var(--color-border)', animation: 'slideDown 0.3s ease' }}>
+          <nav className="flex flex-col p-4 gap-4 font-medium text-base">
+            {navLinks.map((link) => {
+              const active = isActive(link.path, link.tag);
+              return (
+                <a 
+                  key={link.name} 
+                  href={link.href} 
+                  style={{
+                    color: active ? 'var(--color-accent)' : 'var(--color-text-primary)',
+                    padding: '0.5rem',
+                    borderRadius: '8px',
+                    background: active ? 'rgba(0,102,204,0.1)' : 'transparent',
+                    display: 'block'
+                  }}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  {link.name}
+                </a>
+              );
+            })}
+          </nav>
+        </div>
+      )}
     </header>
   );
 }

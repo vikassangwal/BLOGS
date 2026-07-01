@@ -246,7 +246,7 @@ export async function POST(request: NextRequest) {
     // -------------------------------------------------------------
     // IMAGE GENERATOR (Agent 4)
     // -------------------------------------------------------------
-    let featuredImage = `https://source.unsplash.com/1200x630/?${encodeURIComponent(targetTopic.split(' ')[0] || 'tech')}`;
+    let featuredImage = `https://source.unsplash.com/1600x900/?${encodeURIComponent(targetTopic.split(' ')[0] || 'tech')}`;
     
     const imgProvider = savedKeys.imageGenProvider || 'pollinations';
     const imgModel = savedKeys.imageGenModel || 'dall-e-3';
@@ -254,7 +254,7 @@ export async function POST(request: NextRequest) {
     const imgPrompt = `High quality professional blog header image representing ${targetTopic}. 8k resolution, cinematic lighting, modern design.`;
 
     if (imgProvider === 'pollinations') {
-      featuredImage = `https://image.pollinations.ai/prompt/${encodeURIComponent(imgPrompt)}?width=1200&height=630&nologo=true`;
+      featuredImage = `https://image.pollinations.ai/prompt/${encodeURIComponent(imgPrompt)}?width=1600&height=900&nologo=true`;
     } else if (imgProvider === 'openai' && imgApiKey) {
       try {
         const res = await fetch('https://api.openai.com/v1/images/generations', {
@@ -271,7 +271,7 @@ export async function POST(request: NextRequest) {
       }
     } else if (imgProvider === 'custom' || imgProvider === 'openrouter') {
        // Placeholder for future APIs. Currently routes to pollinations to ensure an image is always generated
-       featuredImage = `https://image.pollinations.ai/prompt/${encodeURIComponent(imgPrompt)}?width=1200&height=630&nologo=true`;
+       featuredImage = `https://image.pollinations.ai/prompt/${encodeURIComponent(imgPrompt)}?width=1600&height=900&nologo=true`;
     } else if (settings.imageSource === 'none') {
       featuredImage = '';
     }
@@ -370,8 +370,20 @@ export async function POST(request: NextRequest) {
   }
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    const { searchParams } = new URL(request.url);
+    
+    // Check if this is a cron trigger request
+    if (searchParams.get('action') === 'trigger') {
+      const cronSecret = searchParams.get('secret');
+      // Basic security check (we can rely on the cron-job.org setting this parameter)
+      if (cronSecret !== 'auto123') {
+        return NextResponse.json({ error: 'Unauthorized cron access' }, { status: 401 });
+      }
+      return POST(request);
+    }
+
     const totalKeywords = await prisma.autoBlogKeyword.count();
     const pendingKeywords = await prisma.autoBlogKeyword.count({ where: { status: 'pending' } });
     const usedKeywords = await prisma.autoBlogKeyword.count({ where: { status: 'used' } });

@@ -221,14 +221,34 @@ export async function POST(request: NextRequest) {
     }
 
     // -------------------------------------------------------------
-    // IMAGE GENERATOR
+    // IMAGE GENERATOR (Agent 4)
     // -------------------------------------------------------------
     let featuredImage = `https://source.unsplash.com/1200x630/?${encodeURIComponent(targetTopic.split(' ')[0] || 'tech')}`;
     
-    if (settings.imageSource === 'pollinations') {
-      // Using Pollinations AI - generates an image dynamically on request
-      const imagePrompt = `High quality professional blog header image representing ${targetTopic}. 8k resolution, cinematic lighting, modern design.`;
-      featuredImage = `https://image.pollinations.ai/prompt/${encodeURIComponent(imagePrompt)}?width=1200&height=630&nologo=true`;
+    const imgProvider = savedKeys.imageGenProvider || 'pollinations';
+    const imgModel = savedKeys.imageGenModel || 'dall-e-3';
+    const imgApiKey = savedKeys.imageGenApi || savedKeys.openai || '';
+    const imgPrompt = `High quality professional blog header image representing ${targetTopic}. 8k resolution, cinematic lighting, modern design.`;
+
+    if (imgProvider === 'pollinations') {
+      featuredImage = `https://image.pollinations.ai/prompt/${encodeURIComponent(imgPrompt)}?width=1200&height=630&nologo=true`;
+    } else if (imgProvider === 'openai' && imgApiKey) {
+      try {
+        const res = await fetch('https://api.openai.com/v1/images/generations', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${imgApiKey}` },
+          body: JSON.stringify({ model: imgModel, prompt: imgPrompt, n: 1, size: "1024x1024" })
+        });
+        const data = await res.json();
+        if (data?.data?.[0]?.url) {
+          featuredImage = data.data[0].url;
+        }
+      } catch (e) {
+        console.error("OpenAI Image Gen failed", e);
+      }
+    } else if (imgProvider === 'custom' || imgProvider === 'openrouter') {
+       // Placeholder for future APIs. Currently routes to pollinations to ensure an image is always generated
+       featuredImage = `https://image.pollinations.ai/prompt/${encodeURIComponent(imgPrompt)}?width=1200&height=630&nologo=true`;
     } else if (settings.imageSource === 'none') {
       featuredImage = '';
     }

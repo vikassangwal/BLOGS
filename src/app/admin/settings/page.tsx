@@ -271,6 +271,28 @@ export default function SettingsAdmin() {
               </div>
             </div>
 
+            {/* Agent 4: Image Creator */}
+            <div style={{ background: 'rgba(236,72,153,0.08)', padding: '1.2rem', borderRadius: '12px', border: '1px solid rgba(236,72,153,0.2)' }}>
+              <h4 style={{ margin: '0 0 0.8rem', fontSize: '1rem', fontWeight: 700, color: '#EC4899' }}>🎨 Agent 4: Image Creator (तस्वीरें बनाने वाला)</h4>
+              <p style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', margin: '0 0 0.8rem' }}>यह AI ब्लॉग के लिए Custom तस्वीरें बनाएगा। (अगर कोई नया Provider आए, तो Custom चुनें)।</p>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.8rem' }}>
+                <div>
+                  <label style={{ display: 'block', marginBottom: '0.3rem', fontWeight: 600, fontSize: '0.85rem' }}>Provider</label>
+                  <select value={apiKeys.imageGenProvider || 'pollinations'} onChange={e => setApiKeys({ ...apiKeys, imageGenProvider: e.target.value })} style={{ width: '100%', padding: '0.7rem', borderRadius: '8px', border: '1px solid var(--color-border)' }}>
+                    <option value="pollinations">Pollinations.ai (Free - No Key Needed)</option>
+                    <option value="openrouter">OpenRouter</option>
+                    <option value="openai">OpenAI (DALL-E)</option>
+                    <option value="falai">Fal.ai</option>
+                    <option value="custom">Custom / Other</option>
+                  </select>
+                </div>
+                <div>
+                  <label style={{ display: 'block', marginBottom: '0.3rem', fontWeight: 600, fontSize: '0.85rem' }}>Model Name</label>
+                  <input type="text" value={apiKeys.imageGenModel || 'flux'} onChange={e => setApiKeys({ ...apiKeys, imageGenModel: e.target.value })} placeholder="e.g. dall-e-3, flux-pro" style={{ width: '100%', padding: '0.7rem', borderRadius: '8px', border: '1px solid var(--color-border)' }} />
+                </div>
+              </div>
+            </div>
+
           </div>
         )}
 

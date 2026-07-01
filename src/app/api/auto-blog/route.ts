@@ -332,17 +332,19 @@ export async function POST(request: NextRequest) {
     // -------------------------------------------------------------
     // SOCIAL MEDIA BROADCASTER
     // -------------------------------------------------------------
-    const postUrl = `https://knowora.in/blog/${newPost.slug}`;
-    const socialCaption = `🚨 New Article Alert! 🚨\n\n${newPost.title}\n\nRead more here: ${postUrl}\n\n#Trending #News`;
+    const socialCaption = newPost.socialCaptions || `Check out our latest article: ${newPost.title}\n\nRead more here: https://www.knowora.in/blog/${newPost.slug}\n\n${newPost.socialHashtags || ''}`;
+    
+    // Generate dynamic poster URL for social sharing
+    const socialImageUrl = `https://www.knowora.in/api/og?title=${encodeURIComponent(newPost.title)}&bg=${encodeURIComponent(newPost.featuredImage)}`;
 
     // 1. WhatsApp
     if (savedKeys.whatsappToken && savedKeys.whatsappPhoneId && savedKeys.whatsappGroupId) {
-      await postToWhatsApp(savedKeys.whatsappToken, savedKeys.whatsappPhoneId, savedKeys.whatsappGroupId, socialCaption, featuredImage);
+      await postToWhatsApp(savedKeys.whatsappToken, savedKeys.whatsappPhoneId, savedKeys.whatsappGroupId, socialCaption, socialImageUrl);
     }
 
-    // 2. Instagram
-    if (savedKeys.instagram && savedKeys.instagramAccountId) {
-      await postToInstagram(savedKeys.instagram, savedKeys.instagramAccountId, featuredImage, socialCaption);
+    // 1. Instagram
+    if (savedKeys.instagramToken && savedKeys.instagramAccountId) {
+      await postToInstagram(savedKeys.instagramToken, savedKeys.instagramAccountId, socialImageUrl, socialCaption);
     }
 
     // 2.5 Twitter

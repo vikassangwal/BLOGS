@@ -30,7 +30,8 @@ export async function generateMetadata(
   const title = post.seoTitle || post.title;
   const description = post.seoDescription || post.excerpt || '';
   const url = `https://knowora.in/blog/${post.slug}`;
-  const imageUrl = post.featuredImage || 'https://knowora.in/default-og.png'; // Fallback
+  const rawImageUrl = post.featuredImage || 'https://knowora.in/default-og.png';
+  const imageUrl = `https://www.knowora.in/api/og?title=${encodeURIComponent(title)}&bg=${encodeURIComponent(rawImageUrl)}`;
 
   return {
     title: title,

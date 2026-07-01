@@ -10,6 +10,7 @@ const sidebarItems = [
   { name: 'Captured Leads', path: '/admin/leads', icon: '🎯' },
   { name: 'Social Links', path: '/admin/social-links', icon: '🔗' },
   { name: 'AdSense Ads', path: '/admin/ads', icon: '💰' },
+  { name: 'Tags Management', path: '/admin/tags', icon: '🏷️' },
   { name: 'Team Management', path: '/admin/team', icon: '👥' },
   { name: 'Site Settings', path: '/admin/settings', icon: '⚙️' },
 ];

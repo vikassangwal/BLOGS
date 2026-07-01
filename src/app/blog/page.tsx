@@ -163,16 +163,11 @@ export default function BlogListingPage() {
                   key={post.id}
                   style={{ textDecoration: 'none', color: 'inherit' }}
                 >
-                  <article className="minimal-card blog-list-card" style={{
+                  <article className="premium-card flex flex-row items-center overflow-hidden p-3 gap-4 hover:bg-white/5 transition-colors border border-white/5 rounded-xl" style={{
                     animation: `slideUp 0.4s ease forwards ${idx * 0.1}s`,
                     opacity: 0,
                     transform: 'translateY(20px)',
-                    overflow: 'hidden',
                     background: 'rgba(255,255,255,0.03)',
-                    borderRadius: '16px',
-                    border: '1px solid var(--color-border)',
-                    transition: 'transform 0.3s, box-shadow 0.3s',
-                    padding: '1rem',
                   }}
                   onMouseEnter={e => {
                     e.currentTarget.style.transform = 'translateY(-4px)';
@@ -185,56 +180,35 @@ export default function BlogListingPage() {
                   >
                     {/* Image Thumbnail */}
                     {post.featuredImage && (
-                      <div className="blog-list-image" style={{ 
-                        position: 'relative', 
-                        background: 'var(--color-bg-secondary)',
-                        borderRadius: '12px',
-                        overflow: 'hidden',
-                        flexShrink: 0
-                      }}>
-                        <Image src={post.featuredImage} alt={post.title} fill style={{ objectFit: 'cover' }} sizes="(max-width: 768px) 150px, 180px" />
-                        {post.tags?.[0] && (
-                          <span style={{
-                            position: 'absolute',
-                            top: '10px',
-                            left: '10px',
-                            background: 'rgba(0,0,0,0.6)',
-                            color: '#fff',
-                            padding: '0.2rem 0.6rem',
-                            borderRadius: '12px',
-                            fontSize: '0.7rem',
-                            fontWeight: 600,
-                            backdropFilter: 'blur(4px)'
-                          }}>
-                            {post.tags[0]}
-                          </span>
-                        )}
+                      <div className="w-24 h-24 sm:w-32 sm:h-24 relative bg-gray-900 overflow-hidden rounded-lg flex-shrink-0">
+                        <Image src={post.featuredImage} alt={post.title} fill style={{ objectFit: 'cover' }} sizes="(max-width: 768px) 96px, 128px" />
                       </div>
                     )}
 
                     {/* Content */}
-                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, justifyContent: 'center' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.3rem', flexWrap: 'wrap' }}>
-                        {!post.featuredImage && post.tags?.[0] && (
+                        {post.tags?.[0] && (
                           <span style={{
-                            background: 'var(--color-bg-secondary)',
-                            color: 'var(--color-accent)',
+                            background: 'rgba(59,130,246,0.1)',
+                            color: '#60a5fa',
                             padding: '0.2rem 0.6rem',
                             borderRadius: '12px',
-                            fontSize: '0.7rem',
-                            fontWeight: 600
+                            fontSize: '0.65rem',
+                            fontWeight: 600,
+                            whiteSpace: 'nowrap'
                           }}>
                             {post.tags[0]}
                           </span>
                         )}
-                        <p style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', margin: 0 }}>
-                          {new Date(post.publishedAt || post.createdAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                        <p style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', margin: 0, whiteSpace: 'nowrap' }}>
+                          {new Date(post.publishedAt || post.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                         </p>
                       </div>
-                      <h2 style={{ fontSize: '1.2rem', fontWeight: 700, marginBottom: '0.5rem', lineHeight: 1.3 }}>
+                      <h2 className="text-base sm:text-lg font-bold m-0 mb-1 leading-snug line-clamp-2 text-ellipsis overflow-hidden">
                         {post.title}
                       </h2>
-                      <p style={{ fontSize: '0.9rem', color: 'var(--color-text-secondary)', lineHeight: 1.5, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                      <p className="text-sm text-gray-400 m-0 line-clamp-1 text-ellipsis overflow-hidden">
                         {post.excerpt}
                       </p>
                     </div>

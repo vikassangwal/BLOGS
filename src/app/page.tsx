@@ -54,30 +54,27 @@ export default async function HomePage() {
             View All →
           </Link>
         </div>
-        <div className="grid md:grid-cols-3 gap-6">
+        <div className="flex flex-col gap-3">
           {posts.map((post) => (
             <Link href={`/blog/${post.slug}`} key={post.id} className="block group">
-              <div className="premium-card h-full flex flex-col overflow-hidden">
-                <div className="h-48 relative bg-gray-900 overflow-hidden">
-                  {post.featuredImage ? (
-                    <Image src={post.featuredImage} alt={post.title} fill className="object-cover transition-transform duration-500 group-hover:scale-110" sizes="(max-width: 768px) 100vw, 33vw" />
-                  ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-blue-900 to-black opacity-80" />
-                  )}
-                  <span className="absolute top-4 right-4 bg-black/60 text-white px-3 py-1 text-xs font-semibold rounded-full backdrop-blur-md">
-                    {tag}
-                  </span>
-                </div>
-                <div className="p-6 flex-1 flex flex-col">
-                  <p className="text-xs text-gray-400 mb-2">
-                    {new Date(post.publishedAt || post.createdAt).toLocaleDateString()}
-                  </p>
-                  <h3 className="text-xl font-bold text-white mb-3 leading-tight group-hover:text-blue-400 transition-colors">
+              <div className="premium-card flex flex-row items-center overflow-hidden p-3 gap-4 hover:bg-white/5 transition-colors border border-white/5 rounded-xl">
+                {post.featuredImage && (
+                  <div className="w-20 h-20 sm:w-28 sm:h-20 relative bg-gray-900 overflow-hidden rounded-lg flex-shrink-0">
+                    <Image src={post.featuredImage} alt={post.title} fill className="object-cover transition-transform duration-500 group-hover:scale-110" sizes="(max-width: 768px) 80px, 112px" />
+                  </div>
+                )}
+                <div className="flex-1 flex flex-col justify-center min-w-0">
+                  <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+                    <span className="text-[10px] text-blue-400 font-semibold bg-blue-500/10 px-2 py-0.5 rounded-full whitespace-nowrap">
+                      {tag}
+                    </span>
+                    <p className="text-[10px] sm:text-xs text-gray-400 whitespace-nowrap">
+                      {new Date(post.publishedAt || post.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                    </p>
+                  </div>
+                  <h3 className="text-sm sm:text-base font-bold text-white leading-snug group-hover:text-blue-400 transition-colors truncate">
                     {post.title}
                   </h3>
-                  <p className="text-sm text-gray-400 line-clamp-2">
-                    {post.excerpt}
-                  </p>
                 </div>
               </div>
             </Link>

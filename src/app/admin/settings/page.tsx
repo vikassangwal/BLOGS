@@ -7,7 +7,7 @@ export default function SettingsAdmin() {
     openai: '', gemini: '', anthropic: '', deepseek: '', openrouter: '',
     resend: '', twitter: '', facebook: '', instagram: '', instagramAccountId: '',
     onesignalAppId: '', onesignalApiKey: '', razorpayKey: '', razorpaySecret: '',
-    telegramToken: '', telegramChatId: ''
+    telegramToken: '', telegramChatId: '', whatsappToken: '', whatsappPhoneId: '', whatsappGroupId: ''
   });
   const [isSaving, setIsSaving] = useState(false);
   const [activeTab, setActiveTab] = useState('general');
@@ -360,6 +360,18 @@ export default function SettingsAdmin() {
                 <div>
                   <label style={{ display: 'block', marginBottom: '0.25rem', fontWeight: 600, fontSize: '0.9rem' }}>Instagram Account ID</label>
                   <input type="text" value={apiKeys.instagramAccountId || ''} onChange={e => setApiKeys({ ...apiKeys, instagramAccountId: e.target.value })} placeholder="e.g. 178414..." style={{ width: '100%', padding: '0.6rem', borderRadius: '6px', border: '1px solid var(--color-border)' }} />
+                </div>
+                <div>
+                  <label style={{ display: 'block', marginBottom: '0.25rem', fontWeight: 600, fontSize: '0.9rem' }}>WhatsApp Cloud API Token</label>
+                  <input type="password" value={apiKeys.whatsappToken || ''} onChange={e => setApiKeys({ ...apiKeys, whatsappToken: e.target.value })} placeholder="EAAD..." style={{ width: '100%', padding: '0.6rem', borderRadius: '6px', border: '1px solid var(--color-border)' }} />
+                </div>
+                <div>
+                  <label style={{ display: 'block', marginBottom: '0.25rem', fontWeight: 600, fontSize: '0.9rem' }}>WhatsApp Phone Number ID</label>
+                  <input type="text" value={apiKeys.whatsappPhoneId || ''} onChange={e => setApiKeys({ ...apiKeys, whatsappPhoneId: e.target.value })} placeholder="1234567890..." style={{ width: '100%', padding: '0.6rem', borderRadius: '6px', border: '1px solid var(--color-border)' }} />
+                </div>
+                <div>
+                  <label style={{ display: 'block', marginBottom: '0.25rem', fontWeight: 600, fontSize: '0.9rem' }}>WhatsApp Group ID (Target)</label>
+                  <input type="text" value={apiKeys.whatsappGroupId || ''} onChange={e => setApiKeys({ ...apiKeys, whatsappGroupId: e.target.value })} placeholder="1234567890@g.us" style={{ width: '100%', padding: '0.6rem', borderRadius: '6px', border: '1px solid var(--color-border)' }} />
                 </div>
               </div>
             </div>

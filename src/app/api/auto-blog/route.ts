@@ -75,6 +75,27 @@ async function postToInstagram(token: string, accountId: string, imageUrl: strin
   }
 }
 
+// -------------------------------------------------------------
+// HELPER: Twitter Auto-Poster (v2)
+// -------------------------------------------------------------
+async function postToTwitter(bearerToken: string, text: string) {
+  try {
+    const res = await fetch('https://api.twitter.com/2/tweets', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${bearerToken}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ text })
+    });
+    return res.ok;
+  } catch (e) {
+    console.error('Twitter post error:', e);
+    return false;
+  }
+}
+
+
 export async function POST(request: NextRequest) {
   try {
     // 1. GET SETTINGS
@@ -302,13 +323,18 @@ export async function POST(request: NextRequest) {
     const socialCaption = `🚨 New Article Alert! 🚨\n\n${newPost.title}\n\nRead more here: ${postUrl}\n\n#Trending #News`;
 
     // 1. WhatsApp
-    if (settings.whatsappToken && settings.whatsappPhoneId && settings.whatsappGroupId) {
-      await postToWhatsApp(settings.whatsappToken, settings.whatsappPhoneId, settings.whatsappGroupId, socialCaption, featuredImage);
+    if (savedKeys.whatsappToken && savedKeys.whatsappPhoneId && savedKeys.whatsappGroupId) {
+      await postToWhatsApp(savedKeys.whatsappToken, savedKeys.whatsappPhoneId, savedKeys.whatsappGroupId, socialCaption, featuredImage);
     }
 
     // 2. Instagram
-    if (settings.instagramToken && settings.instagramAccountId) {
-      await postToInstagram(settings.instagramToken, settings.instagramAccountId, featuredImage, socialCaption);
+    if (savedKeys.instagram && savedKeys.instagramAccountId) {
+      await postToInstagram(savedKeys.instagram, savedKeys.instagramAccountId, featuredImage, socialCaption);
+    }
+
+    // 2.5 Twitter
+    if (savedKeys.twitter) {
+      await postToTwitter(savedKeys.twitter, socialCaption);
     }
 
     // 3. Telegram

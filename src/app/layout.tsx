@@ -1,6 +1,7 @@
 import { Suspense } from 'react';
 import type { Metadata } from 'next';
 import Script from 'next/script';
+import NextTopLoader from 'nextjs-toploader';
 import './globals.css';
 import GlobalHeader from '@/components/GlobalHeader';
 import GlobalFooter from '@/components/GlobalFooter';
@@ -54,6 +55,7 @@ export default async function RootLayout({
           crossOrigin="anonymous" 
           strategy="lazyOnload" 
         />
+        <NextTopLoader color="var(--color-accent)" showSpinner={false} />
         <div className="bg-mesh"></div>
         <Suspense fallback={<div className="h-20 w-full" />}>
           <GlobalHeader siteName={siteName} />

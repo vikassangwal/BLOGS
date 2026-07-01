@@ -15,55 +15,59 @@ interface BlogPostClientProps {
 }
 
 export default function BlogPostClient({ post, ads, relatedPosts, whatsappLinks }: BlogPostClientProps) {
-  const [translatedHtml, setTranslatedHtml] = useState<string | null>(null);
-  const [isTranslating, setIsTranslating] = useState(false);
   const [isUnlocked, setIsUnlocked] = useState(false);
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
+  const synthRef = useRef<SpeechSynthesis | null>(null);
+  const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
 
-  const handleTranslate = async (lang: string) => {
-    if (!lang) return;
-    setIsTranslating(true);
-    try {
-      const res = await fetch('/api/ai/translate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ htmlContent: post.content, targetLanguage: lang })
-      });
-      const data = await res.json();
-      if (data.translatedHtml) {
-        setTranslatedHtml(data.translatedHtml);
-      } else {
-        alert('Translation failed. Please check AI API configuration.');
-      }
-    } catch (err) {
-      alert('Translation failed.');
-    } finally {
-      setIsTranslating(false);
-    }
-  };
+  useEffect(() => {
+    synthRef.current = window.speechSynthesis;
+    return () => {
+      if (synthRef.current) synthRef.current.cancel();
+    };
+  }, []);
 
   const handleListen = () => {
     if (!('speechSynthesis' in window)) {
       alert('Text-to-Speech is not supported in your browser.');
       return;
     }
-    if (window.speechSynthesis.speaking) {
-      window.speechSynthesis.cancel();
+
+    if (isPlaying) {
+      if (isPaused) {
+        window.speechSynthesis.resume();
+        setIsPaused(false);
+      } else {
+        window.speechSynthesis.pause();
+        setIsPaused(true);
+      }
       return;
     }
-    const text = contentHtml.replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ').trim();
-    // Chunk by sentences to prevent silent browser limits on long texts
-    const chunks = text.match(/[^.!?]+[.!?]+/g) || [text];
+
+    const text = post.content.replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ').trim();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = post.content?.includes('है') ? 'hi-IN' : 'en-US';
     
-    const lang = post.content?.includes('है') ? 'hi-IN' : 'en-US';
-    
-    chunks.forEach((chunk) => {
-      if (chunk.trim()) {
-        const utterance = new SpeechSynthesisUtterance(chunk.trim());
-        utterance.lang = lang;
-        window.speechSynthesis.speak(utterance);
-      }
-    });
+    utterance.onstart = () => setIsPlaying(true);
+    utterance.onend = () => {
+      setIsPlaying(false);
+      setIsPaused(false);
+    };
+    utterance.onerror = () => {
+      setIsPlaying(false);
+      setIsPaused(false);
+    };
+
+    utteranceRef.current = utterance;
+    window.speechSynthesis.speak(utterance);
+  };
+
+  const stopListen = () => {
+    window.speechSynthesis.cancel();
+    setIsPlaying(false);
+    setIsPaused(false);
   };
 
   const handlePayment = async () => {
@@ -140,7 +144,7 @@ export default function BlogPostClient({ post, ads, relatedPosts, whatsappLinks 
   const footerAd = ads.find(a => a.position === 'footer');
 
   const isPremium = post.tags?.some((t: any) => t.name === 'Premium' || t.tag?.name === 'Premium');
-  let contentHtml = translatedHtml || post.content || '';
+  let contentHtml = post.content || '';
   
   if (isPremium && !isUnlocked) {
     const charLimit = Math.floor(contentHtml.length * 0.3);
@@ -157,24 +161,32 @@ export default function BlogPostClient({ post, ads, relatedPosts, whatsappLinks 
       <article style={{ maxWidth: '800px', margin: '0 auto', padding: '4rem 2rem' }}>
         {/* Translate and TTS Toolbar */}
         <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1rem', gap: '1rem', flexWrap: 'wrap' }}>
-          <button
-            onClick={handleListen}
-            style={{ padding: '0.4rem 0.8rem', borderRadius: '8px', background: 'linear-gradient(135deg, #10b981, #059669)', border: 'none', color: '#fff', cursor: 'pointer', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.5rem' }}
-          >
-            🔊 Listen to Article
-          </button>
-          
-          <select 
-            onChange={(e) => handleTranslate(e.target.value)}
-            disabled={isTranslating}
-            style={{ padding: '0.4rem 0.8rem', borderRadius: '8px', background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)' }}
-          >
-            <option value="">{isTranslating ? 'Translating...' : 'Translate with AI'}</option>
-            <option value="Hindi">Hindi (हिन्दी)</option>
-            <option value="Spanish">Spanish (Español)</option>
-            <option value="French">French (Français)</option>
-            <option value="German">German (Deutsch)</option>
-          </select>
+          <div className="flex gap-4">
+            <button 
+              onClick={handleListen}
+              className="px-4 py-2 rounded-full font-semibold flex items-center gap-2 transition-colors"
+              style={{ background: 'rgba(0,102,204,0.1)', color: 'var(--color-accent)' }}
+              title={isPlaying ? (isPaused ? "Resume Audio" : "Pause Audio") : "Listen to Article"}
+            >
+              {isPlaying && !isPaused ? (
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
+              ) : (
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+              )}
+              {isPlaying ? (isPaused ? "Resume" : "Pause") : "Listen"}
+            </button>
+            {isPlaying && (
+              <button 
+                onClick={stopListen}
+                className="px-4 py-2 rounded-full font-semibold flex items-center gap-2 transition-colors"
+                style={{ background: 'rgba(239,68,68,0.1)', color: '#EF4444' }}
+                title="Stop Audio"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect></svg>
+                Stop
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Post Header */}
@@ -274,7 +286,33 @@ export default function BlogPostClient({ post, ads, relatedPosts, whatsappLinks 
             <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--color-text-primary)', marginBottom: '0.5rem' }}>
               Written by {post.author?.name || 'Our Blog Team'}
             </h3>
-            <p style={{ fontSize: '0.9rem', color: 'var(--color-text-secondary)', lineHeight: 1.6, margin: 0 }}>
+            <div className="flex gap-4">
+            <button 
+              onClick={handleListen}
+              className="px-4 py-2 rounded-full font-semibold flex items-center gap-2 transition-colors"
+              style={{ background: 'rgba(0,102,204,0.1)', color: 'var(--color-accent)' }}
+              title={isPlaying ? (isPaused ? "Resume Audio" : "Pause Audio") : "Listen to Article"}
+            >
+              {isPlaying && !isPaused ? (
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
+              ) : (
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+              )}
+              {isPlaying ? (isPaused ? "Resume" : "Pause") : "Listen"}
+            </button>
+            {isPlaying && (
+              <button 
+                onClick={stopListen}
+                className="px-4 py-2 rounded-full font-semibold flex items-center gap-2 transition-colors"
+                style={{ background: 'rgba(239,68,68,0.1)', color: '#EF4444' }}
+                title="Stop Audio"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect></svg>
+                Stop
+              </button>
+            )}
+          </div>
+            <p style={{ fontSize: '0.9rem', color: 'var(--color-text-secondary)', lineHeight: 1.6, margin: 0, marginTop: '0.5rem' }}>
               {post.author?.name ? `${post.author.name} is a senior editor and subject matter expert.` : 'The Our Blog Team consists of industry experts and AI specialists dedicated to bringing you the most accurate and up-to-date information.'}
             </p>
           </div>
@@ -338,18 +376,19 @@ export default function BlogPostClient({ post, ads, relatedPosts, whatsappLinks 
       <style>{`
         .blog-content h2 { fontSize: 2rem; fontWeight: 700; margin: 2.5rem 0 1rem; color: var(--color-text-primary); letter-spacing: -0.5px; }
         .blog-content h3 { fontSize: 1.5rem; fontWeight: 600; margin: 2rem 0 1rem; color: var(--color-text-primary); }
-        .blog-content p { margin-bottom: 1.5rem; line-height: 1.8; }
-        .blog-content ul { margin: 0 0 1.5rem 2rem; list-style-type: disc; line-height: 1.8; }
+        .blog-content p { margin-bottom: 1.5rem; line-height: 1.8; color: var(--color-text-primary) !important; background: transparent !important; }
+        .blog-content ul { margin: 0 0 1.5rem 2rem; list-style-type: disc; line-height: 1.8; color: var(--color-text-primary) !important; }
         .blog-content li { margin-bottom: 0.5rem; }
-        .blog-content strong { color: var(--color-text-primary); font-weight: 700; }
+        .blog-content strong { color: var(--color-text-primary) !important; font-weight: 700; }
+        .blog-content span { color: inherit; background: transparent; }
         .blog-content a { color: var(--color-accent); text-decoration: none; border-bottom: 1px solid transparent; transition: border-color 0.2s; }
         .blog-content a:hover { border-bottom-color: var(--color-accent); }
-        .blog-content blockquote { border-left: 4px solid var(--color-accent); margin: 2rem 0; padding: 1.5rem; font-style: italic; color: var(--color-text-secondary); background: rgba(255,255,255,0.05); border-radius: 8px; }
-        .blog-content table { width: 100%; border-collapse: collapse; margin: 2rem 0; font-size: 0.95rem; text-align: left; background: rgba(255,255,255,0.02); border-radius: 8px; overflow: hidden; border-spacing: 0; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .blog-content th, .blog-content td { padding: 15px 20px; border-bottom: 1px solid var(--color-border); }
-        .blog-content th { background-color: rgba(255,255,255,0.05); font-weight: 700; color: var(--color-text-primary); }
+        .blog-content blockquote { border-left: 4px solid var(--color-accent); margin: 2rem 0; padding: 1.5rem; font-style: italic; color: var(--color-text-secondary) !important; background: rgba(255,255,255,0.05) !important; border-radius: 8px; }
+        .blog-content table { width: 100%; border-collapse: collapse; margin: 2rem 0; font-size: 0.95rem; text-align: left; background: rgba(255,255,255,0.02) !important; border-radius: 8px; overflow: hidden; border-spacing: 0; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .blog-content th, .blog-content td { padding: 15px 20px; border-bottom: 1px solid var(--color-border); color: var(--color-text-primary) !important; background: transparent !important; }
+        .blog-content th { background-color: rgba(255,255,255,0.05) !important; font-weight: 700; color: var(--color-text-primary) !important; }
         .blog-content tr:last-of-type td { border-bottom: none; }
-        .blog-content tr:hover td { background-color: rgba(255,255,255,0.02); }
+        .blog-content tr:hover td { background-color: rgba(255,255,255,0.02) !important; }
       `}</style>
     </div>
   );

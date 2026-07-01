@@ -12,6 +12,7 @@ const sidebarItems = [
   { name: 'AdSense Ads', path: '/admin/ads', icon: '💰' },
   { name: 'File Manager', path: '/admin/files', icon: '📁' },
   { name: 'Tags Management', path: '/admin/tags', icon: '🏷️' },
+  { name: 'Admin Users', path: '/admin/users', icon: '🔐' },
   { name: 'Team Management', path: '/admin/team', icon: '👥' },
   { name: 'Site Settings', path: '/admin/settings', icon: '⚙️' },
 ];

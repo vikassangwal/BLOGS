@@ -339,7 +339,7 @@ export async function POST(request: NextRequest) {
         seoDescription: seoData.seoDescription,
         seoKeywords: seoData.seoKeywords,
         tags: {
-          create: [{ tag: { connectOrCreate: { where: { name: targetKeyword.niche || 'News' }, create: { name: targetKeyword.niche || 'News', slug: (targetKeyword.niche || 'News').toLowerCase().replace(/[^a-z0-9]+/g, '-') } } } }]
+          create: [{ tag: { connectOrCreate: { where: { name: pendingKeyword?.niche || 'News' }, create: { name: pendingKeyword?.niche || 'News', slug: (pendingKeyword?.niche || 'News').toLowerCase().replace(/[^a-z0-9]+/g, '-') } } } }]
         }
       }
     });

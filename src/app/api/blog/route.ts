@@ -2,6 +2,49 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyToken } from '@/lib/auth';
 
+// -------------------------------------------------------------
+// HELPER: WhatsApp Auto-Poster
+// -------------------------------------------------------------
+async function postToWhatsApp(token: string, phoneId: string, groupId: string, text: string, imageUrl: string) {
+  try {
+    const res = await fetch(`https://graph.facebook.com/v19.0/${phoneId}/messages`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ messaging_product: 'whatsapp', to: groupId, type: 'image', image: { link: imageUrl, caption: text } })
+    });
+    return res.ok;
+  } catch(e) { return false; }
+}
+
+// -------------------------------------------------------------
+// HELPER: Instagram Auto-Poster
+// -------------------------------------------------------------
+async function postToInstagram(token: string, accountId: string, imageUrl: string, caption: string) {
+  try {
+    const containerRes = await fetch(`https://graph.facebook.com/v19.0/${accountId}/media?image_url=${encodeURIComponent(imageUrl)}&caption=${encodeURIComponent(caption)}&access_token=${token}`, { method: 'POST' });
+    const containerData = await containerRes.json();
+    if (containerData.id) {
+      await fetch(`https://graph.facebook.com/v19.0/${accountId}/media_publish?creation_id=${containerData.id}&access_token=${token}`, { method: 'POST' });
+      return true;
+    }
+    return false;
+  } catch(e) { return false; }
+}
+
+// -------------------------------------------------------------
+// HELPER: Twitter Auto-Poster (v2)
+// -------------------------------------------------------------
+async function postToTwitter(bearerToken: string, text: string) {
+  try {
+    const res = await fetch('https://api.twitter.com/2/tweets', {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${bearerToken}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text })
+    });
+    return res.ok;
+  } catch (e) { return false; }
+}
+
 // GET: List posts
 export async function GET(request: Request) {
   try {
@@ -129,42 +172,37 @@ export async function POST(request: NextRequest) {
     // Social Media Auto-Poster Logic
     if (status === 'Published') {
       try {
-        const settings = await prisma.siteSettings.findUnique({ where: { id: 'default' } });
-        if (settings?.aiApiKey?.startsWith('{')) {
-          const parsedKeys = JSON.parse(settings.aiApiKey);
-          const postUrl = `https://antigravity.com/blog/${newPost.slug}`;
-          const message = socialCaptions ? `${socialCaptions}\n\nRead more: ${postUrl}` : `New Post: ${title}!\n\nRead more: ${postUrl}`;
-          
-          if (parsedKeys.twitter) {
-            console.log(`[Twitter Auto-Post] Sending tweet using key: ${parsedKeys.twitter.substring(0, 5)}... Message: ${message}`);
-            // TODO: Implement actual twitter-api-v2 call here
+        const savedKeys = await prisma.autoBlogSettings.findUnique({ where: { id: 'default' } });
+        if (savedKeys) {
+          const socialCaption = socialCaptions || `Check out our latest article: ${title}\n\nRead more here: https://www.knowora.in/blog/${newPost.slug}\n\n${socialHashtags || ''}`;
+          const socialImageUrl = `https://www.knowora.in/api/og?title=${encodeURIComponent(title)}&bg=${encodeURIComponent(featuredImage)}`;
+
+          // 1. WhatsApp
+          if (savedKeys.whatsappToken && savedKeys.whatsappPhoneId && savedKeys.whatsappGroupId) {
+            await postToWhatsApp(savedKeys.whatsappToken, savedKeys.whatsappPhoneId, savedKeys.whatsappGroupId, socialCaption, socialImageUrl);
           }
-          if (parsedKeys.facebook) {
-            console.log(`[Facebook Auto-Post] Posting to FB page using token: ${parsedKeys.facebook.substring(0, 5)}... Message: ${message}`);
-            // TODO: Implement actual Facebook Graph API call here
+
+          // 2. Instagram
+          if (savedKeys.instagramToken && savedKeys.instagramAccountId) {
+            await postToInstagram(savedKeys.instagramToken, savedKeys.instagramAccountId, socialImageUrl, socialCaption);
           }
-          if (parsedKeys.instagram) {
-            console.log(`[Instagram Auto-Post] Posting to IG using token: ${parsedKeys.instagram.substring(0, 5)}... Image: ${featuredImage}`);
-            // TODO: Implement actual Instagram Graph API call here
+
+          // 3. Twitter
+          if (savedKeys.twitter) {
+            await postToTwitter(savedKeys.twitter, socialCaption);
           }
-          
-          if (parsedKeys.onesignalAppId && parsedKeys.onesignalApiKey) {
-            console.log(`[OneSignal] Sending push notification...`);
-            fetch('https://onesignal.com/api/v1/notifications', {
+
+          // 4. Telegram
+          if (savedKeys.telegramToken && savedKeys.telegramChatId) {
+            await fetch(`https://api.telegram.org/bot${savedKeys.telegramToken}/sendMessage`, {
               method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Basic ${parsedKeys.onesignalApiKey}`
-              },
+              headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
-                app_id: parsedKeys.onesignalAppId,
-                included_segments: ['Subscribed Users'],
-                headings: { en: title },
-                contents: { en: excerpt || 'Read our latest post!' },
-                url: postUrl,
-                big_picture: featuredImage
+                chat_id: savedKeys.telegramChatId,
+                text: socialCaption,
+                parse_mode: 'HTML'
               })
-            }).catch(console.error);
+            }).catch(() => {});
           }
         }
       } catch (err) {

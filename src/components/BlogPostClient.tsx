@@ -42,6 +42,30 @@ export default function BlogPostClient({ post, ads, relatedPosts, whatsappLinks 
     }
   };
 
+  const handleListen = () => {
+    if (!('speechSynthesis' in window)) {
+      alert('Text-to-Speech is not supported in your browser.');
+      return;
+    }
+    if (window.speechSynthesis.speaking) {
+      window.speechSynthesis.cancel();
+      return;
+    }
+    const text = contentHtml.replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ').trim();
+    // Chunk by sentences to prevent silent browser limits on long texts
+    const chunks = text.match(/[^.!?]+[.!?]+/g) || [text];
+    
+    const lang = post.content?.includes('है') ? 'hi-IN' : 'en-US';
+    
+    chunks.forEach((chunk) => {
+      if (chunk.trim()) {
+        const utterance = new SpeechSynthesisUtterance(chunk.trim());
+        utterance.lang = lang;
+        window.speechSynthesis.speak(utterance);
+      }
+    });
+  };
+
   const handlePayment = async () => {
     setIsProcessingPayment(true);
     try {
@@ -134,20 +158,7 @@ export default function BlogPostClient({ post, ads, relatedPosts, whatsappLinks 
         {/* Translate and TTS Toolbar */}
         <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1rem', gap: '1rem', flexWrap: 'wrap' }}>
           <button
-            onClick={() => {
-              if ('speechSynthesis' in window) {
-                if (window.speechSynthesis.speaking) {
-                  window.speechSynthesis.cancel();
-                  return;
-                }
-                const text = contentHtml.replace(/<[^>]+>/g, '');
-                const utterance = new SpeechSynthesisUtterance(text);
-                utterance.lang = post.content?.includes('है') ? 'hi-IN' : 'en-US';
-                window.speechSynthesis.speak(utterance);
-              } else {
-                alert('Text-to-Speech is not supported in your browser.');
-              }
-            }}
+            onClick={handleListen}
             style={{ padding: '0.4rem 0.8rem', borderRadius: '8px', background: 'linear-gradient(135deg, #10b981, #059669)', border: 'none', color: '#fff', cursor: 'pointer', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.5rem' }}
           >
             🔊 Listen to Article

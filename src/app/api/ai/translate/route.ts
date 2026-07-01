@@ -17,7 +17,10 @@ export async function POST(request: Request) {
     const prompt = `You are a professional translator. Translate the following HTML content into ${targetLanguage}. Maintain all HTML tags and formatting exactly as they are. Only return the translated HTML string without any markdown code blocks.`;
 
     // Limit content size to avoid context limits if needed, but modern models handle it
-    const translatedHtml = await generateAIContent(aiConfig, prompt, htmlContent, 4000);
+    let translatedHtml = await generateAIContent(aiConfig, prompt, htmlContent, 4000);
+
+    // Strip markdown formatting if AI added it
+    translatedHtml = translatedHtml.replace(/^```html\n?/, '').replace(/\n?```$/, '').trim();
 
     return NextResponse.json({ translatedHtml });
   } catch (error) {

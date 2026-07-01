@@ -73,8 +73,47 @@ export default function GlobalHeader({ siteName }: { siteName?: string }) {
             </svg>
           </a>
 
-          {/* Language Translate */}
-          <div id="google_translate_element" className="[&>div]:!mb-0 scale-75 origin-right"></div>
+          {/* Hidden Original Google Translate */}
+          <div id="google_translate_element" style={{ display: 'none' }}></div>
+          
+          {/* Custom Sleek Language Selector */}
+          <select
+            onChange={(e) => {
+              const lang = e.target.value;
+              const select = document.querySelector('.goog-te-combo') as HTMLSelectElement;
+              if (select) {
+                select.value = lang;
+                select.dispatchEvent(new Event('change'));
+              }
+            }}
+            className="language-selector"
+            style={{
+              appearance: 'none',
+              background: 'rgba(255, 255, 255, 0.05) url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23FFFFFF%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E") no-repeat right 12px center',
+              backgroundSize: '12px',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              color: '#ffffff',
+              padding: '8px 36px 8px 16px',
+              borderRadius: '8px',
+              fontSize: '15px',
+              cursor: 'pointer',
+              outline: 'none',
+              minWidth: '160px',
+              fontFamily: 'inherit',
+            }}
+          >
+            <option value="en" style={{ background: '#121212', color: '#fff' }}>English</option>
+            <option value="hi" style={{ background: '#121212', color: '#fff' }}>Hindi (हिन्दी)</option>
+            <option value="bn" style={{ background: '#121212', color: '#fff' }}>Bengali (বাংলা)</option>
+            <option value="te" style={{ background: '#121212', color: '#fff' }}>Telugu (తెలుగు)</option>
+            <option value="mr" style={{ background: '#121212', color: '#fff' }}>Marathi (मराठी)</option>
+            <option value="ta" style={{ background: '#121212', color: '#fff' }}>Tamil (தமிழ்)</option>
+            <option value="gu" style={{ background: '#121212', color: '#fff' }}>Gujarati (ગુજરાતી)</option>
+            <option value="ur" style={{ background: '#121212', color: '#fff' }}>Urdu (اردو)</option>
+            <option value="kn" style={{ background: '#121212', color: '#fff' }}>Kannada (ಕನ್ನಡ)</option>
+            <option value="ml" style={{ background: '#121212', color: '#fff' }}>Malayalam (മലയാളം)</option>
+            <option value="pa" style={{ background: '#121212', color: '#fff' }}>Punjabi (ਪੰਜਾਬੀ)</option>
+          </select>
           
           {/* Theme Toggle */}
           <ThemeToggle />

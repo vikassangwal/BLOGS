@@ -36,8 +36,8 @@ export default function GlobalHeader({ siteName }: { siteName?: string }) {
   return (
     <header className="sticky top-0 z-50 glass-panel w-full" style={{ borderBottom: '1px solid var(--color-border)' }}>
       <div className="container mx-auto px-4 md:px-6 h-16 md:h-20 flex items-center justify-between">
-        <a href="/" className="text-xl md:text-2xl font-bold tracking-tight premium-gradient-text" style={{ zIndex: 60 }}>
-          {siteName || 'Our Blog'}
+        <a href="/" className="flex items-center" style={{ zIndex: 60 }}>
+          <img src="/logo.png" alt={siteName || 'Knowora'} className="h-12 md:h-14 w-auto object-contain" />
         </a>
         
         {/* Desktop & Mobile Shared Actions */}

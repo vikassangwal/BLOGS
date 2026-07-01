@@ -163,10 +163,7 @@ export default function BlogListingPage() {
                   key={post.id}
                   style={{ textDecoration: 'none', color: 'inherit' }}
                 >
-                  <article className="minimal-card" style={{
-                    display: 'flex',
-                    flexDirection: 'row', // Horizontal layout
-                    alignItems: 'center',
+                  <article className="minimal-card blog-list-card" style={{
                     animation: `slideUp 0.4s ease forwards ${idx * 0.1}s`,
                     opacity: 0,
                     transform: 'translateY(20px)',
@@ -176,7 +173,6 @@ export default function BlogListingPage() {
                     border: '1px solid var(--color-border)',
                     transition: 'transform 0.3s, box-shadow 0.3s',
                     padding: '1rem',
-                    gap: '1.5rem'
                   }}
                   onMouseEnter={e => {
                     e.currentTarget.style.transform = 'translateY(-4px)';
@@ -188,9 +184,7 @@ export default function BlogListingPage() {
                   }}
                   >
                     {/* Image Thumbnail */}
-                    <div style={{ 
-                      width: '180px', 
-                      height: '120px', 
+                    <div className="blog-list-image" style={{ 
                       position: 'relative', 
                       background: 'var(--color-bg-secondary)',
                       borderRadius: '12px',
@@ -283,6 +277,27 @@ export default function BlogListingPage() {
           display: inline-block;
           animation: bounce 1.4s infinite ease-in-out both;
           font-weight: bold;
+        }
+        .blog-list-card {
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+          gap: 1.5rem;
+        }
+        .blog-list-image {
+          width: 180px;
+          height: 120px;
+        }
+        @media (max-width: 768px) {
+          .blog-list-card {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 1rem;
+          }
+          .blog-list-image {
+            width: 100%;
+            height: 200px;
+          }
         }
       `}</style>
     </div>

@@ -246,10 +246,10 @@ export default function BlogPostClient({ post, ads, relatedPosts, whatsappLinks 
         {(post.tags?.some((t: any) => (t.tag?.name || t.name) === 'Finance & Earning' || (t.tag?.name || t.name) === 'Education & Career')) && (
           <div style={{ marginTop: '3rem', padding: '1.5rem', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.2)', borderRadius: '12px', color: '#fca5a5' }}>
             <h4 style={{ fontWeight: 700, marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <span>⚠️</span> Disclaimer
+              <span>⚠️</span> SEBI Disclaimer & Educational Notice
             </h4>
             <p style={{ fontSize: '0.9rem', margin: 0, lineHeight: 1.6 }}>
-              यह जानकारी केवल शैक्षिक उद्देश्यों के लिए है। (This information is for educational purposes only.) Please consult with a certified professional before making any financial or career-altering decisions.
+              यह जानकारी केवल शैक्षिक (Educational) उद्देश्यों के लिए है। हम <strong>SEBI द्वारा रजिस्टर्ड वित्तीय सलाहकार (Financial Advisor) नहीं हैं</strong>। किसी भी शेयर, स्टॉक या योजना में निवेश करने से पहले कृपया अपने सर्टिफाइड वित्तीय सलाहकार से परामर्श लें। (This information is for educational purposes only. We are not SEBI-registered advisors.)
             </p>
           </div>
         )}

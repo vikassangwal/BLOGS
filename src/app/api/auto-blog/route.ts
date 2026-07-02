@@ -104,15 +104,6 @@ export async function POST(request: NextRequest) {
         else if (provider === 'anthropic') apiKey = savedKeys.anthropic || '';
         else if (provider === 'deepseek') apiKey = savedKeys.deepseek || '';
 
-        // FORCE OVERRIDE BROKEN MODELS NO MATTER WHERE THEY WERE SAVED (ONLY FOR OPENROUTER)
-        if (provider === 'openrouter' || (!apiKey && savedKeys.openrouter)) {
-            if (model.includes('gemini-2.5-flash') || model.includes('gemini-2.0-flash-exp') || model.includes('llama-3-8b') || model === 'openrouter/free') {
-                model = 'meta-llama/llama-3.3-70b-instruct:free';
-            }
-        }
-
-
-      if (!apiKey && savedKeys.openrouter) return { provider: 'openrouter' as any, apiKey: savedKeys.openrouter, model };
       if (!apiKey && siteSettings?.aiApiKey && !siteSettings.aiApiKey.startsWith('{')) apiKey = siteSettings.aiApiKey;
       return { provider: provider as any, apiKey, model };
     }

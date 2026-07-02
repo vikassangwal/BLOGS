@@ -165,7 +165,7 @@ export default function BlogPostClient({ post, ads, relatedPosts, whatsappLinks 
             <button 
               onClick={handleListen}
               className="px-4 py-2 rounded-full font-semibold flex items-center gap-2 transition-colors"
-              style={{ background: 'rgba(0,102,204,0.1)', color: 'var(--color-accent)' }}
+              style={{ background: isPlaying ? 'var(--color-accent)' : 'rgba(0,102,204,0.1)', color: isPlaying ? '#fff' : 'var(--color-accent)' }}
               title={isPlaying ? (isPaused ? "Resume Audio" : "Pause Audio") : "Listen to Article"}
             >
               {isPlaying && !isPaused ? (
@@ -290,7 +290,7 @@ export default function BlogPostClient({ post, ads, relatedPosts, whatsappLinks 
             <button 
               onClick={handleListen}
               className="px-4 py-2 rounded-full font-semibold flex items-center gap-2 transition-colors"
-              style={{ background: 'rgba(0,102,204,0.1)', color: 'var(--color-accent)' }}
+              style={{ background: isPlaying ? 'var(--color-accent)' : 'rgba(0,102,204,0.1)', color: isPlaying ? '#fff' : 'var(--color-accent)' }}
               title={isPlaying ? (isPaused ? "Resume Audio" : "Pause Audio") : "Listen to Article"}
             >
               {isPlaying && !isPaused ? (

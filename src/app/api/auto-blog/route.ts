@@ -252,7 +252,9 @@ export async function POST(request: NextRequest) {
     
     ${recentPostsHtml ? `
     AUTO-INTERNAL LINKING:
-    You MUST naturally hyperlink the following related articles into the body text of your article. Use exact <a> tags provided below when the topic naturally fits in a sentence:
+    If you mention the following related articles, you MUST add them as a visually distinct NOTE block using this exact HTML format:
+    <div class="internal-link-note"><strong>📝 नोट (Note):</strong> <a href="...">Article Title</a> के बारे में और पढ़ें।</div>
+    Do NOT just mix them in the normal paragraph text. You MUST use this exact HTML div format. Use the exact <a> tags provided below:
     ${recentPostsHtml}
     ` : ''}
 

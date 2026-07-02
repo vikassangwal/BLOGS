@@ -173,6 +173,26 @@
 body { top: 0 !important; }
 .goog-te-banner-frame { display: none !important; }
 
+/* Internal Link Note */
+.internal-link-note {
+  background: rgba(59, 130, 246, 0.1); /* Light blue tint */
+  border-left: 4px solid var(--color-accent);
+  padding: 1.2rem 1.5rem;
+  margin: 2rem 0;
+  border-radius: 8px;
+  font-family: 'Georgia', serif; /* Different font as requested */
+  font-size: 1.1rem;
+  font-style: italic;
+  color: var(--color-text-primary);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.internal-link-note a {
+  font-weight: bold;
+  text-decoration: underline;
+  color: var(--color-accent);
+}
+
 /* Global Input Styles for Dark Theme */
 input, textarea, select { background-color: rgba(255, 255, 255, 0.03); color: var(--color-text-primary); }
 input:focus, textarea:focus, select:focus { outline: 2px solid var(--color-accent-glow); }

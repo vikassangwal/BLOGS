@@ -82,11 +82,14 @@ export default function GlobalHeader({ siteName }: { siteName?: string }) {
           <select
             onChange={(e) => {
               const lang = e.target.value;
-              const select = document.querySelector('.goog-te-combo') as HTMLSelectElement;
-              if (select) {
-                select.value = lang;
-                select.dispatchEvent(new Event('change', { bubbles: true }));
+              if (lang === 'en') {
+                document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+                document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=${window.location.hostname}`;
+              } else {
+                document.cookie = `googtrans=/en/${lang}; path=/`;
+                document.cookie = `googtrans=/en/${lang}; path=/; domain=${window.location.hostname}`;
               }
+              window.location.reload();
             }}
             className="language-selector"
             style={{

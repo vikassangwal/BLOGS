@@ -155,6 +155,7 @@ export default function IntegrationsHubPage() {
                   <select value={aiKeys.imageGenProvider || 'pollinations'} onChange={e => setAiKeys({...aiKeys, imageGenProvider: e.target.value})} className="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2 text-white">
                     <option value="pollinations">Pollinations.ai (Free)</option>
                     <option value="openai">OpenAI (DALL-E)</option>
+                    <option value="openrouter">OpenRouter</option>
                   </select>
                 </div>
                 <div>

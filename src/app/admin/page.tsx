@@ -111,28 +111,8 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {/* Stats Cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
-        {[
-          { title: 'Total Posts', value: stats?.totalPosts, icon: '📝', gradient: 'linear-gradient(135deg, #3b82f6, #1d4ed8)', shadow: 'rgba(59,130,246,0.3)' },
-          { title: 'AI Generated', value: stats?.totalAutoPosts, icon: '✨', gradient: 'linear-gradient(135deg, #a855f7, #7c3aed)', shadow: 'rgba(168,85,247,0.3)' },
-          { title: 'Total Leads', value: stats?.totalLeads, icon: '🎯', gradient: 'linear-gradient(135deg, #10b981, #059669)', shadow: 'rgba(16,185,129,0.3)' },
-          { title: 'Pending Keywords', value: stats?.pendingKeywords, icon: '⏳', gradient: 'linear-gradient(135deg, #f59e0b, #d97706)', shadow: 'rgba(245,158,11,0.3)' },
-        ].map((card, i) => (
-          <div key={i} style={{
-            ...glassCard,
-            display: 'flex', alignItems: 'center', gap: '1rem',
-            position: 'relative', overflow: 'hidden'
-          }}>
-            <div style={{
-              position: 'absolute', top: '-20px', right: '-20px', width: '80px', height: '80px',
-              borderRadius: '50%', background: card.gradient, opacity: 0.15, filter: 'blur(10px)'
-            }} />
-            <div style={{
-          <p style={{ color: 'var(--color-text-secondary)' }}>Welcome back! Here's what's happening.</p>
-        </div>
-        
-        {/* Global Time Filter */}
+      {/* Global Time Filter */}
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '2rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(255,255,255,0.05)', padding: '0.5rem', borderRadius: '12px', border: '1px solid var(--color-border)' }}>
           <span style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)', paddingLeft: '0.5rem' }}>⏱️ Filter:</span>
           <select 
@@ -153,7 +133,9 @@ export default function AdminDashboard() {
             <option value="lifetime" style={{background:'#111'}}>Lifetime</option>
           </select>
         </div>
-      </header>
+      </div>
+
+
 
       {/* Stats Grid */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>

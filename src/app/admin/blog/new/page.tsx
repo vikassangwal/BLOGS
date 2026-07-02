@@ -187,7 +187,7 @@ function BlogEditor() {
   };
 
   return (
-    <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
+    <div style={{ maxWidth: '1600px', margin: '0 auto', padding: '0 1rem' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
         <h1 style={{ fontSize: '2rem', fontWeight: 800, margin: 0, color: 'var(--color-text-primary)' }}>
           {isEdit ? 'Edit Post' : 'Create New Post'}
@@ -245,8 +245,8 @@ function BlogEditor() {
           </div>
 
           <div style={{ background: 'rgba(255, 255, 255, 0.05)', padding: '1.5rem', borderRadius: '16px', border: '1px solid var(--color-border)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-              <label style={{ fontWeight: 600, color: 'var(--color-text-primary)' }}>Content (HTML)</label>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+              <label style={{ fontWeight: 600, color: 'var(--color-text-primary)' }}>Content (Live Split-Screen Editor)</label>
               <button 
                 type="button" 
                 onClick={() => handleAiGenerate('article')}
@@ -256,12 +256,35 @@ function BlogEditor() {
                 {aiLoading ? 'Generating...' : '✨ Generate with AI'}
               </button>
             </div>
-            <textarea
-              value={formData.content}
-              onChange={e => setFormData({ ...formData, content: e.target.value })}
-              style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--color-border)', minHeight: '400px', fontFamily: 'monospace' }}
-              required
-            />
+            
+            <style>{`
+              .admin-live-preview a::after {
+                content: " (" attr(href) ")";
+                font-size: 0.85em;
+                color: #0ea5e9;
+                margin-left: 4px;
+                font-family: monospace;
+                word-break: break-all;
+                background: rgba(14, 165, 233, 0.1);
+                padding: 2px 4px;
+                border-radius: 4px;
+              }
+            `}</style>
+            
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+              <textarea
+                value={formData.content}
+                onChange={e => setFormData({ ...formData, content: e.target.value })}
+                placeholder="Write your HTML content here..."
+                style={{ width: '100%', padding: '1rem', borderRadius: '8px', border: '1px solid var(--color-border)', minHeight: '600px', fontFamily: 'monospace', background: 'rgba(0,0,0,0.3)', color: '#e2e8f0', lineHeight: 1.6 }}
+                required
+              />
+              <div 
+                className="blog-content admin-live-preview"
+                style={{ width: '100%', padding: '1rem 2rem', borderRadius: '8px', border: '1px solid var(--color-border)', background: 'var(--color-bg-primary)', minHeight: '600px', maxHeight: '800px', overflowY: 'auto' }}
+                dangerouslySetInnerHTML={{ __html: formData.content.replace(/\[LINK_NOT_AVAILABLE\]/g, '<span style="background:#ef4444;color:white;padding:2px 6px;font-weight:bold;border-radius:4px;box-shadow:0 0 10px rgba(239,68,68,0.5);">🚨 [LINK_NOT_AVAILABLE]</span>') }}
+              />
+            </div>
           </div>
 
           <div style={{ background: 'rgba(255, 255, 255, 0.05)', padding: '1.5rem', borderRadius: '16px', border: '1px solid var(--color-border)' }}>

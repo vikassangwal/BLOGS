@@ -135,7 +135,10 @@ export async function POST(request: NextRequest) {
       Respond ONLY with a valid JSON array of strings. No markdown, no backticks.
       Example format: ["Topic 1", "Topic 2", "Topic 3"]`;
 
-      const researcherConfigForTopic = buildAgentConfig('researcherProvider', 'researcherModel', 'openrouter', settings.researcherModel || 'google/gemini-2.0-flash-exp:free');
+      let rModel = settings.researcherModel || '';
+      if (rModel === 'google/gemini-2.5-flash' || rModel.includes('2.5-flash') || !rModel) rModel = 'google/gemini-2.0-flash-exp:free';
+
+      const researcherConfigForTopic = buildAgentConfig('researcherProvider', 'researcherModel', 'openrouter', rModel);
       
       try {
         const topicRaw = await generateAIContent(researcherConfigForTopic, "You output strict JSON arrays.", topicPrompt, 1500);
@@ -189,9 +192,18 @@ export async function POST(request: NextRequest) {
       selectedCategory = pendingKeyword.niche || 'News';
     }
 
-    const researcherConfig = buildAgentConfig('researcherProvider', 'researcherModel', 'openrouter', settings.researcherModel || 'google/gemini-2.0-flash-exp:free');
-    const writerConfig = buildAgentConfig('writerProvider', 'writerModel', 'openrouter', settings.writerModel || 'meta-llama/llama-3.3-70b-instruct');
-    const seoConfig = buildAgentConfig('seoProvider', 'seoModel', 'openrouter', settings.seoModel || 'google/gemini-2.0-flash-exp:free');
+    let rModel = settings.researcherModel || '';
+    if (rModel === 'google/gemini-2.5-flash' || rModel.includes('2.5-flash') || !rModel) rModel = 'google/gemini-2.0-flash-exp:free';
+    
+    let wModel = settings.writerModel || '';
+    if (wModel === 'openai/gpt-4o-mini' || !wModel) wModel = 'meta-llama/llama-3.3-70b-instruct';
+    
+    let sModel = settings.seoModel || '';
+    if (sModel === 'openai/gpt-4o-mini' || !sModel) sModel = 'google/gemini-2.0-flash-exp:free';
+
+    const researcherConfig = buildAgentConfig('researcherProvider', 'researcherModel', 'openrouter', rModel);
+    const writerConfig = buildAgentConfig('writerProvider', 'writerModel', 'openrouter', wModel);
+    const seoConfig = buildAgentConfig('seoProvider', 'seoModel', 'openrouter', sModel);
 
     // Verify at least one agent has a valid API key
     if (!researcherConfig.apiKey && !writerConfig.apiKey && !seoConfig.apiKey) {

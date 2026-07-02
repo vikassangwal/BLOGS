@@ -264,6 +264,7 @@ export async function POST(request: NextRequest) {
     6. Add a compelling introduction and a strong conclusion.
     7. IF the topic is about Finance/Earning/Money, you MUST include sections on "How to make money (पैसे कैसे कमाएं)" and "Money Management Tips (पैसे कैसे मैनेज करें)".
     8. IF the topic is about Technology/Gadgets/Mobiles, you MUST embed realistic images of the gadgets using this HTML tag: <img src="https://image.pollinations.ai/prompt/Realistic%20Photo%20Of%20[GADGET_NAME_HERE]?width=800&height=400&nologo=true" alt="Gadget Image" class="w-full rounded-xl my-4" />
+    9. IF the topic is about Education, Jobs, Vacancies, or Results, you MUST include a well-formatted HTML Table at the end with important links (like Official Website, Apply Link, Notification Link). The links in the table MUST be styled as a button with the text "Click Here". Use this exact HTML format for the buttons in the table: <a href="#" style="display:inline-block; padding:8px 16px; background-color:#2563eb; color:white; text-decoration:none; border-radius:5px; font-weight:bold; text-align:center;">Click Here</a>
     
     ${recentPostsHtml ? `
     AUTO-INTERNAL LINKING:

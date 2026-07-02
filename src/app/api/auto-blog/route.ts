@@ -113,6 +113,7 @@ export async function POST(request: NextRequest) {
 
     let targetTopic = '';
     let keywordId = null;
+    let selectedCategory = 'News';
 
     if (pendingKeyword) {
       targetTopic = pendingKeyword.keyword;
@@ -125,7 +126,7 @@ export async function POST(request: NextRequest) {
       // Topic Rotation based on time (Technology, Education, Finance)
       const topicsList = settings.newsTopics ? settings.newsTopics.split(',').map(t => t.trim()) : ['Technology', 'Education & Career', 'Finance & Earning'];
       const currentHour = new Date().getHours();
-      const selectedCategory = topicsList[currentHour % topicsList.length] || 'Technology';
+      selectedCategory = topicsList[currentHour % topicsList.length] || 'Technology';
 
       const trends = await getTrendingTopics();
       

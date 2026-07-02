@@ -257,7 +257,12 @@ export async function POST(request: NextRequest) {
     
     REQUIREMENTS:
     1. ${langInstructions}
-    2. THE MAIN ARTICLE TITLE (<h1> or <h2> at the top) MUST be highly engaging, creating immense curiosity (जिज्ञासा) so the reader is compelled to click. Use psychological hooks without being fake (e.g., 'ये गलती मत करना', 'बड़ा बदलाव', 'चौंकाने वाली खबर'). MUST be in the format: "Hindi Title (English Title)". For example: "UPSC NDA में हुआ बड़ा बदलाव, फॉर्म भरने से पहले जानें ये नियम (UPSC NDA 2026 Big Update)". ALWAYS write the main title related to the news, first in Hindi, then in brackets English.
+    2. THE MAIN ARTICLE TITLE (<h1> or <h2> at the top) MUST be highly engaging, creating immense curiosity (जिज्ञासा). MUST be in the exact format: "Long Hindi Title with Curiosity Hook (Short English Keyword Title)". 
+       EXAMPLES FOR ALL CATEGORIES:
+       - Education/Jobs: "UPSC NDA 2026 का आधिकारिक नोटिफिकेशन जारी, जानिए योग्यता, पद और आवेदन का तरीका! (UPSC NDA 2026 Notification)"
+       - Technology: "Realme 14 Pro 5G भारत में हुआ लॉन्च, 200MP कैमरा और धांसू फीचर्स ने उड़ाई सबकी नींद! (Realme 14 Pro 5G Launch)"
+       - Finance: "बजट 2026 में हुआ बड़ा बदलाव, टैक्सपेयर्स को मिला भारी तोहफा, जानिए पूरी डिटेल! (Budget 2026 Updates)"
+       ALWAYS write the main title first in Hindi (creating eagerness to read), then in brackets English.
     3. Format using strict HTML tags: <h2>, <h3>, <p>, <ul>, <li>, <strong>, <blockquote>, <table>.
     4. Do NOT wrap the output in markdown code blocks like \`\`\`html. Output raw HTML only.
     5. Make the content highly readable and scannable with engaging subheadings.

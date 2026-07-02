@@ -4,13 +4,17 @@ import Link from 'next/link';
 
 export default function AboutUsPage() {
   const [team, setTeam] = useState<any[]>([]);
+  const [about, setAbout] = useState({ heading: 'About Our Blog', content: 'Loading...', mission: '' });
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    fetch('/api/team')
-      .then(res => res.json())
-      .then(data => {
-        if (Array.isArray(data)) setTeam(data);
+    Promise.all([
+      fetch('/api/team').then(res => res.json()),
+      fetch('/api/admin/about').then(res => res.json())
+    ])
+      .then(([teamData, aboutData]) => {
+        if (Array.isArray(teamData)) setTeam(teamData);
+        if (aboutData && !aboutData.error) setAbout(aboutData);
         setIsLoading(false);
       })
       .catch(() => setIsLoading(false));
@@ -23,20 +27,18 @@ export default function AboutUsPage() {
       
       <div className="max-w-4xl mx-auto">
         <h1 className="text-4xl md:text-5xl font-extrabold mb-8 text-center premium-gradient-text">
-          About Our Blog
+          {about.heading || 'About Our Blog'}
         </h1>
         
         <div className="glass-panel p-8 md:p-12 rounded-3xl mb-12 animate-slide-up">
           <h2 className="text-2xl font-bold mb-4 text-white">Our Mission</h2>
-          <p className="text-gray-300 leading-relaxed mb-6">
-            At Our Blog, our mission is to empower readers with high-quality, expertly curated content across Technology, Education & Career, and Finance & Earning. 
-            We believe that knowledge should be accessible, accurate, and actionable. Our platform leverages advanced AI combined with human expertise to bring you the most reliable insights.
+          <p className="text-gray-300 leading-relaxed mb-6 whitespace-pre-line">
+            {about.content}
           </p>
           
           <h2 className="text-2xl font-bold mb-4 text-white mt-8">Our Expertise (E-E-A-T)</h2>
-          <p className="text-gray-300 leading-relaxed mb-6">
-            We adhere strictly to Google's E-E-A-T (Experience, Expertise, Authoritativeness, and Trustworthiness) guidelines. 
-            Our content is generated and reviewed by industry professionals to ensure that the information you receive is not only engaging but also factually correct and trustworthy.
+          <p className="text-gray-300 leading-relaxed mb-6 whitespace-pre-line">
+            {about.mission || "We adhere strictly to Google's E-E-A-T (Experience, Expertise, Authoritativeness, and Trustworthiness) guidelines."}
           </p>
           <ul className="list-disc pl-6 text-gray-300 space-y-3 mb-6">
             <li><strong>Experience:</strong> Years of hands-on experience in tech, finance, and education sectors.</li>
@@ -76,7 +78,7 @@ export default function AboutUsPage() {
         <div className="text-center mt-16 animate-slide-up delay-300">
           <h2 className="text-2xl font-bold mb-4 text-white">Contact Us</h2>
           <p className="text-gray-400 mb-6">Have questions or want to collaborate? Reach out to us.</p>
-          <a href="mailto:admin@antigravity.com" className="inline-block px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-full transition-all shadow-[0_0_15px_rgba(37,99,235,0.5)]">
+          <a href="mailto:info@knowora.in" className="inline-block px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-full transition-all shadow-[0_0_15px_rgba(37,99,235,0.5)]">
             Email Us
           </a>
         </div>

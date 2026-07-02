@@ -43,8 +43,35 @@ export async function GET(request: NextRequest) {
   }
 }
 
-export async function POST(request: Request) {
+// Simple in-memory rate limiting map for basic DDoS/Spam protection
+const rateLimitMap = new Map<string, { count: number, resetAt: number }>();
+
+function isRateLimited(ip: string): boolean {
+  const now = Date.now();
+  const record = rateLimitMap.get(ip);
+  if (!record) {
+    rateLimitMap.set(ip, { count: 1, resetAt: now + 3600000 }); // 1 hour window
+    return false;
+  }
+  if (now > record.resetAt) {
+    rateLimitMap.set(ip, { count: 1, resetAt: now + 3600000 });
+    return false;
+  }
+  if (record.count >= 5) {
+    return true; // Limit exceeded (Max 5 leads per IP per hour)
+  }
+  record.count += 1;
+  return false;
+}
+
+export async function POST(request: NextRequest) {
   try {
+    const ip = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
+    
+    if (ip !== 'unknown' && isRateLimited(ip)) {
+      return NextResponse.json({ error: 'Too many requests. Please try again later.' }, { status: 429 });
+    }
+
     const body = await request.json();
     const { name, email, phone, source, postId } = body;
 

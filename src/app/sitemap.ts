@@ -1,6 +1,9 @@
 import { MetadataRoute } from 'next';
 import { prisma } from '@/lib/prisma';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Try to fetch site settings to get the actual domain if available, otherwise fallback
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://knowora.in'; // User should update this env var

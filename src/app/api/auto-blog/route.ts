@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { prisma } from '@/lib/prisma';
 import { getAIConfig, generateAIContent } from '@/lib/ai';
 // Code cleaned up: RSS fetching is no longer used.
@@ -419,6 +420,14 @@ export async function POST(request: NextRequest) {
       } catch (err) {
         console.error('Telegram broadcast failed:', err);
       }
+    }
+
+    // Revalidate Homepage and Blog index so the new post appears immediately
+    try {
+      revalidatePath('/');
+      revalidatePath('/blog');
+    } catch(e) {
+      console.warn("Revalidate failed", e);
     }
 
     return NextResponse.json({ success: true, post: newPost });

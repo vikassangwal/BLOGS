@@ -129,8 +129,13 @@ export async function generateAIContent(
   }
   
   if (config.provider === 'gemini') {
+    let cleanModel = config.model;
+    if (cleanModel.includes('google/')) cleanModel = cleanModel.replace('google/', '');
+    if (cleanModel.includes('gemini-2.5-flash') || cleanModel.includes('gemini-2.0-flash')) cleanModel = 'gemini-1.5-flash';
+    if (!cleanModel) cleanModel = 'gemini-1.5-flash';
+
     const res = await fetchWithRetry(
-      `https://generativelanguage.googleapis.com/v1beta/models/${config.model}:generateContent?key=${config.apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/${cleanModel}:generateContent?key=${config.apiKey}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

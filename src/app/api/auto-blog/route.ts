@@ -147,7 +147,6 @@ export async function POST(request: NextRequest) {
       Example format: ["Topic 1", "Topic 2", "Topic 3"]`;
 
       let rModel = settings.researcherModel || '';
-      if (rModel.includes('gemini') || rModel.includes('llama-3-8b') || rModel === 'openrouter/free' || !rModel) rModel = 'meta-llama/llama-3.2-3b-instruct:free';
 
       const researcherConfigForTopic = buildAgentConfig('researcherProvider', 'researcherModel', 'openrouter', rModel);
       
@@ -204,13 +203,8 @@ export async function POST(request: NextRequest) {
     }
 
     let rModel = settings.researcherModel || '';
-    if (rModel.includes('gemini') || rModel.includes('llama-3-8b') || rModel === 'openrouter/free' || !rModel) rModel = 'meta-llama/llama-3.2-3b-instruct:free';
-    
     let wModel = settings.writerModel || '';
-    if (wModel === 'openai/gpt-4o-mini' || wModel.includes('llama-3-8b') || wModel === 'openrouter/free' || !wModel) wModel = 'meta-llama/llama-3.3-70b-instruct:free';
-    
     let sModel = settings.seoModel || '';
-    if (sModel === 'openai/gpt-4o-mini' || sModel.includes('llama-3-8b') || sModel === 'openrouter/free' || !sModel) sModel = 'meta-llama/llama-3.2-3b-instruct:free';
 
     const researcherConfig = buildAgentConfig('researcherProvider', 'researcherModel', 'openrouter', rModel);
     const writerConfig = buildAgentConfig('writerProvider', 'writerModel', 'openrouter', wModel);

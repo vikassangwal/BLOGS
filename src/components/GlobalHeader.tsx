@@ -91,9 +91,9 @@ export default function GlobalHeader({ siteName }: { siteName?: string }) {
                 document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=${domain}`;
                 document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=${topDomain}`;
 
-                if (lang !== 'en') {
-                  document.cookie = `googtrans=/en/${lang}; path=/`;
-                  document.cookie = `googtrans=/en/${lang}; path=/; domain=${topDomain}`;
+                if (lang !== 'default') {
+                  document.cookie = `googtrans=/auto/${lang}; path=/`;
+                  document.cookie = `googtrans=/auto/${lang}; path=/; domain=${topDomain}`;
                 }
                 window.location.reload();
               }}
@@ -117,6 +117,7 @@ export default function GlobalHeader({ siteName }: { siteName?: string }) {
                 fontFamily: 'inherit',
               }}
             >
+              <option value="default">Default (Original)</option>
               <option value="en">EN (English)</option>
               <option value="hi">HI (हिन्दी)</option>
               <option value="bn">BN (বাংলা)</option>

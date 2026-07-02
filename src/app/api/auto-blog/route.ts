@@ -272,12 +272,72 @@ export async function POST(request: NextRequest) {
        - Technology: "Realme 14 Pro 5G भारत में हुआ लॉन्च, 200MP कैमरा और धांसू फीचर्स ने उड़ाई सबकी नींद! (Realme 14 Pro 5G Launch)"
        - Finance: "बजट 2026 में हुआ बड़ा बदलाव, टैक्सपेयर्स को मिला भारी तोहफा, जानिए पूरी डिटेल! (Budget 2026 Updates)"
        ALWAYS write the main title first in Hindi (creating eagerness to read), then in brackets English.
-    3. Format using strict HTML tags: <h2>, <h3>, <p>, <ul>, <li>, <strong>, <blockquote>, <table>.
-    4. Do NOT wrap the output in markdown code blocks like \`\`\`html. Output raw HTML only.
-    5. Make the content highly readable and scannable with engaging subheadings.
-    6. Add a compelling introduction and a strong conclusion.
-    7. IF the topic is about Finance/Earning/Money, you MUST include sections on "How to make money (पैसे कैसे कमाएं)" and "Money Management Tips (पैसे कैसे मैनेज करें)".
-    8. IF the topic is about Technology/Gadgets/Mobiles, you MUST embed realistic images of the gadgets using this HTML tag: <img src="https://image.pollinations.ai/prompt/Realistic%20Photo%20Of%20[GADGET_NAME_HERE]?width=800&height=400&nologo=true" alt="Gadget Image" class="w-full rounded-xl my-4" />
+        8. IF the topic is about Technology/Gadgets/Mobiles, you MUST strictly follow this 🔥 TECH ULTIMATE MASTER PROMPT 🔥 format EXACTLY AS WRITTEN:
+        --- START TECH MASTER PROMPT ---
+        तुम एक Top-Tier Tech Blogger और Gadget Reviewer हो। 
+        🚫 कड़े नियम (Strict Rules):
+        - BANNED WORDS: "आज के इस डिजिटल युग में", "आइए जानते हैं", "निष्कर्ष के तौर पर", "दोस्तों", "रोमांचक". सीधे मुद्दे पर बात करें।
+        - No Markdown HTML: कंटेंट सीधे HTML फॉर्मेट में होगा (<h2>, <p>, <table>, <ul>)।
+        - Mobile-First Readability: पैराग्राफ 3-4 लाइनों से बड़ा नहीं होना चाहिए।
+        - Images: You MUST embed 1 realistic image after the introduction using this tag: <img src="https://image.pollinations.ai/prompt/Realistic%20Photo%20Of%20[GADGET_NAME_HERE]?width=800&height=400&nologo=true" alt="[GADGET_NAME_HERE] realistic view" class="w-full rounded-xl my-4" />
+        - Links: Use <a href="..." target="_blank" rel="nofollow">👉 Check Price Here</a> for buying links (Amazon/Flipkart).
+        
+        📝 ब्लॉग का अनिवार्य लेआउट (Blog Structure) - YOU MUST USE THESE EXACT HTML HEADINGS:
+        
+        <h2>Introduction</h2>
+        Write a 150-200 word engaging intro. Tell the user why this phone/gadget is creating hype. Include the main keyword.
+        
+        <h2>एक नज़र में (Key Highlights)</h2>
+        <div class="bg-blue-50 border-l-4 border-blue-500 p-4 my-4 rounded-r">
+          <ul> (Write 4 highly crisp bullet points: Processor, Battery, Camera, Price. Web Stories ready). </ul>
+        </div>
+        
+        <h2>Table of Contents</h2>
+        Create a clickable HTML Table of Contents with jump links (e.g. <a href="#design">) to IDs on the <h2> tags below.
+
+        <h2 id="design">Display & Design (डिस्प्ले और डिज़ाइन)</h2>
+        Discuss screen size, refresh rate (120Hz etc), panel type (AMOLED), and build quality.
+        
+        <h2 id="camera">Camera Quality (कैमरा क्वालिटी)</h2>
+        Detail the primary, ultrawide, and selfie cameras.
+        
+        <h2 id="performance">Processor & Performance (Gaming & Antutu Score)</h2>
+        Discuss the processor (Snapdragon/MediaTek), gaming performance (BGMI/FreeFire), and estimated Antutu score.
+        
+        <h2 id="battery">Battery & Charging (बैटरी और चार्जर)</h2>
+        Discuss mAh capacity and fast charging Wattage.
+        
+        <h2 id="inbox">In The Box (बॉक्स में क्या-क्या मिलेगा?)</h2>
+        Bullet list of box contents (Does it have a charger? Case? Type-C cable?).
+        
+        <h2 id="colors">Colors & Storage Variants (रंग और स्टोरेज)</h2>
+        List the available aesthetic colors and RAM/ROM variants.
+        
+        <h2 id="specs">Key Specifications (स्पेसिफिकेशन्स)</h2>
+        Create a clean, comprehensive HTML Table comparing Feature vs Details.
+        
+        <h2 id="pros-cons">Pros & Cons (फायदे और नुकसान)</h2>
+        Create a 2-column HTML Table. Left column for Pros (🟢 फायदे), Right column for Cons (🔴 नुकसान).
+        
+        <h2 id="price">Price in India & Offers (कीमत और ऑफर्स)</h2>
+        State the exact or expected price. Provide Affiliate Buying Links (Amazon/Flipkart) using: <a href="https://www.google.com/search?q=[GADGET_NAME_HERE]+buy+online+amazon" target="_blank" rel="nofollow" class="inline-block bg-yellow-400 text-black px-4 py-2 rounded font-bold mt-2">👉 Buy on Amazon / Flipkart</a>.
+        
+        <h2 id="alternatives">Rivals & Alternatives (इसके विकल्प)</h2>
+        Mention 2-3 competitor phones in the same price range.
+        
+        <h2 id="verdict">क्या आपको यह खरीदना चाहिए? (Final Verdict)</h2>
+        Give an honest review. End with <strong>Our Rating: [X]/5 ⭐</strong>.
+        
+        <h2 id="faq">FAQ (अक्सर पूछे जाने वाले प्रश्न)</h2>
+        Use <details><summary>[Question]</summary><p>[Answer]</p></details>. YOU MUST ANSWER THESE 3 QUESTIONS:
+        1. क्या इसमें 3.5mm ऑडियो जैक है?
+        2. क्या यह फोन 5G सपोर्ट करता है?
+        3. क्या यह वाटरप्रूफ (IP Rating) है?
+        
+        <h2 id="conclusion">Conclusion</h2>
+        Add the VIRAL CTA: <p class="font-bold text-green-600 mt-4">💡 <strong>ध्यान दें:</strong> अगर आपको यह जानकारी उपयोगी लगी, तो इसे अपने दोस्तों के साथ <strong>WhatsApp</strong> और <strong>Telegram</strong> पर ज़रूर शेयर करें!</p>
+        Add COMMENT HOOK: <p class="font-bold text-blue-600 mt-2">💬 <strong>आपकी बारी:</strong> आपको इस फोन का कौन सा फीचर सबसे अच्छा लगा? नीचे कमेंट करके ज़रूर बताएं!</p>
+        --- END TECH MASTER PROMPT ---
     10. IF the topic is about Education, Jobs, Vacancies, Results, or Career, you MUST strictly follow this 🔥 ULTIMATE MASTER PROMPT 3.0 🔥 format EXACTLY AS WRITTEN:
         --- START MASTER PROMPT ---
         तुम एक Top-Tier Education/Career Content Writer, Pro SEO Expert और Google Discover Specialist हो। 

@@ -313,7 +313,7 @@ export async function POST(request: NextRequest) {
         | कुल पद (Total Posts) | ... |
         | आवेदन शुरू | [Smart Date or Exact Date] |
         | अंतिम तिथि | [Smart Date] |
-        | आधिकारिक वेबसाइट | <a href="..." target="_blank" rel="nofollow">👉 Click Here</a> |
+        | आधिकारिक वेबसाइट (Official Website) | <a href="..." target="_blank" rel="nofollow">👉 Click Here</a> (THIS ROW IS 100% MANDATORY) |
         (Include Notification/Apply/Result rows ONLY if they are actively available or announced).
 
         <h2 id="dates">Important Dates (महत्वपूर्ण तिथियां)</h2>

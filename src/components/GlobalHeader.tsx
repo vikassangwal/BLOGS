@@ -85,12 +85,15 @@ export default function GlobalHeader({ siteName }: { siteName?: string }) {
               onChange={(e) => {
                 const lang = e.target.value;
                 const domain = window.location.hostname;
-                if (lang === 'en') {
-                  document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-                  document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=${domain}`;
-                } else {
+                const topDomain = '.' + domain.replace(/^www\./, '');
+                // Clear all variations to prevent conflicts
+                document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+                document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=${domain}`;
+                document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=${topDomain}`;
+
+                if (lang !== 'en') {
                   document.cookie = `googtrans=/en/${lang}; path=/`;
-                  document.cookie = `googtrans=/en/${lang}; path=/; domain=${domain}`;
+                  document.cookie = `googtrans=/en/${lang}; path=/; domain=${topDomain}`;
                 }
                 window.location.reload();
               }}

@@ -172,34 +172,36 @@ function BlogListContent() {
           </span>
         </div>
 
-        {/* State Filter */}
-        <div style={{ maxWidth: '400px', margin: '1rem auto 0', display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(255,255,255,0.03)', padding: '0.5rem 1.2rem', borderRadius: '25px', border: '1px solid var(--color-border)' }}>
-          <span style={{ opacity: 0.7 }}>📍</span>
-          <select 
-            value={selectedState}
-            onChange={(e) => {
-              setSelectedState(e.target.value);
-              localStorage.setItem('user_state', e.target.value);
-              setPage(1);
-            }}
-            style={{
-              background: 'transparent',
-              border: 'none',
-              color: 'var(--color-text-primary)',
-              width: '100%',
-              outline: 'none',
-              fontSize: '0.95rem',
-              fontWeight: 500,
-              cursor: 'pointer'
-            }}
-          >
-            {INDIAN_STATES.map(s => (
-              <option key={s} value={s} style={{ background: '#121212', color: '#fff' }}>
-                {s === 'All India' ? 'National News (All India)' : `${s} News`}
-              </option>
-            ))}
-          </select>
-        </div>
+        {/* State Filter - ONLY SHOW FOR EDUCATION & CAREER */}
+        {activeTag === 'Education & Career' && (
+          <div style={{ maxWidth: '400px', margin: '1rem auto 0', display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(255,255,255,0.03)', padding: '0.5rem 1.2rem', borderRadius: '25px', border: '1px solid var(--color-border)' }}>
+            <span style={{ opacity: 0.7 }}>📍</span>
+            <select 
+              value={selectedState}
+              onChange={(e) => {
+                setSelectedState(e.target.value);
+                localStorage.setItem('user_state', e.target.value);
+                setPage(1);
+              }}
+              style={{
+                background: 'transparent',
+                border: 'none',
+                color: 'var(--color-text-primary)',
+                width: '100%',
+                outline: 'none',
+                fontSize: '0.95rem',
+                fontWeight: 500,
+                cursor: 'pointer'
+              }}
+            >
+              {INDIAN_STATES.map(s => (
+                <option key={s} value={s} style={{ background: '#121212', color: '#fff' }}>
+                  {s === 'All India' ? 'National News (All India)' : `${s} News`}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
 
         {/* Tags */}
         <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', justifyContent: 'center', marginTop: '2rem' }}>
@@ -219,7 +221,7 @@ function BlogListContent() {
           >
             All
           </button>
-          {tags.slice(0, 3).map(tag => (
+          {['Education & Career', 'Study', 'Career', 'Vacancy', 'News', 'Technology', 'Finance'].map(tag => (
             <button
               key={tag}
               onClick={() => setActiveTag(tag)}

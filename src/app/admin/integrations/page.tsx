@@ -5,7 +5,9 @@ import Link from 'next/link';
 export default function IntegrationsHubPage() {
   const [aiKeys, setAiKeys] = useState({ 
     openai: '', gemini: '', anthropic: '', deepseek: '', openrouter: '', 
-    newsdata: '', googleIndexing: '', resend: '' 
+    newsdata: '', googleIndexing: '', resend: '',
+    textModel: 'google/gemini-1.5-pro',
+    imageGenProvider: 'pollinations', imageGenModel: 'dall-e-3', imageGenApi: ''
   });
   const [socialKeys, setSocialKeys] = useState({
     twitter: '', instagramToken: '', instagramAccountId: '',
@@ -118,6 +120,12 @@ export default function IntegrationsHubPage() {
                 <input type="password" value={aiKeys.deepseek || ''} onChange={e => setAiKeys({...aiKeys, deepseek: e.target.value})} className="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2 text-white" placeholder="sk-..." />
               </div>
             </div>
+            
+            <div className="mt-6">
+              <label className="block text-sm font-medium text-gray-400 mb-1">Default Text Model Name (OpenRouter/OpenAI)</label>
+              <input type="text" value={aiKeys.textModel || ''} onChange={e => setAiKeys({...aiKeys, textModel: e.target.value})} className="w-full md:w-1/2 bg-gray-900 border border-gray-700 rounded-lg px-4 py-2 text-white" placeholder="e.g. google/gemini-1.5-pro or gpt-4o" />
+              <p className="text-xs text-gray-500 mt-1">If using OpenRouter, specify the exact model string.</p>
+            </div>
           </div>
         )}
 
@@ -139,6 +147,26 @@ export default function IntegrationsHubPage() {
                 <option value="none">No Images</option>
               </select>
             </div>
+            
+            {imageSource === 'ai' && (
+              <div className="grid md:grid-cols-3 gap-6 mt-4 p-4 border border-gray-800 rounded-xl bg-gray-900/30">
+                <div>
+                  <label className="block text-sm font-medium text-gray-400 mb-1">AI Image Provider</label>
+                  <select value={aiKeys.imageGenProvider || 'pollinations'} onChange={e => setAiKeys({...aiKeys, imageGenProvider: e.target.value})} className="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2 text-white">
+                    <option value="pollinations">Pollinations.ai (Free)</option>
+                    <option value="openai">OpenAI (DALL-E)</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-400 mb-1">Image Model</label>
+                  <input type="text" value={aiKeys.imageGenModel || ''} onChange={e => setAiKeys({...aiKeys, imageGenModel: e.target.value})} className="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2 text-white" placeholder="dall-e-3" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-400 mb-1">Image API Key</label>
+                  <input type="password" value={aiKeys.imageGenApi || ''} onChange={e => setAiKeys({...aiKeys, imageGenApi: e.target.value})} className="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2 text-white" placeholder="Leave empty to use main OpenAI key" />
+                </div>
+              </div>
+            )}
             
             <p className="text-sm text-gray-400 mt-4">
               Note: Unsplash and Pollinations AI do not require API keys for basic usage. If you choose "AI Generated", it will attempt to use your OpenAI key (DALL-E) or fallback to free Pollinations.

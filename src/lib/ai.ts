@@ -138,7 +138,7 @@ export async function generateAIContent(
     if (!cleanModel) cleanModel = 'gemini-2.5-flash';
 
     const res = await fetchWithRetry(
-      `https://generativelanguage.googleapis.com/v1beta/models/${cleanModel}:generateContent?key=${config.apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/${cleanModel}:generateContent?key=${config.apiKey.trim()}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

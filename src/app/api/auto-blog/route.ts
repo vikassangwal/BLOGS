@@ -1,30 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getAIConfig, generateAIContent } from '@/lib/ai';
-import Parser from 'rss-parser';
-
+// Code cleaned up: RSS fetching is no longer used.
 export const maxDuration = 60; // Vercel hobby allows up to 60s for serverless
 export const dynamic = 'force-dynamic'; // Prevent caching for cron jobs
-
-// -------------------------------------------------------------
-// HELPER: Fetch Google Trends RSS for India
-// -------------------------------------------------------------
-async function getTrendingTopics() {
-  try {
-    const parser = new Parser();
-    const feed = await parser.parseURL('https://trends.google.com/trends/trendingsearches/daily/rss?geo=IN');
-    return feed.items.map(item => item.title || '').filter(Boolean);
-  } catch (e) {
-    console.error('RSS Fetch error:', e);
-    return [
-      'Artificial Intelligence in Education',
-      'Stock Market Updates India',
-      'New Government Schemes India',
-      'Technology Trends 2026',
-      'Top Exams in India'
-    ];
-  }
-}
 
 // -------------------------------------------------------------
 // HELPER: WhatsApp Auto-Poster

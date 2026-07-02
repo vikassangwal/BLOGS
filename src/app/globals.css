@@ -170,8 +170,18 @@
 .goog-te-gadget .goog-te-combo option { background-color: #111; color: #fff; }
 .goog-logo-link { display: none !important; }
 .goog-te-gadget img { display: none !important; }
+/* Hide Google Translate UI Elements completely */
 body { top: 0 !important; }
-.goog-te-banner-frame { display: none !important; }
+.goog-te-banner-frame, 
+.skiptranslate iframe,
+#goog-gt-tt,
+.goog-te-balloon-frame { 
+  display: none !important; 
+}
+.goog-text-highlight {
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
 
 /* Internal Link Note */
 .internal-link-note {

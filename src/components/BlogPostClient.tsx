@@ -46,22 +46,35 @@ export default function BlogPostClient({ post, ads, relatedPosts, whatsappLinks 
       return;
     }
 
+    window.speechSynthesis.cancel();
+    
     const text = post.content.replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ').trim();
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = post.content?.includes('है') ? 'hi-IN' : 'en-US';
     
-    utterance.onstart = () => setIsPlaying(true);
+    // Set playing state immediately for UI feedback
+    setIsPlaying(true);
+    setIsPaused(false);
+    
+    utterance.onstart = () => {
+      setIsPlaying(true);
+      setIsPaused(false);
+    };
     utterance.onend = () => {
       setIsPlaying(false);
       setIsPaused(false);
     };
-    utterance.onerror = () => {
+    utterance.onerror = (e) => {
+      console.error('Speech synthesis error:', e);
       setIsPlaying(false);
       setIsPaused(false);
     };
 
     utteranceRef.current = utterance;
-    window.speechSynthesis.speak(utterance);
+    // Small timeout to ensure cancel() finishes before speak()
+    setTimeout(() => {
+      window.speechSynthesis.speak(utterance);
+    }, 50);
   };
 
   const stopListen = () => {

@@ -222,8 +222,8 @@ export default function AutoBlogAdmin() {
 
             <hr style={{ border: 'none', borderTop: '1px solid var(--color-border)', margin: '1rem 0' }} />
             
-            <h3 style={{ fontSize: '1.1rem', fontWeight: 700, margin: '0' }}>📰 Live News Auto-Blogger</h3>
-            <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.85rem', margin: '-1rem 0 0 0' }}>Fetches live news via Google RSS, rewrites & auto-publishes.</p>
+            <h3 style={{ fontSize: '1.1rem', fontWeight: 700, margin: '0' }}>📰 41-Blog Daily Auto-Queue</h3>
+            <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.85rem', margin: '-1rem 0 0 0' }}>Automatically queues and publishes 41 specific daily blogs.</p>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
               <input
@@ -233,18 +233,13 @@ export default function AutoBlogAdmin() {
                 onChange={e => setSettings({ ...settings, isNewsActive: e.target.checked })}
                 style={{ width: '20px', height: '20px' }}
               />
-              <label htmlFor="isNewsActive" style={{ fontWeight: 600 }}>Enable Live News Auto-Blogging</label>
+              <label htmlFor="isNewsActive" style={{ fontWeight: 600 }}>Enable 41-Blog Daily Generation (37 Education/Vacancy, 2 Tech, 2 Finance)</label>
             </div>
 
-            <div>
-              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, color: 'var(--color-text-primary)' }}>News Topics / Niches (Comma separated)</label>
-              <textarea
-                value={settings.newsTopics || ''}
-                onChange={e => setSettings({ ...settings, newsTopics: e.target.value })}
-                placeholder="e.g., Education Yojna, Scholarships India, Technology, Finance"
-                style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--color-border)', minHeight: '80px' }}
-              />
-              <p style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', marginTop: '0.5rem' }}>The system will pick a random topic from this list on every run to fetch live news.</p>
+            <div style={{ background: 'rgba(0, 102, 204, 0.1)', padding: '1rem', borderRadius: '8px', border: '1px solid rgba(0, 102, 204, 0.3)' }}>
+              <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--color-text-primary)' }}>
+                <strong>Current Configuration:</strong> The system automatically seeds the queue with 41 blogs every day. You do not need to manually input topics. It targets every Indian state for "Education & Career" and includes dedicated slots for "Technology" and "Finance".
+              </p>
             </div>
 
             <hr style={{ border: 'none', borderTop: '1px solid var(--color-border)', margin: '1rem 0' }} />

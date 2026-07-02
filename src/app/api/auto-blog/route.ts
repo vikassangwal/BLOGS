@@ -262,12 +262,13 @@ export async function POST(request: NextRequest) {
     
     REQUIREMENTS:
     1. ${langInstructions}
-    2. Format using strict HTML tags: <h2>, <h3>, <p>, <ul>, <li>, <strong>, <blockquote>, <table>.
-    3. Do NOT wrap the output in markdown code blocks like \`\`\`html. Output raw HTML only.
-    4. Make the content highly readable and scannable with engaging subheadings.
-    5. Add a compelling introduction and a strong conclusion.
-    6. IF the topic is about Finance/Earning/Money, you MUST include sections on "How to make money (पैसे कैसे कमाएं)" and "Money Management Tips (पैसे कैसे मैनेज करें)".
-    7. IF the topic is about Technology/Gadgets/Mobiles, you MUST embed realistic images of the gadgets using this HTML tag: <img src="https://image.pollinations.ai/prompt/Realistic%20Photo%20Of%20[GADGET_NAME_HERE]?width=800&height=400&nologo=true" alt="Gadget Image" class="w-full rounded-xl my-4" />
+    2. THE MAIN ARTICLE TITLE (<h1> or <h2> at the top) MUST be in the format: "Hindi Title (English Title)". For example: "सेंसेक्स में भारी गिरावट (Sensex Crashes)". ALWAYS write the main title related to the news, first in Hindi, then in brackets English.
+    3. Format using strict HTML tags: <h2>, <h3>, <p>, <ul>, <li>, <strong>, <blockquote>, <table>.
+    4. Do NOT wrap the output in markdown code blocks like \`\`\`html. Output raw HTML only.
+    5. Make the content highly readable and scannable with engaging subheadings.
+    6. Add a compelling introduction and a strong conclusion.
+    7. IF the topic is about Finance/Earning/Money, you MUST include sections on "How to make money (पैसे कैसे कमाएं)" and "Money Management Tips (पैसे कैसे मैनेज करें)".
+    8. IF the topic is about Technology/Gadgets/Mobiles, you MUST embed realistic images of the gadgets using this HTML tag: <img src="https://image.pollinations.ai/prompt/Realistic%20Photo%20Of%20[GADGET_NAME_HERE]?width=800&height=400&nologo=true" alt="Gadget Image" class="w-full rounded-xl my-4" />
     
     ${recentPostsHtml ? `
     AUTO-INTERNAL LINKING:
@@ -291,9 +292,11 @@ export async function POST(request: NextRequest) {
     // AGENT 3: THE SEO EXPERT
     // -------------------------------------------------------------
     const seoPrompt = `You are an SEO Expert. Analyze the following article HTML and generate optimized metadata.
+    IMPORTANT TITLE RULE: The seoTitle MUST ALWAYS be formatted as "Hindi Title (English Title)". For example: "सेंसेक्स में भारी गिरावट (Sensex Crashes Heavily)". The title MUST be directly related to the news. Where Hindi is not suitable, use English.
+    
     Respond ONLY with a valid JSON object in this exact format, with no markdown formatting or backticks:
     {
-      "seoTitle": "Catchy SEO Title (under 60 chars)",
+      "seoTitle": "Hindi Title (English Title) (under 80 chars)",
       "seoDescription": "Compelling meta description (under 160 chars)",
       "seoKeywords": "keyword1, keyword2, keyword3",
       "slug": "url-friendly-english-slug",

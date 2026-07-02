@@ -178,8 +178,13 @@ body { top: 0 !important; }
 .goog-te-balloon-frame,
 .VIpgJd-Zvi9od-aZ2wEe-wOHMyf,
 .VIpgJd-Zvi9od-aZ2wEe-wOHMyf-ti6hGc,
+.VIpgJd-Zvi9od-ORHb-OEVmcd,
+.goog-te-spinner-pos,
+div[style*="padding: 8px;"],
 #goog-translate-element img { 
   display: none !important; 
+  visibility: hidden !important;
+  opacity: 0 !important;
 }
 .goog-text-highlight {
   background-color: transparent !important;

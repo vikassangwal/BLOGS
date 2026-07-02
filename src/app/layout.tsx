@@ -72,7 +72,6 @@ export default async function RootLayout({
             window.googleTranslateElementInit = function() {
               new window.google.translate.TranslateElement({
                 pageLanguage: 'en',
-                includedLanguages: 'en,hi,bn,te,mr,ta,ur,gu,kn,ml,pa,or,as',
                 layout: window.google.translate.TranslateElement.InlineLayout.SIMPLE
               }, 'google_translate_element');
             };

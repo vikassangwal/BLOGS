@@ -178,12 +178,12 @@ export async function POST(request: NextRequest) {
 
           await prisma.autoBlogKeyword.createMany({ data: queueData });
 
-          pendingKeyword = await prisma.autoBlogKeyword.findFirst({
-            where: { status: 'pending' },
-            orderBy: [{ priority: 'desc' }, { createdAt: 'asc' }]
+          // Return early to prevent Vercel 60s timeout limit. The next click will generate the actual blog.
+          return NextResponse.json({ 
+            status: 'empty', 
+            message: '45 Hot Topics Generated successfully! Please click "Run Now" again to write the first blog.' 
           });
           
-          if (!pendingKeyword) return NextResponse.json({ status: 'empty', message: 'Failed to pick generated keyword.' });
         } else {
            return NextResponse.json({ status: 'empty', message: 'AI failed to generate topics array.' });
         }

@@ -59,10 +59,17 @@ export async function GET(request: Request) {
     const where: any = {};
     if (search) {
       where.OR = [
-        { title: { contains: search } },
-        { content: { contains: search } }
+        { title: { contains: search, mode: 'insensitive' } },
+        { content: { contains: search, mode: 'insensitive' } }
+      ];
+    } else if (publishedOnly) {
+      // Vacancy Expiry Logic: Hide expired posts in normal feed
+      where.OR = [
+        { expiryDate: null },
+        { expiryDate: { gte: new Date() } }
       ];
     }
+    
     if (status && status !== 'All') {
       where.status = status;
     }

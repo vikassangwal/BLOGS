@@ -85,6 +85,34 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'Auto-blogging is disabled in settings' });
     }
 
+    const siteSettings = await prisma.siteSettings.findUnique({ where: { id: 'default' } });
+    let savedKeys: Record<string, string> = {};
+    try {
+      if (siteSettings?.aiApiKey?.startsWith('{')) {
+        savedKeys = JSON.parse(siteSettings.aiApiKey);
+      }
+    } catch(e) {}
+
+    function buildAgentConfig(providerKey: string, modelKey: string, fallbackProvider: string, fallbackModel: string) {
+      const provider = savedKeys[providerKey] || fallbackProvider;
+      let model = (savedKeys[modelKey] || fallbackModel).trim();
+      
+      // FORCE OVERRIDE BROKEN MODELS NO MATTER WHERE THEY WERE SAVED
+      if (model.includes('gemini-2.5-flash') || model.includes('gemini-2.0-flash-exp') || model.includes('llama-3-8b')) {
+          model = 'openrouter/free';
+      }
+
+      let apiKey = '';
+      if (provider === 'openrouter') apiKey = savedKeys.openrouter || '';
+      else if (provider === 'openai') apiKey = savedKeys.openai || '';
+      else if (provider === 'gemini') apiKey = savedKeys.gemini || '';
+      else if (provider === 'anthropic') apiKey = savedKeys.anthropic || '';
+      else if (provider === 'deepseek') apiKey = savedKeys.deepseek || '';
+      if (!apiKey && savedKeys.openrouter) return { provider: 'openrouter' as any, apiKey: savedKeys.openrouter, model };
+      if (!apiKey && siteSettings?.aiApiKey && !siteSettings.aiApiKey.startsWith('{')) apiKey = siteSettings.aiApiKey;
+      return { provider: provider as any, apiKey, model };
+    }
+
     // 2. FETCH KEYWORD
     let pendingKeyword = await prisma.autoBlogKeyword.findFirst({
       where: { status: 'pending' },
@@ -103,33 +131,6 @@ export async function POST(request: NextRequest) {
       // -------------------------------------------------------------
       // AI TOPIC GENERATOR (Triggered when queue is empty)
       // -------------------------------------------------------------
-      const siteSettings = await prisma.siteSettings.findUnique({ where: { id: 'default' } });
-      let savedKeys: Record<string, string> = {};
-      try {
-        if (siteSettings?.aiApiKey?.startsWith('{')) {
-          savedKeys = JSON.parse(siteSettings.aiApiKey);
-        }
-      } catch(e) {}
-
-      function buildAgentConfig(providerKey: string, modelKey: string, fallbackProvider: string, fallbackModel: string) {
-        const provider = savedKeys[providerKey] || fallbackProvider;
-        let model = (savedKeys[modelKey] || fallbackModel).trim();
-        
-        // FORCE OVERRIDE BROKEN MODELS NO MATTER WHERE THEY WERE SAVED
-        if (model.includes('gemini-2.5-flash') || model.includes('gemini-2.0-flash-exp') || model.includes('llama-3-8b')) {
-            model = 'openrouter/free';
-        }
-
-        let apiKey = '';
-        if (provider === 'openrouter') apiKey = savedKeys.openrouter || '';
-        else if (provider === 'openai') apiKey = savedKeys.openai || '';
-        else if (provider === 'gemini') apiKey = savedKeys.gemini || '';
-        else if (provider === 'anthropic') apiKey = savedKeys.anthropic || '';
-        else if (provider === 'deepseek') apiKey = savedKeys.deepseek || '';
-        if (!apiKey && savedKeys.openrouter) return { provider: 'openrouter' as any, apiKey: savedKeys.openrouter, model };
-        if (!apiKey && siteSettings?.aiApiKey && !siteSettings.aiApiKey.startsWith('{')) apiKey = siteSettings.aiApiKey;
-        return { provider: provider as any, apiKey, model };
-      }
 
       const topicPrompt = `You are a Trending News & Job Alert researcher for India. 
       The user needs to auto-generate blogs today. 

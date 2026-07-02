@@ -255,7 +255,11 @@ export async function DELETE(request: NextRequest) {
 
     if (!id) return NextResponse.json({ error: 'ID required' }, { status: 400 });
 
+    // First delete associated tags to prevent foreign key constraints
+    await prisma.postTag.deleteMany({ where: { postId: id } });
+    // Then delete the post
     await prisma.blogPost.delete({ where: { id } });
+    
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Error deleting post:', error);

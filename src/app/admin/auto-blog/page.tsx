@@ -68,7 +68,7 @@ export default function AutoBlogAdmin() {
       const res = await fetch('/api/auto-blog', { method: 'POST' });
       const data = await res.json();
       if (data.status === 'empty') {
-        alert('No pending keywords found');
+        alert(data.message || 'No pending keywords found');
       } else if (data.success) {
         alert('Auto-blog generated successfully!');
         fetchData();

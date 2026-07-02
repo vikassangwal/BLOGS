@@ -96,9 +96,9 @@ export async function POST(request: NextRequest) {
     let selectedCategory = 'News';
 
     if (!pendingKeyword) {
-      if (!settings.isNewsActive) {
-        return NextResponse.json({ status: 'empty', message: 'No keywords in queue and News Auto-Blogger is disabled.' });
-      }
+      // ALWAYS generate topics when queue is empty, regardless of isNewsActive setting
+      // Since manual run button was pressed, or the cron is active, we should restock the queue.
+
 
       // -------------------------------------------------------------
       // AI TOPIC GENERATOR (Triggered when queue is empty)

@@ -1,6 +1,6 @@
 'use client';
 import { useState } from 'react';
-import { Sparkles, Search, TrendingUp, ChevronRight, Loader2, Copy, Check } from 'lucide-react';
+import { Sparkles, Search, TrendingUp, ChevronRight, Loader2, Copy, Check, Link2 } from 'lucide-react';
 
 export default function AIToolsPage() {
   const [activeTab, setActiveTab] = useState('seo');
@@ -51,7 +51,8 @@ export default function AIToolsPage() {
         {[
           { id: 'seo', name: 'Auto SEO Gen', icon: Sparkles, desc: 'Titles, Meta & Tags' },
           { id: 'keyword', name: 'Keyword Gen', icon: Search, desc: 'LSI & Long-tail Keywords' },
-          { id: 'rank', name: 'Rank Master', icon: TrendingUp, desc: 'Google Discover Strategy' }
+          { id: 'rank', name: 'Rank Master', icon: TrendingUp, desc: 'Google Discover Strategy' },
+          { id: 'link', name: 'Link Finder', icon: Link2, desc: 'Official Domain & URLs' }
         ].map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
@@ -81,6 +82,7 @@ export default function AIToolsPage() {
           {activeTab === 'seo' && 'Enter Blog Topic or Title'}
           {activeTab === 'keyword' && 'Enter Seed Keyword'}
           {activeTab === 'rank' && 'Enter Target Keyword'}
+          {activeTab === 'link' && 'Enter Job or Exam Name'}
         </h2>
         
         <div className="flex gap-4">
@@ -90,7 +92,8 @@ export default function AIToolsPage() {
             onChange={(e) => setInput(e.target.value)}
             placeholder={
               activeTab === 'seo' ? 'e.g. UPSC NDA 2026 Notification...' :
-              activeTab === 'keyword' ? 'e.g. SSC CGL...' : 'e.g. Best smartphones under 20000...'
+              activeTab === 'keyword' ? 'e.g. SSC CGL...' : 
+              activeTab === 'link' ? 'e.g. Bihar Police Constable Result...' : 'e.g. Best smartphones under 20000...'
             }
             className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-purple-500"
             onKeyDown={(e) => e.key === 'Enter' && handleGenerate()}
@@ -165,6 +168,31 @@ export default function AIToolsPage() {
                   <ul className="space-y-2 text-gray-300 text-sm">
                     {result.questions?.map((kw: string, i: number) => <li key={i}>• {kw}</li>)}
                   </ul>
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'link' && result.domain && (
+              <div className="space-y-6">
+                <div>
+                  <label className="text-sm text-gray-400 mb-2 block">Official Domain</label>
+                  <div className="p-4 bg-green-500/10 rounded-xl border border-green-500/20 flex justify-between items-start gap-4">
+                    <p className="text-green-400 font-bold text-lg">{result.domain}</p>
+                    <button onClick={() => copyToClipboard(result.domain)} className="text-gray-500 hover:text-white p-2">
+                      {copied ? <Check className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4" />}
+                    </button>
+                  </div>
+                </div>
+                <div>
+                  <label className="text-sm text-gray-400 mb-2 block">Magic Search Links (Click to find real URL)</label>
+                  <div className="flex flex-col gap-3">
+                    {result.links?.map((link: any, i: number) => (
+                      <a key={i} href={link.url} target="_blank" rel="noreferrer" className="flex items-center justify-between p-4 bg-[#0a0a0a] border border-white/5 hover:border-purple-500/50 rounded-xl transition-all group">
+                        <span className="text-gray-200 font-medium group-hover:text-purple-400">{link.name}</span>
+                        <Link2 className="w-4 h-4 text-gray-500 group-hover:text-purple-400" />
+                      </a>
+                    ))}
+                  </div>
                 </div>
               </div>
             )}

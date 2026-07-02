@@ -186,9 +186,6 @@ export async function POST(request: NextRequest) {
       selectedCategory = pendingKeyword.niche || 'News';
     }
 
-      return { provider: provider as any, apiKey, model };
-    }
-
     const researcherConfig = buildAgentConfig('researcherProvider', 'researcherModel', 'openrouter', settings.researcherModel || 'google/gemini-2.5-flash');
     const writerConfig = buildAgentConfig('writerProvider', 'writerModel', 'openrouter', settings.writerModel || 'openai/gpt-4o-mini');
     const seoConfig = buildAgentConfig('seoProvider', 'seoModel', 'openrouter', settings.seoModel || 'openai/gpt-4o-mini');
@@ -276,7 +273,7 @@ export async function POST(request: NextRequest) {
         तुम एक Professional Education/Career Content Writer, SEO Expert और Google Discover Friendly Blogger हो। 
         🚫 कड़े नियम (Strictly Enforced):
         1. Clean HTML Code: कंटेंट सीधे पब्लिश करने योग्य HTML फॉर्मेट में होगा। (Use <h2>, <p>, <table>, <ul>, etc. NO Markdown).
-        2. Link Format: जहाँ भी कोई आधिकारिक लिंक (वेबसाइट, नोटिफिकेशन, आवेदन, रिजल्ट आदि) देना हो, वहाँ href में लिंक डालकर टेक्स्ट केवल और केवल "👉 Click Here" लिखना है (e.g., <a href="[LINK_NOT_AVAILABLE]">👉 Click Here</a>).
+        2. Link Format: जहाँ भी कोई आधिकारिक लिंक (वेबसाइट, नोटिफिकेशन, आवेदन, रिजल्ट आदि) देना हो, वहाँ href में लिंक डालकर टेक्स्ट केवल और केवल "👉 Click Here" लिखना है (e.g., <a href="https://www.google.com/search?q=site:ssc.nic.in+result">👉 Click Here</a>).
         3. Missing Info Format: जो जानकारी अभी उपलब्ध या घोषित नहीं हुई है, वहाँ अनुमान नहीं लगाना है, बल्कि केवल "Coming Soon" लिखना है।
         4. Length & Quality: ब्लॉग 2000-3000+ शब्दों का होना चाहिए। कोई AI जैसी भाषा नहीं होनी चाहिए। 100% Human-Written होना चाहिए।
         5. Formatting: छोटे पैराग्राफ, Bullet Points और Tables का अनिवार्य रूप से उपयोग करना है।
@@ -316,7 +313,10 @@ export async function POST(request: NextRequest) {
         <h2>Conclusion</h2>
         --- END MASTER PROMPT ---
 
-    11. CRITICAL LINKING RULE: For any official link (Result, Job, Purchase), if you do not know the exact direct URL, you MUST output the exact string "[LINK_NOT_AVAILABLE]" in the href attribute instead of making up a fake link. The system will flag this for the admin to fix later.
+    11. CRITICAL LINKING RULE: If you do not know the exact direct URL for an official link (Result, Apply, Notification), you MUST generate a targeted Google Search URL that searches ONLY the official domain. 
+        Format: "https://www.google.com/search?q=site:[OFFICIAL_DOMAIN]+[SPECIFIC_KEYWORD]". 
+        Example for SSC CGL: <a href="https://www.google.com/search?q=site:ssc.nic.in+SSC+CGL+apply+online+link" target="_blank">👉 Click Here</a>. 
+        NEVER use "[LINK_NOT_AVAILABLE]" or "#" or empty href. Always provide a Google Dork link if unsure so the user can easily find it.
     
     ${recentPostsHtml ? `
     AUTO-INTERNAL LINKING:

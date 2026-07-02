@@ -44,6 +44,21 @@ export async function POST(request: NextRequest) {
       Include content gaps, what type of image to use, and exact subheadings to include.
       
       Respond in beautiful Markdown format with emojis.`;
+    } else if (tool === 'link') {
+      systemInstruction = 'You are a Master Official Link Finder.';
+      prompt = `For the given government job, exam, or topic: "${input}", identify its exact OFFICIAL government or organization website domain (e.g., 'upsc.gov.in', 'ssc.nic.in'). 
+      Then, generate exactly 3 highly specific Google Search URLs that will lead the user directly to the correct pages.
+      Use this format: https://www.google.com/search?q=site:[DOMAIN]+[SPECIFIC_KEYWORDS]
+      
+      Respond ONLY in JSON format like this:
+      {
+        "domain": "ssc.nic.in",
+        "links": [
+          { "name": "Official Notification PDF", "url": "https://www.google.com/search?q=site:ssc.nic.in+official+notification+pdf" },
+          { "name": "Apply Online Link", "url": "..." },
+          { "name": "Official Website", "url": "..." }
+        ]
+      }`;
     } else {
       return NextResponse.json({ error: 'Unknown tool' }, { status: 400 });
     }
@@ -52,7 +67,7 @@ export async function POST(request: NextRequest) {
 
     let resultData = rawResponse;
 
-    if (tool === 'seo' || tool === 'keyword') {
+    if (tool === 'seo' || tool === 'keyword' || tool === 'link') {
       try {
         const cleanJson = rawResponse.replace(/^```json\n?|```$/g, '').trim();
         resultData = JSON.parse(cleanJson);

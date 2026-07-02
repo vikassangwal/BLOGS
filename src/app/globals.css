@@ -262,7 +262,9 @@ input:focus, textarea:focus, select:focus { outline: 2px solid var(--color-accen
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
 }
 
-.blog-content th {
+.blog-content th,
+.blog-content thead td,
+.blog-content tr:first-child td {
   background: var(--color-bg-tertiary) !important;
   color: var(--color-text-primary) !important;
   font-weight: 700;

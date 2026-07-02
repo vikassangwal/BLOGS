@@ -175,7 +175,10 @@ body { top: 0 !important; }
 .goog-te-banner-frame, 
 .skiptranslate iframe,
 #goog-gt-tt,
-.goog-te-balloon-frame { 
+.goog-te-balloon-frame,
+.VIpgJd-Zvi9od-aZ2wEe-wOHMyf,
+.VIpgJd-Zvi9od-aZ2wEe-wOHMyf-ti6hGc,
+#goog-translate-element img { 
   display: none !important; 
 }
 .goog-text-highlight {

@@ -129,16 +129,93 @@ export default function AdminDashboard() {
               borderRadius: '50%', background: card.gradient, opacity: 0.15, filter: 'blur(10px)'
             }} />
             <div style={{
-              width: '55px', height: '55px', borderRadius: '14px', background: card.gradient,
-              display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem',
-              boxShadow: `0 4px 15px ${card.shadow}`, flexShrink: 0
-            }}>{card.icon}</div>
+          <p style={{ color: 'var(--color-text-secondary)' }}>Welcome back! Here's what's happening.</p>
+        </div>
+        
+        {/* Global Time Filter */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(255,255,255,0.05)', padding: '0.5rem', borderRadius: '12px', border: '1px solid var(--color-border)' }}>
+          <span style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)', paddingLeft: '0.5rem' }}>⏱️ Filter:</span>
+          <select 
+            value={timeFilter} 
+            onChange={(e) => setTimeFilter(e.target.value)}
+            style={{
+              background: 'transparent', border: 'none', color: 'var(--color-text-primary)',
+              padding: '0.4rem 0.8rem', outline: 'none', fontSize: '0.9rem', fontWeight: 600, cursor: 'pointer'
+            }}
+          >
+            <option value="mint" style={{background:'#111'}}>Last 60 Minutes</option>
+            <option value="hour" style={{background:'#111'}}>Last 24 Hours</option>
+            <option value="week" style={{background:'#111'}}>Last 7 Days</option>
+            <option value="month" style={{background:'#111'}}>Last 30 Days</option>
+            <option value="6mont" style={{background:'#111'}}>Last 6 Months</option>
+            <option value="year" style={{background:'#111'}}>Last 1 Year</option>
+            <option value="2year" style={{background:'#111'}}>Last 2 Years</option>
+            <option value="lifetime" style={{background:'#111'}}>Lifetime</option>
+          </select>
+        </div>
+      </header>
+
+      {/* Stats Grid */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
+        <div style={glassCard}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(59, 130, 246, 1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem' }}>👀</div>
             <div>
-              <p style={{ margin: '0 0 0.3rem 0', fontSize: '0.8rem', color: 'var(--color-text-secondary)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>{card.title}</p>
-              <p style={{ margin: 0, fontSize: '1.8rem', fontWeight: 800, color: 'var(--color-text-primary)', lineHeight: 1 }}>{card.value ?? 0}</p>
+              <div style={{ fontSize: '0.9rem', color: 'var(--color-text-secondary)', fontWeight: 500 }}>Total Views</div>
+              <div style={{ fontSize: '1.8rem', fontWeight: 800, color: 'var(--color-text-primary)' }}>{chartTotals.views}</div>
             </div>
           </div>
-        ))}
+        </div>
+        
+        <div style={glassCard}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(16, 185, 129, 1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem' }}>💰</div>
+            <div>
+              <div style={{ fontSize: '0.9rem', color: 'var(--color-text-secondary)', fontWeight: 500 }}>Est. Earnings</div>
+              <div style={{ fontSize: '1.8rem', fontWeight: 800, color: 'var(--color-text-primary)' }}>${(chartTotals.views * 0.005).toFixed(2)}</div>
+            </div>
+          </div>
+        </div>
+        
+        <div style={glassCard}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(59, 130, 246, 1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem' }}>📝</div>
+            <div>
+              <div style={{ fontSize: '0.9rem', color: 'var(--color-text-secondary)', fontWeight: 500 }}>Total Posts</div>
+              <div style={{ fontSize: '1.8rem', fontWeight: 800, color: 'var(--color-text-primary)' }}>{chartTotals.posts || stats?.totalPosts}</div>
+            </div>
+          </div>
+        </div>
+
+        <div style={glassCard}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(139, 92, 246, 1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem' }}>✨</div>
+            <div>
+              <div style={{ fontSize: '0.9rem', color: 'var(--color-text-secondary)', fontWeight: 500 }}>AI Generated</div>
+              <div style={{ fontSize: '1.8rem', fontWeight: 800, color: 'var(--color-text-primary)' }}>{stats?.totalAutoPosts || 0}</div>
+            </div>
+          </div>
+        </div>
+
+        <div style={glassCard}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(16, 185, 129, 1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem' }}>🎯</div>
+            <div>
+              <div style={{ fontSize: '0.9rem', color: 'var(--color-text-secondary)', fontWeight: 500 }}>Total Leads</div>
+              <div style={{ fontSize: '1.8rem', fontWeight: 800, color: 'var(--color-text-primary)' }}>{chartTotals.leads || stats?.totalLeads}</div>
+            </div>
+          </div>
+        </div>
+
+        <div style={glassCard}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(245, 158, 11, 1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem' }}>⏳</div>
+            <div>
+              <div style={{ fontSize: '0.9rem', color: 'var(--color-text-secondary)', fontWeight: 500 }}>Pending Keywords</div>
+              <div style={{ fontSize: '1.8rem', fontWeight: 800, color: 'var(--color-text-primary)' }}>{stats?.pendingKeywords || 0}</div>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Charts Row */}
@@ -146,23 +223,7 @@ export default function AdminDashboard() {
         {/* Line Chart */}
         <div style={glassCard}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '1rem' }}>
-            <h2 style={{ fontSize: '1.1rem', fontWeight: 700, margin: 0, color: 'var(--color-text-primary)' }}>📈 Traffic & Leads <span style={{fontSize:'0.8rem', fontWeight:400, color:'var(--color-text-secondary)'}}>(Views: {chartTotals.views})</span></h2>
-            <select 
-              value={timeFilter} 
-              onChange={(e) => setTimeFilter(e.target.value)}
-              style={{
-                background: 'rgba(255,255,255,0.05)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)',
-                padding: '0.4rem 0.8rem', borderRadius: '8px', outline: 'none', fontSize: '0.85rem'
-              }}
-            >
-              <option value="mint" style={{background:'#111'}}>Last 60 Minutes</option>
-              <option value="hour" style={{background:'#111'}}>Last 24 Hours</option>
-              <option value="week" style={{background:'#111'}}>Last 7 Days</option>
-              <option value="month" style={{background:'#111'}}>Last 30 Days</option>
-              <option value="6mont" style={{background:'#111'}}>Last 6 Months</option>
-              <option value="year" style={{background:'#111'}}>Last 1 Year</option>
-              <option value="2year" style={{background:'#111'}}>Last 2 Years</option>
-            </select>
+            <h2 style={{ fontSize: '1.1rem', fontWeight: 700, margin: 0, color: 'var(--color-text-primary)' }}>📈 Traffic & Leads</h2>
           </div>
           <div style={{ width: '100%', height: 250 }}>
             <ResponsiveContainer>

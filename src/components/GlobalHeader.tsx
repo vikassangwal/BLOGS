@@ -79,49 +79,53 @@ export default function GlobalHeader({ siteName }: { siteName?: string }) {
           <div id="google_translate_element" style={{ display: 'none' }}></div>
           
           {/* Custom Sleek Language Selector */}
-          <select
-            onChange={(e) => {
-              const lang = e.target.value;
-              if (lang === 'en') {
-                document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-                document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=${window.location.hostname}`;
-              } else {
-                document.cookie = `googtrans=/en/${lang}; path=/`;
-                document.cookie = `googtrans=/en/${lang}; path=/; domain=${window.location.hostname}`;
-              }
-              window.location.reload();
-            }}
-            className="language-selector"
-            style={{
-              appearance: 'none',
-              background: 'var(--color-bg-secondary)',
-              backgroundImage: 'url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23888888%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E")',
-              backgroundRepeat: 'no-repeat',
-              backgroundPosition: 'right 12px center',
-              backgroundSize: '12px',
-              border: '1px solid var(--color-border)',
-              color: 'var(--color-text-primary)',
-              padding: '8px 36px 8px 16px',
-              borderRadius: '8px',
-              fontSize: '15px',
-              cursor: 'pointer',
-              outline: 'none',
-              minWidth: 'auto',
-              fontFamily: 'inherit',
-            }}
-          >
-            <option value="en" style={{ background: 'var(--color-bg-primary)', color: 'var(--color-text-primary)' }}>English</option>
-            <option value="hi" style={{ background: 'var(--color-bg-primary)', color: 'var(--color-text-primary)' }}>Hindi (हिन्दी)</option>
-            <option value="bn" style={{ background: 'var(--color-bg-primary)', color: 'var(--color-text-primary)' }}>Bengali (বাংলা)</option>
-            <option value="te" style={{ background: 'var(--color-bg-primary)', color: 'var(--color-text-primary)' }}>Telugu (తెలుగు)</option>
-            <option value="mr" style={{ background: 'var(--color-bg-primary)', color: 'var(--color-text-primary)' }}>Marathi (मराठी)</option>
-            <option value="ta" style={{ background: 'var(--color-bg-primary)', color: 'var(--color-text-primary)' }}>Tamil (தமிழ்)</option>
-            <option value="gu" style={{ background: 'var(--color-bg-primary)', color: 'var(--color-text-primary)' }}>Gujarati (ગુજરાતી)</option>
-            <option value="ur" style={{ background: 'var(--color-bg-primary)', color: 'var(--color-text-primary)' }}>Urdu (اردو)</option>
-            <option value="kn" style={{ background: 'var(--color-bg-primary)', color: 'var(--color-text-primary)' }}>Kannada (ಕನ್ನಡ)</option>
-            <option value="ml" style={{ background: 'var(--color-bg-primary)', color: 'var(--color-text-primary)' }}>Malayalam (മലയാളം)</option>
-            <option value="pa" style={{ background: 'var(--color-bg-primary)', color: 'var(--color-text-primary)' }}>Punjabi (ਪੰਜਾਬੀ)</option>
-          </select>
+          <div className="flex items-center gap-1 notranslate">
+            <span style={{fontSize: '0.85rem', color: 'var(--color-text-secondary)', fontWeight: 600}}>Lang:</span>
+            <select
+              onChange={(e) => {
+                const lang = e.target.value;
+                if (lang === 'en') {
+                  document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+                  document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=${window.location.hostname}`;
+                } else {
+                  document.cookie = `googtrans=/en/${lang}; path=/`;
+                  document.cookie = `googtrans=/en/${lang}; path=/; domain=${window.location.hostname}`;
+                }
+                window.location.reload();
+              }}
+              className="language-selector"
+              style={{
+                appearance: 'none',
+                background: 'var(--color-bg-secondary)',
+                backgroundImage: 'url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23888888%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E")',
+                backgroundRepeat: 'no-repeat',
+                backgroundPosition: 'right 8px center',
+                backgroundSize: '10px',
+                border: '1px solid var(--color-border)',
+                color: 'var(--color-text-primary)',
+                padding: '6px 24px 6px 12px',
+                borderRadius: '8px',
+                fontSize: '14px',
+                fontWeight: 500,
+                cursor: 'pointer',
+                outline: 'none',
+                minWidth: 'auto',
+                fontFamily: 'inherit',
+              }}
+            >
+              <option value="en">EN (English)</option>
+              <option value="hi">HI (हिन्दी)</option>
+              <option value="bn">BN (বাংলা)</option>
+              <option value="te">TE (తెలుగు)</option>
+              <option value="mr">MR (मराठी)</option>
+              <option value="ta">TA (தமிழ்)</option>
+              <option value="gu">GU (ગુજરાતી)</option>
+              <option value="ur">UR (اردو)</option>
+              <option value="kn">KN (ಕನ್ನಡ)</option>
+              <option value="ml">ML (മലയാളം)</option>
+              <option value="pa">PA (ਪੰਜਾਬੀ)</option>
+            </select>
+          </div>
           
           {/* Theme Toggle */}
           <ThemeToggle />

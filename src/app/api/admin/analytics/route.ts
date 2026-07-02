@@ -47,6 +47,11 @@ export async function GET(request: Request) {
         groupBy = 'month';
         dataPoints = 24;
         break;
+      case 'lifetime':
+        startDate = new Date(0); // Beginning of time
+        groupBy = 'month';
+        dataPoints = 60; // Up to 5 years back
+        break;
       default:
         startDate.setDate(now.getDate() - 7);
         groupBy = 'day';

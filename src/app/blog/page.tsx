@@ -12,6 +12,7 @@ function BlogListContent() {
   const [posts, setPosts] = useState<any[]>([]);
   const [tags, setTags] = useState<string[]>([]);
   const [activeTag, setActiveTag] = useState(initialTag);
+  const [subTag, setSubTag] = useState('');
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -119,6 +120,21 @@ function BlogListContent() {
     return () => clearTimeout(timer);
   }, [search]);
 
+  const MAIN_CATEGORIES = ['Education & Career', 'Technology', 'Finance & Earning'];
+  const getContextTags = (category: string) => {
+    if (category === 'Technology') return ['News', 'AI', 'Software', 'Gadgets', 'Mobiles'];
+    if (category === 'Finance & Earning') return ['News', 'Crypto', 'Stock Market', 'Business', 'Investment'];
+    if (category === 'Education & Career') return ['Study', 'Career', 'Vacancy', 'News', 'Results'];
+    return MAIN_CATEGORIES;
+  };
+
+  const currentTags = getContextTags(activeTag);
+  
+  // Local filtering for sub-tags
+  const filteredPosts = subTag 
+    ? posts.filter(p => p.tags && p.tags.includes(subTag))
+    : posts;
+
   return (
     <div style={{ minHeight: '100vh', background: 'var(--color-bg-primary)', color: 'var(--color-text-primary)' }}>
       {/* Hero Section */}
@@ -202,36 +218,51 @@ function BlogListContent() {
             </select>
           </div>
         )}
-
-        {/* Tags */}
+              {/* Tags */}
         <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', justifyContent: 'center', marginTop: '2rem' }}>
           <button
-            onClick={() => setActiveTag('')}
+            onClick={() => {
+              if (activeTag) {
+                // If on a category page, 'All' means all posts in THIS category
+                setSubTag('');
+              } else {
+                // If on home page, 'All' means all posts
+                window.location.href = '/blog';
+              }
+            }}
             style={{
               padding: '0.5rem 1.2rem',
               borderRadius: '20px',
               border: '1px solid',
-              borderColor: activeTag === '' ? 'var(--color-accent)' : 'var(--color-border)',
-              background: activeTag === '' ? 'var(--color-accent)' : 'transparent',
-              color: activeTag === '' ? '#fff' : 'var(--color-text-primary)',
+              borderColor: subTag === '' ? 'var(--color-accent)' : 'var(--color-border)',
+              background: subTag === '' ? 'var(--color-accent)' : 'transparent',
+              color: subTag === '' ? '#fff' : 'var(--color-text-primary)',
               cursor: 'pointer',
               fontWeight: 500,
               transition: 'all 0.2s'
             }}
           >
-            All
+            All {activeTag}
           </button>
-          {['Education & Career', 'Study', 'Career', 'Vacancy', 'News', 'Technology', 'Finance'].map(tag => (
+          {currentTags.map(tag => (
             <button
               key={tag}
-              onClick={() => setActiveTag(tag)}
+              onClick={() => {
+                if (MAIN_CATEGORIES.includes(tag)) {
+                  // Navigate to main category page
+                  window.location.href = `/blog?tag=${encodeURIComponent(tag)}`;
+                } else {
+                  // Filter locally by sub-tag
+                  setSubTag(tag);
+                }
+              }}
               style={{
                 padding: '0.5rem 1.2rem',
                 borderRadius: '20px',
                 border: '1px solid',
-                borderColor: activeTag === tag ? 'var(--color-accent)' : 'var(--color-border)',
-                background: activeTag === tag ? 'var(--color-accent)' : 'transparent',
-                color: activeTag === tag ? '#fff' : 'var(--color-text-primary)',
+                borderColor: subTag === tag ? 'var(--color-accent)' : 'var(--color-border)',
+                background: subTag === tag ? 'var(--color-accent)' : 'transparent',
+                color: subTag === tag ? '#fff' : 'var(--color-text-primary)',
                 cursor: 'pointer',
                 fontWeight: 500,
                 transition: 'all 0.2s'

@@ -136,7 +136,7 @@ export async function POST(request: NextRequest) {
       Example format: ["Topic 1", "Topic 2", "Topic 3"]`;
 
       let rModel = settings.researcherModel || '';
-      if (rModel === 'google/gemini-2.5-flash' || rModel.includes('2.5-flash') || !rModel) rModel = 'google/gemini-2.0-flash-exp:free';
+      if (rModel.includes('gemini-2.5-flash') || rModel.includes('gemini-2.0-flash-exp') || !rModel) rModel = 'meta-llama/llama-3-8b-instruct:free';
 
       const researcherConfigForTopic = buildAgentConfig('researcherProvider', 'researcherModel', 'openrouter', rModel);
       
@@ -193,13 +193,13 @@ export async function POST(request: NextRequest) {
     }
 
     let rModel = settings.researcherModel || '';
-    if (rModel === 'google/gemini-2.5-flash' || rModel.includes('2.5-flash') || !rModel) rModel = 'google/gemini-2.0-flash-exp:free';
+    if (rModel.includes('gemini-2.5-flash') || rModel.includes('gemini-2.0-flash-exp') || !rModel) rModel = 'meta-llama/llama-3-8b-instruct:free';
     
     let wModel = settings.writerModel || '';
-    if (wModel === 'openai/gpt-4o-mini' || !wModel) wModel = 'meta-llama/llama-3.3-70b-instruct';
+    if (wModel === 'openai/gpt-4o-mini' || !wModel) wModel = 'meta-llama/llama-3-8b-instruct:free';
     
     let sModel = settings.seoModel || '';
-    if (sModel === 'openai/gpt-4o-mini' || !sModel) sModel = 'google/gemini-2.0-flash-exp:free';
+    if (sModel === 'openai/gpt-4o-mini' || !sModel) sModel = 'meta-llama/llama-3-8b-instruct:free';
 
     const researcherConfig = buildAgentConfig('researcherProvider', 'researcherModel', 'openrouter', rModel);
     const writerConfig = buildAgentConfig('writerProvider', 'writerModel', 'openrouter', wModel);

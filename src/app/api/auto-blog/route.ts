@@ -100,49 +100,83 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ status: 'empty', message: 'No keywords in queue and News Auto-Blogger is disabled.' });
       }
 
-      // Check if we already generated the 41-blog queue for today
-      const startOfDay = new Date();
-      startOfDay.setHours(0, 0, 0, 0);
-      const generatedToday = await prisma.autoBlogKeyword.count({
-        where: { createdAt: { gte: startOfDay } }
-      });
-
-      if (generatedToday === 0) {
-        const INDIAN_STATES = [
-          'All India (Central)', 'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh', 
-          'Delhi', 'Goa', 'Gujarat', 'Haryana', 'Himachal Pradesh', 'Jharkhand', 'Karnataka', 
-          'Kerala', 'Madhya Pradesh', 'Maharashtra', 'Manipur', 'Meghalaya', 'Mizoram', 
-          'Nagaland', 'Odisha', 'Punjab', 'Rajasthan', 'Sikkim', 'Tamil Nadu', 'Telangana', 
-          'Tripura', 'Uttar Pradesh', 'Uttarakhand', 'West Bengal', 'Jammu and Kashmir', 
-          'Ladakh', 'Chandigarh', 'Andaman and Nicobar', 'Puducherry', 'Dadra and Nagar Haveli', 'Lakshadweep'
-        ];
-
-        const queueData = [];
-        // 37 Education / Vacancy
-        for (const state of INDIAN_STATES) {
-          queueData.push({
-            keyword: `Education, Job Vacancy, Results and Recruitment latest news in ${state}`,
-            niche: 'Education & Career',
-            status: 'pending',
-            priority: Math.floor(Math.random() * 10) // Mix them randomly
-          });
+      // -------------------------------------------------------------
+      // AI TOPIC GENERATOR (Triggered when queue is empty)
+      // -------------------------------------------------------------
+      const siteSettings = await prisma.siteSettings.findUnique({ where: { id: 'default' } });
+      let savedKeys: Record<string, string> = {};
+      try {
+        if (siteSettings?.aiApiKey?.startsWith('{')) {
+          savedKeys = JSON.parse(siteSettings.aiApiKey);
         }
-        // 2 Technology
-        queueData.push({ keyword: `Latest Technology, Mobiles and Gadgets news update`, niche: 'Technology', status: 'pending', priority: 5 });
-        queueData.push({ keyword: `Top Tech Trends and Innovations today`, niche: 'Technology', status: 'pending', priority: 5 });
+      } catch(e) {}
+
+      function buildAgentConfig(providerKey: string, modelKey: string, fallbackProvider: string, fallbackModel: string) {
+        const provider = savedKeys[providerKey] || fallbackProvider;
+        const model = savedKeys[modelKey] || fallbackModel;
+        let apiKey = '';
+        if (provider === 'openrouter') apiKey = savedKeys.openrouter || '';
+        else if (provider === 'openai') apiKey = savedKeys.openai || '';
+        else if (provider === 'gemini') apiKey = savedKeys.gemini || '';
+        else if (provider === 'anthropic') apiKey = savedKeys.anthropic || '';
+        else if (provider === 'deepseek') apiKey = savedKeys.deepseek || '';
+        if (!apiKey && savedKeys.openrouter) return { provider: 'openrouter' as any, apiKey: savedKeys.openrouter, model };
+        if (!apiKey && siteSettings?.aiApiKey && !siteSettings.aiApiKey.startsWith('{')) apiKey = siteSettings.aiApiKey;
+        return { provider: provider as any, apiKey, model };
+      }
+
+      const topicPrompt = `You are a Trending News & Job Alert researcher for India. 
+      The user needs to auto-generate blogs today. 
+      Provide exactly 45 highly specific, real, and currently trending topics in India.
+      Include 30 Government Jobs, Exam Notifications, Admit Cards, or Exam Results (e.g., 'SSC CGL 2026 Notification', 'Bihar Police Constable Result', 'UPSC NDA 2026').
+      Include 10 Technology trends (e.g., 'Samsung S24 Ultra Launch', 'Latest AI tools 2024').
+      Include 5 Finance updates (e.g., 'Budget 2026 Highlights', 'Stock Market Sensex crash').
+      Ensure the topics are highly specific (NOT generic like 'Education news in Bihar').
+      Respond ONLY with a valid JSON array of strings. No markdown, no backticks.
+      Example format: ["Topic 1", "Topic 2", "Topic 3"]`;
+
+      const researcherConfigForTopic = buildAgentConfig('researcherProvider', 'researcherModel', 'openrouter', settings.researcherModel || 'google/gemini-2.5-flash');
+      
+      try {
+        const topicRaw = await generateAIContent(researcherConfigForTopic, "You output strict JSON arrays.", topicPrompt, 1500);
+        const cleanTopicJson = topicRaw.replace(/^```json\n?|```$/g, '').trim();
+        const generatedTopics: string[] = JSON.parse(cleanTopicJson);
         
-        // 2 Finance
-        queueData.push({ keyword: `Latest Finance, Stock Market and Economy news`, niche: 'Finance & Earning', status: 'pending', priority: 5 });
-        queueData.push({ keyword: `Business, Earning and Investment tips news`, niche: 'Finance & Earning', status: 'pending', priority: 5 });
+        if (Array.isArray(generatedTopics) && generatedTopics.length > 0) {
+          const shuffledTopics = generatedTopics.sort(() => Math.random() - 0.5);
+          
+          const queueData = shuffledTopics.map((topic, i) => {
+             let niche = 'News';
+             const tLower = topic.toLowerCase();
+             if (tLower.includes('job') || tLower.includes('result') || tLower.includes('exam') || tLower.includes('admit') || tLower.includes('notification') || tLower.includes('vacancy') || tLower.includes('recruitment')) {
+                niche = 'Education & Career';
+             } else if (tLower.includes('tech') || tLower.includes('launch') || tLower.includes('ai') || tLower.includes('phone') || tLower.includes('app')) {
+                niche = 'Technology';
+             } else if (tLower.includes('finance') || tLower.includes('stock') || tLower.includes('budget') || tLower.includes('market') || tLower.includes('bank')) {
+                niche = 'Finance & Earning';
+             }
+             return {
+                keyword: topic,
+                niche: niche,
+                status: 'pending',
+                priority: 5
+             };
+          });
 
-        await prisma.autoBlogKeyword.createMany({ data: queueData });
+          await prisma.autoBlogKeyword.createMany({ data: queueData });
 
-        pendingKeyword = await prisma.autoBlogKeyword.findFirst({
-          where: { status: 'pending' },
-          orderBy: [{ priority: 'desc' }, { createdAt: 'asc' }]
-        });
-      } else {
-        return NextResponse.json({ status: 'completed', message: 'Daily limit of 41 blogs reached. Sleeping until tomorrow.' });
+          pendingKeyword = await prisma.autoBlogKeyword.findFirst({
+            where: { status: 'pending' },
+            orderBy: [{ priority: 'desc' }, { createdAt: 'asc' }]
+          });
+          
+          if (!pendingKeyword) return NextResponse.json({ status: 'empty', message: 'Failed to pick generated keyword.' });
+        } else {
+           return NextResponse.json({ status: 'empty', message: 'AI failed to generate topics array.' });
+        }
+      } catch (e) {
+        console.error('AI Topic Generator failed:', e);
+        return NextResponse.json({ status: 'empty', message: 'AI Topic Generator failed to generate valid JSON.' });
       }
     }
 
@@ -152,39 +186,6 @@ export async function POST(request: NextRequest) {
       selectedCategory = pendingKeyword.niche || 'News';
     }
 
-    // 3. INITIALIZE MULTI-AGENT AI CONFIG
-    // Read all saved API keys from SiteSettings.aiApiKey (JSON blob)
-    const siteSettings = await prisma.siteSettings.findUnique({ where: { id: 'default' } });
-    let savedKeys: Record<string, string> = {};
-    try {
-      if (siteSettings?.aiApiKey?.startsWith('{')) {
-        savedKeys = JSON.parse(siteSettings.aiApiKey);
-      }
-    } catch(e) {}
-
-    // Helper: Build an AI config for a specific agent based on its provider and model
-    function buildAgentConfig(providerKey: string, modelKey: string, fallbackProvider: string, fallbackModel: string) {
-      const provider = savedKeys[providerKey] || fallbackProvider;
-      const model = savedKeys[modelKey] || fallbackModel;
-      
-      // Determine which API key to use based on the provider
-      let apiKey = '';
-      if (provider === 'openrouter') apiKey = savedKeys.openrouter || '';
-      else if (provider === 'openai') apiKey = savedKeys.openai || '';
-      else if (provider === 'gemini') apiKey = savedKeys.gemini || '';
-      else if (provider === 'anthropic') apiKey = savedKeys.anthropic || '';
-      else if (provider === 'deepseek') apiKey = savedKeys.deepseek || '';
-      
-      // Fallback: if that provider's key is empty, try openrouter as universal fallback
-      if (!apiKey && savedKeys.openrouter) {
-        apiKey = savedKeys.openrouter;
-        return { provider: 'openrouter' as any, apiKey, model };
-      }
-      // Last resort: try the default config
-      if (!apiKey && siteSettings?.aiApiKey && !siteSettings.aiApiKey.startsWith('{')) {
-        apiKey = siteSettings.aiApiKey;
-      }
-      
       return { provider: provider as any, apiKey, model };
     }
 
@@ -284,6 +285,7 @@ export async function POST(request: NextRequest) {
         <h2>Introduction</h2> (150-250 words)
         
         <h2>Quick Information</h2> (Mandatory HTML Table)
+        - **CRITICAL:** The table MUST have exactly TWO (2) columns. NEVER create a 3-column or 4-column table.
         | विवरण | जानकारी | (Convert this to HTML Table format)
         | विभाग/संस्था | ... |
         | पद/विषय | ... |

@@ -51,20 +51,7 @@ export default function AutoBlogAdmin() {
     }
   };
 
-  const addKeywords = async () => {
-    if (!newKeywords.trim()) return;
-    try {
-      await fetch('/api/auto-blog/keywords', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ keywords: newKeywords, niche: 'General', priority: 1 })
-      });
-      setNewKeywords('');
-      fetchData();
-    } catch (error) {
-      alert('Failed to add keywords');
-    }
-  };
+  // Add Keywords function removed as it is now handled automatically by the 41-blog queue
 
   const deleteKeyword = async (id: string) => {
     try {
@@ -148,42 +135,7 @@ export default function AutoBlogAdmin() {
               <label htmlFor="isActive" style={{ fontWeight: 600 }}>Enable Auto-Blogging</label>
             </div>
 
-            <div>
-              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, color: 'var(--color-text-primary)' }}>Frequency</label>
-              <select
-                value={settings.frequency}
-                onChange={e => setSettings({ ...settings, frequency: e.target.value })}
-                style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--color-border)' }}
-              >
-                <option value="hourly">Every 1 Hour</option>
-                <option value="every2h">Every 2 Hours</option>
-                <option value="every4h">Every 4 Hours</option>
-                <option value="every12h">Every 12 Hours</option>
-                <option value="daily">Daily (Once a day)</option>
-                <option value="weekly">Weekly</option>
-              </select>
-            </div>
-
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-              <div>
-                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, color: 'var(--color-text-primary)' }}>Posts Per Run</label>
-                <input
-                  type="number"
-                  value={settings.maxPostsPerRun}
-                  onChange={e => setSettings({ ...settings, maxPostsPerRun: parseInt(e.target.value) })}
-                  style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--color-border)' }}
-                />
-              </div>
-              <div>
-                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, color: 'var(--color-text-primary)' }}>Max Posts/Day</label>
-                <input
-                  type="number"
-                  value={settings.maxPostsPerDay}
-                  onChange={e => setSettings({ ...settings, maxPostsPerDay: parseInt(e.target.value) })}
-                  style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--color-border)' }}
-                />
-              </div>
-            </div>
+            {/* Frequency and Posts per Run removed as backend is hardcoded to 41-blog daily queue */}
 
             <div>
               <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, color: 'var(--color-text-primary)' }}>Featured Image Source</label>
@@ -418,20 +370,8 @@ export default function AutoBlogAdmin() {
           </form>
         </div>
 
-        {/* Keyword Queue */}
+        {/* Manual Keyword Queue Input Removed */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          <div style={{ background: 'rgba(255, 255, 255, 0.05)', padding: '1.5rem', borderRadius: '16px', border: '1px solid var(--color-border)' }}>
-            <h2 style={{ fontSize: '1.2rem', fontWeight: 700, margin: '0 0 1rem 0' }}>Add Keywords</h2>
-            <textarea
-              value={newKeywords}
-              onChange={e => setNewKeywords(e.target.value)}
-              placeholder="Enter topics, one per line..."
-              style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--color-border)', minHeight: '100px', marginBottom: '1rem' }}
-            />
-            <button onClick={addKeywords} style={{ background: 'rgba(255, 255, 255, 0.02)', border: '1px solid var(--color-border)', padding: '0.6rem 1rem', borderRadius: '8px', cursor: 'pointer', fontWeight: 600 }}>
-              + Add to Queue
-            </button>
-          </div>
 
           <div style={{ background: 'rgba(255, 255, 255, 0.05)', padding: '1.5rem', borderRadius: '16px', border: '1px solid var(--color-border)', flex: 1 }}>
             <h2 style={{ fontSize: '1.2rem', fontWeight: 700, margin: '0 0 1rem 0' }}>Up Next</h2>

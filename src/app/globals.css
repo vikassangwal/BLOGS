@@ -289,6 +289,8 @@ input:focus, textarea:focus, select:focus { outline: 2px solid var(--color-accen
 .blog-content li {
   margin-bottom: 0.5rem;
 }
-body { top: 0 !important; }
-.skiptranslate iframe, .goog-te-banner-frame, #goog-gt-tt, .goog-te-balloon-frame { display: none !important; }
+body { top: 0px !important; position: static !important; }
+.skiptranslate iframe, .goog-te-banner-frame, #goog-gt-tt, .goog-te-balloon-frame, .goog-tooltip, .goog-tooltip:hover { display: none !important; }
 .goog-text-highlight { background: none !important; box-shadow: none !important; pointer-events: none !important; }
+.goog-te-gadget { color: transparent !important; }
+.goog-te-gadget-icon, .goog-te-gadget-simple img { display: none !important; }

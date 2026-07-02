@@ -89,8 +89,8 @@ export default function GlobalHeader({ siteName }: { siteName?: string }) {
                   document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
                   document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=${domain}`;
                 } else {
-                  document.cookie = `googtrans=/auto/${lang}; path=/`;
-                  document.cookie = `googtrans=/auto/${lang}; path=/; domain=${domain}`;
+                  document.cookie = `googtrans=/en/${lang}; path=/`;
+                  document.cookie = `googtrans=/en/${lang}; path=/; domain=${domain}`;
                 }
                 window.location.reload();
               }}

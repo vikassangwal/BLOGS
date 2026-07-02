@@ -10,6 +10,9 @@ export default function AdminDashboard() {
   const [autoBlogLogs, setAutoBlogLogs] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [timeFilter, setTimeFilter] = useState('week');
+  const [chartData, setChartData] = useState<any[]>([]);
+  const [chartTotals, setChartTotals] = useState({ views: 0, leads: 0, posts: 0 });
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
@@ -20,8 +23,9 @@ export default function AdminDashboard() {
     Promise.all([
       fetch('/api/blog?limit=5').then(r => r.json()),
       fetch('/api/leads?limit=5').then(r => r.json()),
-      fetch('/api/auto-blog').then(r => r.json())
-    ]).then(([blogData, leadsData, autoBlogData]) => {
+      fetch('/api/auto-blog').then(r => r.json()),
+      fetch(`/api/admin/analytics?filter=${timeFilter}`).then(r => r.json())
+    ]).then(([blogData, leadsData, autoBlogData, analyticsData]) => {
       setStats({
         totalPosts: blogData.total || 0,
         totalLeads: leadsData.total || 0,
@@ -33,9 +37,13 @@ export default function AdminDashboard() {
       setRecentPosts(blogData.posts || []);
       setRecentLeads(leadsData.leads || []);
       setAutoBlogLogs(autoBlogData.logs || []);
+      if (analyticsData.success) {
+        setChartData(analyticsData.chartData);
+        setChartTotals(analyticsData.totals);
+      }
       setIsLoading(false);
     }).catch(() => setIsLoading(false));
-  }, []);
+  }, [timeFilter]);
 
   if (isLoading) {
     return (
@@ -63,14 +71,6 @@ export default function AdminDashboard() {
     { name: 'Pending', value: stats?.pendingKeywords || 0, color: '#f59e0b' },
     { name: 'Used', value: stats?.usedKeywords || 0, color: '#10b981' },
   ];
-
-  // Generate mock weekly data from actual stats for visual effect
-  const weekData = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(day => ({
-    name: day,
-    views: Math.floor(Math.random() * 500 + 200),
-    leads: Math.floor(Math.random() * 30 + 5),
-    posts: Math.floor(Math.random() * 3),
-  }));
 
   const glassCard: React.CSSProperties = {
     background: 'rgba(255, 255, 255, 0.03)',
@@ -145,10 +145,28 @@ export default function AdminDashboard() {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
         {/* Line Chart */}
         <div style={glassCard}>
-          <h2 style={{ fontSize: '1.1rem', fontWeight: 700, margin: '0 0 1rem 0', color: 'var(--color-text-primary)' }}>📈 Weekly Traffic & Leads</h2>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '1rem' }}>
+            <h2 style={{ fontSize: '1.1rem', fontWeight: 700, margin: 0, color: 'var(--color-text-primary)' }}>📈 Traffic & Leads <span style={{fontSize:'0.8rem', fontWeight:400, color:'var(--color-text-secondary)'}}>(Views: {chartTotals.views})</span></h2>
+            <select 
+              value={timeFilter} 
+              onChange={(e) => setTimeFilter(e.target.value)}
+              style={{
+                background: 'rgba(255,255,255,0.05)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)',
+                padding: '0.4rem 0.8rem', borderRadius: '8px', outline: 'none', fontSize: '0.85rem'
+              }}
+            >
+              <option value="mint" style={{background:'#111'}}>Last 60 Minutes</option>
+              <option value="hour" style={{background:'#111'}}>Last 24 Hours</option>
+              <option value="week" style={{background:'#111'}}>Last 7 Days</option>
+              <option value="month" style={{background:'#111'}}>Last 30 Days</option>
+              <option value="6mont" style={{background:'#111'}}>Last 6 Months</option>
+              <option value="year" style={{background:'#111'}}>Last 1 Year</option>
+              <option value="2year" style={{background:'#111'}}>Last 2 Years</option>
+            </select>
+          </div>
           <div style={{ width: '100%', height: 250 }}>
             <ResponsiveContainer>
-              <LineChart data={weekData}>
+              <LineChart data={chartData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
                 <XAxis dataKey="name" stroke="var(--color-text-secondary)" fontSize={12} />
                 <YAxis stroke="var(--color-text-secondary)" fontSize={12} />
@@ -209,10 +227,10 @@ export default function AdminDashboard() {
 
       {/* Bar Chart - Posts per day */}
       <div style={{ ...glassCard, marginBottom: '2rem' }}>
-        <h2 style={{ fontSize: '1.1rem', fontWeight: 700, margin: '0 0 1rem 0', color: 'var(--color-text-primary)' }}>📊 Daily Activity</h2>
+        <h2 style={{ fontSize: '1.1rem', fontWeight: 700, margin: '0 0 1rem 0', color: 'var(--color-text-primary)' }}>📊 Publishing Activity</h2>
         <div style={{ width: '100%', height: 200 }}>
           <ResponsiveContainer>
-            <BarChart data={weekData}>
+            <BarChart data={chartData}>
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
               <XAxis dataKey="name" stroke="var(--color-text-secondary)" fontSize={12} />
               <YAxis stroke="var(--color-text-secondary)" fontSize={12} />

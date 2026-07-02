@@ -24,10 +24,18 @@ export default function BlogPostClient({ post, ads, relatedPosts, whatsappLinks 
 
   useEffect(() => {
     synthRef.current = window.speechSynthesis;
+    
+    // Track Pageview
+    fetch('/api/analytics', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ path: window.location.pathname, postId: post?.id })
+    }).catch(e => console.error('Analytics error:', e));
+
     return () => {
       if (synthRef.current) synthRef.current.cancel();
     };
-  }, []);
+  }, [post?.id]);
 
   const handleListen = () => {
     if (!('speechSynthesis' in window)) {

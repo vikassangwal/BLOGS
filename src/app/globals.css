@@ -225,18 +225,19 @@ input:focus, textarea:focus, select:focus { outline: 2px solid var(--color-accen
 }
 
 .blog-content th {
-  background: var(--color-bg-tertiary);
-  color: #fff;
+  background: var(--color-bg-tertiary) !important;
+  color: var(--color-text-primary) !important;
   font-weight: 700;
   text-align: left;
   padding: 1rem;
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--color-border) !important;
 }
 
 .blog-content td {
   padding: 1rem;
-  border: 1px solid var(--color-border);
-  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--color-border) !important;
+  background: var(--color-bg-primary) !important;
+  color: var(--color-text-primary) !important;
 }
 
 .blog-content ul {

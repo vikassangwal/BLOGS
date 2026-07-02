@@ -139,7 +139,10 @@ export async function POST(request: NextRequest) {
       
       try {
         const topicRaw = await generateAIContent(researcherConfigForTopic, "You output strict JSON arrays.", topicPrompt, 1500);
-        const cleanTopicJson = topicRaw.replace(/^```json\n?|```$/g, '').trim();
+        const firstBracket = topicRaw.indexOf('[');
+        const lastBracket = topicRaw.lastIndexOf(']');
+        if (firstBracket === -1 || lastBracket === -1) throw new Error("No JSON array found");
+        const cleanTopicJson = topicRaw.substring(firstBracket, lastBracket + 1);
         const generatedTopics: string[] = JSON.parse(cleanTopicJson);
         
         if (Array.isArray(generatedTopics) && generatedTopics.length > 0) {

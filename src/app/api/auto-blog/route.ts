@@ -115,39 +115,61 @@ export async function POST(request: NextRequest) {
     let keywordId = null;
     let selectedCategory = 'News';
 
-    if (pendingKeyword) {
-      targetTopic = pendingKeyword.keyword;
-      keywordId = pendingKeyword.id;
-    } else {
+    if (!pendingKeyword) {
       if (!settings.isNewsActive) {
         return NextResponse.json({ status: 'empty', message: 'No keywords in queue and News Auto-Blogger is disabled.' });
       }
-      
-      // Topic Rotation based on time (Technology, Education, Finance)
-      const topicsList = settings.newsTopics ? settings.newsTopics.split(',').map(t => t.trim()) : ['Technology', 'Education & Career', 'Finance & Earning'];
-      const currentHour = new Date().getHours();
-      selectedCategory = topicsList[currentHour % topicsList.length] || 'Technology';
 
-      const trends = await getTrendingTopics();
-      
-      // Prevent duplicate blogs by checking if the trend was already processed
-      let foundTrend = '';
-      for (const trend of trends) {
-        const existingLog = await prisma.autoBlogLog.findFirst({
-          where: { keyword: trend, status: 'success' }
-        });
-        if (!existingLog) {
-          foundTrend = trend;
-          break;
+      // Check if we already generated the 41-blog queue for today
+      const startOfDay = new Date();
+      startOfDay.setHours(0, 0, 0, 0);
+      const generatedToday = await prisma.autoBlogKeyword.count({
+        where: { createdAt: { gte: startOfDay } }
+      });
+
+      if (generatedToday === 0) {
+        const INDIAN_STATES = [
+          'All India (Central)', 'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh', 
+          'Delhi', 'Goa', 'Gujarat', 'Haryana', 'Himachal Pradesh', 'Jharkhand', 'Karnataka', 
+          'Kerala', 'Madhya Pradesh', 'Maharashtra', 'Manipur', 'Meghalaya', 'Mizoram', 
+          'Nagaland', 'Odisha', 'Punjab', 'Rajasthan', 'Sikkim', 'Tamil Nadu', 'Telangana', 
+          'Tripura', 'Uttar Pradesh', 'Uttarakhand', 'West Bengal', 'Jammu and Kashmir', 
+          'Ladakh', 'Chandigarh', 'Andaman and Nicobar', 'Puducherry', 'Dadra and Nagar Haveli', 'Lakshadweep'
+        ];
+
+        const queueData = [];
+        // 37 Education / Vacancy
+        for (const state of INDIAN_STATES) {
+          queueData.push({
+            keyword: `Education, Job Vacancy, Results and Recruitment latest news in ${state}`,
+            niche: 'Education & Career',
+            status: 'pending',
+            priority: Math.floor(Math.random() * 10) // Mix them randomly
+          });
         }
-      }
+        // 2 Technology
+        queueData.push({ keyword: `Latest Technology, Mobiles and Gadgets news update`, niche: 'Technology', status: 'pending', priority: 5 });
+        queueData.push({ keyword: `Top Tech Trends and Innovations today`, niche: 'Technology', status: 'pending', priority: 5 });
+        
+        // 2 Finance
+        queueData.push({ keyword: `Latest Finance, Stock Market and Economy news`, niche: 'Finance & Earning', status: 'pending', priority: 5 });
+        queueData.push({ keyword: `Business, Earning and Investment tips news`, niche: 'Finance & Earning', status: 'pending', priority: 5 });
 
-      // Fallback if all trends were used
-      if (!foundTrend) {
-         foundTrend = trends[Math.floor(Math.random() * Math.min(trends.length, 5))];
+        await prisma.autoBlogKeyword.createMany({ data: queueData });
+
+        pendingKeyword = await prisma.autoBlogKeyword.findFirst({
+          where: { status: 'pending' },
+          orderBy: [{ priority: 'desc' }, { createdAt: 'asc' }]
+        });
+      } else {
+        return NextResponse.json({ status: 'completed', message: 'Daily limit of 41 blogs reached. Sleeping until tomorrow.' });
       }
-      
-      targetTopic = `Latest news and updates about ${selectedCategory} (Context: ${foundTrend})`;
+    }
+
+    if (pendingKeyword) {
+      targetTopic = pendingKeyword.keyword;
+      keywordId = pendingKeyword.id;
+      selectedCategory = pendingKeyword.niche || 'News';
     }
 
     // 3. INITIALIZE MULTI-AGENT AI CONFIG

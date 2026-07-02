@@ -1,5 +1,5 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import LeadCaptureForm from '@/components/LeadCaptureForm';
 import SmartBanners from '@/components/SmartBanners';

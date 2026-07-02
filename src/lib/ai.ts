@@ -129,12 +129,14 @@ export async function generateAIContent(
   }
   
   if (config.provider === 'gemini') {
-    let cleanModel = config.model.toLowerCase();
+    let cleanModel = config.model.toLowerCase().trim();
     if (cleanModel.includes('google/')) cleanModel = cleanModel.replace('google/', '');
     // If it's a random model like openai/gpt-4o-mini or llama, force it to gemini
     if (!cleanModel.includes('gemini')) cleanModel = 'gemini-1.5-flash';
     // Google doesn't have 2.5/2.0 on standard beta endpoints yet
     if (cleanModel.includes('gemini-2.5') || cleanModel.includes('gemini-2.0')) cleanModel = 'gemini-1.5-flash';
+    // Map deprecated gemini-pro to gemini-1.5-pro
+    if (cleanModel === 'gemini-pro') cleanModel = 'gemini-1.5-pro';
     if (!cleanModel) cleanModel = 'gemini-1.5-flash';
 
     const res = await fetchWithRetry(

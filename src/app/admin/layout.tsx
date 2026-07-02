@@ -14,6 +14,7 @@ const sidebarItems = [
   { name: 'Tags Management', path: '/admin/tags', icon: '🏷️' },
   { name: 'Admin Users', path: '/admin/users', icon: '🔐' },
   { name: 'Team Management', path: '/admin/team', icon: '👥' },
+  { name: 'API Integrations', path: '/admin/integrations', icon: '🔌' },
   { name: 'Site Settings', path: '/admin/settings', icon: '⚙️' },
 ];
 

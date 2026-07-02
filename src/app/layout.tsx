@@ -67,12 +67,7 @@ export default async function RootLayout({
 
         <GlobalFooter siteName={siteName} />
 
-        <Script
-          src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"
-          strategy="lazyOnload"
-        />
-        <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
-        <Script id="google-translate-init" strategy="lazyOnload">
+        <Script id="google-translate-init" strategy="afterInteractive">
           {`
             window.googleTranslateElementInit = function() {
               new window.google.translate.TranslateElement({
@@ -83,6 +78,11 @@ export default async function RootLayout({
             };
           `}
         </Script>
+        <Script
+          src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"
+          strategy="afterInteractive"
+        />
+        <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
 
         {/* OneSignal SDK */}
         {onesignalAppId && (

@@ -98,9 +98,9 @@ export async function POST(request: NextRequest) {
       let model = (savedKeys[modelKey] || fallbackModel).trim();
       
       // FORCE OVERRIDE BROKEN MODELS NO MATTER WHERE THEY WERE SAVED
-      if (model.includes('gemini-2.5-flash') || model.includes('gemini-2.0-flash-exp') || model.includes('llama-3-8b')) {
-          model = 'openrouter/free';
-      }
+        if (model.includes('gemini-2.5-flash') || model.includes('gemini-2.0-flash-exp') || model.includes('llama-3-8b') || model === 'openrouter/free') {
+            model = 'meta-llama/llama-3.3-70b-instruct:free';
+        }
 
       let apiKey = '';
       if (provider === 'openrouter') apiKey = savedKeys.openrouter || '';
@@ -143,7 +143,7 @@ export async function POST(request: NextRequest) {
       Example format: ["Topic 1", "Topic 2", "Topic 3"]`;
 
       let rModel = settings.researcherModel || '';
-      if (rModel.includes('gemini-2.5-flash') || rModel.includes('gemini-2.0-flash-exp') || rModel.includes('llama-3-8b') || !rModel) rModel = 'openrouter/free';
+      if (rModel.includes('gemini') || rModel.includes('llama-3-8b') || rModel === 'openrouter/free' || !rModel) rModel = 'meta-llama/llama-3.2-3b-instruct:free';
 
       const researcherConfigForTopic = buildAgentConfig('researcherProvider', 'researcherModel', 'openrouter', rModel);
       
@@ -200,13 +200,13 @@ export async function POST(request: NextRequest) {
     }
 
     let rModel = settings.researcherModel || '';
-    if (rModel.includes('gemini-2.5-flash') || rModel.includes('gemini-2.0-flash-exp') || rModel.includes('llama-3-8b') || !rModel) rModel = 'openrouter/free';
+    if (rModel.includes('gemini') || rModel.includes('llama-3-8b') || rModel === 'openrouter/free' || !rModel) rModel = 'meta-llama/llama-3.2-3b-instruct:free';
     
     let wModel = settings.writerModel || '';
-    if (wModel === 'openai/gpt-4o-mini' || wModel.includes('llama-3-8b') || !wModel) wModel = 'openrouter/free';
+    if (wModel === 'openai/gpt-4o-mini' || wModel.includes('llama-3-8b') || wModel === 'openrouter/free' || !wModel) wModel = 'meta-llama/llama-3.3-70b-instruct:free';
     
     let sModel = settings.seoModel || '';
-    if (sModel === 'openai/gpt-4o-mini' || sModel.includes('llama-3-8b') || !sModel) sModel = 'openrouter/free';
+    if (sModel === 'openai/gpt-4o-mini' || sModel.includes('llama-3-8b') || sModel === 'openrouter/free' || !sModel) sModel = 'meta-llama/llama-3.2-3b-instruct:free';
 
     const researcherConfig = buildAgentConfig('researcherProvider', 'researcherModel', 'openrouter', rModel);
     const writerConfig = buildAgentConfig('writerProvider', 'writerModel', 'openrouter', wModel);

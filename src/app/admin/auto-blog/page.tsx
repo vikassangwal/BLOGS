@@ -75,8 +75,8 @@ export default function AutoBlogAdmin() {
       } else {
         alert('Auto-blog failed: ' + data.error);
       }
-    } catch (error) {
-      alert('Auto-blog trigger failed');
+    } catch (error: any) {
+      alert('Auto-blog trigger failed: ' + (error?.message || error));
     } finally {
       setIsRunning(false);
     }

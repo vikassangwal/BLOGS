@@ -156,6 +156,7 @@ export default function IntegrationsHubPage() {
                     <option value="pollinations">Pollinations.ai (Free)</option>
                     <option value="openai">OpenAI (DALL-E)</option>
                     <option value="openrouter">OpenRouter</option>
+                    <option value="gemini">Google Gemini (Imagen)</option>
                   </select>
                 </div>
                 <div>

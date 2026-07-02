@@ -116,8 +116,8 @@ export async function POST(request: NextRequest) {
         let model = (savedKeys[modelKey] || fallbackModel).trim();
         
         // FORCE OVERRIDE BROKEN MODELS NO MATTER WHERE THEY WERE SAVED
-        if (model.includes('gemini-2.5-flash') || model.includes('gemini-2.0-flash-exp')) {
-            model = 'meta-llama/llama-3-8b-instruct:free';
+        if (model.includes('gemini-2.5-flash') || model.includes('gemini-2.0-flash-exp') || model.includes('llama-3-8b')) {
+            model = 'openrouter/free';
         }
 
         let apiKey = '';
@@ -142,7 +142,7 @@ export async function POST(request: NextRequest) {
       Example format: ["Topic 1", "Topic 2", "Topic 3"]`;
 
       let rModel = settings.researcherModel || '';
-      if (rModel.includes('gemini-2.5-flash') || rModel.includes('gemini-2.0-flash-exp') || !rModel) rModel = 'meta-llama/llama-3-8b-instruct:free';
+      if (rModel.includes('gemini-2.5-flash') || rModel.includes('gemini-2.0-flash-exp') || rModel.includes('llama-3-8b') || !rModel) rModel = 'openrouter/free';
 
       const researcherConfigForTopic = buildAgentConfig('researcherProvider', 'researcherModel', 'openrouter', rModel);
       
@@ -199,13 +199,13 @@ export async function POST(request: NextRequest) {
     }
 
     let rModel = settings.researcherModel || '';
-    if (rModel.includes('gemini-2.5-flash') || rModel.includes('gemini-2.0-flash-exp') || !rModel) rModel = 'meta-llama/llama-3-8b-instruct:free';
+    if (rModel.includes('gemini-2.5-flash') || rModel.includes('gemini-2.0-flash-exp') || rModel.includes('llama-3-8b') || !rModel) rModel = 'openrouter/free';
     
     let wModel = settings.writerModel || '';
-    if (wModel === 'openai/gpt-4o-mini' || !wModel) wModel = 'meta-llama/llama-3-8b-instruct:free';
+    if (wModel === 'openai/gpt-4o-mini' || wModel.includes('llama-3-8b') || !wModel) wModel = 'openrouter/free';
     
     let sModel = settings.seoModel || '';
-    if (sModel === 'openai/gpt-4o-mini' || !sModel) sModel = 'meta-llama/llama-3-8b-instruct:free';
+    if (sModel === 'openai/gpt-4o-mini' || sModel.includes('llama-3-8b') || !sModel) sModel = 'openrouter/free';
 
     const researcherConfig = buildAgentConfig('researcherProvider', 'researcherModel', 'openrouter', rModel);
     const writerConfig = buildAgentConfig('writerProvider', 'writerModel', 'openrouter', wModel);

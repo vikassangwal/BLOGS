@@ -177,9 +177,9 @@ export async function POST(request: NextRequest) {
         } else {
            return NextResponse.json({ status: 'empty', message: 'AI failed to generate topics array.' });
         }
-      } catch (e) {
+      } catch (e: any) {
         console.error('AI Topic Generator failed:', e);
-        return NextResponse.json({ status: 'empty', message: 'AI Topic Generator failed to generate valid JSON.' });
+        return NextResponse.json({ status: 'empty', message: 'AI Error: ' + (e.message || 'Unknown error') });
       }
     }
 

@@ -113,7 +113,13 @@ export async function POST(request: NextRequest) {
 
       function buildAgentConfig(providerKey: string, modelKey: string, fallbackProvider: string, fallbackModel: string) {
         const provider = savedKeys[providerKey] || fallbackProvider;
-        const model = (savedKeys[modelKey] || fallbackModel).trim();
+        let model = (savedKeys[modelKey] || fallbackModel).trim();
+        
+        // FORCE OVERRIDE BROKEN MODELS NO MATTER WHERE THEY WERE SAVED
+        if (model.includes('gemini-2.5-flash') || model.includes('gemini-2.0-flash-exp')) {
+            model = 'meta-llama/llama-3-8b-instruct:free';
+        }
+
         let apiKey = '';
         if (provider === 'openrouter') apiKey = savedKeys.openrouter || '';
         else if (provider === 'openai') apiKey = savedKeys.openai || '';

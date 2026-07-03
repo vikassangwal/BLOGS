@@ -28,21 +28,19 @@ export async function POST(request: Request) {
         name: name || '',
         email,
         password: hashedPassword,
-        role: 'ADMIN',
+        role: 'EDITOR',
         isVerified: false,
         otpCode,
         otpExpiry,
       }
     });
 
-    // In Demo Mode: Return OTP in response (in production, send via email)
-    // TODO: Replace with Nodemailer when Gmail App Password is configured
-    console.log(`[OTP for ${email}]: ${otpCode}`);
+    // OTP will be sent via email in production
+    // console.log(`[OTP for ${email}]: ${otpCode}`);
 
     return NextResponse.json({ 
       message: 'Account created! Please verify OTP.',
-      userId: user.id,
-      demoOtp: otpCode // Remove this in production!
+      userId: user.id
     }, { status: 201 });
 
   } catch (error) {

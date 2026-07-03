@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
 import { prisma } from '@/lib/prisma';
 import { getAIConfig, generateAIContent } from '@/lib/ai';
+import { verifyToken } from '@/lib/auth';
 // Code cleaned up: RSS fetching is no longer used.
 export const maxDuration = 60; // Vercel hobby allows up to 60s for serverless
 export const dynamic = 'force-dynamic'; // Prevent caching for cron jobs
@@ -79,9 +80,18 @@ async function postToTwitter(bearerToken: string, text: string) {
 
 export async function POST(request: NextRequest) {
   try {
+    // Auth check: only admin can trigger auto-blog (skip for cron calls with x-cron-secret header)
+    const isCronCall = request.headers.get('x-cron-secret') === (process.env.CRON_SECRET || 'knowora-cron-2026');
+    if (!isCronCall) {
+      const cookieHeader = request.headers.get('cookie') || '';
+      const tokenMatch = cookieHeader.match(/automata_auth_token=([^;]+)/);
+      const user = tokenMatch ? verifyToken(tokenMatch[1]) : null;
+      if (!user) return NextResponse.json({ success: false, error: 'Unauthorized. Please login as admin.' }, { status: 401 });
+    }
+
     // 1. GET SETTINGS
     const settings = await prisma.autoBlogSettings.findUnique({ where: { id: 'default' } });
-    if (!settings || (!settings.isActive && !request.headers.get('x-force-run'))) {
+    if (!settings || (!settings.isActive && !request.headers.get('x-force-run') && !isCronCall)) {
       return NextResponse.json({ success: false, error: 'Auto-blogging is disabled in settings' });
     }
 
@@ -875,12 +885,18 @@ export async function GET(request: NextRequest) {
     // Check if this is a cron trigger request
     if (searchParams.get('action') === 'trigger') {
       const cronSecret = searchParams.get('secret');
-      // Basic security check (we can rely on the cron-job.org setting this parameter)
-      if (cronSecret !== 'auto123') {
+      const expectedSecret = process.env.CRON_SECRET || 'knowora-cron-2026';
+      if (cronSecret !== expectedSecret) {
         return NextResponse.json({ error: 'Unauthorized cron access' }, { status: 401 });
       }
       return POST(request);
     }
+
+    // Auth check for stats
+    const cookieHeader = request.headers.get('cookie') || '';
+    const tokenMatch = cookieHeader.match(/automata_auth_token=([^;]+)/);
+    const user = tokenMatch ? verifyToken(tokenMatch[1]) : null;
+    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const totalKeywords = await prisma.autoBlogKeyword.count();
     const pendingKeywords = await prisma.autoBlogKeyword.count({ where: { status: 'pending' } });

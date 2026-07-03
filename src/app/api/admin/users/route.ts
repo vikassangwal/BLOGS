@@ -1,8 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { verifyToken } from '@/lib/auth';
 import bcrypt from 'bcryptjs';
 
-export async function GET() {
+function getUser(request: NextRequest) {
+  const cookieHeader = request.headers.get('cookie') || '';
+  const tokenMatch = cookieHeader.match(/automata_auth_token=([^;]+)/);
+  return tokenMatch ? verifyToken(tokenMatch[1]) : null;
+}
+
+export async function GET(request: NextRequest) {
+  const user = getUser(request);
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
   try {
     const users = await prisma.user.findMany({
       select: { id: true, name: true, email: true, role: true, createdAt: true },
@@ -15,6 +25,9 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
+  const user = getUser(req);
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
   try {
     const { name, email, password, role } = await req.json();
     if (!email || !password) {
@@ -32,7 +45,7 @@ export async function POST(req: NextRequest) {
         name: name || '',
         email,
         password: hashedPassword,
-        role: role || 'SUPER_ADMIN',
+        role: role || 'EDITOR',
       },
       select: { id: true, name: true, email: true, role: true }
     });

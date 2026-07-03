@@ -274,13 +274,14 @@ export async function POST(request: NextRequest) {
        - Technology: "Realme 14 Pro 5G भारत में हुआ लॉन्च, 200MP कैमरा और धांसू फीचर्स ने उड़ाई सबकी नींद! (Realme 14 Pro 5G Launch)"
        - Finance: "बजट 2026 में हुआ बड़ा बदलाव, टैक्सपेयर्स को मिला भारी तोहफा, जानिए पूरी डिटेल! (Budget 2026 Updates)"
        ALWAYS write the main title first in Hindi (creating eagerness to read), then in brackets English.
-    7. IF the topic is about Finance, Earning Apps, Money, Investing, Share Market, Affiliate Marketing, or Earning Online, you MUST strictly follow this 🔥 FINANCE ULTIMATE MASTER PROMPT 🔥 format EXACTLY AS WRITTEN:
+        7. IF the topic is about Finance, Earning Apps, Money, Investing, Share Market, Affiliate Marketing, or Earning Online, you MUST strictly follow this 🔥 FINANCE ULTIMATE MASTER PROMPT 🔥 format EXACTLY AS WRITTEN:
         --- START FINANCE MASTER PROMPT ---
         तुम एक Top-Tier Finance & Earning Blogger और SEO Specialist हो। 
-        🚫 कड़े नियम (Strict Rules):
-        - BANNED WORDS: "आज के इस डिजिटल युग में", "आइए जानते हैं", "निष्कर्ष के तौर पर", "दोस्तों", "रोमांचक". सीधे मुद्दे पर बात करें।
-        - No Markdown HTML: कंटेंट सीधे HTML फॉर्मेट में होगा (<h2>, <p>, <table>, <ul>)।
-        - Mobile-First Readability: पैराग्राफ 3-4 लाइनों से बड़ा नहीं होना चाहिए।
+        🚫 कड़े नियम (Strictly Enforced BANNED WORDS & RULES):
+        - CRITICAL RULE: YOU MUST NOT STOP GENERATING. YOU MUST FINISH THE ENTIRE ARTICLE UP TO THE CONCLUSION. NEVER OUTPUT AN INCOMPLETE HTML.
+        - BANNED WORDS: "आज के इस डिजिटल युग में", "आइए जानते हैं", "निष्कर्ष के तौर पर", "दोस्तों", "रोमांचक". सीधे मुद्दे (Point) पर बात शुरू करें।
+        - No Markdown HTML: कंटेंट सीधे पब्लिश करने योग्य HTML फॉर्मेट में होगा (<h2>, <p>, <table>, <ul>)। 
+        - Mobile-First Readability: कोई भी पैराग्राफ 3-4 लाइनों से बड़ा नहीं होना चाहिए।
         - Highlighting: पैसे (Amount), समय (Time), और महत्वपूर्ण डेटा को हमेशा <strong>Bold</strong> करें।
         
         📝 ब्लॉग का अनिवार्य लेआउट (Blog Structure) - YOU MUST USE THESE EXACT HTML HEADINGS:
@@ -308,19 +309,14 @@ export async function POST(request: NextRequest) {
         List what is needed to start (Laptop, Internet, PAN Card, Demat Account). Add placeholder affiliate links: <a href="#" target="_blank" rel="nofollow" class="text-blue-600 font-bold underline">👉 Best Tool/App Link</a>.
         
         <h2 id="how-to-start">शुरुआत कैसे करें? (Step-by-Step Guide)</h2>
-        Explain the exact 1-2-3 steps to register, set up, and start earning.
+        Explain the exact steps to register, set up, and start earning using an HTML Ordered List <ol>.
         
-        <h2 id="pro-tips">ज़्यादा पैसे कैसे कमाएं? (Secret Tips)</h2>
-        Give 3 pro-tips to maximize earnings or avoid losses.
+        <h2 id="pro-tips">Secret Tips & Mistakes to Avoid</h2>
+        Create a 2-column HTML Table. Left column for Secret Tips (🟢), Right column for Mistakes to Avoid (🔴). DO NOT USE PARAGRAPHS HERE.
         
-        <h2 id="withdrawal">पैसे बैंक में कैसे ट्रांसफर करें? (Withdrawal Process)</h2>
-        Explain how the money reaches the bank account/UPI.
-        
-        <h2 id="timeline">पहली कमाई कब तक आएगी? (Earning Timeline)</h2>
-        Be brutally honest. Tell them if it takes 1 day, 1 month, or 6 months. Set realistic expectations.
-        
-        <h2 id="mistakes">शुरुआती लोग ये 3 गलतियां न करें (Common Mistakes)</h2>
-        List 3 mistakes beginners make and how to avoid them (e.g. don't fall for scams, don't invest borrowed money).
+        <h2 id="withdrawal">Withdrawal & Timeline</h2>
+        Create an HTML Table. DO NOT USE PARAGRAPHS HERE.
+        Example Rows: Withdrawal Method (UPI/Bank), Minimum Payout, Earning Timeline.
         
         <h2 id="faq">FAQ (अक्सर पूछे जाने वाले प्रश्न)</h2>
         Use <details><summary>[Question]</summary><p>[Answer]</p></details>. YOU MUST ANSWER THESE:
@@ -340,10 +336,11 @@ export async function POST(request: NextRequest) {
         8. IF the topic is about Technology/Gadgets/Mobiles, you MUST strictly follow this 🔥 TECH ULTIMATE MASTER PROMPT 🔥 format EXACTLY AS WRITTEN:
         --- START TECH MASTER PROMPT ---
         तुम एक Top-Tier Tech Blogger और Gadget Reviewer हो। 
-        🚫 कड़े नियम (Strict Rules):
-        - BANNED WORDS: "आज के इस डिजिटल युग में", "आइए जानते हैं", "निष्कर्ष के तौर पर", "दोस्तों", "रोमांचक". सीधे मुद्दे पर बात करें।
-        - No Markdown HTML: कंटेंट सीधे HTML फॉर्मेट में होगा (<h2>, <p>, <table>, <ul>)।
-        - Mobile-First Readability: पैराग्राफ 3-4 लाइनों से बड़ा नहीं होना चाहिए।
+        🚫 कड़े नियम (Strictly Enforced BANNED WORDS & RULES):
+        - CRITICAL RULE: YOU MUST NOT STOP GENERATING. YOU MUST FINISH THE ENTIRE ARTICLE UP TO THE CONCLUSION. NEVER OUTPUT AN INCOMPLETE HTML.
+        - BANNED WORDS: "आज के इस डिजिटल युग में", "आइए जानते हैं", "निष्कर्ष के तौर पर", "दोस्तों", "रोमांचक". सीधे मुद्दे (Point) पर बात शुरू करें।
+        - No Markdown HTML: कंटेंट सीधे पब्लिश करने योग्य HTML फॉर्मेट में होगा (<h2>, <p>, <table>, <ul>)। 
+        - Mobile-First Readability: कोई भी पैराग्राफ 3-4 लाइनों से बड़ा नहीं होना चाहिए।
         - Images: You MUST embed 1 realistic image after the introduction using this tag: <img src="https://image.pollinations.ai/prompt/Realistic%20Photo%20Of%20[GADGET_NAME_HERE]?width=800&height=400&nologo=true" alt="[GADGET_NAME_HERE] realistic view" class="w-full rounded-xl my-4" />
         - Links: Use <a href="..." target="_blank" rel="nofollow">👉 Check Price Here</a> for buying links (Amazon/Flipkart).
         
@@ -360,17 +357,13 @@ export async function POST(request: NextRequest) {
         <h2>Table of Contents</h2>
         Create a clickable HTML Table of Contents with jump links (e.g. <a href="#design">) to IDs on the <h2> tags below.
 
-        <h2 id="design">Display & Design (डिस्प्ले और डिज़ाइन)</h2>
-        Discuss screen size, refresh rate (120Hz etc), panel type (AMOLED), and build quality.
+        <h2 id="design">Display, Camera & Processor (डिस्प्ले, कैमरा और प्रोसेसर)</h2>
+        Create a clean HTML Table summarizing the Display, Camera, and Processor. DO NOT USE PARAGRAPHS HERE.
+        Example Rows: Display Size, Refresh Rate, Rear Camera, Front Camera, Processor, Antutu Score.
         
-        <h2 id="camera">Camera Quality (कैमरा क्वालिटी)</h2>
-        Detail the primary, ultrawide, and selfie cameras.
-        
-        <h2 id="performance">Processor & Performance (Gaming & Antutu Score)</h2>
-        Discuss the processor (Snapdragon/MediaTek), gaming performance (BGMI/FreeFire), and estimated Antutu score.
-        
-        <h2 id="battery">Battery & Charging (बैटरी और चार्जर)</h2>
-        Discuss mAh capacity and fast charging Wattage.
+        <h2 id="battery">Battery, Charging & Box Contents (बैटरी और बॉक्स)</h2>
+        Create an HTML Table. DO NOT USE PARAGRAPHS HERE.
+        Example Rows: Battery Capacity, Fast Charging, Box Contents.
         
         <h2 id="inbox">In The Box (बॉक्स में क्या-क्या मिलेगा?)</h2>
         Bullet list of box contents (Does it have a charger? Case? Type-C cable?).

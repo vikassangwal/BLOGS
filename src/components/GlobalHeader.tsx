@@ -25,11 +25,11 @@ export default function GlobalHeader({ siteName }: { siteName?: string }) {
   };
 
   const navLinks = [
-    { name: 'घर', href: '/', path: '/' },
-    { name: 'तकनीकी', href: '/blog?tag=Technology', path: '/blog', tag: 'Technology' },
-    { name: 'शिक्षा और करियर', href: '/blog?tag=Education+%26+Career', path: '/blog', tag: 'Education & Career' },
-    { name: 'वित्त और आय', href: '/blog?tag=Finance+%26+Earning', path: '/blog', tag: 'Finance & Earning' },
-    { name: 'हमारे बारे में', href: '/about', path: '/about' },
+    { name: 'Home', href: '/', path: '/' },
+    { name: 'Technology', href: '/blog?tag=Technology', path: '/blog', tag: 'Technology' },
+    { name: 'Education & Career', href: '/blog?tag=Education+%26+Career', path: '/blog', tag: 'Education & Career' },
+    { name: 'Finance & Earning', href: '/blog?tag=Finance+%26+Earning', path: '/blog', tag: 'Finance & Earning' },
+    { name: 'About Us', href: '/about', path: '/about' },
   ];
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);

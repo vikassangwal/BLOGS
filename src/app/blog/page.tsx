@@ -17,47 +17,6 @@ function BlogListContent() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
-  const [selectedState, setSelectedState] = useState('All India');
-  const [isStateDetected, setIsStateDetected] = useState(false);
-
-  const INDIAN_STATES = [
-    'All India', 'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh', 
-    'Delhi', 'Goa', 'Gujarat', 'Haryana', 'Himachal Pradesh', 'Jharkhand', 'Karnataka', 
-    'Kerala', 'Madhya Pradesh', 'Maharashtra', 'Manipur', 'Meghalaya', 'Mizoram', 
-    'Nagaland', 'Odisha', 'Punjab', 'Rajasthan', 'Sikkim', 'Tamil Nadu', 'Telangana', 
-    'Tripura', 'Uttar Pradesh', 'Uttarakhand', 'West Bengal'
-  ];
-
-  // Auto-detect State based on IP
-  useEffect(() => {
-    const detectState = async () => {
-      try {
-        const savedState = localStorage.getItem('user_state');
-        if (savedState) {
-          setSelectedState(savedState);
-          setIsStateDetected(true);
-          return;
-        }
-
-        const res = await fetch('https://ipapi.co/json/');
-        const data = await res.json();
-        
-        if (data.country_code === 'IN' && data.region) {
-          // Check if region matches any state exactly or roughly
-          const stateMatch = INDIAN_STATES.find(s => s.toLowerCase() === data.region.toLowerCase());
-          if (stateMatch) {
-            setSelectedState(stateMatch);
-            localStorage.setItem('user_state', stateMatch);
-          }
-        }
-      } catch (err) {
-        console.error('IP Detection failed', err);
-      } finally {
-        setIsStateDetected(true);
-      }
-    };
-    detectState();
-  }, []);
 
   // Sync activeTag if URL changes externally
   useEffect(() => {
@@ -78,9 +37,6 @@ function BlogListContent() {
       url.searchParams.append('limit', '9');
 
       let finalSearch = search;
-      if (selectedState !== 'All India') {
-        finalSearch = search ? `${selectedState} ${search}` : selectedState;
-      }
 
       if (finalSearch) url.searchParams.append('search', finalSearch);
       if (activeTag) url.searchParams.append('tag', activeTag);
@@ -106,10 +62,8 @@ function BlogListContent() {
   };
 
   useEffect(() => {
-    if (isStateDetected) {
-      fetchPosts();
-    }
-  }, [page, activeTag, isStateDetected, selectedState]);
+    fetchPosts();
+  }, [page, activeTag]);
 
   // Debounced search
   useEffect(() => {
@@ -188,36 +142,7 @@ function BlogListContent() {
           </span>
         </div>
 
-        {/* State Filter - ONLY SHOW FOR EDUCATION & CAREER */}
-        {activeTag === 'Education & Career' && (
-          <div style={{ maxWidth: '400px', margin: '1rem auto 0', display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(255,255,255,0.03)', padding: '0.5rem 1.2rem', borderRadius: '25px', border: '1px solid var(--color-border)' }}>
-            <span style={{ opacity: 0.7 }}>📍</span>
-            <select 
-              value={selectedState}
-              onChange={(e) => {
-                setSelectedState(e.target.value);
-                localStorage.setItem('user_state', e.target.value);
-                setPage(1);
-              }}
-              style={{
-                background: 'transparent',
-                border: 'none',
-                color: 'var(--color-text-primary)',
-                width: '100%',
-                outline: 'none',
-                fontSize: '0.95rem',
-                fontWeight: 500,
-                cursor: 'pointer'
-              }}
-            >
-              {INDIAN_STATES.map(s => (
-                <option key={s} value={s} style={{ background: '#121212', color: '#fff' }}>
-                  {s === 'All India' ? 'National News (All India)' : `${s} News`}
-                </option>
-              ))}
-            </select>
-          </div>
-        )}
+
               {/* Tags */}
         <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', justifyContent: 'center', marginTop: '2rem' }}>
           <button

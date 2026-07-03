@@ -430,20 +430,25 @@ export async function POST(request: NextRequest) {
         <h2>Table of Contents</h2>
         Create a clickable HTML Table of Contents with jump links (e.g. <a href="#quick-info">) linking to IDs on the <h2> tags below.
 
-        <h2 id="quick-info">Quick Information & Dates (संक्षिप्त विवरण और तिथियां)</h2>
-        Create ONE HTML Table combining key info, dates, and fees. ONLY include rows relevant to the CURRENT stage.
+        <h2 id="quick-info">Quick Information (संक्षिप्त विवरण)</h2>
+        Create ONE HTML Table combining department name, post name, total posts, and the Official Website link.
         | विवरण | जानकारी | (Convert to HTML Table)
         | विभाग/संस्था | ... |
         | पद/विषय | ... |
         | कुल पद (Total Posts) | ... |
-        | आवेदन शुरू | [Smart Date or Exact Date] |
-        | अंतिम तिथि | [Smart Date] |
-        | आवेदन शुल्क (Fee) | Gen/OBC: ₹X | SC/ST: ₹Y |
         | आधिकारिक वेबसाइट | <a href="..." target="_blank" rel="nofollow">👉 Click Here</a> (THIS ROW IS 100% MANDATORY) |
 
-        <h2 id="details">Vacancy, Eligibility & Salary (पद, योग्यता और वेतन)</h2>
-        Create an HTML Table for this section to save words. Do NOT use paragraphs.
-        Example Rows: Number of Vacancies, Age Limit, Educational Qualification, Estimated Salary.
+        <h2 id="dates">Important Dates (महत्वपूर्ण तिथियां)</h2>
+        Create an HTML Table for dates. DO NOT WRITE PARAGRAPHS.
+        Example Rows: Notification Date, Application Start, Last Date, Exam Date.
+
+        <h2 id="fee">Application Fee (आवेदन शुल्क)</h2>
+        Create an HTML Table for fees. DO NOT WRITE PARAGRAPHS.
+        Example Rows: Gen/OBC Fee, SC/ST Fee, Payment Mode.
+
+        <h2 id="details">Vacancy & Eligibility (पदों का विवरण और योग्यता)</h2>
+        Create an HTML Table for this section. DO NOT WRITE PARAGRAPHS.
+        Example Rows: Post Name, Number of Vacancies, Age Limit, Educational Qualification.
 
         <h2 id="selection">Selection Process & Exam Pattern (चयन प्रक्रिया और सिलेबस)</h2>
         Create an HTML Table for this section.

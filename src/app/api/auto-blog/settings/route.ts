@@ -2,8 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyToken } from '@/lib/auth';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    const authToken = request.cookies.get('automata_auth_token')?.value;
+    const user = authToken ? verifyToken(authToken) : null;
+    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
     const settings = await prisma.autoBlogSettings.findUnique({ where: { id: 'default' } });
     if (!settings) {
       const newSettings = await prisma.autoBlogSettings.create({

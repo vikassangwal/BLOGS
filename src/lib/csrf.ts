@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 
-const CSRF_SECRET = process.env.CSRF_SECRET || 'csrf-secret-change-in-production';
+const CSRF_SECRET = process.env.CSRF_SECRET || process.env.JWT_SECRET || '';
 
 /**
  * Generate a CSRF token

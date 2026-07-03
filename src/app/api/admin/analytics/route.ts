@@ -1,8 +1,13 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { verifyToken } from '@/lib/auth';
 
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
   try {
+    const authToken = request.cookies.get('automata_auth_token')?.value;
+    const user = authToken ? verifyToken(authToken) : null;
+    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
     const { searchParams } = new URL(request.url);
     const filter = searchParams.get('filter') || 'week'; // mint, hour, week, month, 6mont, year, 2year
 

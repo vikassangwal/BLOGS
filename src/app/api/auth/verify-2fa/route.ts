@@ -4,7 +4,7 @@ import { generateToken } from '@/lib/auth';
 import { verifyTOTP } from '@/lib/totp';
 import * as jose from 'jose';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'automata-labs-secret-key-change-in-production';
+const JWT_SECRET = process.env.JWT_SECRET || '';
 
 export async function POST(request: Request) {
   try {

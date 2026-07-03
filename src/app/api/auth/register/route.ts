@@ -1,9 +1,16 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { hashPassword, generateOTP } from '@/lib/auth';
+import { checkRateLimit, getIP } from '@/lib/rate-limit';
 
 export async function POST(request: Request) {
   try {
+    const ip = getIP(request);
+    const rl = checkRateLimit(`register_${ip}`, 5, 3600000); // 5 registrations per hour per IP
+    if (!rl.success) {
+      return NextResponse.json({ error: 'Too many registration attempts. Please try again later.' }, { status: 429 });
+    }
+
     const body = await request.json();
     const { name, email, password } = body;
 

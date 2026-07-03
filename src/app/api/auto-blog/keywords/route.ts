@@ -4,6 +4,10 @@ import { verifyToken } from '@/lib/auth';
 
 export async function GET(request: NextRequest) {
   try {
+    const authToken = request.cookies.get('automata_auth_token')?.value;
+    const user = authToken ? verifyToken(authToken) : null;
+    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '50');

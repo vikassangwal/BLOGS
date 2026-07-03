@@ -28,6 +28,10 @@ function ensureFileExists() {
 
 export async function GET(request: NextRequest) {
   try {
+    const authToken = request.cookies.get('automata_auth_token')?.value;
+    const user = authToken ? verifyToken(authToken) : null;
+    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
     ensureFileExists();
     const data = fs.readFileSync(SETTINGS_FILE, 'utf-8');
     return NextResponse.json(JSON.parse(data));

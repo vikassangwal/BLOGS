@@ -1,9 +1,16 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getAIConfig, generateAIContent } from '@/lib/ai';
+import { checkRateLimit, getIP } from '@/lib/rate-limit';
 
 export async function POST(request: Request) {
   try {
+    const ip = getIP(request);
+    const rl = checkRateLimit(ip, 10, 60000); // 10 requests per minute
+    if (!rl.success) {
+      return NextResponse.json({ error: 'Rate limit exceeded. Try again in a minute.' }, { status: 429 });
+    }
+
     const body = await request.json();
     const { message, postId, history = [] } = body;
 

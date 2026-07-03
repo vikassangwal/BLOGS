@@ -1,8 +1,15 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { checkRateLimit, getIP } from '@/lib/rate-limit';
 
 export async function POST(request: Request) {
   try {
+    const ip = getIP(request);
+    const rl = checkRateLimit(`verify_${ip}`, 10, 300000); // 10 attempts per 5 minutes per IP
+    if (!rl.success) {
+      return NextResponse.json({ error: 'Too many verification attempts. Please try again later.' }, { status: 429 });
+    }
+
     const body = await request.json();
     const { userId, otpCode } = body;
 

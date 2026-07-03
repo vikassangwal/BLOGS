@@ -130,12 +130,8 @@ export async function generateAIContent(
   }
   
   if (config.provider === 'gemini') {
-    let cleanModel = config.model.toLowerCase().trim();
-    if (cleanModel.includes('google/')) cleanModel = cleanModel.replace('google/', '');
-    // Force to gemini-1.5-flash if invalid string or non-existent 2.5 model
-    if (!cleanModel.includes('gemini') && !cleanModel.includes('gemma')) cleanModel = 'gemini-1.5-flash';
-    if (cleanModel.includes('2.5') || cleanModel === 'gemini-pro') cleanModel = 'gemini-1.5-flash';
-    if (!cleanModel) cleanModel = 'gemini-1.5-flash';
+    // Strictly enforce gemini-1.5-flash to prevent any 404 Model Not Found errors
+    const cleanModel = 'gemini-1.5-flash';
 
     const res = await fetchWithRetry(
       `https://generativelanguage.googleapis.com/v1beta/models/${cleanModel}:generateContent?key=${config.apiKey.trim()}`,

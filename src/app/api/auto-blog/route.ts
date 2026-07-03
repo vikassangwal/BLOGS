@@ -442,10 +442,12 @@ export async function POST(request: NextRequest) {
         | आधिकारिक वेबसाइट | <a href="..." target="_blank" rel="nofollow">👉 Click Here</a> (THIS ROW IS 100% MANDATORY) |
 
         <h2 id="details">Vacancy, Eligibility & Salary (पद, योग्यता और वेतन)</h2>
-        Explain the number of vacancies, age limit, educational qualifications, and estimated salary in 3-4 bullet points or a small table.
+        Create an HTML Table for this section to save words. Do NOT use paragraphs.
+        Example Rows: Number of Vacancies, Age Limit, Educational Qualification, Estimated Salary.
 
         <h2 id="selection">Selection Process & Exam Pattern (चयन प्रक्रिया और सिलेबस)</h2>
-        Briefly list the stages (e.g. CBT, PET, Interview) and key subjects in a short ordered list or bullets.
+        Create an HTML Table for this section.
+        Example Rows: Stage 1 (e.g. CBT Exam), Stage 2 (PET/PST), Stage 3 (Interview/DV), Negative Marking (Yes/No).
 
         <h2 id="apply">How to Apply / Check Result (आवेदन कैसे करें / Result kaise dekhe)</h2>
         Step-by-step process in 3-4 simple points.

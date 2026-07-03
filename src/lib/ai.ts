@@ -8,6 +8,45 @@ interface AIConfig {
   model: string;
 }
 
+// Valid model mappings for each provider
+const DEFAULT_MODELS: Record<AIProvider, string> = {
+  openai: 'gpt-4o-mini',
+  gemini: 'gemini-1.5-flash',
+  anthropic: 'claude-3-haiku-20240307',
+  deepseek: 'deepseek-chat',
+  openrouter: 'meta-llama/llama-3-8b-instruct:free',
+};
+
+/**
+ * Validate and sanitize model name for a given provider
+ */
+function sanitizeModel(provider: AIProvider, model: string): string {
+  if (!model || !model.trim()) return DEFAULT_MODELS[provider];
+  
+  const clean = model.toLowerCase().trim();
+  
+  if (provider === 'gemini') {
+    // Only allow known working Gemini models
+    if (clean.includes('gemini-2.0-flash')) return 'gemini-2.0-flash';
+    if (clean.includes('gemini-1.5-pro')) return 'gemini-1.5-pro';
+    if (clean.includes('gemini-1.5-flash')) return 'gemini-1.5-flash';
+    // Everything else (2.5, invalid names) → safe fallback
+    return 'gemini-1.5-flash';
+  }
+  
+  return model.trim();
+}
+
+/**
+ * Validate API key format (basic sanity check)
+ */
+function isValidApiKey(key: string): boolean {
+  if (!key || !key.trim()) return false;
+  if (key.trim().length < 10) return false;
+  if (key.includes(' ') && !key.startsWith('sk-')) return false;
+  return true;
+}
+
 /**
  * Get AI configuration from SiteSettings or ApiKey table
  */
@@ -16,46 +55,36 @@ export async function getAIConfig(): Promise<AIConfig | null> {
     // First try SiteSettings
     const settings = await prisma.siteSettings.findUnique({ where: { id: 'default' } });
     if (settings?.aiApiKey) {
-      const provider = settings.aiProvider as AIProvider;
-      let model = settings.aiModel;
+      const provider = (settings.aiProvider as AIProvider) || 'openai';
       let apiKeyToUse = settings.aiApiKey.trim();
 
+      // Handle JSON-encoded multi-provider keys
       try {
         if (apiKeyToUse.startsWith('{')) {
           const parsedKeys = JSON.parse(apiKeyToUse);
-          // If we want a specific provider, grab it. Otherwise use the default provider's key
           apiKeyToUse = parsedKeys[provider] || parsedKeys['openai'] || '';
         }
-      } catch(e) {}
-      
-      if (!model) {
-        if (provider === 'openai') model = 'gpt-4o-mini';
-        else if (provider === 'gemini') model = 'gemini-1.5-pro';
-        else if (provider === 'anthropic') model = 'claude-3-haiku-20240307';
-        else if (provider === 'deepseek') model = 'deepseek-chat';
-        else if (provider === 'openrouter') model = 'meta-llama/llama-3-8b-instruct:free';
-        else model = 'gpt-4o-mini';
+      } catch(e) {
+        // If JSON parse fails, use the raw key as-is
       }
+      
+      const model = sanitizeModel(provider, settings.aiModel || '');
 
-      if (apiKeyToUse) {
-        return {
-          provider,
-          apiKey: apiKeyToUse,
-          model,
-        };
+      if (isValidApiKey(apiKeyToUse)) {
+        return { provider, apiKey: apiKeyToUse.trim(), model };
       }
     }
     
     // Fallback to ApiKey table
     const apiKey = await prisma.apiKey.findFirst({
       where: { 
-        provider: { in: ['openai', 'google_ai', 'anthropic'] },
+        provider: { in: ['openai', 'google_ai', 'anthropic', 'deepseek', 'openrouter'] },
         isActive: true 
       },
       orderBy: { createdAt: 'desc' }
     });
     
-    if (apiKey) {
+    if (apiKey && isValidApiKey(apiKey.apiKey)) {
       const providerMap: Record<string, AIProvider> = {
         'openai': 'openai',
         'google_ai': 'gemini',
@@ -63,42 +92,83 @@ export async function getAIConfig(): Promise<AIConfig | null> {
         'deepseek': 'deepseek',
         'openrouter': 'openrouter'
       };
+      const mappedProvider = providerMap[apiKey.provider] || 'openai';
       return {
-        provider: providerMap[apiKey.provider] || 'openai',
+        provider: mappedProvider,
         apiKey: apiKey.apiKey.trim(),
-        model: apiKey.provider === 'openai' ? 'gpt-4o-mini' : 
-               apiKey.provider === 'google_ai' ? 'gemini-pro' : 
-               apiKey.provider === 'deepseek' ? 'deepseek-chat' : 
-               apiKey.provider === 'openrouter' ? 'meta-llama/llama-3-8b-instruct:free' : 'claude-3-haiku-20240307',
+        model: DEFAULT_MODELS[mappedProvider],
       };
     }
     
     return null;
-  } catch {
+  } catch (error) {
+    console.error('[AI Config] Failed to load AI configuration:', error);
     return null;
   }
 }
 
+/**
+ * Fetch with automatic retry on 429 (Rate Limit) errors
+ * Uses exponential backoff: 2s, 4s, 8s (total ~14s, safe for Vercel 60s limit)
+ */
 async function fetchWithRetry(url: string, options: any, maxRetries = 3): Promise<Response> {
-  let attempt = 0;
-  while (attempt < maxRetries) {
-    const res = await fetch(url, options);
-    if (res.status === 429) {
-      attempt++;
-      if (attempt >= maxRetries) return res;
-      // Short backoff: 2s, 4s, 8s (Total wait ~14s) to prevent Vercel 60s timeout
-      const waitTime = Math.pow(2, attempt) * 1000;
-      console.warn(`[AI API] Rate limit hit (429). Retrying in ${waitTime}ms... (Attempt ${attempt}/${maxRetries})`);
-      await new Promise(resolve => setTimeout(resolve, waitTime));
-    } else {
+  let lastError: Error | null = null;
+  
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 45000); // 45s timeout per request
+      
+      const res = await fetch(url, { ...options, signal: controller.signal });
+      clearTimeout(timeout);
+      
+      if (res.status === 429) {
+        if (attempt >= maxRetries - 1) return res; // Last attempt, return 429
+        const waitTime = Math.pow(2, attempt + 1) * 1000; // 2s, 4s, 8s
+        console.warn(`[AI API] Rate limit (429). Retry ${attempt + 1}/${maxRetries} in ${waitTime}ms`);
+        await new Promise(resolve => setTimeout(resolve, waitTime));
+        continue;
+      }
+      
       return res;
+    } catch (error: any) {
+      lastError = error;
+      if (error.name === 'AbortError') {
+        console.error(`[AI API] Request timed out (attempt ${attempt + 1})`);
+        if (attempt >= maxRetries - 1) throw new Error('AI API request timed out after 45 seconds');
+        continue;
+      }
+      if (attempt >= maxRetries - 1) throw error;
+      // Network error, wait and retry
+      await new Promise(resolve => setTimeout(resolve, 2000));
     }
   }
-  return fetch(url, options);
+  
+  throw lastError || new Error('AI API request failed after all retries');
 }
 
 /**
- * Call AI API to generate content
+ * Parse API error response for better error messages
+ */
+async function parseErrorResponse(res: Response, providerName: string): Promise<string> {
+  try {
+    const text = await res.text();
+    try {
+      const json = JSON.parse(text);
+      const msg = json?.error?.message || json?.message || json?.error || '';
+      if (msg) return `${providerName} API error ${res.status}: ${msg}`;
+    } catch(e) {
+      // Not JSON
+    }
+    if (text.length < 200) return `${providerName} API error ${res.status}: ${text}`;
+  } catch(e) {
+    // Could not read body
+  }
+  return `${providerName} API error: ${res.status}`;
+}
+
+/**
+ * Call AI API to generate content — supports OpenAI, Gemini, Anthropic, DeepSeek, OpenRouter
  */
 export async function generateAIContent(
   config: AIConfig,
@@ -107,15 +177,27 @@ export async function generateAIContent(
   maxTokens: number = 2000
 ): Promise<string> {
   
+  // Pre-flight validation
+  if (!config.apiKey || !config.apiKey.trim()) {
+    throw new Error(`API Key खाली है। कृपया Admin Panel > Settings में ${config.provider} की API Key डालें।`);
+  }
+  
+  if (!config.provider) {
+    throw new Error('AI Provider सेट नहीं है। कृपया Admin Panel > Settings में Provider चुनें।');
+  }
+
+  const model = sanitizeModel(config.provider, config.model);
+
+  // ===================== OPENAI =====================
   if (config.provider === 'openai') {
     const res = await fetchWithRetry('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${config.apiKey}`
+        'Authorization': `Bearer ${config.apiKey.trim()}`
       },
       body: JSON.stringify({
-        model: config.model,
+        model: model,
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userPrompt }
@@ -124,17 +206,17 @@ export async function generateAIContent(
         max_tokens: maxTokens
       })
     });
-    if (!res.ok) throw new Error(`OpenAI API error: ${res.status}`);
+    if (!res.ok) throw new Error(await parseErrorResponse(res, 'OpenAI'));
     const data = await res.json();
-    return data.choices?.[0]?.message?.content || '';
+    const content = data.choices?.[0]?.message?.content || '';
+    if (!content) throw new Error('OpenAI ने खाली response दिया। कृपया दोबारा कोशिश करें।');
+    return content;
   }
   
+  // ===================== GEMINI =====================
   if (config.provider === 'gemini') {
-    // Strictly enforce gemini-1.5-flash to prevent any 404 Model Not Found errors
-    const cleanModel = 'gemini-1.5-flash';
-
     const res = await fetchWithRetry(
-      `https://generativelanguage.googleapis.com/v1beta/models/${cleanModel}:generateContent?key=${config.apiKey.trim()}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${config.apiKey.trim()}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -142,44 +224,69 @@ export async function generateAIContent(
           contents: [{
             parts: [{ text: `${systemPrompt}\n\n${userPrompt}` }]
           }],
-          generationConfig: { maxOutputTokens: maxTokens, temperature: 0.7 }
+          generationConfig: { maxOutputTokens: maxTokens, temperature: 0.7 },
+          safetySettings: [
+            { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_NONE' },
+            { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_NONE' },
+            { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_NONE' },
+            { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_NONE' },
+          ]
         })
       }
     );
-    if (!res.ok) throw new Error(`Gemini API error: ${res.status}`);
+    if (!res.ok) throw new Error(await parseErrorResponse(res, 'Gemini'));
     const data = await res.json();
-    return data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    
+    // Check for safety blocks
+    if (data.candidates?.[0]?.finishReason === 'SAFETY') {
+      console.warn('[Gemini] Content blocked by safety filters');
+      throw new Error('Gemini ने content को safety reasons से block कर दिया। कृपया दोबारा कोशिश करें।');
+    }
+    
+    const content = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    if (!content) {
+      // Check for blocked prompt
+      if (data.promptFeedback?.blockReason) {
+        throw new Error(`Gemini error: Prompt blocked (${data.promptFeedback.blockReason})`);
+      }
+      throw new Error('Gemini ने खाली response दिया। कृपया दोबारा कोशिश करें।');
+    }
+    return content;
   }
   
+  // ===================== ANTHROPIC =====================
   if (config.provider === 'anthropic') {
     const res = await fetchWithRetry('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-api-key': config.apiKey,
+        'x-api-key': config.apiKey.trim(),
         'anthropic-version': '2023-06-01'
       },
       body: JSON.stringify({
-        model: config.model,
+        model: model,
         max_tokens: maxTokens,
         system: systemPrompt,
         messages: [{ role: 'user', content: userPrompt }]
       })
     });
-    if (!res.ok) throw new Error(`Anthropic API error: ${res.status}`);
+    if (!res.ok) throw new Error(await parseErrorResponse(res, 'Anthropic'));
     const data = await res.json();
-    return data.content?.[0]?.text || '';
+    const content = data.content?.[0]?.text || '';
+    if (!content) throw new Error('Anthropic ने खाली response दिया। कृपया दोबारा कोशिश करें।');
+    return content;
   }
   
+  // ===================== DEEPSEEK =====================
   if (config.provider === 'deepseek') {
     const res = await fetchWithRetry('https://api.deepseek.com/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${config.apiKey}`
+        'Authorization': `Bearer ${config.apiKey.trim()}`
       },
       body: JSON.stringify({
-        model: config.model,
+        model: model,
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userPrompt }
@@ -188,22 +295,25 @@ export async function generateAIContent(
         max_tokens: maxTokens
       })
     });
-    if (!res.ok) throw new Error(`DeepSeek API error: ${res.status}`);
+    if (!res.ok) throw new Error(await parseErrorResponse(res, 'DeepSeek'));
     const data = await res.json();
-    return data.choices?.[0]?.message?.content || '';
+    const content = data.choices?.[0]?.message?.content || '';
+    if (!content) throw new Error('DeepSeek ने खाली response दिया। कृपया दोबारा कोशिश करें।');
+    return content;
   }
   
+  // ===================== OPENROUTER =====================
   if (config.provider === 'openrouter') {
     const res = await fetchWithRetry('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${config.apiKey}`,
-        'HTTP-Referer': 'https://antigravity.com', // Optional but recommended by OpenRouter
-        'X-Title': 'Our Blog',
+        'Authorization': `Bearer ${config.apiKey.trim()}`,
+        'HTTP-Referer': 'https://www.knowora.in',
+        'X-Title': 'Knowora Blog',
       },
       body: JSON.stringify({
-        model: config.model,
+        model: model,
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userPrompt }
@@ -212,10 +322,12 @@ export async function generateAIContent(
         max_tokens: maxTokens
       })
     });
-    if (!res.ok) throw new Error(`OpenRouter API error: ${res.status}`);
+    if (!res.ok) throw new Error(await parseErrorResponse(res, 'OpenRouter'));
     const data = await res.json();
-    return data.choices?.[0]?.message?.content || '';
+    const content = data.choices?.[0]?.message?.content || '';
+    if (!content) throw new Error('OpenRouter ने खाली response दिया। कृपया दोबारा कोशिश करें।');
+    return content;
   }
   
-  throw new Error(`Unsupported AI provider: ${config.provider}`);
+  throw new Error(`असमर्थित AI Provider: ${config.provider}। कृपया Settings में OpenAI, Gemini, Anthropic, DeepSeek, या OpenRouter चुनें।`);
 }

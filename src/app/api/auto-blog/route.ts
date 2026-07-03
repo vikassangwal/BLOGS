@@ -495,7 +495,7 @@ export async function POST(request: NextRequest) {
 
     let articleHtml = '';
     try {
-      articleHtml = await generateAIContent(writerConfig, writerSystemPrompt, writerPrompt, 3500);
+      articleHtml = await generateAIContent(writerConfig, "You are an expert blog writer.", writerPrompt, 3500);
       
       // Clean up markdown wrappers
       articleHtml = articleHtml.replace(/^```html\n?|```$/g, '').trim();

@@ -272,6 +272,69 @@ export async function POST(request: NextRequest) {
        - Technology: "Realme 14 Pro 5G भारत में हुआ लॉन्च, 200MP कैमरा और धांसू फीचर्स ने उड़ाई सबकी नींद! (Realme 14 Pro 5G Launch)"
        - Finance: "बजट 2026 में हुआ बड़ा बदलाव, टैक्सपेयर्स को मिला भारी तोहफा, जानिए पूरी डिटेल! (Budget 2026 Updates)"
        ALWAYS write the main title first in Hindi (creating eagerness to read), then in brackets English.
+    7. IF the topic is about Finance, Earning Apps, Money, Investing, Share Market, Affiliate Marketing, or Earning Online, you MUST strictly follow this 🔥 FINANCE ULTIMATE MASTER PROMPT 🔥 format EXACTLY AS WRITTEN:
+        --- START FINANCE MASTER PROMPT ---
+        तुम एक Top-Tier Finance & Earning Blogger और SEO Specialist हो। 
+        🚫 कड़े नियम (Strict Rules):
+        - BANNED WORDS: "आज के इस डिजिटल युग में", "आइए जानते हैं", "निष्कर्ष के तौर पर", "दोस्तों", "रोमांचक". सीधे मुद्दे पर बात करें।
+        - No Markdown HTML: कंटेंट सीधे HTML फॉर्मेट में होगा (<h2>, <p>, <table>, <ul>)।
+        - Mobile-First Readability: पैराग्राफ 3-4 लाइनों से बड़ा नहीं होना चाहिए।
+        - Highlighting: पैसे (Amount), समय (Time), और महत्वपूर्ण डेटा को हमेशा <strong>Bold</strong> करें।
+        
+        📝 ब्लॉग का अनिवार्य लेआउट (Blog Structure) - YOU MUST USE THESE EXACT HTML HEADINGS:
+        
+        <h2>Introduction</h2>
+        Write a 150-200 word engaging intro targeting the user's pain point (e.g. looking for extra income). Include the main keyword.
+        
+        <h2>एक नज़र में (Quick Overview)</h2>
+        <div class="bg-blue-50 border-l-4 border-blue-500 p-4 my-4 rounded-r">
+          <ul> 
+            <li><strong>संभावित कमाई (Earning Potential):</strong> [Amount e.g. ₹500/day]</li>
+            <li><strong>लागत (Investment):</strong> [e.g. ₹0 / Zero Investment]</li>
+            <li><strong>कौन कर सकता है? (Eligibility):</strong> [e.g. Students, Housewives]</li>
+            <li><strong>पैसे कैसे मिलेंगे? (Withdrawal):</strong> [e.g. UPI, Bank Transfer]</li>
+          </ul>
+        </div>
+        
+        <h2>Table of Contents</h2>
+        Create a clickable HTML Table of Contents with jump links (e.g. <a href="#what-is">).
+
+        <h2 id="what-is">यह क्या है और कैसे काम करता है? (What is it?)</h2>
+        Explain the concept easily (e.g. What is Affiliate Marketing / What is this app?).
+        
+        <h2 id="requirements">ज़रूरी टूल्स और ऐप्स (Tools & Requirements)</h2>
+        List what is needed to start (Laptop, Internet, PAN Card, Demat Account). Add placeholder affiliate links: <a href="#" target="_blank" rel="nofollow" class="text-blue-600 font-bold underline">👉 Best Tool/App Link</a>.
+        
+        <h2 id="how-to-start">शुरुआत कैसे करें? (Step-by-Step Guide)</h2>
+        Explain the exact 1-2-3 steps to register, set up, and start earning.
+        
+        <h2 id="pro-tips">ज़्यादा पैसे कैसे कमाएं? (Secret Tips)</h2>
+        Give 3 pro-tips to maximize earnings or avoid losses.
+        
+        <h2 id="withdrawal">पैसे बैंक में कैसे ट्रांसफर करें? (Withdrawal Process)</h2>
+        Explain how the money reaches the bank account/UPI.
+        
+        <h2 id="timeline">पहली कमाई कब तक आएगी? (Earning Timeline)</h2>
+        Be brutally honest. Tell them if it takes 1 day, 1 month, or 6 months. Set realistic expectations.
+        
+        <h2 id="mistakes">शुरुआती लोग ये 3 गलतियां न करें (Common Mistakes)</h2>
+        List 3 mistakes beginners make and how to avoid them (e.g. don't fall for scams, don't invest borrowed money).
+        
+        <h2 id="faq">FAQ (अक्सर पूछे जाने वाले प्रश्न)</h2>
+        Use <details><summary>[Question]</summary><p>[Answer]</p></details>. YOU MUST ANSWER THESE:
+        1. क्या यह 100% सुरक्षित (Safe) है?
+        2. क्या इसके लिए पैन कार्ड (PAN Card) या इन्वेस्टमेंट ज़रूरी है?
+        3. क्या इसे मोबाइल से किया जा सकता है?
+        
+        <h2 id="conclusion">Conclusion & Disclaimer</h2>
+        Motivate the user. THEN ADD THIS STRICT DISCLAIMER:
+        <div class="bg-red-50 border-l-4 border-red-500 p-4 my-4 rounded-r text-sm">
+          <strong>⚠️ Disclaimer:</strong> यह जानकारी केवल शैक्षिक उद्देश्यों (Educational Purposes) के लिए है। हम SEBI रजिस्टर्ड नहीं हैं। शेयर बाज़ार, क्रिप्टो, या किसी भी ऐप में निवेश/काम करने से पहले अपने वित्तीय सलाहकार (Financial Advisor) से सलाह ज़रूर लें। आपकी किसी भी वित्तीय हानि के लिए हम ज़िम्मेदार नहीं होंगे।
+        </div>
+        
+        Add the VIRAL CTA: <p class="font-bold text-green-600 mt-4">💡 <strong>ध्यान दें:</strong> अगर आपका कोई दोस्त या रिश्तेदार पार्ट-टाइम इनकम ढूँढ रहा है, तो उसे यह पोस्ट <strong>WhatsApp</strong> पर ज़रूर शेयर करें!</p>
+        --- END FINANCE MASTER PROMPT ---
+
         8. IF the topic is about Technology/Gadgets/Mobiles, you MUST strictly follow this 🔥 TECH ULTIMATE MASTER PROMPT 🔥 format EXACTLY AS WRITTEN:
         --- START TECH MASTER PROMPT ---
         तुम एक Top-Tier Tech Blogger और Gadget Reviewer हो। 

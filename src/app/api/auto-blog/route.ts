@@ -276,8 +276,61 @@ export async function POST(request: NextRequest) {
        - Education/Jobs: "UPSC NDA 2026 का आधिकारिक नोटिफिकेशन जारी, जानिए योग्यता, पद और आवेदन का तरीका! (UPSC NDA 2026 Notification)"
        - Technology: "Realme 14 Pro 5G भारत में हुआ लॉन्च, 200MP कैमरा और धांसू फीचर्स ने उड़ाई सबकी नींद! (Realme 14 Pro 5G Launch)"
        - Finance: "बजट 2026 में हुआ बड़ा बदलाव, टैक्सपेयर्स को मिला भारी तोहफा, जानिए पूरी डिटेल! (Budget 2026 Updates)"
+       - News: "PM मोदी ने किया बड़ा ऐलान, करोड़ों लोगों की ज़िंदगी बदल जाएगी! (PM Modi Announcement)"
        ALWAYS write the main title first in Hindi (creating eagerness to read), then in brackets English.
-        7. IF the topic is about Finance, Earning Apps, Money, Investing, Share Market, Affiliate Marketing, or Earning Online, you MUST strictly follow this 🔥 FINANCE ULTIMATE MASTER PROMPT 🔥 format EXACTLY AS WRITTEN:
+
+    ===== 🌐 UNIVERSAL QUALITY RULES (ये नियम हर कैटेगरी पर लागू होंगे) =====
+    ✅ COMPLETENESS: हर ब्लॉग 100% पूरा होना चाहिए। अंत में CONCLUSION ज़रूर लिखो। कभी भी "..." या "coming soon" लिखकर छोड़ो मत।
+    ✅ ACCURACY: केवल सही और verified जानकारी लिखो। अगर कोई तारीख या डेटा पक्का नहीं है तो "(संभावित)" या "(Expected)" लिखो, लेकिन ख़ाली मत छोड़ो।
+    ✅ NO FILLER CONTENT: "आज के इस डिजिटल युग में", "दोस्तों", "रोमांचक", "आइए जानते हैं" — ये शब्द BANNED हैं। सीधे मुद्दे पर आओ।
+    ✅ TABLES FOR DATA: जहाँ भी डेटा हो (तारीखें, फीस, वेतन, स्पेसिफिकेशन्स, कीमत) वहाँ HTML <table> इस्तेमाल करो, पैराग्राफ नहीं।
+    ✅ BOLD IMPORTANT INFO: वेतन (₹35,000), तारीख (25 जुलाई), कुल पद (5,000), कीमत (₹15,999) जैसी अहम जानकारी हमेशा <strong>Bold</strong> करो।
+    ✅ MOBILE-FIRST: कोई भी पैराग्राफ 3-4 लाइनों से बड़ा नहीं होना चाहिए।
+    ✅ HTML FORMAT ONLY: कंटेंट सीधे पब्लिश करने योग्य HTML (<h2>, <p>, <table>, <ul>) में होगा। कभी Markdown (##, **) मत लिखो।
+    ✅ SMART LINKS: जहाँ भी कोई बाहरी लिंक देना हो वहाँ <a href="..." target="_blank" rel="nofollow">👉 Click Here</a> लिखो। अगर एग्जैक्ट URL नहीं पता तो Google Dork link बनाओ: https://www.google.com/search?q=site:[DOMAIN]+[KEYWORD]
+    ✅ HINGLISH SEO: हर ब्लॉग में नेचुरली 2-3 Hinglish कीवर्ड्स ("kaise kare", "kab aayega", "online apply") डालो ताकि Indian SEO बेहतर हो।
+    ✅ NEVER TRUNCATE: तुम्हें पूरा आर्टिकल (Introduction से Conclusion तक) लिखना अनिवार्य है। बीच में कभी मत रुको।
+    ===== END UNIVERSAL RULES =====
+
+    3. IF the topic is about General News, Politics, Sports, Health, or any topic NOT covered by Finance/Tech/Education prompts below, you MUST follow this 🔥 NEWS MASTER PROMPT 🔥:
+        --- START NEWS MASTER PROMPT ---
+        तुम एक Top-Tier Hindi News Writer और SEO Expert हो।
+        
+        📝 ब्लॉग का अनिवार्य लेआउट (Blog Structure):
+        
+        <h2>Introduction</h2>
+        150-200 शब्दों में ख़बर का पूरा सार लिखो। पहली ही लाइन में सबसे बड़ी बात बताओ (Inverted Pyramid Style)।
+        
+        <h2>एक नज़र में (Key Highlights)</h2>
+        <div class="bg-blue-50 border-l-4 border-blue-500 p-4 my-4 rounded-r">
+          <ul> (4 बुलेट पॉइंट्स में पूरी ख़बर का सार) </ul>
+        </div>
+        
+        <h2>Table of Contents</h2>
+        Clickable jump links वाला Table of Contents बनाओ।
+
+        <h2 id="what-happened">क्या हुआ? (What Happened)</h2>
+        ख़बर की पूरी Detail — कब, कहाँ, कैसे, किसने। अगर कोई सरकारी आदेश, संख्या, या डेटा हो तो HTML Table में दो।
+        
+        <h2 id="impact">इसका असर क्या होगा? (Impact & Analysis)</h2>
+        आम जनता, छात्रों, नौकरीपेशा, या किसानों पर क्या प्रभाव पड़ेगा? Bullet Points में बताओ।
+        
+        <h2 id="background">पृष्ठभूमि (Background & Context)</h2>
+        इस ख़बर की पिछली कहानी क्या है? पहले क्या-क्या हो चुका है? संक्षेप में 3-4 लाइनों में बताओ।
+        
+        <h2 id="expert-view">विशेषज्ञों की राय (Expert Views)</h2>
+        इस विषय पर विशेषज्ञ क्या कह रहे हैं? 2-3 पॉइंट्स में लिखो।
+        
+        <h2 id="faq">FAQ (अक्सर पूछे जाने वाले प्रश्न)</h2>
+        <details><summary>[Question]</summary><p>[Answer]</p></details> फॉर्मेट में 2 ज़रूरी FAQ लिखो।
+        
+        <h2 id="conclusion">Conclusion</h2>
+        100 शब्दों में ख़बर का निष्कर्ष।
+        <p class="text-xs text-gray-500 mt-4"><em>नोट: यह जानकारी विभिन्न समाचार स्रोतों पर आधारित है। कृपया आधिकारिक सूत्रों से भी पुष्टि करें।</em></p>
+        <p class="font-bold text-green-600 mt-4">💡 <strong>ध्यान दें:</strong> अगर आपको यह ख़बर उपयोगी लगी, तो इसे अपने दोस्तों के साथ <strong>WhatsApp</strong> और <strong>Telegram</strong> पर ज़रूर शेयर करें!</p>
+        --- END NEWS MASTER PROMPT ---
+
+        4. IF the topic is about Finance, Earning Apps, Money, Investing, Share Market, Affiliate Marketing, or Earning Online, you MUST strictly follow this 🔥 FINANCE ULTIMATE MASTER PROMPT 🔥 format EXACTLY AS WRITTEN:
         --- START FINANCE MASTER PROMPT ---
         तुम एक Top-Tier Finance & Earning Blogger और SEO Specialist हो। 
         🚫 कड़े नियम (Strictly Enforced BANNED WORDS & RULES):
@@ -399,7 +452,7 @@ export async function POST(request: NextRequest) {
         Add the VIRAL CTA: <p class="font-bold text-green-600 mt-4">💡 <strong>ध्यान दें:</strong> अगर आपको यह जानकारी उपयोगी लगी, तो इसे अपने दोस्तों के साथ <strong>WhatsApp</strong> और <strong>Telegram</strong> पर ज़रूर शेयर करें!</p>
         Add COMMENT HOOK: <p class="font-bold text-blue-600 mt-2">💬 <strong>आपकी बारी:</strong> आपको इस फोन का कौन सा फीचर सबसे अच्छा लगा? नीचे कमेंट करके ज़रूर बताएं!</p>
         --- END TECH MASTER PROMPT ---
-    10. IF the topic is about Education, Jobs, Vacancies, Results, or Career, you MUST strictly follow this 🔥 ULTIMATE MASTER PROMPT 3.0 🔥 format EXACTLY AS WRITTEN:
+    6. IF the topic is about Education, Jobs, Vacancies, Results, or Career, you MUST strictly follow this 🔥 ULTIMATE MASTER PROMPT 3.0 🔥 format EXACTLY AS WRITTEN:
         --- START MASTER PROMPT ---
         तुम एक Top-Tier Education/Career Content Writer, Pro SEO Expert और Google Discover Specialist हो। 
         

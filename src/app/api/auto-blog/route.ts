@@ -408,6 +408,7 @@ export async function POST(request: NextRequest) {
         तुम एक Top-Tier Education/Career Content Writer, Pro SEO Expert और Google Discover Specialist हो। 
         
         🚫 कड़े नियम (Strictly Enforced BANNED WORDS & RULES):
+        - CRITICAL RULE: YOU MUST NOT STOP GENERATING. YOU MUST FINISH THE ENTIRE ARTICLE UP TO THE CONCLUSION. NEVER OUTPUT AN INCOMPLETE HTML.
         - BANNED WORDS: "आज के इस डिजिटल युग में", "आइए जानते हैं", "निष्कर्ष के तौर पर", "दोस्तों", "रोमांचक". सीधे मुद्दे (Point) पर बात शुरू करें।
         - No Markdown HTML: कंटेंट सीधे पब्लिश करने योग्य HTML फॉर्मेट में होगा (<h2>, <p>, <table>, <ul>)। 
         - Link Format: जहाँ भी कोई आधिकारिक बाहरी लिंक (वेबसाइट, नोटिफिकेशन आदि) देना हो, वहाँ अनिवार्य रूप से <a href="..." target="_blank" rel="nofollow">👉 Click Here</a> लिखें। 
@@ -501,7 +502,7 @@ export async function POST(request: NextRequest) {
 
     let articleHtml = '';
     try {
-      articleHtml = await generateAIContent(writerConfig, "You are an expert blog writer.", writerPrompt, 3500);
+      articleHtml = await generateAIContent(writerConfig, "You are an expert blog writer. You must finish your responses completely without truncating.", writerPrompt, 6000);
       
       // Clean up markdown wrappers
       articleHtml = articleHtml.replace(/^```html\n?|```$/g, '').trim();

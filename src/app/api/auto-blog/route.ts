@@ -502,7 +502,7 @@ export async function POST(request: NextRequest) {
 
     let articleHtml = '';
     try {
-      articleHtml = await generateAIContent(writerConfig, "You are an expert blog writer. You must finish your responses completely without truncating.", writerPrompt, 6000);
+      articleHtml = await generateAIContent(writerConfig, "You are an expert blog writer. You must finish your responses completely without truncating.", writerPrompt, 3500);
       
       // Clean up markdown wrappers
       articleHtml = articleHtml.replace(/^```html\n?|```$/g, '').trim();

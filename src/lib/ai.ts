@@ -79,14 +79,15 @@ export async function getAIConfig(): Promise<AIConfig | null> {
   }
 }
 
-async function fetchWithRetry(url: string, options: any, maxRetries = 3): Promise<Response> {
+async function fetchWithRetry(url: string, options: any, maxRetries = 5): Promise<Response> {
   let attempt = 0;
   while (attempt < maxRetries) {
     const res = await fetch(url, options);
     if (res.status === 429) {
       attempt++;
       if (attempt >= maxRetries) return res;
-      const waitTime = Math.pow(2, attempt) * 1000; // 2s, 4s, 8s
+      // Exponential backoff: 5s, 10s, 20s, 40s
+      const waitTime = Math.pow(2, attempt - 1) * 5000;
       console.warn(`[AI API] Rate limit hit (429). Retrying in ${waitTime}ms... (Attempt ${attempt}/${maxRetries})`);
       await new Promise(resolve => setTimeout(resolve, waitTime));
     } else {

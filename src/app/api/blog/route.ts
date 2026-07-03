@@ -55,30 +55,60 @@ export async function GET(request: Request) {
     const tag = searchParams.get('tag') || '';
     const status = searchParams.get('status') || '';
     const publishedOnly = searchParams.get('published') === 'true';
+    const stateFilter = searchParams.get('stateFilter') || '';
 
-    const where: any = {};
+    const where: any = { AND: [] };
+
     if (search) {
-      where.OR = [
-        { title: { contains: search, mode: 'insensitive' } },
-        { content: { contains: search, mode: 'insensitive' } }
-      ];
-    } else if (publishedOnly) {
-      // Vacancy Expiry Logic: Hide expired posts in normal feed
-      where.OR = [
-        { expiryDate: null },
-        { expiryDate: { gte: new Date() } }
-      ];
+      where.AND.push({
+        OR: [
+          { title: { contains: search, mode: 'insensitive' } },
+          { content: { contains: search, mode: 'insensitive' } }
+        ]
+      });
     }
     
-    if (status && status !== 'All') {
-      where.status = status;
+    if (stateFilter) {
+      where.AND.push({
+        OR: [
+          { title: { contains: stateFilter, mode: 'insensitive' } },
+          { content: { contains: stateFilter, mode: 'insensitive' } },
+          { title: { contains: 'UPSC', mode: 'insensitive' } },
+          { title: { contains: 'SSC', mode: 'insensitive' } },
+          { title: { contains: 'Railway', mode: 'insensitive' } },
+          { title: { contains: 'Bank', mode: 'insensitive' } },
+          { title: { contains: 'SBI', mode: 'insensitive' } },
+          { title: { contains: 'IBPS', mode: 'insensitive' } },
+          { title: { contains: 'Army', mode: 'insensitive' } },
+          { title: { contains: 'Navy', mode: 'insensitive' } },
+          { title: { contains: 'Airforce', mode: 'insensitive' } },
+          { title: { contains: 'India', mode: 'insensitive' } },
+          { title: { contains: 'Central', mode: 'insensitive' } }
+        ]
+      });
     }
+
     if (publishedOnly) {
-      where.status = 'Published';
-      where.publishedAt = { lte: new Date() };
+      where.AND.push({
+        OR: [
+          { expiryDate: null },
+          { expiryDate: { gte: new Date() } }
+        ]
+      });
+      where.AND.push({ status: 'Published' });
+      where.AND.push({ publishedAt: { lte: new Date() } });
     }
+
+    if (status && status !== 'All') {
+      where.AND.push({ status });
+    }
+
     if (tag) {
-      where.tags = { some: { tag: { name: tag } } };
+      where.AND.push({ tags: { some: { tag: { name: tag } } } });
+    }
+
+    if (where.AND.length === 0) {
+      delete where.AND;
     }
 
     const [posts, total] = await Promise.all([

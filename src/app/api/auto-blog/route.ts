@@ -430,34 +430,30 @@ export async function POST(request: NextRequest) {
         <h2>Table of Contents</h2>
         Create a clickable HTML Table of Contents with jump links (e.g. <a href="#quick-info">) linking to IDs on the <h2> tags below.
 
-        <h2 id="quick-info">Quick Information</h2>
-        Create an HTML Table (Exactly TWO columns). ONLY include rows relevant to the CURRENT stage of the event.
+        <h2 id="quick-info">Quick Information & Dates (संक्षिप्त विवरण और तिथियां)</h2>
+        Create ONE HTML Table combining key info, dates, and fees. ONLY include rows relevant to the CURRENT stage.
         | विवरण | जानकारी | (Convert to HTML Table)
         | विभाग/संस्था | ... |
         | पद/विषय | ... |
         | कुल पद (Total Posts) | ... |
         | आवेदन शुरू | [Smart Date or Exact Date] |
         | अंतिम तिथि | [Smart Date] |
-        | आधिकारिक वेबसाइट (Official Website) | <a href="..." target="_blank" rel="nofollow">👉 Click Here</a> (THIS ROW IS 100% MANDATORY) |
-        (Include Notification/Apply/Result rows ONLY if they are actively available or announced).
+        | आवेदन शुल्क (Fee) | Gen/OBC: ₹X | SC/ST: ₹Y |
+        | आधिकारिक वेबसाइट | <a href="..." target="_blank" rel="nofollow">👉 Click Here</a> (THIS ROW IS 100% MANDATORY) |
 
-        <h2 id="dates">Important Dates (महत्वपूर्ण तिथियां)</h2>
-        <h2 id="vacancies">Vacancy Details (पदों का विवरण)</h2> (Use HTML Table)
-        <h2 id="fee">Application Fee (आवेदन शुल्क)</h2> (Use HTML Table)
-        <h2 id="eligibility">Eligibility Criteria (योग्यता और आयु सीमा)</h2> (Bullets)
-        <h2 id="selection">Selection Process (चयन प्रक्रिया)</h2> (Ordered List <ol>)
-        <h2 id="pattern">Exam Pattern & Syllabus (परीक्षा पैटर्न और सिलेबस)</h2>
-        
-        <h2 id="salary">Salary & Job Profile (वेतन और कार्य विवरण)</h2>
-        Include perks and why this job is good (Top reasons to apply).
-        
+        <h2 id="details">Vacancy, Eligibility & Salary (पद, योग्यता और वेतन)</h2>
+        Explain the number of vacancies, age limit, educational qualifications, and estimated salary in 3-4 bullet points or a small table.
+
+        <h2 id="selection">Selection Process & Exam Pattern (चयन प्रक्रिया और सिलेबस)</h2>
+        Briefly list the stages (e.g. CBT, PET, Interview) and key subjects in a short ordered list or bullets.
+
         <h2 id="apply">How to Apply / Check Result (आवेदन कैसे करें / Result kaise dekhe)</h2>
-        Step-by-step process.
+        Step-by-step process in 3-4 simple points.
         
         (IF TOPIC IS RESULT OR ADMIT CARD, add a section: <h2 id="cutoff">Expected Cut-off / Safe Score</h2>)
         
         <h2 id="faq">FAQ (अक्सर पूछे जाने वाले प्रश्न)</h2>
-        Use <details><summary>[Question]</summary><p>[Answer]</p></details> format. Include popular Hinglish queries.
+        Use <details><summary>[Question]</summary><p>[Answer]</p></details> format. Provide EXACTLY 2 most important FAQs.
         
         <h2 id="conclusion">Conclusion</h2>
         Write a 100-word motivating conclusion. 

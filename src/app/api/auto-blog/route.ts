@@ -244,10 +244,18 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    const researchPrompt = `You are an expert Internet Researcher. The user wants to write a blog post about: "${targetTopic}".
+    const researchPrompt = `You are an expert Internet Researcher and SEO Analyst. The user wants to write a blog post about: "${targetTopic}".
     ${liveNewsContext}
-    Analyze this topic and provide a detailed factual summary, key points, current trends, and structural ideas for the article.
-    Ensure facts are accurate. Do not write the article, just provide the research data and an outline.`;
+    
+    You MUST provide ALL of the following:
+    1. FACTUAL SUMMARY: Key facts, dates, numbers, names related to this topic. Be specific, not vague.
+    2. SEO KEYWORDS: List 5-7 high-traffic Hindi+English keywords that Indian users would search on Google for this topic (e.g. "SSC CGL 2026 notification", "SSC CGL kab aayega", "SSC CGL eligibility").
+    3. TRENDING ANGLE: What is the most clickable, curiosity-inducing angle for this story right now?
+    4. KEY DATA POINTS: Any specific numbers (salary, vacancies, price, dates, fees) that MUST appear in the article.
+    5. OFFICIAL SOURCES: List any official website domains (e.g. ssc.nic.in, upsc.gov.in) related to this topic.
+    6. RELATED TOPICS: 2-3 related topics that readers might also search for.
+    
+    Ensure facts are accurate. Do not write the article, just provide structured research data.`;
     
     let researchData = '';
     try {
@@ -551,7 +559,23 @@ export async function POST(request: NextRequest) {
 
     let articleHtml = '';
     try {
-      articleHtml = await generateAIContent(writerConfig, "You are an expert blog writer. You must finish your responses completely without truncating.", writerPrompt, 3500);
+      const writerSystemPrompt = `You are India's #1 Hindi Blog Writer and Google SEO Expert. You have been writing viral blogs for 10+ years.
+
+YOUR 5 UNBREAKABLE RULES:
+1. NEVER stop writing mid-article. You MUST complete from Introduction to Conclusion.
+2. NEVER use filler words: "आज के इस डिजिटल युग में", "दोस्तों", "रोमांचक", "आइए जानते हैं".
+3. ALWAYS use HTML tables for data (dates, fees, salary, specs, prices). NEVER write data in paragraphs.
+4. ALWAYS bold important numbers: ₹35,000, 25 July, 5000 posts, ₹15,999.
+5. ALWAYS output clean HTML (<h2>, <p>, <table>, <ul>). NEVER output Markdown.
+
+YOUR SEO SKILLS:
+- You naturally weave 2-3 Hinglish keywords ("kaise kare", "online apply", "kab aayega") into headings and paragraphs.
+- You write in short, punchy paragraphs (max 3-4 lines each) for mobile readers.
+- You create clickable Table of Contents with jump links.
+- You use Google Dork links when exact URLs are unknown.
+- Every article ends with a WhatsApp share CTA and comment hook.`;
+
+      articleHtml = await generateAIContent(writerConfig, writerSystemPrompt, writerPrompt, 3500);
       
       // Wait 2 seconds to prevent OpenRouter Free Tier burst rate limit (429)
       await new Promise(resolve => setTimeout(resolve, 2000));
@@ -574,16 +598,23 @@ export async function POST(request: NextRequest) {
     // -------------------------------------------------------------
     // AGENT 3: THE SEO EXPERT
     // -------------------------------------------------------------
-    const seoPrompt = `You are an SEO Expert. Analyze the following article HTML and generate optimized metadata.
-    IMPORTANT TITLE RULE: The seoTitle MUST ALWAYS be formatted as "Hindi Title (English Title)". For example: "सेंसेक्स में भारी गिरावट (Sensex Crashes Heavily)". The title MUST be directly related to the news. Where Hindi is not suitable, use English.
+    const seoPrompt = `You are India's Top SEO Expert specializing in Google Discover and Hindi blogs.
+    Analyze the following article and generate optimized metadata for maximum Google ranking.
     
-    Respond ONLY with a valid JSON object in this exact format, with no markdown formatting or backticks:
+    RULES:
+    1. seoTitle: MUST be "Hindi Curiosity Title (English Keyword)" format. Under 60 chars. Include the MAIN keyword.
+    2. seoDescription: Write a compelling meta description in Hindi that makes users CLICK. Under 155 chars. Include primary keyword.
+    3. seoKeywords: List 6-8 comma-separated keywords mixing Hindi, English, and Hinglish (e.g. "SSC CGL 2026, SSC CGL notification, SSC CGL kab aayega, एसएससी सीजीएल 2026").
+    4. slug: Short, keyword-rich English-only URL slug (e.g. "ssc-cgl-2026-notification"). No random numbers.
+    5. expiryDate: ONLY for job/recruitment posts with a specific last date. Otherwise null.
+    
+    Respond ONLY with a valid JSON object, no markdown:
     {
-      "seoTitle": "Hindi Title (English Title) (under 80 chars)",
-      "seoDescription": "Compelling meta description (under 160 chars)",
-      "seoKeywords": "keyword1, keyword2, keyword3",
-      "slug": "url-friendly-english-slug",
-      "expiryDate": "YYYY-MM-DDTHH:mm:ss.sssZ (ONLY if this is a job vacancy or recruitment news with a specific last date to apply, otherwise return null)"
+      "seoTitle": "...",
+      "seoDescription": "...",
+      "seoKeywords": "...",
+      "slug": "...",
+      "expiryDate": "YYYY-MM-DDTHH:mm:ss.sssZ or null"
     }
     
     ARTICLE HTML:

@@ -252,7 +252,10 @@ export async function POST(request: NextRequest) {
     let researchData = '';
     try {
       researchData = await generateAIContent(researcherConfig, "You are a factual research assistant.", researchPrompt, 1500);
-    } catch (e) {
+      // Wait 2 seconds to prevent OpenRouter Free Tier burst rate limit (429)
+      await new Promise(resolve => setTimeout(resolve, 2000));
+    } catch (e: any) {
+      if (e.message?.includes('429')) throw new Error("API Limit (429): AI की फ्री लिमिट खत्म हो गई है या सर्वर बिज़ी है। कृपया 1 घंटे बाद कोशिश करें या अपना API Key बदलें।");
       // Fallback if researcher fails (e.g. invalid model)
       researchData = `Topic: ${targetTopic}. Provide a comprehensive overview. ${liveNewsContext}`;
     }
@@ -497,10 +500,14 @@ export async function POST(request: NextRequest) {
     try {
       articleHtml = await generateAIContent(writerConfig, "You are an expert blog writer. You must finish your responses completely without truncating.", writerPrompt, 3500);
       
+      // Wait 2 seconds to prevent OpenRouter Free Tier burst rate limit (429)
+      await new Promise(resolve => setTimeout(resolve, 2000));
+
       // Clean up markdown wrappers
       articleHtml = articleHtml.replace(/^```html\n?|```$/g, '').trim();
-    } catch(error) {
+    } catch(error: any) {
       console.error("Writer generation failed", error);
+      if (error.message?.includes('429')) throw new Error("API Limit (429): AI की फ्री लिमिट खत्म हो गई है या सर्वर बिज़ी है। कृपया 1 घंटे बाद कोशिश करें या अपना API Key बदलें।");
       throw error;
     }
 

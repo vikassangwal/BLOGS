@@ -287,7 +287,7 @@ export default function BlogPostClient({ post, ads, relatedPosts, whatsappLinks 
         </div>
 
         {/* YMYL Disclaimer */}
-        {(post.tags?.some((t: any) => (t.tag?.name || t.name) === 'Finance & Earning' || (t.tag?.name || t.name) === 'Education & Career')) && (
+        {(post.tags?.some((t: any) => (t.tag?.name || t.name) === 'Finance & Earning')) && (
           <div style={{ marginTop: '3rem', padding: '1.5rem', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.2)', borderRadius: '12px', color: '#fca5a5' }}>
             <h4 style={{ fontWeight: 700, marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <span>⚠️</span> SEBI Disclaimer & Educational Notice

@@ -79,15 +79,15 @@ export async function getAIConfig(): Promise<AIConfig | null> {
   }
 }
 
-async function fetchWithRetry(url: string, options: any, maxRetries = 5): Promise<Response> {
+async function fetchWithRetry(url: string, options: any, maxRetries = 3): Promise<Response> {
   let attempt = 0;
   while (attempt < maxRetries) {
     const res = await fetch(url, options);
     if (res.status === 429) {
       attempt++;
       if (attempt >= maxRetries) return res;
-      // Exponential backoff: 5s, 10s, 20s, 40s
-      const waitTime = Math.pow(2, attempt - 1) * 5000;
+      // Short backoff: 2s, 4s, 8s (Total wait ~14s) to prevent Vercel 60s timeout
+      const waitTime = Math.pow(2, attempt) * 1000;
       console.warn(`[AI API] Rate limit hit (429). Retrying in ${waitTime}ms... (Attempt ${attempt}/${maxRetries})`);
       await new Promise(resolve => setTimeout(resolve, waitTime));
     } else {

@@ -66,7 +66,14 @@ export default function AutoBlogAdmin() {
     setIsRunning(true);
     try {
       const res = await fetch('/api/auto-blog', { method: 'POST' });
-      const data = await res.json();
+      
+      let data;
+      try {
+        data = await res.json();
+      } catch (err) {
+        throw new Error(`Server returned invalid JSON. Status: ${res.status}`);
+      }
+
       if (data.status === 'empty') {
         alert(data.message || 'No pending keywords found');
       } else if (data.success) {

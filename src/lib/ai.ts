@@ -1,333 +1,495 @@
 import { prisma } from '@/lib/prisma';
 
-export type AIProvider = 'openai' | 'gemini' | 'anthropic' | 'deepseek' | 'openrouter';
+// ============================================================================
+// UNIVERSAL AI ENGINE — Accepts ANY provider, ANY model, ANY API key
+// ============================================================================
 
-interface AIConfig {
-  provider: AIProvider;
+export interface AIConfig {
+  provider: string;   // Any string: 'openai', 'gemini', 'anthropic', 'deepseek', 'openrouter', 'groq', 'mistral', 'together', 'fireworks', 'perplexity', 'cohere', 'custom', etc.
   apiKey: string;
   model: string;
+  baseUrl?: string;   // Custom base URL for unknown/self-hosted providers
 }
 
-// Valid model mappings for each provider
-const DEFAULT_MODELS: Record<AIProvider, string> = {
-  openai: 'gpt-4o-mini',
-  gemini: 'gemini-1.5-flash',
-  anthropic: 'claude-3-haiku-20240307',
-  deepseek: 'deepseek-chat',
-  openrouter: 'meta-llama/llama-3-8b-instruct:free',
+// ---------------------------------------------------------------------------
+// PROVIDER REGISTRY — Auto-detect provider from API key or model name
+// ---------------------------------------------------------------------------
+interface ProviderProfile {
+  name: string;
+  baseUrl: string;
+  authHeader: (key: string) => Record<string, string>;
+  buildBody: (model: string, systemPrompt: string, userPrompt: string, maxTokens: number) => any;
+  extractContent: (data: any) => string;
+  models: string[];           // Known model prefixes for auto-detection
+  keyPatterns: RegExp[];       // API key patterns for auto-detection
+}
+
+const PROVIDER_REGISTRY: Record<string, ProviderProfile> = {
+  // ========================= OPENAI =========================
+  openai: {
+    name: 'OpenAI',
+    baseUrl: 'https://api.openai.com/v1/chat/completions',
+    authHeader: (key) => ({ 'Authorization': `Bearer ${key}`, 'Content-Type': 'application/json' }),
+    buildBody: (model, sys, user, max) => ({
+      model, messages: [{ role: 'system', content: sys }, { role: 'user', content: user }],
+      temperature: 0.7, max_tokens: max
+    }),
+    extractContent: (data) => data.choices?.[0]?.message?.content || '',
+    models: ['gpt-', 'o1-', 'o3-', 'o4-', 'chatgpt-'],
+    keyPatterns: [/^sk-[a-zA-Z0-9_-]{20,}/],
+  },
+
+  // ========================= GEMINI =========================
+  gemini: {
+    name: 'Google Gemini',
+    baseUrl: 'https://generativelanguage.googleapis.com/v1beta/models/{MODEL}:generateContent?key={KEY}',
+    authHeader: () => ({ 'Content-Type': 'application/json' }),
+    buildBody: (model, sys, user, max) => ({
+      contents: [{ parts: [{ text: `${sys}\n\n${user}` }] }],
+      generationConfig: { maxOutputTokens: max, temperature: 0.7 },
+      safetySettings: [
+        { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_NONE' },
+        { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_NONE' },
+        { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_NONE' },
+        { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_NONE' },
+      ]
+    }),
+    extractContent: (data) => {
+      if (data.candidates?.[0]?.finishReason === 'SAFETY') {
+        throw new Error('Gemini: Content blocked by safety filters.');
+      }
+      return data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    },
+    models: ['gemini-'],
+    keyPatterns: [/^AIza[a-zA-Z0-9_-]{30,}/],
+  },
+
+  // ========================= ANTHROPIC =========================
+  anthropic: {
+    name: 'Anthropic Claude',
+    baseUrl: 'https://api.anthropic.com/v1/messages',
+    authHeader: (key) => ({
+      'Content-Type': 'application/json',
+      'x-api-key': key,
+      'anthropic-version': '2023-06-01'
+    }),
+    buildBody: (model, sys, user, max) => ({
+      model, max_tokens: max, system: sys,
+      messages: [{ role: 'user', content: user }]
+    }),
+    extractContent: (data) => data.content?.[0]?.text || '',
+    models: ['claude-'],
+    keyPatterns: [/^sk-ant-/],
+  },
+
+  // ========================= DEEPSEEK =========================
+  deepseek: {
+    name: 'DeepSeek',
+    baseUrl: 'https://api.deepseek.com/chat/completions',
+    authHeader: (key) => ({ 'Authorization': `Bearer ${key}`, 'Content-Type': 'application/json' }),
+    buildBody: (model, sys, user, max) => ({
+      model, messages: [{ role: 'system', content: sys }, { role: 'user', content: user }],
+      temperature: 0.7, max_tokens: max
+    }),
+    extractContent: (data) => data.choices?.[0]?.message?.content || '',
+    models: ['deepseek-'],
+    keyPatterns: [/^sk-[a-f0-9]{32,}/],
+  },
+
+  // ========================= OPENROUTER =========================
+  openrouter: {
+    name: 'OpenRouter',
+    baseUrl: 'https://openrouter.ai/api/v1/chat/completions',
+    authHeader: (key) => ({
+      'Authorization': `Bearer ${key}`, 'Content-Type': 'application/json',
+      'HTTP-Referer': 'https://www.knowora.in', 'X-Title': 'Knowora Blog'
+    }),
+    buildBody: (model, sys, user, max) => ({
+      model, messages: [{ role: 'system', content: sys }, { role: 'user', content: user }],
+      temperature: 0.7, max_tokens: max
+    }),
+    extractContent: (data) => data.choices?.[0]?.message?.content || '',
+    models: [], // OpenRouter uses external model names like 'google/gemini-2.5-flash'
+    keyPatterns: [/^sk-or-/],
+  },
+
+  // ========================= GROQ =========================
+  groq: {
+    name: 'Groq',
+    baseUrl: 'https://api.groq.com/openai/v1/chat/completions',
+    authHeader: (key) => ({ 'Authorization': `Bearer ${key}`, 'Content-Type': 'application/json' }),
+    buildBody: (model, sys, user, max) => ({
+      model, messages: [{ role: 'system', content: sys }, { role: 'user', content: user }],
+      temperature: 0.7, max_tokens: max
+    }),
+    extractContent: (data) => data.choices?.[0]?.message?.content || '',
+    models: ['llama-', 'llama3-', 'mixtral-', 'gemma-', 'gemma2-'],
+    keyPatterns: [/^gsk_/],
+  },
+
+  // ========================= MISTRAL =========================
+  mistral: {
+    name: 'Mistral AI',
+    baseUrl: 'https://api.mistral.ai/v1/chat/completions',
+    authHeader: (key) => ({ 'Authorization': `Bearer ${key}`, 'Content-Type': 'application/json' }),
+    buildBody: (model, sys, user, max) => ({
+      model, messages: [{ role: 'system', content: sys }, { role: 'user', content: user }],
+      temperature: 0.7, max_tokens: max
+    }),
+    extractContent: (data) => data.choices?.[0]?.message?.content || '',
+    models: ['mistral-', 'mixtral-', 'codestral-', 'open-mistral-', 'pixtral-'],
+    keyPatterns: [/^[a-zA-Z0-9]{32}$/],
+  },
+
+  // ========================= TOGETHER AI =========================
+  together: {
+    name: 'Together AI',
+    baseUrl: 'https://api.together.xyz/v1/chat/completions',
+    authHeader: (key) => ({ 'Authorization': `Bearer ${key}`, 'Content-Type': 'application/json' }),
+    buildBody: (model, sys, user, max) => ({
+      model, messages: [{ role: 'system', content: sys }, { role: 'user', content: user }],
+      temperature: 0.7, max_tokens: max
+    }),
+    extractContent: (data) => data.choices?.[0]?.message?.content || '',
+    models: ['meta-llama/', 'mistralai/', 'togethercomputer/', 'Qwen/'],
+    keyPatterns: [/^[a-f0-9]{64}$/],
+  },
+
+  // ========================= FIREWORKS AI =========================
+  fireworks: {
+    name: 'Fireworks AI',
+    baseUrl: 'https://api.fireworks.ai/inference/v1/chat/completions',
+    authHeader: (key) => ({ 'Authorization': `Bearer ${key}`, 'Content-Type': 'application/json' }),
+    buildBody: (model, sys, user, max) => ({
+      model, messages: [{ role: 'system', content: sys }, { role: 'user', content: user }],
+      temperature: 0.7, max_tokens: max
+    }),
+    extractContent: (data) => data.choices?.[0]?.message?.content || '',
+    models: ['accounts/fireworks/'],
+    keyPatterns: [/^fw_/],
+  },
+
+  // ========================= PERPLEXITY =========================
+  perplexity: {
+    name: 'Perplexity',
+    baseUrl: 'https://api.perplexity.ai/chat/completions',
+    authHeader: (key) => ({ 'Authorization': `Bearer ${key}`, 'Content-Type': 'application/json' }),
+    buildBody: (model, sys, user, max) => ({
+      model, messages: [{ role: 'system', content: sys }, { role: 'user', content: user }],
+      temperature: 0.7, max_tokens: max
+    }),
+    extractContent: (data) => data.choices?.[0]?.message?.content || '',
+    models: ['sonar-', 'llama-3.1-sonar-'],
+    keyPatterns: [/^pplx-/],
+  },
+
+  // ========================= COHERE =========================
+  cohere: {
+    name: 'Cohere',
+    baseUrl: 'https://api.cohere.com/v2/chat',
+    authHeader: (key) => ({ 'Authorization': `Bearer ${key}`, 'Content-Type': 'application/json' }),
+    buildBody: (model, sys, user, max) => ({
+      model, messages: [{ role: 'system', content: sys }, { role: 'user', content: user }],
+      temperature: 0.7, max_tokens: max
+    }),
+    extractContent: (data) => data.message?.content?.[0]?.text || data.text || '',
+    models: ['command-'],
+    keyPatterns: [/^[a-zA-Z0-9]{40}$/],
+  },
+
+  // ========================= XAI (GROK) =========================
+  xai: {
+    name: 'xAI Grok',
+    baseUrl: 'https://api.x.ai/v1/chat/completions',
+    authHeader: (key) => ({ 'Authorization': `Bearer ${key}`, 'Content-Type': 'application/json' }),
+    buildBody: (model, sys, user, max) => ({
+      model, messages: [{ role: 'system', content: sys }, { role: 'user', content: user }],
+      temperature: 0.7, max_tokens: max
+    }),
+    extractContent: (data) => data.choices?.[0]?.message?.content || '',
+    models: ['grok-'],
+    keyPatterns: [/^xai-/],
+  },
 };
 
-/**
- * Validate and sanitize model name for a given provider
- */
-function sanitizeModel(provider: AIProvider, model: string): string {
-  if (!model || !model.trim()) return DEFAULT_MODELS[provider];
-  
-  const clean = model.toLowerCase().trim();
-  
-  if (provider === 'gemini') {
-    // Only allow known working Gemini models
-    if (clean.includes('gemini-2.0-flash')) return 'gemini-2.0-flash';
-    if (clean.includes('gemini-1.5-pro')) return 'gemini-1.5-pro';
-    if (clean.includes('gemini-1.5-flash')) return 'gemini-1.5-flash';
-    // Everything else (2.5, invalid names) → safe fallback
-    return 'gemini-1.5-flash';
+// ---------------------------------------------------------------------------
+// AUTO-DETECT: Guess provider from API key pattern or model name
+// ---------------------------------------------------------------------------
+function autoDetectProvider(apiKey: string, model: string): string {
+  const key = apiKey.trim();
+  const mdl = model.toLowerCase().trim();
+
+  // Step 1: Match by API key pattern (most reliable)
+  for (const [providerName, profile] of Object.entries(PROVIDER_REGISTRY)) {
+    for (const pattern of profile.keyPatterns) {
+      if (pattern.test(key)) return providerName;
+    }
   }
-  
-  return model.trim();
+
+  // Step 2: Match by model name prefix
+  for (const [providerName, profile] of Object.entries(PROVIDER_REGISTRY)) {
+    for (const prefix of profile.models) {
+      if (mdl.startsWith(prefix.toLowerCase())) return providerName;
+    }
+  }
+
+  // Step 3: If model contains '/' it's likely OpenRouter format
+  if (mdl.includes('/')) return 'openrouter';
+
+  // Step 4: Default fallback
+  return 'openai';
 }
 
-/**
- * Validate API key format (basic sanity check)
- */
-function isValidApiKey(key: string): boolean {
-  if (!key || !key.trim()) return false;
-  if (key.trim().length < 10) return false;
-  if (key.includes(' ') && !key.startsWith('sk-')) return false;
-  return true;
+// ---------------------------------------------------------------------------
+// OpenAI-COMPATIBLE FALLBACK: For any unknown provider with a custom base URL
+// Most AI APIs follow the OpenAI chat/completions format
+// ---------------------------------------------------------------------------
+function getOpenAICompatibleProfile(baseUrl: string): ProviderProfile {
+  return {
+    name: 'Custom AI',
+    baseUrl: baseUrl.endsWith('/chat/completions') ? baseUrl : `${baseUrl.replace(/\/$/, '')}/chat/completions`,
+    authHeader: (key) => ({ 'Authorization': `Bearer ${key}`, 'Content-Type': 'application/json' }),
+    buildBody: (model, sys, user, max) => ({
+      model, messages: [{ role: 'system', content: sys }, { role: 'user', content: user }],
+      temperature: 0.7, max_tokens: max
+    }),
+    extractContent: (data) => data.choices?.[0]?.message?.content || data.content?.[0]?.text || '',
+    models: [],
+    keyPatterns: [],
+  };
 }
 
-/**
- * Get AI configuration from SiteSettings or ApiKey table
- */
+// ---------------------------------------------------------------------------
+// GET AI CONFIG from database
+// ---------------------------------------------------------------------------
 export async function getAIConfig(): Promise<AIConfig | null> {
   try {
-    // First try SiteSettings
     const settings = await prisma.siteSettings.findUnique({ where: { id: 'default' } });
     if (settings?.aiApiKey) {
-      const provider = (settings.aiProvider as AIProvider) || 'openai';
+      const provider = settings.aiProvider || 'openai';
       let apiKeyToUse = settings.aiApiKey.trim();
 
       // Handle JSON-encoded multi-provider keys
       try {
         if (apiKeyToUse.startsWith('{')) {
           const parsedKeys = JSON.parse(apiKeyToUse);
-          apiKeyToUse = parsedKeys[provider] || parsedKeys['openai'] || '';
+          apiKeyToUse = parsedKeys[provider] || parsedKeys['openai'] || Object.values(parsedKeys).find((v: any) => v && String(v).length > 10) as string || '';
         }
-      } catch(e) {
-        // If JSON parse fails, use the raw key as-is
-      }
-      
-      const model = sanitizeModel(provider, settings.aiModel || '');
+      } catch (e) {}
 
-      if (isValidApiKey(apiKeyToUse)) {
-        return { provider, apiKey: apiKeyToUse.trim(), model };
+      if (apiKeyToUse && apiKeyToUse.length >= 10) {
+        return { provider, apiKey: apiKeyToUse.trim(), model: settings.aiModel || '' };
       }
     }
-    
+
     // Fallback to ApiKey table
     const apiKey = await prisma.apiKey.findFirst({
-      where: { 
-        provider: { in: ['openai', 'google_ai', 'anthropic', 'deepseek', 'openrouter'] },
-        isActive: true 
-      },
+      where: { isActive: true },
       orderBy: { createdAt: 'desc' }
     });
-    
-    if (apiKey && isValidApiKey(apiKey.apiKey)) {
-      const providerMap: Record<string, AIProvider> = {
-        'openai': 'openai',
-        'google_ai': 'gemini',
-        'anthropic': 'anthropic',
-        'deepseek': 'deepseek',
-        'openrouter': 'openrouter'
-      };
-      const mappedProvider = providerMap[apiKey.provider] || 'openai';
+
+    if (apiKey && apiKey.apiKey?.length >= 10) {
+      const providerMap: Record<string, string> = { 'google_ai': 'gemini' };
       return {
-        provider: mappedProvider,
+        provider: providerMap[apiKey.provider] || apiKey.provider,
         apiKey: apiKey.apiKey.trim(),
-        model: DEFAULT_MODELS[mappedProvider],
+        model: '',
       };
     }
-    
+
     return null;
   } catch (error) {
-    console.error('[AI Config] Failed to load AI configuration:', error);
+    console.error('[AI Config] Failed to load:', error);
     return null;
   }
 }
 
-/**
- * Fetch with automatic retry on 429 (Rate Limit) errors
- * Uses exponential backoff: 2s, 4s, 8s (total ~14s, safe for Vercel 60s limit)
- */
+// ---------------------------------------------------------------------------
+// FETCH WITH RETRY — Exponential backoff for rate limits
+// ---------------------------------------------------------------------------
 async function fetchWithRetry(url: string, options: any, maxRetries = 3): Promise<Response> {
   let lastError: Error | null = null;
-  
+
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
       const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 45000); // 45s timeout per request
-      
+      const timeout = setTimeout(() => controller.abort(), 45000);
+
       const res = await fetch(url, { ...options, signal: controller.signal });
       clearTimeout(timeout);
-      
+
       if (res.status === 429) {
-        if (attempt >= maxRetries - 1) return res; // Last attempt, return 429
-        const waitTime = Math.pow(2, attempt + 1) * 1000; // 2s, 4s, 8s
-        console.warn(`[AI API] Rate limit (429). Retry ${attempt + 1}/${maxRetries} in ${waitTime}ms`);
-        await new Promise(resolve => setTimeout(resolve, waitTime));
+        if (attempt >= maxRetries - 1) return res;
+        const waitTime = Math.pow(2, attempt + 1) * 1000;
+        console.warn(`[AI] Rate limit (429). Retry ${attempt + 1}/${maxRetries} in ${waitTime}ms`);
+        await new Promise(r => setTimeout(r, waitTime));
         continue;
       }
-      
       return res;
     } catch (error: any) {
       lastError = error;
       if (error.name === 'AbortError') {
-        console.error(`[AI API] Request timed out (attempt ${attempt + 1})`);
-        if (attempt >= maxRetries - 1) throw new Error('AI API request timed out after 45 seconds');
+        if (attempt >= maxRetries - 1) throw new Error('AI API request timed out (45s)');
         continue;
       }
       if (attempt >= maxRetries - 1) throw error;
-      // Network error, wait and retry
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise(r => setTimeout(r, 2000));
     }
   }
-  
-  throw lastError || new Error('AI API request failed after all retries');
+  throw lastError || new Error('AI API failed after retries');
 }
 
-/**
- * Parse API error response for better error messages
- */
+// ---------------------------------------------------------------------------
+// PARSE ERROR RESPONSE — Extract meaningful error messages
+// ---------------------------------------------------------------------------
 async function parseErrorResponse(res: Response, providerName: string): Promise<string> {
   try {
     const text = await res.text();
     try {
       const json = JSON.parse(text);
-      const msg = json?.error?.message || json?.message || json?.error || '';
-      if (msg) return `${providerName} API error ${res.status}: ${msg}`;
-    } catch(e) {
-      // Not JSON
-    }
-    if (text.length < 200) return `${providerName} API error ${res.status}: ${text}`;
-  } catch(e) {
-    // Could not read body
-  }
+      const msg = json?.error?.message || json?.message || json?.error || json?.detail || '';
+      if (msg) return `${providerName} API error ${res.status}: ${typeof msg === 'string' ? msg : JSON.stringify(msg)}`;
+    } catch (e) {}
+    if (text.length < 300) return `${providerName} API error ${res.status}: ${text}`;
+  } catch (e) {}
   return `${providerName} API error: ${res.status}`;
 }
 
-/**
- * Call AI API to generate content — supports OpenAI, Gemini, Anthropic, DeepSeek, OpenRouter
- */
+// ---------------------------------------------------------------------------
+// MAIN: Generate AI Content — Universal for ALL providers
+// ---------------------------------------------------------------------------
 export async function generateAIContent(
   config: AIConfig,
   systemPrompt: string,
   userPrompt: string,
   maxTokens: number = 2000
 ): Promise<string> {
-  
+
   // Pre-flight validation
-  if (!config.apiKey || !config.apiKey.trim()) {
-    throw new Error(`API Key खाली है। कृपया Admin Panel > Settings में ${config.provider} की API Key डालें।`);
-  }
-  
-  if (!config.provider) {
-    throw new Error('AI Provider सेट नहीं है। कृपया Admin Panel > Settings में Provider चुनें।');
+  if (!config.apiKey?.trim()) {
+    throw new Error(`API Key खाली है। कृपया Admin Panel > Settings में API Key डालें।`);
   }
 
-  const model = sanitizeModel(config.provider, config.model);
+  // Resolve provider: explicit name or auto-detect from key/model
+  let providerName = config.provider?.toLowerCase().trim() || autoDetectProvider(config.apiKey, config.model);
 
-  // ===================== OPENAI =====================
-  if (config.provider === 'openai') {
-    const res = await fetchWithRetry('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${config.apiKey.trim()}`
-      },
-      body: JSON.stringify({
-        model: model,
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: userPrompt }
-        ],
-        temperature: 0.7,
-        max_tokens: maxTokens
-      })
-    });
-    if (!res.ok) throw new Error(await parseErrorResponse(res, 'OpenAI'));
-    const data = await res.json();
-    const content = data.choices?.[0]?.message?.content || '';
-    if (!content) throw new Error('OpenAI ने खाली response दिया। कृपया दोबारा कोशिश करें।');
-    return content;
-  }
-  
-  // ===================== GEMINI =====================
-  if (config.provider === 'gemini') {
-    const res = await fetchWithRetry(
-      `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${config.apiKey.trim()}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{
-            parts: [{ text: `${systemPrompt}\n\n${userPrompt}` }]
-          }],
-          generationConfig: { maxOutputTokens: maxTokens, temperature: 0.7 },
-          safetySettings: [
-            { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_NONE' },
-            { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_NONE' },
-            { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_NONE' },
-            { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_NONE' },
-          ]
-        })
+  // Get provider profile (or use OpenAI-compatible fallback)
+  let profile = PROVIDER_REGISTRY[providerName];
+
+  if (!profile) {
+    // Unknown provider → try as OpenAI-compatible with custom base URL
+    if (config.baseUrl) {
+      profile = getOpenAICompatibleProfile(config.baseUrl);
+      profile.name = providerName || 'Custom AI';
+    } else {
+      // Auto-detect from key
+      const detected = autoDetectProvider(config.apiKey, config.model);
+      profile = PROVIDER_REGISTRY[detected];
+      if (!profile) {
+        // Ultimate fallback: treat as OpenAI-compatible
+        profile = getOpenAICompatibleProfile('https://api.openai.com/v1/chat/completions');
+        profile.name = 'Unknown Provider';
       }
-    );
-    if (!res.ok) throw new Error(await parseErrorResponse(res, 'Gemini'));
-    const data = await res.json();
-    
-    // Check for safety blocks
-    if (data.candidates?.[0]?.finishReason === 'SAFETY') {
-      console.warn('[Gemini] Content blocked by safety filters');
-      throw new Error('Gemini ने content को safety reasons से block कर दिया। कृपया दोबारा कोशिश करें।');
+      providerName = detected;
     }
-    
-    const content = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-    if (!content) {
-      // Check for blocked prompt
-      if (data.promptFeedback?.blockReason) {
-        throw new Error(`Gemini error: Prompt blocked (${data.promptFeedback.blockReason})`);
-      }
-      throw new Error('Gemini ने खाली response दिया। कृपया दोबारा कोशिश करें।');
+  }
+
+  // Default model if not specified
+  const model = config.model?.trim() || getDefaultModel(providerName);
+
+  // Build request URL
+  let url = profile.baseUrl;
+  if (providerName === 'gemini') {
+    // Gemini uses URL-based auth and model name in URL
+    const safeModel = sanitizeGeminiModel(model);
+    url = url.replace('{MODEL}', safeModel).replace('{KEY}', config.apiKey.trim());
+  }
+
+  // Build request
+  const headers = profile.authHeader(config.apiKey.trim());
+  const body = profile.buildBody(model, systemPrompt, userPrompt, maxTokens);
+
+  // Execute with retry
+  const res = await fetchWithRetry(url, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify(body)
+  });
+
+  if (!res.ok) {
+    throw new Error(await parseErrorResponse(res, profile.name));
+  }
+
+  const data = await res.json();
+  const content = profile.extractContent(data);
+
+  if (!content) {
+    // Special check for Gemini prompt block
+    if (providerName === 'gemini' && data.promptFeedback?.blockReason) {
+      throw new Error(`Gemini: Prompt blocked (${data.promptFeedback.blockReason})`);
     }
-    return content;
+    throw new Error(`${profile.name} ने खाली response दिया। कृपया दोबारा कोशिश करें।`);
   }
-  
-  // ===================== ANTHROPIC =====================
-  if (config.provider === 'anthropic') {
-    const res = await fetchWithRetry('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': config.apiKey.trim(),
-        'anthropic-version': '2023-06-01'
-      },
-      body: JSON.stringify({
-        model: model,
-        max_tokens: maxTokens,
-        system: systemPrompt,
-        messages: [{ role: 'user', content: userPrompt }]
-      })
-    });
-    if (!res.ok) throw new Error(await parseErrorResponse(res, 'Anthropic'));
-    const data = await res.json();
-    const content = data.content?.[0]?.text || '';
-    if (!content) throw new Error('Anthropic ने खाली response दिया। कृपया दोबारा कोशिश करें।');
-    return content;
+
+  return content;
+}
+
+// ---------------------------------------------------------------------------
+// HELPERS
+// ---------------------------------------------------------------------------
+function getDefaultModel(provider: string): string {
+  const defaults: Record<string, string> = {
+    openai: 'gpt-4o-mini',
+    gemini: 'gemini-2.0-flash',
+    anthropic: 'claude-sonnet-4-20250514',
+    deepseek: 'deepseek-chat',
+    openrouter: 'google/gemini-2.0-flash-exp:free',
+    groq: 'llama-3.3-70b-versatile',
+    mistral: 'mistral-small-latest',
+    together: 'meta-llama/Llama-3-70b-chat-hf',
+    fireworks: 'accounts/fireworks/models/llama-v3p1-70b-instruct',
+    perplexity: 'sonar',
+    cohere: 'command-r-plus',
+    xai: 'grok-3-mini',
+  };
+  return defaults[provider] || 'gpt-4o-mini';
+}
+
+function sanitizeGeminiModel(model: string): string {
+  const clean = model.toLowerCase().trim();
+  if (clean.includes('2.0-flash') || clean.includes('2.0-flash-lite')) return 'gemini-2.0-flash';
+  if (clean.includes('1.5-pro')) return 'gemini-1.5-pro';
+  if (clean.includes('1.5-flash')) return 'gemini-1.5-flash';
+  if (clean.includes('2.5-flash')) return 'gemini-2.5-flash';
+  if (clean.includes('2.5-pro')) return 'gemini-2.5-pro';
+  if (clean.startsWith('gemini-')) return model.trim(); // Let user try any gemini- model
+  return 'gemini-2.0-flash'; // Safe default
+}
+
+// ---------------------------------------------------------------------------
+// UTILITY: Get list of all supported providers (for Settings UI dropdown)
+// ---------------------------------------------------------------------------
+export function getSupportedProviders(): { id: string; name: string; defaultModel: string }[] {
+  return Object.entries(PROVIDER_REGISTRY).map(([id, profile]) => ({
+    id,
+    name: profile.name,
+    defaultModel: getDefaultModel(id),
+  }));
+}
+
+// ---------------------------------------------------------------------------
+// UTILITY: Test if an API key works for a given provider
+// ---------------------------------------------------------------------------
+export async function testAPIKey(provider: string, apiKey: string, model?: string): Promise<{ success: boolean; message: string; provider: string }> {
+  try {
+    const config: AIConfig = {
+      provider,
+      apiKey,
+      model: model || getDefaultModel(provider),
+    };
+    const result = await generateAIContent(config, 'You are a test.', 'Say "API working" in exactly 2 words.', 20);
+    return { success: true, message: `✅ ${provider} API working! Response: "${result.substring(0, 50)}"`, provider };
+  } catch (error: any) {
+    return { success: false, message: `❌ ${error.message}`, provider };
   }
-  
-  // ===================== DEEPSEEK =====================
-  if (config.provider === 'deepseek') {
-    const res = await fetchWithRetry('https://api.deepseek.com/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${config.apiKey.trim()}`
-      },
-      body: JSON.stringify({
-        model: model,
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: userPrompt }
-        ],
-        temperature: 0.7,
-        max_tokens: maxTokens
-      })
-    });
-    if (!res.ok) throw new Error(await parseErrorResponse(res, 'DeepSeek'));
-    const data = await res.json();
-    const content = data.choices?.[0]?.message?.content || '';
-    if (!content) throw new Error('DeepSeek ने खाली response दिया। कृपया दोबारा कोशिश करें।');
-    return content;
-  }
-  
-  // ===================== OPENROUTER =====================
-  if (config.provider === 'openrouter') {
-    const res = await fetchWithRetry('https://openrouter.ai/api/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${config.apiKey.trim()}`,
-        'HTTP-Referer': 'https://www.knowora.in',
-        'X-Title': 'Knowora Blog',
-      },
-      body: JSON.stringify({
-        model: model,
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: userPrompt }
-        ],
-        temperature: 0.7,
-        max_tokens: maxTokens
-      })
-    });
-    if (!res.ok) throw new Error(await parseErrorResponse(res, 'OpenRouter'));
-    const data = await res.json();
-    const content = data.choices?.[0]?.message?.content || '';
-    if (!content) throw new Error('OpenRouter ने खाली response दिया। कृपया दोबारा कोशिश करें।');
-    return content;
-  }
-  
-  throw new Error(`असमर्थित AI Provider: ${config.provider}। कृपया Settings में OpenAI, Gemini, Anthropic, DeepSeek, या OpenRouter चुनें।`);
 }

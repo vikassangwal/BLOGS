@@ -105,34 +105,25 @@ export async function POST(request: NextRequest) {
 
     function buildAgentConfig(providerKey: string, modelKey: string, fallbackProvider: string, fallbackModel: string) {
       const provider = savedKeys[providerKey] || fallbackProvider;
-      let model = (savedKeys[modelKey] || fallbackModel).trim();
+      const model = (savedKeys[modelKey] || fallbackModel).trim();
       
-      // Sanitize Gemini model names to prevent 404 errors
-      if (provider === 'gemini') {
-        const cleanModel = model.toLowerCase();
-        if (cleanModel.includes('2.0-flash')) model = 'gemini-2.0-flash';
-        else if (cleanModel.includes('1.5-pro')) model = 'gemini-1.5-pro';
-        else if (cleanModel.includes('1.5-flash')) model = 'gemini-1.5-flash';
-        else model = 'gemini-1.5-flash'; // Safe fallback for any invalid name
+      // Universal API key resolution: try provider-specific key → raw key → any available key
+      let apiKey = savedKeys[provider] || '';
+      
+      if (!apiKey && siteSettings?.aiApiKey && !siteSettings.aiApiKey.startsWith('{')) {
+        apiKey = siteSettings.aiApiKey;
       }
       
-      // Resolve API key: try provider-specific key first, then fallback
-      let apiKey = '';
-      if (provider === 'openrouter') apiKey = savedKeys.openrouter || '';
-      else if (provider === 'openai') apiKey = savedKeys.openai || '';
-      else if (provider === 'gemini') apiKey = savedKeys.gemini || '';
-      else if (provider === 'anthropic') apiKey = savedKeys.anthropic || '';
-      else if (provider === 'deepseek') apiKey = savedKeys.deepseek || '';
-
-      // Fallback: use raw aiApiKey from SiteSettings if no provider-specific key
-      if (!apiKey && siteSettings?.aiApiKey && !siteSettings.aiApiKey.startsWith('{')) apiKey = siteSettings.aiApiKey;
-      
-      // Last resort fallback: try ANY available key
       if (!apiKey) {
-        apiKey = savedKeys.gemini || savedKeys.openrouter || savedKeys.openai || savedKeys.deepseek || savedKeys.anthropic || '';
+        // Try ALL saved keys — pick the first available one
+        const allKeyNames = Object.keys(savedKeys).filter(k => 
+          !k.includes('Provider') && !k.includes('Model') && !k.includes('Token') && !k.includes('Id') &&
+          savedKeys[k] && savedKeys[k].length >= 10
+        );
+        if (allKeyNames.length > 0) apiKey = savedKeys[allKeyNames[0]];
       }
       
-      return { provider: provider as any, apiKey: apiKey.trim(), model };
+      return { provider: provider as any, apiKey: (apiKey || '').trim(), model };
     }
 
     // 2. FETCH KEYWORD

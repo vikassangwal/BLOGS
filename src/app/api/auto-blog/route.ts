@@ -127,11 +127,13 @@ export async function POST(request: NextRequest) {
       // AI TOPIC GENERATOR (Triggered when queue is empty)
       // -------------------------------------------------------------
 
+      const currentDate = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
       const topicPrompt = `You are a Trending News & Job Alert researcher for India. 
-      The user needs to auto-generate blogs today. 
+      TODAY'S DATE IS: ${currentDate}.
+      You must ONLY provide topics that are highly relevant, trending, or upcoming around THIS SPECIFIC DATE (${currentDate}). Do NOT provide old news from previous years.
       Provide exactly 45 highly specific, real, and currently trending topics in India.
       Include 30 Government Jobs, Exam Notifications, Admit Cards, or Exam Results (e.g., 'SSC CGL 2026 Notification', 'Bihar Police Constable Result', 'UPSC NDA 2026').
-      Include 10 Technology trends (e.g., 'Samsung S24 Ultra Launch', 'Latest AI tools 2024').
+      Include 10 Technology trends (e.g., 'Samsung S24 Ultra Launch', 'Latest AI tools 2026').
       Include 5 Finance updates (e.g., 'Budget 2026 Highlights', 'Stock Market Sensex crash').
       Ensure the topics are highly specific (NOT generic like 'Education news in Bihar').
       Respond ONLY with a valid JSON array of strings. No markdown, no backticks.

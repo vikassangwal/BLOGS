@@ -431,12 +431,11 @@ export async function POST(request: NextRequest) {
         Create a clickable HTML Table of Contents with jump links (e.g. <a href="#quick-info">) linking to IDs on the <h2> tags below.
 
         <h2 id="quick-info">Quick Information (संक्षिप्त विवरण)</h2>
-        Create ONE HTML Table combining department name, post name, total posts, and the Official Website link.
+        Create ONE HTML Table combining department name, post name, and total posts.
         | विवरण | जानकारी | (Convert to HTML Table)
         | विभाग/संस्था | ... |
         | पद/विषय | ... |
         | कुल पद (Total Posts) | ... |
-        | आधिकारिक वेबसाइट | <a href="..." target="_blank" rel="nofollow">👉 Click Here</a> (THIS ROW IS 100% MANDATORY) |
 
         <h2 id="dates">Important Dates (महत्वपूर्ण तिथियां)</h2>
         Create an HTML Table for dates. DO NOT WRITE PARAGRAPHS.
@@ -446,15 +445,19 @@ export async function POST(request: NextRequest) {
         Create an HTML Table for fees. DO NOT WRITE PARAGRAPHS.
         Example Rows: Gen/OBC Fee, SC/ST Fee, Payment Mode.
 
-        <h2 id="details">Vacancy & Eligibility (पदों का विवरण और योग्यता)</h2>
+        <h2 id="details">Vacancy, Age Limit & Salary (पद, आयु सीमा और वेतन)</h2>
         Create an HTML Table for this section. DO NOT WRITE PARAGRAPHS.
-        Example Rows: Post Name, Number of Vacancies, Age Limit, Educational Qualification.
+        Example Rows: Post Name, Number of Vacancies, Age Limit (आयु सीमा), Educational Qualification, Salary (वेतन).
 
         <h2 id="selection">Selection Process & Exam Pattern (चयन प्रक्रिया और सिलेबस)</h2>
-        Create an HTML Table for this section.
+        Create an HTML Table for this section. DO NOT WRITE PARAGRAPHS.
         Example Rows: Stage 1 (e.g. CBT Exam), Stage 2 (PET/PST), Stage 3 (Interview/DV), Negative Marking (Yes/No).
 
-        <h2 id="apply">How to Apply / Check Result (आवेदन कैसे करें / Result kaise dekhe)</h2>
+        <h2 id="links">Important Links (महत्वपूर्ण लिंक)</h2>
+        Create an HTML Table for ALL important links. DO NOT WRITE PARAGRAPHS.
+        Example Rows: Official Website Link, Apply Online Link, Download Notification Link. (Use <a href="..." target="_blank" rel="nofollow">👉 Click Here</a> for all links).
+
+        <h2 id="apply">How to Apply (आवेदन कैसे करें)</h2>
         Step-by-step process in 3-4 simple points.
         
         (IF TOPIC IS RESULT OR ADMIT CARD, add a section: <h2 id="cutoff">Expected Cut-off / Safe Score</h2>)

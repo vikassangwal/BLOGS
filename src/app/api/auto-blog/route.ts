@@ -81,7 +81,12 @@ async function postToTwitter(bearerToken: string, text: string) {
 export async function POST(request: NextRequest) {
   try {
     // Auth check: only admin can trigger auto-blog (skip for cron calls with x-cron-secret header)
-    const isCronCall = request.headers.get('x-cron-secret') === (process.env.CRON_SECRET || 'knowora-cron-2026');
+    const expectedSecret = process.env.CRON_SECRET || 'knowora-cron-2026';
+    const authHeader = request.headers.get('authorization');
+    const isCronCall = 
+      request.headers.get('x-cron-secret') === expectedSecret || 
+      authHeader === `Bearer ${expectedSecret}` ||
+      new URL(request.url).searchParams.get('secret') === expectedSecret;
     if (!isCronCall) {
       const cookieHeader = request.headers.get('cookie') || '';
       const tokenMatch = cookieHeader.match(/automata_auth_token=([^;]+)/);
@@ -266,7 +271,7 @@ export async function POST(request: NextRequest) {
     // AGENT 1: THE RESEARCHER & NEWS API
     // -------------------------------------------------------------
     let liveNewsContext = '';
-    if (selectedCategory === 'News' && savedKeys.newsdata) {
+    if (savedKeys.newsdata) {
       try {
         const newsRes = await fetch(`https://newsdata.io/api/1/news?apikey=${savedKeys.newsdata}&q=${encodeURIComponent(targetTopic.split(' ')[0] || 'india')}&language=en,hi`);
         const newsJson = await newsRes.json();

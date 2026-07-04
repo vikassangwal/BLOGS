@@ -65,7 +65,13 @@ export async function GET(req: Request) {
     for (const kw of keywords) {
       const existing = await prisma.autoBlogKeyword.findFirst({ where: { keyword: kw } });
       if (!existing) {
-        await prisma.autoBlogKeyword.create({ data: { keyword: kw } });
+        let niche = 'News';
+        const tLower = kw.toLowerCase();
+        if (tLower.includes('job') || tLower.includes('result') || tLower.includes('exam') || tLower.includes('admit') || tLower.includes('notification') || tLower.includes('vacancy') || tLower.includes('recruitment')) { niche = 'Education & Career'; }
+        else if (tLower.includes('tech') || tLower.includes('launch') || tLower.includes('ai') || tLower.includes('phone') || tLower.includes('app')) { niche = 'Technology'; }
+        else if (tLower.includes('finance') || tLower.includes('stock') || tLower.includes('budget') || tLower.includes('market') || tLower.includes('bank') || tLower.includes('earn')) { niche = 'Finance & Earning'; }
+        
+        await prisma.autoBlogKeyword.create({ data: { keyword: kw, niche: niche } });
         added.push(kw);
       }
     }

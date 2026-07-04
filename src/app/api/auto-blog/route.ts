@@ -103,27 +103,44 @@ export async function POST(request: NextRequest) {
       }
     } catch(e) {}
 
-    function buildAgentConfig(providerKey: string, modelKey: string, fallbackProvider: string, fallbackModel: string) {
-      const provider = savedKeys[providerKey] || fallbackProvider;
-      const model = (savedKeys[modelKey] || fallbackModel).trim();
+    function buildAgentConfig(prefix: string, defaultProvider: string, defaultModel: string, defaultTokens: number) {
+      const provider = savedKeys[`${prefix}Provider`] || defaultProvider;
+      const model = (savedKeys[`${prefix}Model`] || defaultModel).trim();
+      const maxTokens = parseInt(savedKeys[`${prefix}Tokens`]) || defaultTokens;
       
-      // Universal API key resolution: try provider-specific key → raw key → any available key
-      let apiKey = savedKeys[provider] || '';
+      const fallbackProvider = savedKeys[`${prefix}FallbackProvider`] || null;
+      const fallbackModel = (savedKeys[`${prefix}FallbackModel`] || '').trim() || null;
       
-      if (!apiKey && siteSettings?.aiApiKey && !siteSettings.aiApiKey.startsWith('{')) {
-        apiKey = siteSettings.aiApiKey;
+      const getApiKey = (p: string) => {
+        let key = savedKeys[p] || '';
+        if (!key && siteSettings?.aiApiKey && !siteSettings.aiApiKey.startsWith('{')) key = siteSettings.aiApiKey;
+        if (!key) {
+          const allKeyNames = Object.keys(savedKeys).filter(k => 
+            !k.includes('Provider') && !k.includes('Model') && !k.includes('Token') && !k.includes('Id') &&
+            savedKeys[k] && savedKeys[k].length >= 10
+          );
+          if (allKeyNames.length > 0) key = savedKeys[allKeyNames[0]];
+        }
+        return key.trim();
+      };
+      
+      return {
+        primary: { provider: provider as any, apiKey: getApiKey(provider), model },
+        fallback: (fallbackProvider && fallbackModel) ? { provider: fallbackProvider as any, apiKey: getApiKey(fallbackProvider), model: fallbackModel } : null,
+        maxTokens
+      };
+    }
+
+    async function generateContentWithFallback(config: any, sysPrompt: string, userPrompt: string) {
+      try {
+        return await generateAIContent(config.primary, sysPrompt, userPrompt, config.maxTokens);
+      } catch (err: any) {
+        if (!config.fallback) {
+          throw err;
+        }
+        console.warn(`[Auto-Blog Fallback] Primary ${config.primary.provider} failed. Switching to fallback ${config.fallback.provider}...`, err.message);
+        return await generateAIContent(config.fallback, sysPrompt, userPrompt, config.maxTokens);
       }
-      
-      if (!apiKey) {
-        // Try ALL saved keys — pick the first available one
-        const allKeyNames = Object.keys(savedKeys).filter(k => 
-          !k.includes('Provider') && !k.includes('Model') && !k.includes('Token') && !k.includes('Id') &&
-          savedKeys[k] && savedKeys[k].length >= 10
-        );
-        if (allKeyNames.length > 0) apiKey = savedKeys[allKeyNames[0]];
-      }
-      
-      return { provider: provider as any, apiKey: (apiKey || '').trim(), model };
     }
 
     // 2. FETCH KEYWORD
@@ -159,10 +176,10 @@ export async function POST(request: NextRequest) {
 
       let rModel = settings.researcherModel || '';
 
-      const researcherConfigForTopic = buildAgentConfig('researcherProvider', 'researcherModel', 'openrouter', rModel);
+      const researcherConfigForTopic = buildAgentConfig('researcher', 'openrouter', rModel || 'google/gemini-2.5-flash', 1500);
       
       try {
-        const topicRaw = await generateAIContent(researcherConfigForTopic, "You output strict JSON arrays.", topicPrompt, 1500);
+        const topicRaw = await generateContentWithFallback(researcherConfigForTopic, "You output strict JSON arrays.", topicPrompt);
         const firstBracket = topicRaw.indexOf('[');
         const lastBracket = topicRaw.lastIndexOf(']');
         if (firstBracket === -1 || lastBracket === -1) throw new Error("No JSON array found");
@@ -217,12 +234,12 @@ export async function POST(request: NextRequest) {
     let wModel = settings.writerModel || '';
     let sModel = settings.seoModel || '';
 
-    const researcherConfig = buildAgentConfig('researcherProvider', 'researcherModel', 'openrouter', rModel);
-    const writerConfig = buildAgentConfig('writerProvider', 'writerModel', 'openrouter', wModel);
-    const seoConfig = buildAgentConfig('seoProvider', 'seoModel', 'openrouter', sModel);
+    const researcherConfig = buildAgentConfig('researcher', 'openrouter', rModel || 'google/gemini-2.5-flash', 1500);
+    const writerConfig = buildAgentConfig('writer', 'openrouter', wModel || 'openai/gpt-4o-mini', 6000);
+    const seoConfig = buildAgentConfig('seo', 'openrouter', sModel || 'openai/gpt-4o-mini', 500);
 
     // Verify at least one agent has a valid API key
-    if (!researcherConfig.apiKey && !writerConfig.apiKey && !seoConfig.apiKey) {
+    if (!researcherConfig.primary.apiKey && !writerConfig.primary.apiKey && !seoConfig.primary.apiKey) {
       return NextResponse.json({ success: false, error: 'AI is not configured. Please add at least one API key in Settings > AI Configuration.' });
     }
 
@@ -277,7 +294,7 @@ export async function POST(request: NextRequest) {
     
     let researchData = '';
     try {
-      researchData = await generateAIContent(researcherConfig, "You are a factual research assistant.", researchPrompt, 1500);
+      researchData = await generateContentWithFallback(researcherConfig, "You are a factual research assistant.", researchPrompt);
       // Wait 2 seconds to prevent OpenRouter Free Tier burst rate limit (429)
       await new Promise(resolve => setTimeout(resolve, 2000));
     } catch (e: any) {
@@ -592,7 +609,7 @@ YOUR SEO SKILLS:
 - You use Google Dork links when exact URLs are unknown (e.g., search links).
 - Every article ends with a WhatsApp/Telegram share CTA and an engaging comment hook.`;
 
-      articleHtml = await generateAIContent(writerConfig, writerSystemPrompt, writerPrompt, 6000);
+      articleHtml = await generateContentWithFallback(writerConfig, writerSystemPrompt, writerPrompt);
       
       // Wait 2 seconds to prevent OpenRouter Free Tier burst rate limit (429)
       await new Promise(resolve => setTimeout(resolve, 2000));
@@ -646,7 +663,7 @@ YOUR SEO SKILLS:
 
     let expiryDate = null;
     try {
-      const seoResultRaw = await generateAIContent(seoConfig, "You are an SEO metadata generator that outputs only strict JSON.", seoPrompt, 500);
+      const seoResultRaw = await generateContentWithFallback(seoConfig, "You are an SEO metadata generator that outputs only strict JSON.", seoPrompt);
       const cleanJsonStr = seoResultRaw.replace(/^```json\n?|```$/g, '').trim();
       const parsedSeo = JSON.parse(cleanJsonStr);
       if (parsedSeo.seoTitle) seoData = { ...seoData, ...parsedSeo };

@@ -246,27 +246,49 @@ export default function SettingsAdmin() {
             <div style={{ background: 'rgba(59,130,246,0.08)', padding: '1.2rem', borderRadius: '12px', border: '1px solid rgba(59,130,246,0.2)' }}>
               <h4 style={{ margin: '0 0 0.8rem', fontSize: '1rem', fontWeight: 700, color: '#3B82F6' }}>🔍 Agent 1: Researcher (रिसर्चर)</h4>
               <p style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', margin: '0 0 0.8rem' }}>यह AI इंटरनेट से facts, data और trends रिसर्च करके लाएगा।</p>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.8rem' }}>
-                <div>
-                  <label style={{ display: 'block', marginBottom: '0.3rem', fontWeight: 600, fontSize: '0.85rem' }}>Provider</label>
-                  <select value={apiKeys.researcherProvider || 'openrouter'} onChange={e => setApiKeys({ ...apiKeys, researcherProvider: e.target.value })} style={{ width: '100%', padding: '0.7rem', borderRadius: '8px', border: '1px solid var(--color-border)' }}>
-                    <option value="openrouter">OpenRouter</option>
-                    <option value="openai">OpenAI</option>
-                    <option value="gemini">Google Gemini</option>
-                    <option value="anthropic">Anthropic (Claude)</option>
-                    <option value="deepseek">DeepSeek</option>
-                    <option value="groq">Groq</option>
-                    <option value="mistral">Mistral</option>
-                    <option value="xai">xAI Grok</option>
-                    <option value="together">Together AI</option>
-                    <option value="fireworks">Fireworks AI</option>
-                    <option value="perplexity">Perplexity</option>
-                    <option value="cohere">Cohere</option>
-                  </select>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.8rem' }}>
+                  <div>
+                    <label style={{ display: 'block', marginBottom: '0.3rem', fontWeight: 600, fontSize: '0.85rem' }}>Provider</label>
+                    <select value={apiKeys.researcherProvider || 'openrouter'} onChange={e => setApiKeys({ ...apiKeys, researcherProvider: e.target.value })} style={{ width: '100%', padding: '0.7rem', borderRadius: '8px', border: '1px solid var(--color-border)' }}>
+                      <option value="openrouter">OpenRouter</option>
+                      <option value="openai">OpenAI</option>
+                      <option value="gemini">Google Gemini</option>
+                      <option value="anthropic">Anthropic (Claude)</option>
+                      <option value="deepseek">DeepSeek</option>
+                      <option value="groq">Groq</option>
+                      <option value="mistral">Mistral</option>
+                      <option value="xai">xAI Grok</option>
+                      <option value="together">Together AI</option>
+                      <option value="fireworks">Fireworks AI</option>
+                      <option value="perplexity">Perplexity</option>
+                      <option value="cohere">Cohere</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', marginBottom: '0.3rem', fontWeight: 600, fontSize: '0.85rem' }}>Model Name</label>
+                    <input type="text" value={apiKeys.researcherModel || 'google/gemini-2.5-flash'} onChange={e => setApiKeys({ ...apiKeys, researcherModel: e.target.value })} placeholder="google/gemini-2.5-flash" style={{ width: '100%', padding: '0.7rem', borderRadius: '8px', border: '1px solid var(--color-border)' }} />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', marginBottom: '0.3rem', fontWeight: 600, fontSize: '0.85rem' }}>Max Tokens</label>
+                    <input type="number" value={apiKeys.researcherTokens || 1500} onChange={e => setApiKeys({ ...apiKeys, researcherTokens: parseInt(e.target.value) || 1500 })} placeholder="1500" style={{ width: '100%', padding: '0.7rem', borderRadius: '8px', border: '1px solid var(--color-border)' }} />
+                  </div>
                 </div>
-                <div>
-                  <label style={{ display: 'block', marginBottom: '0.3rem', fontWeight: 600, fontSize: '0.85rem' }}>Model Name</label>
-                  <input type="text" value={apiKeys.researcherModel || 'google/gemini-2.5-flash'} onChange={e => setApiKeys({ ...apiKeys, researcherModel: e.target.value })} placeholder="google/gemini-2.5-flash" style={{ width: '100%', padding: '0.7rem', borderRadius: '8px', border: '1px solid var(--color-border)' }} />
+                {/* Fallback Configuration */}
+                <div style={{ background: 'rgba(255,255,255,0.03)', padding: '0.8rem', borderRadius: '8px', border: '1px dashed rgba(59,130,246,0.3)' }}>
+                  <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, fontSize: '0.85rem', color: '#3B82F6' }}>🔄 Fallback (Backup) AI</label>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.8rem' }}>
+                    <select value={apiKeys.researcherFallbackProvider || ''} onChange={e => setApiKeys({ ...apiKeys, researcherFallbackProvider: e.target.value })} style={{ width: '100%', padding: '0.6rem', borderRadius: '6px', border: '1px solid var(--color-border)', fontSize: '0.85rem' }}>
+                      <option value="">No Fallback</option>
+                      <option value="openrouter">OpenRouter</option>
+                      <option value="openai">OpenAI</option>
+                      <option value="gemini">Google Gemini</option>
+                      <option value="groq">Groq</option>
+                      <option value="together">Together AI</option>
+                      <option value="deepseek">DeepSeek</option>
+                    </select>
+                    <input type="text" value={apiKeys.researcherFallbackModel || ''} onChange={e => setApiKeys({ ...apiKeys, researcherFallbackModel: e.target.value })} placeholder="Fallback Model Name" style={{ width: '100%', padding: '0.6rem', borderRadius: '6px', border: '1px solid var(--color-border)', fontSize: '0.85rem' }} />
+                  </div>
                 </div>
               </div>
             </div>
@@ -275,27 +297,49 @@ export default function SettingsAdmin() {
             <div style={{ background: 'rgba(16,185,129,0.08)', padding: '1.2rem', borderRadius: '12px', border: '1px solid rgba(16,185,129,0.2)' }}>
               <h4 style={{ margin: '0 0 0.8rem', fontSize: '1rem', fontWeight: 700, color: '#10B981' }}>✍️ Agent 2: Writer (लेखक)</h4>
               <p style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', margin: '0 0 0.8rem' }}>यह AI शानदार ब्लॉग लिखेगा — हिंदी/इंग्लिश, SEO-optimized।</p>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.8rem' }}>
-                <div>
-                  <label style={{ display: 'block', marginBottom: '0.3rem', fontWeight: 600, fontSize: '0.85rem' }}>Provider</label>
-                  <select value={apiKeys.writerProvider || 'openrouter'} onChange={e => setApiKeys({ ...apiKeys, writerProvider: e.target.value })} style={{ width: '100%', padding: '0.7rem', borderRadius: '8px', border: '1px solid var(--color-border)' }}>
-                    <option value="openrouter">OpenRouter</option>
-                    <option value="openai">OpenAI</option>
-                    <option value="gemini">Google Gemini</option>
-                    <option value="anthropic">Anthropic (Claude)</option>
-                    <option value="deepseek">DeepSeek</option>
-                    <option value="groq">Groq</option>
-                    <option value="mistral">Mistral</option>
-                    <option value="xai">xAI Grok</option>
-                    <option value="together">Together AI</option>
-                    <option value="fireworks">Fireworks AI</option>
-                    <option value="perplexity">Perplexity</option>
-                    <option value="cohere">Cohere</option>
-                  </select>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.8rem' }}>
+                  <div>
+                    <label style={{ display: 'block', marginBottom: '0.3rem', fontWeight: 600, fontSize: '0.85rem' }}>Provider</label>
+                    <select value={apiKeys.writerProvider || 'openrouter'} onChange={e => setApiKeys({ ...apiKeys, writerProvider: e.target.value })} style={{ width: '100%', padding: '0.7rem', borderRadius: '8px', border: '1px solid var(--color-border)' }}>
+                      <option value="openrouter">OpenRouter</option>
+                      <option value="openai">OpenAI</option>
+                      <option value="gemini">Google Gemini</option>
+                      <option value="anthropic">Anthropic (Claude)</option>
+                      <option value="deepseek">DeepSeek</option>
+                      <option value="groq">Groq</option>
+                      <option value="mistral">Mistral</option>
+                      <option value="xai">xAI Grok</option>
+                      <option value="together">Together AI</option>
+                      <option value="fireworks">Fireworks AI</option>
+                      <option value="perplexity">Perplexity</option>
+                      <option value="cohere">Cohere</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', marginBottom: '0.3rem', fontWeight: 600, fontSize: '0.85rem' }}>Model Name</label>
+                    <input type="text" value={apiKeys.writerModel || 'openai/gpt-4o-mini'} onChange={e => setApiKeys({ ...apiKeys, writerModel: e.target.value })} placeholder="openai/gpt-4o-mini" style={{ width: '100%', padding: '0.7rem', borderRadius: '8px', border: '1px solid var(--color-border)' }} />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', marginBottom: '0.3rem', fontWeight: 600, fontSize: '0.85rem' }}>Max Tokens</label>
+                    <input type="number" value={apiKeys.writerTokens || 6000} onChange={e => setApiKeys({ ...apiKeys, writerTokens: parseInt(e.target.value) || 6000 })} placeholder="6000" style={{ width: '100%', padding: '0.7rem', borderRadius: '8px', border: '1px solid var(--color-border)' }} />
+                  </div>
                 </div>
-                <div>
-                  <label style={{ display: 'block', marginBottom: '0.3rem', fontWeight: 600, fontSize: '0.85rem' }}>Model Name</label>
-                  <input type="text" value={apiKeys.writerModel || 'openai/gpt-4o-mini'} onChange={e => setApiKeys({ ...apiKeys, writerModel: e.target.value })} placeholder="openai/gpt-4o-mini" style={{ width: '100%', padding: '0.7rem', borderRadius: '8px', border: '1px solid var(--color-border)' }} />
+                {/* Fallback Configuration */}
+                <div style={{ background: 'rgba(255,255,255,0.03)', padding: '0.8rem', borderRadius: '8px', border: '1px dashed rgba(16,185,129,0.3)' }}>
+                  <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, fontSize: '0.85rem', color: '#10B981' }}>🔄 Fallback (Backup) AI</label>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.8rem' }}>
+                    <select value={apiKeys.writerFallbackProvider || ''} onChange={e => setApiKeys({ ...apiKeys, writerFallbackProvider: e.target.value })} style={{ width: '100%', padding: '0.6rem', borderRadius: '6px', border: '1px solid var(--color-border)', fontSize: '0.85rem' }}>
+                      <option value="">No Fallback</option>
+                      <option value="openrouter">OpenRouter</option>
+                      <option value="openai">OpenAI</option>
+                      <option value="gemini">Google Gemini</option>
+                      <option value="groq">Groq</option>
+                      <option value="together">Together AI</option>
+                      <option value="deepseek">DeepSeek</option>
+                    </select>
+                    <input type="text" value={apiKeys.writerFallbackModel || ''} onChange={e => setApiKeys({ ...apiKeys, writerFallbackModel: e.target.value })} placeholder="Fallback Model Name" style={{ width: '100%', padding: '0.6rem', borderRadius: '6px', border: '1px solid var(--color-border)', fontSize: '0.85rem' }} />
+                  </div>
                 </div>
               </div>
             </div>
@@ -304,27 +348,49 @@ export default function SettingsAdmin() {
             <div style={{ background: 'rgba(245,158,11,0.08)', padding: '1.2rem', borderRadius: '12px', border: '1px solid rgba(245,158,11,0.2)' }}>
               <h4 style={{ margin: '0 0 0.8rem', fontSize: '1rem', fontWeight: 700, color: '#F59E0B' }}>📊 Agent 3: SEO Expert</h4>
               <p style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', margin: '0 0 0.8rem' }}>यह AI Title, Description, Keywords, Slug बनाएगा — Google Ranking के लिए।</p>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.8rem' }}>
-                <div>
-                  <label style={{ display: 'block', marginBottom: '0.3rem', fontWeight: 600, fontSize: '0.85rem' }}>Provider</label>
-                  <select value={apiKeys.seoProvider || 'openrouter'} onChange={e => setApiKeys({ ...apiKeys, seoProvider: e.target.value })} style={{ width: '100%', padding: '0.7rem', borderRadius: '8px', border: '1px solid var(--color-border)' }}>
-                    <option value="openrouter">OpenRouter</option>
-                    <option value="openai">OpenAI</option>
-                    <option value="gemini">Google Gemini</option>
-                    <option value="anthropic">Anthropic (Claude)</option>
-                    <option value="deepseek">DeepSeek</option>
-                    <option value="groq">Groq</option>
-                    <option value="mistral">Mistral</option>
-                    <option value="xai">xAI Grok</option>
-                    <option value="together">Together AI</option>
-                    <option value="fireworks">Fireworks AI</option>
-                    <option value="perplexity">Perplexity</option>
-                    <option value="cohere">Cohere</option>
-                  </select>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.8rem' }}>
+                  <div>
+                    <label style={{ display: 'block', marginBottom: '0.3rem', fontWeight: 600, fontSize: '0.85rem' }}>Provider</label>
+                    <select value={apiKeys.seoProvider || 'openrouter'} onChange={e => setApiKeys({ ...apiKeys, seoProvider: e.target.value })} style={{ width: '100%', padding: '0.7rem', borderRadius: '8px', border: '1px solid var(--color-border)' }}>
+                      <option value="openrouter">OpenRouter</option>
+                      <option value="openai">OpenAI</option>
+                      <option value="gemini">Google Gemini</option>
+                      <option value="anthropic">Anthropic (Claude)</option>
+                      <option value="deepseek">DeepSeek</option>
+                      <option value="groq">Groq</option>
+                      <option value="mistral">Mistral</option>
+                      <option value="xai">xAI Grok</option>
+                      <option value="together">Together AI</option>
+                      <option value="fireworks">Fireworks AI</option>
+                      <option value="perplexity">Perplexity</option>
+                      <option value="cohere">Cohere</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', marginBottom: '0.3rem', fontWeight: 600, fontSize: '0.85rem' }}>Model Name</label>
+                    <input type="text" value={apiKeys.seoModel || 'openai/gpt-4o-mini'} onChange={e => setApiKeys({ ...apiKeys, seoModel: e.target.value })} placeholder="openai/gpt-4o-mini" style={{ width: '100%', padding: '0.7rem', borderRadius: '8px', border: '1px solid var(--color-border)' }} />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', marginBottom: '0.3rem', fontWeight: 600, fontSize: '0.85rem' }}>Max Tokens</label>
+                    <input type="number" value={apiKeys.seoTokens || 500} onChange={e => setApiKeys({ ...apiKeys, seoTokens: parseInt(e.target.value) || 500 })} placeholder="500" style={{ width: '100%', padding: '0.7rem', borderRadius: '8px', border: '1px solid var(--color-border)' }} />
+                  </div>
                 </div>
-                <div>
-                  <label style={{ display: 'block', marginBottom: '0.3rem', fontWeight: 600, fontSize: '0.85rem' }}>Model Name</label>
-                  <input type="text" value={apiKeys.seoModel || 'openai/gpt-4o-mini'} onChange={e => setApiKeys({ ...apiKeys, seoModel: e.target.value })} placeholder="openai/gpt-4o-mini" style={{ width: '100%', padding: '0.7rem', borderRadius: '8px', border: '1px solid var(--color-border)' }} />
+                {/* Fallback Configuration */}
+                <div style={{ background: 'rgba(255,255,255,0.03)', padding: '0.8rem', borderRadius: '8px', border: '1px dashed rgba(245,158,11,0.3)' }}>
+                  <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, fontSize: '0.85rem', color: '#F59E0B' }}>🔄 Fallback (Backup) AI</label>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.8rem' }}>
+                    <select value={apiKeys.seoFallbackProvider || ''} onChange={e => setApiKeys({ ...apiKeys, seoFallbackProvider: e.target.value })} style={{ width: '100%', padding: '0.6rem', borderRadius: '6px', border: '1px solid var(--color-border)', fontSize: '0.85rem' }}>
+                      <option value="">No Fallback</option>
+                      <option value="openrouter">OpenRouter</option>
+                      <option value="openai">OpenAI</option>
+                      <option value="gemini">Google Gemini</option>
+                      <option value="groq">Groq</option>
+                      <option value="together">Together AI</option>
+                      <option value="deepseek">DeepSeek</option>
+                    </select>
+                    <input type="text" value={apiKeys.seoFallbackModel || ''} onChange={e => setApiKeys({ ...apiKeys, seoFallbackModel: e.target.value })} placeholder="Fallback Model Name" style={{ width: '100%', padding: '0.6rem', borderRadius: '6px', border: '1px solid var(--color-border)', fontSize: '0.85rem' }} />
+                  </div>
                 </div>
               </div>
             </div>

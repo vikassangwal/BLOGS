@@ -219,7 +219,7 @@ export async function POST(request: NextRequest) {
         Your job is to filter this list and select EXACTLY 41 highly specific, real, and currently trending topics.
         Follow the 37+2+2 rule exactly:
         - Include EXACTLY 37 Education & Career topics. 
-          🚨 1st PRIORITY (HIGHEST) 🚨: ANYTHING NEW! You MUST NOT miss ANY new Government Job, Exam Notification, Admit Card, Result, Exam Calendar, Exam Date announcement, Any Official Notice, State Scholarship, Yojana (Government Scheme), or University/Board Result released in the LAST 72 HOURS. Include ALL of these brand-new updates at the very top of your list so we can be the FIRST to publish!
+          🚨 1st PRIORITY (HIGHEST) 🚨: ANYTHING NEW! You MUST NOT miss ANY new Government Job, Exam Notification, Admit Card, Result, Exam Calendar, Exam Date announcement, Any Official Notice, State Scholarship, Yojana (Government Scheme), or University Admission/Forms/Result released in the LAST 72 HOURS. Include ALL of these brand-new updates at the very top of your list so we can be the FIRST to publish!
           👉 2nd PRIORITY (FALLBACK) 👉: If (and ONLY if) there are not enough new updates today, you MUST fill the remaining slots with: Older Ongoing applications, General State Scholarship information, or Career Courses (e.g. 'Best courses after 12th').
           ⚠️ STRICT CRITICAL RULE ⚠️: You MUST provide exactly ONE real, current news topic for EACH of the 28 States of India, ONE for EACH of the 8 Union Territories, and ONE for the Central Government (28+8+1 = 37). 
           ⚠️ ANTI-FAKE NEWS RULE ⚠️: DO NOT invent exams, schemes, or results that don't exist. Keep real ongoing/upcoming exams, recent vacancies/schemes (last 72 hours), or real scholarship/university updates.

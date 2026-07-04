@@ -148,7 +148,18 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // 2. FETCH KEYWORD
+    // 2. DELETE OLD KEYWORDS (Older than 24 hours) TO ENSURE FRESH NEWS
+    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    try {
+      await prisma.autoBlogKeyword.deleteMany({
+        where: {
+          status: 'pending',
+          createdAt: { lt: twentyFourHoursAgo }
+        }
+      });
+    } catch (e) { console.error('Failed to clear old keywords', e); }
+
+    // 3. FETCH KEYWORD
     let pendingKeyword = await prisma.autoBlogKeyword.findFirst({
       where: { status: 'pending' },
       orderBy: [{ priority: 'desc' }, { createdAt: 'asc' }]

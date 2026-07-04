@@ -30,7 +30,8 @@ export async function GET(request: NextRequest) {
     } catch(e) {}
 
     // Check if Supervisor is enabled
-    if (apiKeys.supervisorActive === false) {
+    const supervisorMode = apiKeys.supervisorMode || (apiKeys.supervisorActive === false ? 'off' : 'auto');
+    if (supervisorMode === 'off') {
       return NextResponse.json({ status: 'skip', message: 'Supervisor Agent is disabled.' });
     }
 
@@ -119,17 +120,20 @@ export async function GET(request: NextRequest) {
     }
 
     if (updatesMade) {
-      // Apply updates to DB
-      await prisma.autoBlogSettings.update({
-        where: { id: 'default' },
-        data: {
-          researcherModel: newResearcher,
-          writerModel: newWriter,
-          seoModel: newSeo
-        }
-      });
-
-      updateMessage += `\nStrategy used: *${strategy.toUpperCase()}*\nYour agents have been automatically upgraded! 🚀`;
+      if (supervisorMode === 'auto') {
+        // Apply updates to DB
+        await prisma.autoBlogSettings.update({
+          where: { id: 'default' },
+          data: {
+            researcherModel: newResearcher,
+            writerModel: newWriter,
+            seoModel: newSeo
+          }
+        });
+        updateMessage += `\nStrategy used: *${strategy.toUpperCase()}*\nYour agents have been automatically upgraded! 🚀`;
+      } else {
+        updateMessage += `\nStrategy used: *${strategy.toUpperCase()}*\n⚠️ **Manual Mode:** I have found these better models but I did NOT update them. Please update manually in the Admin Panel.`;
+      }
 
       // Notify via Telegram if configured
       if (apiKeys.telegramToken && apiKeys.telegramChatId) {

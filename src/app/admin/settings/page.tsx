@@ -9,7 +9,8 @@ export default function SettingsAdmin() {
     resend: '', twitter: '', facebook: '', instagram: '', instagramAccountId: '',
     onesignalAppId: '', onesignalApiKey: '', razorpayKey: '', razorpaySecret: '',
     telegramToken: '', telegramChatId: '', whatsappToken: '', whatsappPhoneId: '', whatsappGroupId: '',
-    supervisorActive: true, supervisorStrategy: 'free'
+    supervisorActive: true, supervisorStrategy: 'free',
+    chatbotActive: true, translateActive: false, supervisorMode: 'auto'
   });
   const [isSaving, setIsSaving] = useState(false);
   const [activeTab, setActiveTab] = useState('general');
@@ -418,14 +419,72 @@ export default function SettingsAdmin() {
               </div>
             </div>
 
+            {/* Agent 8: Editor / QA Agent */}
+            <div style={{ background: 'rgba(139,92,246,0.08)', padding: '1.2rem', borderRadius: '12px', border: '1px solid rgba(139,92,246,0.2)', marginTop: '1rem' }}>
+              <h4 style={{ margin: '0 0 0.8rem', fontSize: '1rem', fontWeight: 700, color: '#8B5CF6' }}>✅ Agent 8: Editor / QA Agent (ब्लॉग क्वालिटी चेक)</h4>
+              <p style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', margin: '0 0 0.8rem' }}>यह AI हाल ही में पब्लिश हुए ब्लॉग्स को पढ़ेगा और अगर SEO, Title, या Content में कोई कमी होगी तो उसे तुरंत ठीक कर देगा।</p>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.8rem' }}>
+                <div>
+                  <label style={{ display: 'block', marginBottom: '0.3rem', fontWeight: 600, fontSize: '0.85rem' }}>Provider</label>
+                  <select value={apiKeys.editorProvider || 'openrouter'} onChange={e => setApiKeys({ ...apiKeys, editorProvider: e.target.value })} style={{ width: '100%', padding: '0.7rem', borderRadius: '8px', border: '1px solid var(--color-border)' }}>
+                    <option value="openrouter">OpenRouter</option>
+                    <option value="openai">OpenAI</option>
+                    <option value="gemini">Google Gemini</option>
+                    <option value="anthropic">Anthropic (Claude)</option>
+                    <option value="deepseek">DeepSeek</option>
+                    <option value="groq">Groq</option>
+                    <option value="mistral">Mistral</option>
+                  </select>
+                </div>
+                <div>
+                  <label style={{ display: 'block', marginBottom: '0.3rem', fontWeight: 600, fontSize: '0.85rem' }}>Model Name</label>
+                  <input type="text" value={apiKeys.editorModel || 'openai/gpt-4o-mini'} onChange={e => setApiKeys({ ...apiKeys, editorModel: e.target.value })} placeholder="openai/gpt-4o-mini" style={{ width: '100%', padding: '0.7rem', borderRadius: '8px', border: '1px solid var(--color-border)' }} />
+                </div>
+                <div>
+                  <label style={{ display: 'block', marginBottom: '0.3rem', fontWeight: 600, fontSize: '0.85rem' }}>Max Tokens</label>
+                  <input type="number" value={apiKeys.editorTokens || 4000} onChange={e => setApiKeys({ ...apiKeys, editorTokens: parseInt(e.target.value) || 4000 })} placeholder="4000" style={{ width: '100%', padding: '0.7rem', borderRadius: '8px', border: '1px solid var(--color-border)' }} />
+                </div>
+              </div>
+            </div>
+
+            {/* UI & UX Controls */}
+            <hr style={{ border: 'none', borderTop: '1px solid var(--color-border)', margin: '0.5rem 0' }} />
+            <h3 style={{ margin: '0', fontSize: '1.15rem', fontWeight: 700 }}>🖥️ Website Features (UI/UX)</h3>
+            
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginTop: '0.5rem' }}>
+              <div style={{ background: 'rgba(255,255,255,0.02)', padding: '1rem', borderRadius: '10px', border: '1px solid var(--color-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div>
+                  <h4 style={{ margin: '0 0 0.3rem', fontSize: '0.95rem', fontWeight: 700 }}>💬 Global Chatbot</h4>
+                  <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>Show AI Chatbot on all public pages.</p>
+                </div>
+                <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+                  <input type="checkbox" checked={apiKeys.chatbotActive !== false} onChange={e => setApiKeys({ ...apiKeys, chatbotActive: e.target.checked })} style={{ transform: 'scale(1.5)' }} />
+                </label>
+              </div>
+
+              <div style={{ background: 'rgba(255,255,255,0.02)', padding: '1rem', borderRadius: '10px', border: '1px solid var(--color-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div>
+                  <h4 style={{ margin: '0 0 0.3rem', fontSize: '0.95rem', fontWeight: 700 }}>🌍 Google Translate</h4>
+                  <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>Enable multi-language dropdown for visitors.</p>
+                </div>
+                <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+                  <input type="checkbox" checked={apiKeys.translateActive === true} onChange={e => setApiKeys({ ...apiKeys, translateActive: e.target.checked })} style={{ transform: 'scale(1.5)' }} />
+                </label>
+              </div>
+            </div>
+
             {/* Agent 7: Supervisor Agent */}
             <div style={{ background: 'rgba(16,185,129,0.08)', padding: '1.2rem', borderRadius: '12px', border: '1px solid rgba(16,185,129,0.2)', marginTop: '1rem' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.8rem' }}>
                 <h4 style={{ margin: 0, fontSize: '1rem', fontWeight: 700, color: '#10B981' }}>👑 Agent 7: Supervisor (Master Orchestrator)</h4>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.9rem', fontWeight: 600 }}>
-                  <input type="checkbox" checked={apiKeys.supervisorActive !== false} onChange={e => setApiKeys({ ...apiKeys, supervisorActive: e.target.checked })} style={{ transform: 'scale(1.2)' }} />
-                  Enable Auto-Update Models
-                </label>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>Mode:</span>
+                  <select value={apiKeys.supervisorMode || 'auto'} onChange={e => setApiKeys({ ...apiKeys, supervisorMode: e.target.value })} style={{ padding: '0.4rem', borderRadius: '6px', border: '1px solid var(--color-border)', fontSize: '0.85rem' }}>
+                    <option value="auto">Auto Update</option>
+                    <option value="manual">Manual (Notify Only)</option>
+                    <option value="off">Off</option>
+                  </select>
+                </div>
               </div>
               <p style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', margin: '0 0 1rem' }}>यह एजेंट हर दिन सभी AI मॉडल्स की हेल्थ चेक करेगा। अगर कोई बेहतर मॉडल मिलता है, तो यह बाकी एजेंट्स को खुद अपडेट कर देगा।</p>
               

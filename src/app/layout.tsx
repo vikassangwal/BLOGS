@@ -42,6 +42,14 @@ export default async function RootLayout({
 
   const siteName = settings?.siteName || 'Our Blog';
   const onesignalAppId = autoBlogSettings?.onesignalAppId || '';
+  let apiKeys: any = {};
+  try {
+    if (settings?.aiApiKey?.startsWith('{')) {
+      apiKeys = JSON.parse(settings.aiApiKey);
+    }
+  } catch (e) {}
+  
+  const isTranslateActive = apiKeys.translateActive === true;
 
   return (
     <html lang="en">
@@ -58,7 +66,7 @@ export default async function RootLayout({
         <NextTopLoader color="var(--color-accent)" showSpinner={false} />
         <div className="bg-mesh"></div>
         <Suspense fallback={<div className="h-20 w-full" />}>
-          <GlobalHeader siteName={siteName} />
+          <GlobalHeader siteName={siteName} translateActive={isTranslateActive} />
         </Suspense>
 
         <main className="flex-grow flex flex-col">

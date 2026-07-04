@@ -38,13 +38,23 @@ async function getPostsByTag(tag: string) {
 
 export default async function HomePage() {
   // Fetch all categories in parallel on the server
-  const [allPosts, techPosts, eduPosts, financePosts, whatsappLinks] = await Promise.all([
+  const [allPosts, techPosts, eduPosts, financePosts, whatsappLinks, siteSettings] = await Promise.all([
     prisma.blogPost.findMany({ where: { status: 'Published' }, orderBy: { publishedAt: 'desc' }, take: 10, select: { id: true, title: true, slug: true, publishedAt: true, featuredImage: true } }),
     getPostsByTag('Technology'),
     getPostsByTag('Education & Career'),
     getPostsByTag('Finance & Earning'),
-    prisma.socialLink.findMany({ where: { platform: 'whatsapp', isActive: true } })
+    prisma.socialLink.findMany({ where: { platform: 'whatsapp', isActive: true } }),
+    prisma.siteSettings.findUnique({ where: { id: 'default' } })
   ]);
+
+  let apiKeys: any = {};
+  try {
+    if (siteSettings?.aiApiKey?.startsWith('{')) {
+      apiKeys = JSON.parse(siteSettings.aiApiKey);
+    }
+  } catch (e) {}
+  
+  const isChatbotActive = apiKeys.chatbotActive !== false;
 
   const CategorySection = ({ title, posts, tag }: { title: string, posts: any[], tag: string }) => {
     if (posts.length === 0) return null;
@@ -172,7 +182,7 @@ export default async function HomePage() {
       `}} />
       
       {/* Global AI Chatbot */}
-      <BlogChatbot whatsappLinks={whatsappLinks} />
+      {isChatbotActive && <BlogChatbot whatsappLinks={whatsappLinks} />}
     </div>
   );
 }

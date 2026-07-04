@@ -1,26 +1,4 @@
 {
   "buildCommand": "prisma generate && next build",
-  "installCommand": "npm install",
-  "crons": [
-    {
-      "path": "/api/auto-blog?trigger=cron",
-      "schedule": "0 0 * * *"
-    },
-    {
-      "path": "/api/cron/cleanup",
-      "schedule": "0 2 * * *"
-    },
-    {
-      "path": "/api/cron/editor",
-      "schedule": "0 */4 * * *"
-    },
-    {
-      "path": "/api/cron/supervisor",
-      "schedule": "0 12 * * *"
-    },
-    {
-      "path": "/api/cron/translator",
-      "schedule": "30 * * * *"
-    }
-  ]
+  "installCommand": "npm install"
 }

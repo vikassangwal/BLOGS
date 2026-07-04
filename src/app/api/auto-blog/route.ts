@@ -367,7 +367,7 @@ export async function POST(request: NextRequest) {
     5. BOLD IMPORTANT INFO: मुख्य शब्दों को <strong>Bold</strong> करें।
     6. MOBILE-FIRST: कोई भी पैराग्राफ 3-4 लाइनों से बड़ा नहीं होना चाहिए।
     7. HTML FORMAT ONLY: कंटेंट सीधे पब्लिश करने योग्य HTML (<h2>, <p>, <table>, <ul>) में होगा। Markdown (##, **) का उपयोग ना करें।
-    8. SMART LINKS: बाहरी लिंक के लिए <a href="..." target="_blank" rel="nofollow">👉 Click Here</a> का उपयोग करें।
+    8. OFFICIAL HOME PAGE LINKS ONLY: बाहरी लिंक के लिए केवल मुख्य वेबसाइट का होमपेज (जैसे https://ssc.gov.in या https://upsc.gov.in) ही दें। कभी भी कोई लंबा या डीप लिंक (PDF Link) खुद से बनाकर ना लिखें, क्योंकि आप उसे वेरीफाई नहीं कर सकते।
     9. HINGLISH SEO: 2-3 Hinglish कीवर्ड्स ("kaise kare", "kab aayega") डालें।
     10. NEVER TRUNCATE: पूरा आर्टिकल (Introduction से Conclusion तक) लिखें।
     ===== END UNIVERSAL RULES =====

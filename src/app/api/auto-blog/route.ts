@@ -312,6 +312,8 @@ export async function POST(request: NextRequest) {
     const researchPrompt = `You are an expert Internet Researcher and SEO Analyst. The user wants to write a blog post about: "${targetTopic}".
     ${liveNewsContext}
     
+    CRITICAL RULE: If the topic appears to be a rumor, a future event that hasn't been officially announced yet, or a fake notification (e.g., an exam notification for 2026 that hasn't actually come yet), you MUST ONLY output the exact word "ABORT_FAKE_NEWS" and nothing else. Do not provide any research.
+
     You MUST provide ALL of the following:
     1. FACTUAL SUMMARY: Key facts, dates, numbers, names related to this topic. Be specific, not vague.
     2. SEO KEYWORDS: List 5-7 high-traffic Hindi+English keywords that Indian users would search on Google for this topic (e.g. "SSC CGL 2026 notification", "SSC CGL kab aayega", "SSC CGL eligibility").
@@ -325,12 +327,18 @@ export async function POST(request: NextRequest) {
     let researchData = '';
     try {
       researchData = await generateContentWithFallback(researcherConfig, "You are a factual research assistant.", researchPrompt);
-      // Wait 2 seconds to prevent OpenRouter Free Tier burst rate limit (429)
       await new Promise(resolve => setTimeout(resolve, 2000));
     } catch (e: any) {
       if (e.message?.includes('429')) throw new Error("API Limit (429): AI की फ्री लिमिट खत्म हो गई है या सर्वर बिज़ी है। कृपया 1 घंटे बाद कोशिश करें या अपना API Key बदलें।");
-      // Fallback if researcher fails (e.g. invalid model)
       researchData = `Topic: ${targetTopic}. Provide a comprehensive overview. ${liveNewsContext}`;
+    }
+
+    if (researchData.includes("ABORT_FAKE_NEWS")) {
+      console.warn("AI detected fake/unreleased news for topic:", targetTopic);
+      if (keywordId) {
+        await prisma.autoBlogKeyword.update({ where: { id: keywordId }, data: { status: 'failed' } });
+      }
+      return NextResponse.json({ success: false, error: 'AI detected fake/unreleased news and aborted.' });
     }
 
     // -------------------------------------------------------------

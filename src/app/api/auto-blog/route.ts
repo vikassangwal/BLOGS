@@ -195,7 +195,7 @@ export async function POST(request: NextRequest) {
       TODAY'S DATE IS: ${currentDate}.
       ${seedNews}
       GENERATE A MASSIVE LIST OF 120 KEYWORDS.
-      This is Step 1 (Brainstorming). Generate a wide variety of Government Jobs, Exam Notifications, Technology trends, and Finance updates. 
+      This is Step 1 (Brainstorming). Generate a wide variety of Government Jobs, Exam Notifications, Scholarships, University Admissions/Results, Board Exam Updates, Technology trends, and Finance updates. 
       Include topics from ALL 28 Indian States and 8 Union Territories.
       Respond ONLY with a valid JSON array of strings. No markdown.
       Example format: ["Topic 1", "Topic 2", "Topic 3"]`;
@@ -218,10 +218,10 @@ export async function POST(request: NextRequest) {
         
         Your job is to filter this list and select EXACTLY 41 highly specific, real, and currently trending topics.
         Follow the 37+2+2 rule exactly:
-        - Include EXACTLY 37 Government Jobs, Exam Notifications, or Results. 
+        - Include EXACTLY 37 Education & Career topics (Government Jobs, Exam Notifications, Scholarships, Board Results, University Admissions). 
           ⚠️ STRICT CRITICAL RULE ⚠️: You MUST provide exactly ONE real, current news topic for EACH of the 28 States of India, ONE for EACH of the 8 Union Territories, and ONE for the Central Government (28+8+1 = 37). 
-          👉 WHAT COUNTS AS REAL: Since 37 new notifications are not released every single day, "Real" job topics MUST include: Recently released notifications, ONGOING application forms, UPCOMING Exam Dates/Syllabus, Expected Results, and Admit Card releases. 
-          ⚠️ ANTI-FAKE NEWS RULE ⚠️: DO NOT invent exams that don't exist. Keep real ongoing/upcoming exams (e.g., 'SSC CGL 2026 Expected Notification & Syllabus', 'UP Police Constable Result Update').
+          👉 WHAT COUNTS AS REAL: Since 37 new notifications are not released every single day, "Real" topics MUST include: Recently released notifications, ONGOING application forms, UPCOMING Exam Dates/Syllabus, Expected Results, State Scholarship Schemes (e.g. 'UP Scholarship Status'), Board Exam updates (e.g. 'Bihar Board 10th Result Date'), and State University Admission/Results. 
+          ⚠️ ANTI-FAKE NEWS RULE ⚠️: DO NOT invent exams or results that don't exist. Keep real ongoing/upcoming exams or real scholarship/university updates.
         - Include 2 Technology topics. MUST BE REAL AND RECENT (e.g., 'Samsung S24 Ultra Launched').
         - Include 2 Finance updates. MUST BE REAL AND RECENT (e.g., 'RBI Repo Rate Increased Today').
         Ensure the topics are highly specific (NOT generic like 'Education news in Bihar').
@@ -345,15 +345,15 @@ export async function POST(request: NextRequest) {
     ${liveNewsContext}
     
     CRITICAL RULE (STRICT): If the topic is a COMPLETELY FAKE exam that does not exist or a totally made-up rumor, you MUST ONLY output the exact word "ABORT_FAKE_NEWS" and nothing else. 
-    HOWEVER, if it is a real Upcoming Exam, an Expected Syllabus, an Ongoing Application, or an Expected Result, DO NOT ABORT! Provide research for it (mentioning it is expected/upcoming) so the writer can write an informative guide.
+    HOWEVER, if it is a real Upcoming Exam, an Expected Syllabus, an Ongoing Application, an Expected Result, a State Scholarship (e.g. 'UP Scholarship 2026'), a Board Exam update, or a University Admission/Result, DO NOT ABORT! Provide research for it (mentioning it is expected/upcoming) so the writer can write an informative guide.
 
     You MUST extract the FULL NOTIFICATION DETAILS. Provide an exhaustive breakdown of ALL of the following (if available):
-    1. FULL NOTIFICATION SUMMARY: What is the notification about? (Department, Post name, Total Vacancies).
-    2. IMPORTANT DATES: Application Start Date, Last Date, Fee Payment Last Date, Exam Date (if any).
-    3. VACANCY DETAILS: Category-wise breakdown (UR, OBC, SC, ST, EWS) if available.
-    4. ELIGIBILITY & AGE LIMIT: Educational qualifications required, Minimum/Maximum Age, and Age Relaxation rules.
+    1. FULL SUMMARY: What is the notification/scholarship/result about? (Department, Post name, Total Vacancies, or University name).
+    2. IMPORTANT DATES: Application Start Date, Last Date, Fee Payment Last Date, Exam Date, or Result Date (if any).
+    3. VACANCY/SCHOLARSHIP DETAILS: Category-wise breakdown (UR, OBC, SC, ST, EWS) or Scholarship Amount if available.
+    4. ELIGIBILITY & AGE LIMIT: Educational qualifications required, Minimum/Maximum Age, and Age Relaxation rules (if applicable).
     5. APPLICATION FEES: Fees for General/OBC and SC/ST/Women.
-    6. SELECTION PROCESS & SYLLABUS: How will candidates be selected? (Written, Physical, Interview) and basic syllabus topics.
+    6. SELECTION PROCESS & SYLLABUS: How will candidates be selected? (Written, Physical, Interview) and basic syllabus topics (if job).
     7. OFFICIAL SOURCES: List exact official website domains (e.g. ssc.gov.in) where the notification is hosted.
     8. SEO KEYWORDS: 5-7 high-traffic Hindi+English keywords.
     

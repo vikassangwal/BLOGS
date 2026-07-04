@@ -5,6 +5,7 @@ export default function SettingsAdmin() {
   const [settings, setSettings] = useState<any>(null);
   const [apiKeys, setApiKeys] = useState<any>({ 
     openai: '', gemini: '', anthropic: '', deepseek: '', openrouter: '',
+    groq: '', mistral: '', together: '', fireworks: '', perplexity: '', cohere: '', xai: '',
     resend: '', twitter: '', facebook: '', instagram: '', instagramAccountId: '',
     onesignalAppId: '', onesignalApiKey: '', razorpayKey: '', razorpaySecret: '',
     telegramToken: '', telegramChatId: '', whatsappToken: '', whatsappPhoneId: '', whatsappGroupId: ''
@@ -156,6 +157,34 @@ export default function SettingsAdmin() {
                 <input type="password" value={apiKeys.deepseek || ''} onChange={e => setApiKeys({ ...apiKeys, deepseek: e.target.value })} placeholder="sk-..." style={{ width: '100%', padding: '0.7rem', borderRadius: '8px', border: '1px solid var(--color-border)' }} />
                 <p style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', margin: '0.3rem 0 0' }}>Models: deepseek-chat, deepseek-reasoner</p>
               </div>
+              <div style={{ background: 'rgba(255,255,255,0.02)', padding: '1rem', borderRadius: '10px', border: '1px solid var(--color-border)' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem', fontWeight: 700, fontSize: '0.95rem' }}>
+                  <span style={{ background: '#F55036', color: '#fff', padding: '2px 8px', borderRadius: '6px', fontSize: '0.7rem' }}>Groq</span> API Key
+                </label>
+                <input type="password" value={apiKeys.groq || ''} onChange={e => setApiKeys({ ...apiKeys, groq: e.target.value })} placeholder="gsk_..." style={{ width: '100%', padding: '0.7rem', borderRadius: '8px', border: '1px solid var(--color-border)' }} />
+                <p style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', margin: '0.3rem 0 0' }}>Models: llama-3.3-70b, mixtral</p>
+              </div>
+              <div style={{ background: 'rgba(255,255,255,0.02)', padding: '1rem', borderRadius: '10px', border: '1px solid var(--color-border)' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem', fontWeight: 700, fontSize: '0.95rem' }}>
+                  <span style={{ background: '#FF7000', color: '#fff', padding: '2px 8px', borderRadius: '6px', fontSize: '0.7rem' }}>Mistral</span> API Key
+                </label>
+                <input type="password" value={apiKeys.mistral || ''} onChange={e => setApiKeys({ ...apiKeys, mistral: e.target.value })} placeholder="..." style={{ width: '100%', padding: '0.7rem', borderRadius: '8px', border: '1px solid var(--color-border)' }} />
+                <p style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', margin: '0.3rem 0 0' }}>Models: mistral-large-latest</p>
+              </div>
+              <div style={{ background: 'rgba(255,255,255,0.02)', padding: '1rem', borderRadius: '10px', border: '1px solid var(--color-border)' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem', fontWeight: 700, fontSize: '0.95rem' }}>
+                  <span style={{ background: '#0F172A', color: '#fff', padding: '2px 8px', borderRadius: '6px', fontSize: '0.7rem' }}>xAI (Grok)</span> API Key
+                </label>
+                <input type="password" value={apiKeys.xai || ''} onChange={e => setApiKeys({ ...apiKeys, xai: e.target.value })} placeholder="xai-..." style={{ width: '100%', padding: '0.7rem', borderRadius: '8px', border: '1px solid var(--color-border)' }} />
+                <p style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', margin: '0.3rem 0 0' }}>Models: grok-3-mini</p>
+              </div>
+              <div style={{ background: 'rgba(255,255,255,0.02)', padding: '1rem', borderRadius: '10px', border: '1px solid var(--color-border)' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem', fontWeight: 700, fontSize: '0.95rem' }}>
+                  <span style={{ background: '#4A5568', color: '#fff', padding: '2px 8px', borderRadius: '6px', fontSize: '0.7rem' }}>Other Providers</span>
+                </label>
+                <input type="password" value={apiKeys.perplexity || ''} onChange={e => setApiKeys({ ...apiKeys, perplexity: e.target.value })} placeholder="pplx-..." style={{ width: '100%', padding: '0.7rem', borderRadius: '8px', border: '1px solid var(--color-border)' }} />
+                <p style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', margin: '0.3rem 0 0' }}>Supports: Perplexity, Together, Cohere, Fireworks</p>
+              </div>
 
               {/* IMAGE GENERATION API */}
               <div style={{ background: 'rgba(255,255,255,0.02)', padding: '1rem', borderRadius: '10px', border: '1px solid var(--color-border)', gridColumn: '1 / -1' }}>
@@ -191,6 +220,13 @@ export default function SettingsAdmin() {
                   <option value="gemini">Google Gemini</option>
                   <option value="anthropic">Anthropic (Claude)</option>
                   <option value="deepseek">DeepSeek</option>
+                  <option value="groq">Groq</option>
+                  <option value="mistral">Mistral</option>
+                  <option value="xai">xAI Grok</option>
+                  <option value="together">Together AI</option>
+                  <option value="fireworks">Fireworks AI</option>
+                  <option value="perplexity">Perplexity</option>
+                  <option value="cohere">Cohere</option>
                 </select>
               </div>
               <div>
@@ -219,6 +255,13 @@ export default function SettingsAdmin() {
                     <option value="gemini">Google Gemini</option>
                     <option value="anthropic">Anthropic (Claude)</option>
                     <option value="deepseek">DeepSeek</option>
+                    <option value="groq">Groq</option>
+                    <option value="mistral">Mistral</option>
+                    <option value="xai">xAI Grok</option>
+                    <option value="together">Together AI</option>
+                    <option value="fireworks">Fireworks AI</option>
+                    <option value="perplexity">Perplexity</option>
+                    <option value="cohere">Cohere</option>
                   </select>
                 </div>
                 <div>
@@ -241,6 +284,13 @@ export default function SettingsAdmin() {
                     <option value="gemini">Google Gemini</option>
                     <option value="anthropic">Anthropic (Claude)</option>
                     <option value="deepseek">DeepSeek</option>
+                    <option value="groq">Groq</option>
+                    <option value="mistral">Mistral</option>
+                    <option value="xai">xAI Grok</option>
+                    <option value="together">Together AI</option>
+                    <option value="fireworks">Fireworks AI</option>
+                    <option value="perplexity">Perplexity</option>
+                    <option value="cohere">Cohere</option>
                   </select>
                 </div>
                 <div>
@@ -263,6 +313,13 @@ export default function SettingsAdmin() {
                     <option value="gemini">Google Gemini</option>
                     <option value="anthropic">Anthropic (Claude)</option>
                     <option value="deepseek">DeepSeek</option>
+                    <option value="groq">Groq</option>
+                    <option value="mistral">Mistral</option>
+                    <option value="xai">xAI Grok</option>
+                    <option value="together">Together AI</option>
+                    <option value="fireworks">Fireworks AI</option>
+                    <option value="perplexity">Perplexity</option>
+                    <option value="cohere">Cohere</option>
                   </select>
                 </div>
                 <div>

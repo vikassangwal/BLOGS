@@ -525,13 +525,31 @@ export default function SettingsAdmin() {
               </div>
               <p style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', margin: '0 0 1rem' }}>यह एजेंट हर दिन सभी AI मॉडल्स की हेल्थ चेक करेगा। अगर कोई बेहतर मॉडल मिलता है, तो यह बाकी एजेंट्स को खुद अपडेट कर देगा।</p>
               
-                <div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.8rem' }}>
+                <div style={{ gridColumn: '1 / -1' }}>
                   <label style={{ display: 'block', marginBottom: '0.3rem', fontWeight: 600, fontSize: '0.85rem' }}>Priority Strategy (नया मॉडल चुनने का तरीका)</label>
                   <select value={apiKeys.supervisorStrategy || 'free'} onChange={e => setApiKeys({ ...apiKeys, supervisorStrategy: e.target.value })} style={{ width: '100%', padding: '0.7rem', borderRadius: '8px', border: '1px solid var(--color-border)' }}>
                     <option value="free">💰 Cheapest / Free (सबसे सस्ता और फ्री मॉडल)</option>
                     <option value="smart">🧠 Smartest / Highest IQ (सबसे अक्लमंद मॉडल - महंगा हो सकता है)</option>
                     <option value="fast">⚡ Fastest (सबसे तेज़ रिप्लाई करने वाला)</option>
                   </select>
+                </div>
+                <div>
+                  <label style={{ display: 'block', marginBottom: '0.3rem', fontWeight: 600, fontSize: '0.85rem' }}>Provider</label>
+                  <select value={apiKeys.supervisorProvider || 'openrouter'} onChange={e => setApiKeys({ ...apiKeys, supervisorProvider: e.target.value })} style={{ width: '100%', padding: '0.7rem', borderRadius: '8px', border: '1px solid var(--color-border)' }}>
+                    <option value="openrouter">OpenRouter</option>
+                    <option value="openai">OpenAI</option>
+                    <option value="gemini">Google Gemini</option>
+                    <option value="groq">Groq</option>
+                  </select>
+                </div>
+                <div>
+                  <label style={{ display: 'block', marginBottom: '0.3rem', fontWeight: 600, fontSize: '0.85rem' }}>Primary Model</label>
+                  <input type="text" value={apiKeys.supervisorModel || 'openai/gpt-4o-mini'} onChange={e => setApiKeys({ ...apiKeys, supervisorModel: e.target.value })} placeholder="openai/gpt-4o-mini" style={{ width: '100%', padding: '0.7rem', borderRadius: '8px', border: '1px solid var(--color-border)' }} />
+                </div>
+                <div style={{ gridColumn: '1 / -1' }}>
+                  <label style={{ display: 'block', marginBottom: '0.3rem', fontWeight: 600, fontSize: '0.85rem' }}>Backup Model (Fallback)</label>
+                  <input type="text" value={apiKeys.supervisorBackupModel || ''} onChange={e => setApiKeys({ ...apiKeys, supervisorBackupModel: e.target.value })} placeholder="e.g. google/gemini-flash" style={{ width: '100%', padding: '0.7rem', borderRadius: '8px', border: '1px solid var(--color-border)' }} />
                 </div>
               </div>
             </div>

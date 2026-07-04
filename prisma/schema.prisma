@@ -53,6 +53,7 @@ model BlogPost {
   socialCaptions  String?
   socialHashtags  String?
   viewCount       Int       @default(0)
+  translations    Json?     // Stores pre-translated content like { "hi": { "title": "...", "content": "..." } }
   authorId        String?
   author          User?     @relation(fields: [authorId], references: [id])
   createdAt       DateTime  @default(now())

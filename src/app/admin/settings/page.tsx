@@ -447,6 +447,39 @@ export default function SettingsAdmin() {
               </div>
             </div>
 
+            {/* Agent 9: AI Translator Agent */}
+            <div style={{ background: 'rgba(59,130,246,0.08)', padding: '1.2rem', borderRadius: '12px', border: '1px solid rgba(59,130,246,0.2)', marginTop: '1rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.8rem' }}>
+                <h4 style={{ margin: 0, fontSize: '1rem', fontWeight: 700, color: '#3B82F6' }}>🌐 Agent 9: AI Translator Agent (Pre-Translator)</h4>
+                <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+                  <input type="checkbox" checked={apiKeys.aiTranslatorActive !== false} onChange={e => setApiKeys({ ...apiKeys, aiTranslatorActive: e.target.checked })} style={{ transform: 'scale(1.2)', marginRight: '0.5rem' }} />
+                  <span style={{ fontSize: '0.8rem', fontWeight: 600 }}>Enable</span>
+                </label>
+              </div>
+              <p style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', margin: '0 0 0.8rem' }}>यह AI बैकग्राउंड में ब्लॉग्स को 5 प्रमुख भारतीय भाषाओं (Hindi, Bengali, Tamil, Telugu, Marathi) में ट्रांसलेट करके डेटाबेस में सेव कर लेगा। (हाइब्रिड सिस्टम के लिए)</p>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.8rem' }}>
+                <div>
+                  <label style={{ display: 'block', marginBottom: '0.3rem', fontWeight: 600, fontSize: '0.85rem' }}>Provider</label>
+                  <select value={apiKeys.translatorProvider || 'openrouter'} onChange={e => setApiKeys({ ...apiKeys, translatorProvider: e.target.value })} style={{ width: '100%', padding: '0.7rem', borderRadius: '8px', border: '1px solid var(--color-border)' }}>
+                    <option value="openrouter">OpenRouter</option>
+                    <option value="openai">OpenAI</option>
+                    <option value="gemini">Google Gemini</option>
+                    <option value="anthropic">Anthropic (Claude)</option>
+                    <option value="deepseek">DeepSeek</option>
+                    <option value="groq">Groq</option>
+                  </select>
+                </div>
+                <div>
+                  <label style={{ display: 'block', marginBottom: '0.3rem', fontWeight: 600, fontSize: '0.85rem' }}>Model Name</label>
+                  <input type="text" value={apiKeys.translatorModel || 'google/gemini-2.5-flash'} onChange={e => setApiKeys({ ...apiKeys, translatorModel: e.target.value })} placeholder="google/gemini-2.5-flash" style={{ width: '100%', padding: '0.7rem', borderRadius: '8px', border: '1px solid var(--color-border)' }} />
+                </div>
+                <div>
+                  <label style={{ display: 'block', marginBottom: '0.3rem', fontWeight: 600, fontSize: '0.85rem' }}>Max Tokens</label>
+                  <input type="number" value={apiKeys.translatorTokens || 4000} onChange={e => setApiKeys({ ...apiKeys, translatorTokens: parseInt(e.target.value) || 4000 })} placeholder="4000" style={{ width: '100%', padding: '0.7rem', borderRadius: '8px', border: '1px solid var(--color-border)' }} />
+                </div>
+              </div>
+            </div>
+
             {/* UI & UX Controls */}
             <hr style={{ border: 'none', borderTop: '1px solid var(--color-border)', margin: '0.5rem 0' }} />
             <h3 style={{ margin: '0', fontSize: '1.15rem', fontWeight: 700 }}>🖥️ Website Features (UI/UX)</h3>

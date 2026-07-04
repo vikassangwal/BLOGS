@@ -102,9 +102,10 @@ model PostTag {
 // ==========================================
 model SiteSettings {
   id            String  @id @default("default")
-  siteName      String  @default("Our Blog")
-  siteTagline   String  @default("AI-Powered Blogging Platform")
-  adminEmail    String  @default("admin@antigravity.com")
+  siteName      String?   @default("Our Blog")
+  siteTagline   String?   @default("Your AI-powered blog")
+  defaultLanguage String? @default("English")
+  adminEmail    String?   @default("admin@example.com")
   aiProvider    String  @default("openai")    // openai, gemini, anthropic, deepseek
   aiApiKey      String  @default("")
   aiModel       String  @default("gpt-4o-mini")
@@ -304,4 +305,15 @@ model TeamMember {
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+
+model StaticPage {
+  id        String   @id @default(cuid())
+  slug      String   @unique
+  title     String
+  content   String
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

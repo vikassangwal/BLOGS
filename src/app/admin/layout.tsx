@@ -14,9 +14,9 @@ const sidebarItems = [
   { name: 'File Manager', path: '/admin/files', icon: '📁' },
   { name: 'Tags Management', path: '/admin/tags', icon: '🏷️' },
   { name: 'Admin Users', path: '/admin/users', icon: '🔐' },
-  { name: 'Team Management', path: '/admin/team', icon: '👥' },
-  { name: 'API Integrations', path: '/admin/integrations', icon: '🔌' },
+  { name: 'API Integrations', path: '/admin/integrations', icon: '🔗' },
   { name: 'Site Settings', path: '/admin/settings', icon: '⚙️' },
+  { name: 'About & Team', path: '/admin/about', icon: '🏢' },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {

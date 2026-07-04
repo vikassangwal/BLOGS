@@ -109,6 +109,16 @@ export default function SettingsAdmin() {
               <input type="text" value={settings.siteTagline || ''} onChange={e => setSettings({ ...settings, siteTagline: e.target.value })} style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--color-border)' }} />
             </div>
             <div>
+              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>Default Language (For AI Posts)</label>
+              <select value={settings.defaultLanguage || 'English'} onChange={e => setSettings({ ...settings, defaultLanguage: e.target.value })} style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--color-border)' }}>
+                <option value="English">English</option>
+                <option value="Hindi">Hindi</option>
+                <option value="Spanish">Spanish</option>
+                <option value="French">French</option>
+                <option value="German">German</option>
+              </select>
+            </div>
+            <div>
               <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>Admin Email</label>
               <input type="email" value={settings.adminEmail || ''} onChange={e => setSettings({ ...settings, adminEmail: e.target.value })} style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--color-border)' }} />
             </div>

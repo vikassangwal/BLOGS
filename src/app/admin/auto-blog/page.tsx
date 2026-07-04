@@ -380,17 +380,31 @@ export default function AutoBlogAdmin() {
         {/* Manual Keyword Queue Input Removed */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
 
-          <div style={{ background: 'rgba(255, 255, 255, 0.05)', padding: '1.5rem', borderRadius: '16px', border: '1px solid var(--color-border)', flex: 1 }}>
-            <h2 style={{ fontSize: '1.2rem', fontWeight: 700, margin: '0 0 1rem 0' }}>Up Next</h2>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
-              {keywords.filter(k => k.status === 'pending').slice(0, 5).map(kw => (
+          <div style={{ background: 'rgba(255, 255, 255, 0.05)', padding: '1.5rem', borderRadius: '16px', border: '1px solid var(--color-border)', flex: 1, display: 'flex', flexDirection: 'column' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+              <h2 style={{ fontSize: '1.2rem', fontWeight: 700, margin: 0 }}>Up Next (Pending Queue)</h2>
+              {keywords.filter(k => k.status === 'pending').length > 0 && (
+                <button 
+                  onClick={async () => {
+                    if(confirm('Delete all pending keywords?')) {
+                      await Promise.all(keywords.filter(k => k.status === 'pending').map(k => deleteKeyword(k.id)));
+                    }
+                  }} 
+                  style={{ background: '#ef4444', color: '#fff', border: 'none', padding: '0.4rem 0.8rem', borderRadius: '6px', cursor: 'pointer', fontSize: '0.8rem' }}
+                >
+                  Clear All
+                </button>
+              )}
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', maxHeight: '400px', overflowY: 'auto', paddingRight: '0.5rem' }}>
+              {keywords.filter(k => k.status === 'pending').map(kw => (
                 <div key={kw.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.8rem', background: 'rgba(255, 255, 255, 0.02)', borderRadius: '8px', border: '1px solid var(--color-border)' }}>
                   <span style={{ fontWeight: 500 }}>{kw.keyword}</span>
-                  <button onClick={() => deleteKeyword(kw.id)} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer' }}>✕</button>
+                  <button onClick={() => deleteKeyword(kw.id)} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', padding: '0.2rem 0.5rem' }}>✕ Delete</button>
                 </div>
               ))}
               {keywords.filter(k => k.status === 'pending').length === 0 && (
-                <p style={{ color: 'var(--color-text-secondary)', textAlign: 'center' }}>Queue is empty.</p>
+                <p style={{ color: 'var(--color-text-secondary)', textAlign: 'center' }}>Queue is empty. Click 'Run Now' to generate fresh topics.</p>
               )}
             </div>
           </div>

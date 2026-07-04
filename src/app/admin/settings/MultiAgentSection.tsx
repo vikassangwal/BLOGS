@@ -129,6 +129,64 @@ export default function MultiAgentSection({ apiKeys, setApiKeys }: any) {
               />
             </div>
           </div>
+
+          {/* Custom Settings for Agent 11 & 12 */}
+          {agentId === 'agent11' && (
+            <div style={{ background: 'rgba(255,255,255,0.03)', padding: '0.8rem', borderRadius: '8px', border: `1px solid rgba(${colorRgb},0.3)`, marginTop: '0.5rem' }}>
+              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, fontSize: '0.85rem', color: colorHex }}>Keywords & Target Country</label>
+              <input 
+                type="text" 
+                value={apiKeys.nicheSeedKeywords || ''} 
+                onChange={e => setApiKeys({ ...apiKeys, nicheSeedKeywords: e.target.value })} 
+                placeholder="e.g. Technology, AI, Finance (Comma separated)" 
+                style={{ width: '100%', padding: '0.6rem', borderRadius: '6px', border: '1px solid var(--color-border)', fontSize: '0.85rem', marginBottom: '0.5rem' }} 
+              />
+              <input 
+                type="text" 
+                value={apiKeys.targetCountry || 'Global'} 
+                onChange={e => setApiKeys({ ...apiKeys, targetCountry: e.target.value })} 
+                placeholder="Target Country (e.g. India, USA, Global)" 
+                style={{ width: '100%', padding: '0.6rem', borderRadius: '6px', border: '1px solid var(--color-border)', fontSize: '0.85rem' }} 
+              />
+            </div>
+          )}
+
+          {agentId === 'agent12' && (
+            <div style={{ background: 'rgba(255,255,255,0.03)', padding: '0.8rem', borderRadius: '8px', border: `1px solid rgba(${colorRgb},0.3)`, marginTop: '0.5rem' }}>
+              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, fontSize: '0.85rem', color: colorHex }}>API Tokens (Medium, Blogger, Tumblr, Reddit)</label>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.8rem' }}>
+                <input 
+                  type="text" 
+                  value={apiKeys.mediumApiToken || ''} 
+                  onChange={e => setApiKeys({ ...apiKeys, mediumApiToken: e.target.value })} 
+                  placeholder="Medium Integration Token" 
+                  style={{ width: '100%', padding: '0.6rem', borderRadius: '6px', border: '1px solid var(--color-border)', fontSize: '0.85rem' }} 
+                />
+                <input 
+                  type="text" 
+                  value={apiKeys.bloggerApiToken || ''} 
+                  onChange={e => setApiKeys({ ...apiKeys, bloggerApiToken: e.target.value })} 
+                  placeholder="Blogger API Key" 
+                  style={{ width: '100%', padding: '0.6rem', borderRadius: '6px', border: '1px solid var(--color-border)', fontSize: '0.85rem' }} 
+                />
+                <input 
+                  type="text" 
+                  value={apiKeys.tumblrApiToken || ''} 
+                  onChange={e => setApiKeys({ ...apiKeys, tumblrApiToken: e.target.value })} 
+                  placeholder="Tumblr API Token" 
+                  style={{ width: '100%', padding: '0.6rem', borderRadius: '6px', border: '1px solid var(--color-border)', fontSize: '0.85rem' }} 
+                />
+                <input 
+                  type="text" 
+                  value={apiKeys.redditApiToken || ''} 
+                  onChange={e => setApiKeys({ ...apiKeys, redditApiToken: e.target.value })} 
+                  placeholder="Reddit API Token" 
+                  style={{ width: '100%', padding: '0.6rem', borderRadius: '6px', border: '1px solid var(--color-border)', fontSize: '0.85rem' }} 
+                />
+              </div>
+            </div>
+          )}
+
         </div>
       </div>
     );
@@ -149,7 +207,11 @@ export default function MultiAgentSection({ apiKeys, setApiKeys }: any) {
       {renderAgentBlock('supervisor', 7, 'Supervisor (Master Orchestrator)', 'यह एजेंट हर दिन सभी AI मॉडल्स की हेल्थ चेक करेगा। अगर कोई बेहतर मॉडल मिलता है, तो यह बाकी एजेंट्स को खुद अपडेट कर देगा।', '#10B981', '16,185,129')}
       {renderAgentBlock('editor', 8, 'Editor / QA Agent', 'Reviews content for grammar, tone, and formatting before final publish.', '#F97316', '249,115,22')}
       {renderAgentBlock('translator', 9, 'AI Translator Agent', 'Translates the blog into multiple languages automatically.', '#06B6D4', '6,182,212')}
+      
       {renderAgentBlock('updater', 10, 'Auto Blog Updater', 'Constantly monitors old blogs and rewrites/updates them with fresh news and links.', '#EAB308', '234,179,8')}
+      {renderAgentBlock('agent11', 11, 'SEO Keyword Researcher', 'Automatically finds low-competition, high-volume keywords in your niche.', '#2DD4BF', '45,212,191')}
+      {renderAgentBlock('agent12', 12, 'Auto Backlink & Syndicator', 'Automatically publishes summaries of new blogs to Medium, Blogger, Tumblr & Reddit.', '#F472B6', '244,114,182')}
+
     </div>
   );
 }

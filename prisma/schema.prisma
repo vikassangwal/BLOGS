@@ -207,6 +207,16 @@ model AutoBlogSettings {
   researcherModel String   @default("google/gemini-2.5-flash")
   writerModel     String   @default("openai/gpt-4o-mini")
   seoModel        String   @default("openai/gpt-4o-mini")
+    
+    // Agent 11 Settings
+    nicheSeedKeywords String? @db.Text
+    targetCountry   String   @default("Global")
+    
+    // Agent 12 Settings
+    mediumApiToken  String?
+    bloggerApiToken String?
+    tumblrApiToken  String?
+    redditApiToken  String?
   
   // Social Media Auto-Post Settings
   instagramToken  String?

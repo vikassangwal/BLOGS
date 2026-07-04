@@ -328,15 +328,17 @@ export async function POST(request: NextRequest) {
     
     CRITICAL RULE: If the topic appears to be a rumor, a future event that hasn't been officially announced yet, or a fake notification (e.g., an exam notification for 2026 that hasn't actually come yet), you MUST ONLY output the exact word "ABORT_FAKE_NEWS" and nothing else. Do not provide any research.
 
-    You MUST provide ALL of the following:
-    1. FACTUAL SUMMARY: Key facts, dates, numbers, names related to this topic. Be specific, not vague.
-    2. SEO KEYWORDS: List 5-7 high-traffic Hindi+English keywords that Indian users would search on Google for this topic (e.g. "SSC CGL 2026 notification", "SSC CGL kab aayega", "SSC CGL eligibility").
-    3. TRENDING ANGLE: What is the most clickable, curiosity-inducing angle for this story right now?
-    4. KEY DATA POINTS: Any specific numbers (salary, vacancies, price, dates, fees) that MUST appear in the article.
-    5. OFFICIAL SOURCES: List any official website domains (e.g. ssc.nic.in, upsc.gov.in) related to this topic.
-    6. RELATED TOPICS: 2-3 related topics that readers might also search for.
+    You MUST extract the FULL NOTIFICATION DETAILS. Provide an exhaustive breakdown of ALL of the following (if available):
+    1. FULL NOTIFICATION SUMMARY: What is the notification about? (Department, Post name, Total Vacancies).
+    2. IMPORTANT DATES: Application Start Date, Last Date, Fee Payment Last Date, Exam Date (if any).
+    3. VACANCY DETAILS: Category-wise breakdown (UR, OBC, SC, ST, EWS) if available.
+    4. ELIGIBILITY & AGE LIMIT: Educational qualifications required, Minimum/Maximum Age, and Age Relaxation rules.
+    5. APPLICATION FEES: Fees for General/OBC and SC/ST/Women.
+    6. SELECTION PROCESS & SYLLABUS: How will candidates be selected? (Written, Physical, Interview) and basic syllabus topics.
+    7. OFFICIAL SOURCES: List exact official website domains (e.g. ssc.gov.in) where the notification is hosted.
+    8. SEO KEYWORDS: 5-7 high-traffic Hindi+English keywords.
     
-    Ensure facts are accurate. Do not write the article, just provide structured research data.`;
+    Be extremely detailed. If a specific piece of information is not found, state "Data not available". Do not write the article, just provide structured exhaustive research data.`;
     
     let researchData = '';
     try {

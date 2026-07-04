@@ -83,12 +83,21 @@ export default function AutoBlogAdmin() {
         alert('Auto-blog generated successfully!');
         fetchData();
       } else {
-        alert('Auto-blog failed: ' + data.error);
+        if (data.error && data.error.includes('AI detected fake')) {
+          console.warn('Fake news skipped, trying next keyword...');
+          // Automatically try the next keyword without bothering the user!
+          setTimeout(() => triggerRun(), 1000);
+        } else {
+          alert('Auto-blog failed: ' + data.error);
+        }
       }
     } catch (error: any) {
       alert('Auto-blog trigger failed: ' + (error?.message || error));
     } finally {
-      setIsRunning(false);
+      // Only reset isRunning if we are NOT automatically retrying
+      if (!(data && data.error && data.error.includes('AI detected fake'))) {
+        setIsRunning(false);
+      }
     }
   };
 

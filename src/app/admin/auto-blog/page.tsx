@@ -391,7 +391,7 @@ export default function AutoBlogAdmin() {
                   onClick={async () => {
                     if(confirm('Delete all pending keywords?')) {
                       await fetch('/api/auto-blog/keywords?clearAll=true', { method: 'DELETE' });
-                      fetchKeywords();
+                      fetchData();
                     }
                   }} 
                   style={{ background: '#ef4444', color: '#fff', border: 'none', padding: '0.4rem 0.8rem', borderRadius: '6px', cursor: 'pointer', fontSize: '0.8rem' }}

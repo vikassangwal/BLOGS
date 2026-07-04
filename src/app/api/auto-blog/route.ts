@@ -327,7 +327,7 @@ export async function POST(request: NextRequest) {
     const researchPrompt = `You are an expert Internet Researcher and SEO Analyst. The user wants to write a blog post about: "${targetTopic}".
     ${liveNewsContext}
     
-    CRITICAL RULE: If the topic appears to be a rumor, a future event that hasn't been officially announced yet, or a fake notification (e.g., an exam notification for 2026 that hasn't actually come yet), you MUST ONLY output the exact word "ABORT_FAKE_NEWS" and nothing else. Do not provide any research.
+    CRITICAL RULE: If the topic is a complete hoax or completely fake rumor, you MUST ONLY output the exact word "ABORT_FAKE_NEWS". HOWEVER, if the topic is just a future/expected exam notification, upcoming job, or expected result that hasn't been released yet, DO NOT ABORT! Instead, provide research clearly stating it is "Expected" or "Upcoming" so the writer can write an "Expected Date/Syllabus" blog.
 
     You MUST extract the FULL NOTIFICATION DETAILS. Provide an exhaustive breakdown of ALL of the following (if available):
     1. FULL NOTIFICATION SUMMARY: What is the notification about? (Department, Post name, Total Vacancies).

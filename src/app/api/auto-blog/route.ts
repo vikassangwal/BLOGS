@@ -326,18 +326,17 @@ export async function POST(request: NextRequest) {
        - Finance: "बजट 2026 में हुआ बड़ा बदलाव, टैक्सपेयर्स को मिला भारी तोहफा, जानिए पूरी डिटेल! (Budget 2026 Updates)"
        - News: "PM मोदी ने किया बड़ा ऐलान, करोड़ों लोगों की ज़िंदगी बदल जाएगी! (PM Modi Announcement)"
        ALWAYS write the main title first in Hindi (creating eagerness to read), then in brackets English.
-
-    ===== 🌐 UNIVERSAL QUALITY RULES (ये नियम हर कैटेगरी पर लागू होंगे) =====
-    ✅ COMPLETENESS: हर ब्लॉग 100% पूरा होना चाहिए। अंत में CONCLUSION ज़रूर लिखो। कभी भी "..." या "coming soon" लिखकर छोड़ो मत।
-    ✅ ACCURACY: केवल सही और verified जानकारी लिखो। अगर कोई तारीख या डेटा पक्का नहीं है तो "(संभावित)" या "(Expected)" लिखो, लेकिन ख़ाली मत छोड़ो।
-    ✅ NO FILLER CONTENT: "आज के इस डिजिटल युग में", "दोस्तों", "रोमांचक", "आइए जानते हैं" — ये शब्द BANNED हैं। सीधे मुद्दे पर आओ।
-    ✅ TABLES FOR DATA: जहाँ भी डेटा हो (तारीखें, फीस, वेतन, स्पेसिफिकेशन्स, कीमत) वहाँ HTML <table> इस्तेमाल करो, पैराग्राफ नहीं।
-    ✅ BOLD IMPORTANT INFO: वेतन (₹35,000), तारीख (25 जुलाई), कुल पद (5,000), कीमत (₹15,999) जैसी अहम जानकारी हमेशा <strong>Bold</strong> करो।
-    ✅ MOBILE-FIRST: कोई भी पैराग्राफ 3-4 लाइनों से बड़ा नहीं होना चाहिए।
-    ✅ HTML FORMAT ONLY: कंटेंट सीधे पब्लिश करने योग्य HTML (<h2>, <p>, <table>, <ul>) में होगा। कभी Markdown (##, **) मत लिखो।
-    ✅ SMART LINKS: जहाँ भी कोई बाहरी लिंक देना हो वहाँ <a href="..." target="_blank" rel="nofollow">👉 Click Here</a> लिखो। अगर एग्जैक्ट URL नहीं पता तो Google Dork link बनाओ: https://www.google.com/search?q=site:[DOMAIN]+[KEYWORD]
-    ✅ HINGLISH SEO: हर ब्लॉग में नेचुरली 2-3 Hinglish कीवर्ड्स ("kaise kare", "kab aayega", "online apply") डालो ताकि Indian SEO बेहतर हो।
-    ✅ NEVER TRUNCATE: तुम्हें पूरा आर्टिकल (Introduction से Conclusion तक) लिखना अनिवार्य है। बीच में कभी मत रुको।
+    ===== 💎 UNIVERSAL QUALITY RULES (इनका 100% पालन करना अनिवार्य है) =====
+    1. COMPLETENESS: आर्टिकल 100% पूरा होना चाहिए। CONCLUSION लिखकर ही खत्म करें।
+    2. ACCURACY & NO EVASIVE ANSWERS (STRICT): जो भी डेटा (Dates, Fees, Links, Exam Dates) दें, वो असली होना चाहिए। अगर एग्जैक्ट डेट नहीं पता है, तो अपनी नॉलेज से एक पक्का अंदाजा/अनुमान (Expected Date/Month) दें, जैसे "(Expected April 2026)"। कभी भी "नोटिफिकेशन में देखें", "जल्द घोषित होगी", या "चेक वेबसाइट" जैसे गोल-मोल जवाब हरगिज़ ना लिखें! अगर कुछ नहीं पता तो वह पंक्ति/रो हटा दें।
+    3. NO FILLER CONTENT: "आज के इस आर्टिकल में", "उम्मीद है", "कैसा लगा", "दोस्तों" जैसे शब्द BANNED हैं। सीधे काम की बात लिखें।
+    4. TABLES FOR DATA: कोई भी आंकड़ा (तारीख, फीस, सैलरी, स्पेसिफिकेशन) हो तो HTML <table> बनाकर दें।
+    5. BOLD IMPORTANT INFO: मुख्य शब्दों को <strong>Bold</strong> करें।
+    6. MOBILE-FIRST: कोई भी पैराग्राफ 3-4 लाइनों से बड़ा नहीं होना चाहिए।
+    7. HTML FORMAT ONLY: कंटेंट सीधे पब्लिश करने योग्य HTML (<h2>, <p>, <table>, <ul>) में होगा। Markdown (##, **) का उपयोग ना करें।
+    8. SMART LINKS: बाहरी लिंक के लिए <a href="..." target="_blank" rel="nofollow">👉 Click Here</a> का उपयोग करें।
+    9. HINGLISH SEO: 2-3 Hinglish कीवर्ड्स ("kaise kare", "kab aayega") डालें।
+    10. NEVER TRUNCATE: पूरा आर्टिकल (Introduction से Conclusion तक) लिखें।
     ===== END UNIVERSAL RULES =====
 
     3. IF the topic is about General News, Politics, Sports, Health, or any topic NOT covered by Finance/Tech/Education prompts below, you MUST follow this 🔥 NEWS MASTER PROMPT 🔥:

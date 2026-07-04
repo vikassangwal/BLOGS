@@ -195,7 +195,7 @@ export async function POST(request: NextRequest) {
       TODAY'S DATE IS: ${currentDate}.
       ${seedNews}
       GENERATE A MASSIVE LIST OF 120 KEYWORDS.
-      This is Step 1 (Brainstorming). Generate a wide variety of Government Job Vacancies (from the LAST 72 HOURS), Exam Notifications, Scholarships, University Admissions/Results, School/College News, Board Exam Updates, Technology trends, and Finance updates. 
+      This is Step 1 (Brainstorming). Generate a wide variety of Government Job Vacancies (from the LAST 72 HOURS), Exam Notifications, Scholarships, University Admissions/Results, School/College News, Career Courses (e.g. Best courses after 12th), Board Exam Updates, Technology trends, and Finance updates. 
       Include topics from ALL 28 Indian States and 8 Union Territories.
       Respond ONLY with a valid JSON array of strings. No markdown.
       Example format: ["Topic 1", "Topic 2", "Topic 3"]`;
@@ -218,11 +218,11 @@ export async function POST(request: NextRequest) {
         
         Your job is to filter this list and select EXACTLY 41 highly specific, real, and currently trending topics.
         Follow the 37+2+2 rule exactly:
-        - Include EXACTLY 37 Education & Career topics (Government Jobs, Exam Notifications, Scholarships, Board Results, University Admissions). 
-          🚨 HIGHEST PRIORITY 🚨: DO NOT MISS ANY NEW NOTIFICATION! Any major job vacancy, exam notification, or result released in the LAST 72 HOURS MUST be included at the top of your list.
+        - Include EXACTLY 37 Education & Career topics. 
+          🚨 1st PRIORITY (HIGHEST) 🚨: NEW NOTIFICATIONS! You MUST NOT miss any new Government Job vacancy, Exam Notification, Admit Card, or Result released in the LAST 72 HOURS. Include ALL of them at the very top of your list so we can be the FIRST to publish before any competitor!
+          👉 2nd PRIORITY (FALLBACK) 👉: If (and ONLY if) there are not enough new job notifications today, you MUST fill the remaining slots with: State Scholarship Schemes, University/Board Results, Ongoing applications, or Career Courses (e.g. 'Best courses after 12th').
           ⚠️ STRICT CRITICAL RULE ⚠️: You MUST provide exactly ONE real, current news topic for EACH of the 28 States of India, ONE for EACH of the 8 Union Territories, and ONE for the Central Government (28+8+1 = 37). 
-          👉 WHAT COUNTS AS REAL: Since 37 new notifications are not released every single day, "Real" topics MUST include: Vacancies released in the LAST 72 HOURS, ONGOING application forms, UPCOMING Exam Dates/Syllabus, Expected Results, State Scholarship Schemes, School/College updates, Board Exam updates, and State University Admission/Results. 
-          ⚠️ ANTI-FAKE NEWS RULE ⚠️: DO NOT invent exams or results that don't exist. Keep real ongoing/upcoming exams, recent vacancies (last 72 hours), or real scholarship/university updates.
+          ⚠️ ANTI-FAKE NEWS RULE ⚠️: DO NOT invent exams or results that don't exist. Keep real ongoing/upcoming exams, recent vacancies (last 72 hours), or real scholarship/university/course updates.
         - Include 2 Technology topics. MUST BE REAL AND RECENT (e.g., 'Samsung S24 Ultra Launched').
         - Include 2 Finance updates. MUST BE REAL AND RECENT (e.g., 'RBI Repo Rate Increased Today').
         Ensure the topics are highly specific (NOT generic like 'Education news in Bihar').

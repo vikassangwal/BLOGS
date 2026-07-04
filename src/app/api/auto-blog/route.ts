@@ -602,7 +602,7 @@ export async function POST(request: NextRequest) {
 
         <h2 id="links">Important Links (महत्वपूर्ण लिंक)</h2>
         Create an HTML Table for ALL important links. DO NOT WRITE PARAGRAPHS.
-        Example Rows: Official Website Link, Apply Online Link, Download Notification Link. (Use <a href="..." target="_blank" rel="nofollow">👉 Click Here</a> for all links).
+        Example Rows: Official Website Link, Apply Online Link, Download Notification Link. (Use <a href="..." target="_blank" rel="nofollow" class="font-bold text-blue-600 underline">👉 Click Here</a> for all links to make them stand out).
 
         <h2 id="apply">How to Apply (आवेदन कैसे करें)</h2>
         Step-by-step process in 3-4 simple points.

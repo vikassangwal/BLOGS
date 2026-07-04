@@ -65,7 +65,10 @@ export default function AutoBlogAdmin() {
   const triggerRun = async () => {
     setIsRunning(true);
     try {
-      const res = await fetch('/api/auto-blog', { method: 'POST' });
+      const res = await fetch('/api/auto-blog', { 
+        method: 'POST',
+        headers: { 'x-force-run': 'true' }
+      });
       
       let data;
       try {

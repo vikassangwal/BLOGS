@@ -91,7 +91,26 @@ Instructions:
 }
 Respond ONLY with the JSON.`;
 
-    const aiResponse = await generateAIContent(editorConfig.primary || editorConfig, sysPrompt, userPrompt, editorConfig.maxTokens);
+    let aiResponse;
+    try {
+      aiResponse = await generateAIContent(editorConfig, sysPrompt, userPrompt, editorConfig.maxTokens);
+    } catch (error) {
+      console.warn("Primary Editor Model failed, attempting fallback...");
+      const backupStr = apiKeys.editorBackupModel?.trim();
+      if (backupStr) {
+        let backupProvider = provider;
+        let backupModelName = backupStr;
+        if (backupStr.includes('/')) {
+          const parts = backupStr.split('/');
+          backupProvider = parts[0];
+          backupModelName = parts.slice(1).join('/');
+        }
+        const backupConfig = { provider: backupProvider as any, apiKey: getApiKey(backupProvider), model: backupModelName, maxTokens };
+        aiResponse = await generateAIContent(backupConfig, sysPrompt, userPrompt, backupConfig.maxTokens);
+      } else {
+        throw error;
+      }
+    }
     
     // Parse the JSON
     let parsedData;

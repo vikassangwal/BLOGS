@@ -461,7 +461,7 @@ export default function SettingsAdmin() {
                 </label>
               </div>
               <p style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', margin: '0 0 0.8rem' }}>यह AI बैकग्राउंड में ब्लॉग्स को 5 प्रमुख भारतीय भाषाओं (Hindi, Bengali, Tamil, Telugu, Marathi) में ट्रांसलेट करके डेटाबेस में सेव कर लेगा। (हाइब्रिड सिस्टम के लिए)</p>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.8rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '0.8rem' }}>
                 <div>
                   <label style={{ display: 'block', marginBottom: '0.3rem', fontWeight: 600, fontSize: '0.85rem' }}>Provider</label>
                   <select value={apiKeys.translatorProvider || 'openrouter'} onChange={e => setApiKeys({ ...apiKeys, translatorProvider: e.target.value })} style={{ width: '100%', padding: '0.7rem', borderRadius: '8px', border: '1px solid var(--color-border)' }}>
@@ -476,6 +476,10 @@ export default function SettingsAdmin() {
                 <div>
                   <label style={{ display: 'block', marginBottom: '0.3rem', fontWeight: 600, fontSize: '0.85rem' }}>Model Name</label>
                   <input type="text" value={apiKeys.translatorModel || 'google/gemini-2.5-flash'} onChange={e => setApiKeys({ ...apiKeys, translatorModel: e.target.value })} placeholder="google/gemini-2.5-flash" style={{ width: '100%', padding: '0.7rem', borderRadius: '8px', border: '1px solid var(--color-border)' }} />
+                </div>
+                <div>
+                  <label style={{ display: 'block', marginBottom: '0.3rem', fontWeight: 600, fontSize: '0.85rem' }}>Backup Model (Fallback)</label>
+                  <input type="text" value={apiKeys.translatorBackupModel || ''} onChange={e => setApiKeys({ ...apiKeys, translatorBackupModel: e.target.value })} placeholder="e.g. groq/llama3-8b" style={{ width: '100%', padding: '0.7rem', borderRadius: '8px', border: '1px solid var(--color-border)' }} />
                 </div>
                 <div>
                   <label style={{ display: 'block', marginBottom: '0.3rem', fontWeight: 600, fontSize: '0.85rem' }}>Max Tokens</label>

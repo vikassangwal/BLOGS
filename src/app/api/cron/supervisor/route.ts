@@ -38,13 +38,28 @@ export async function GET(request: NextRequest) {
     const strategy = apiKeys.supervisorStrategy || 'free'; // 'free', 'smart', 'fast'
 
     // 2. Fetch all models from OpenRouter (acts as the global registry)
-    const orRes = await fetch('https://openrouter.ai/api/v1/models');
-    if (!orRes.ok) {
-      return NextResponse.json({ error: 'Failed to fetch model registry' }, { status: 500 });
+    let availableModels: any[] = [];
+    try {
+      const orRes = await fetch('https://openrouter.ai/api/v1/models', { signal: AbortSignal.timeout(10000) });
+      if (orRes.ok) {
+        const orData = await orRes.json();
+        availableModels = orData.data || [];
+      } else {
+        throw new Error('Non-200 response from registry');
+      }
+    } catch (error) {
+      console.warn("Supervisor failed to fetch registry, using Fallback Models...");
+      // Fallback: If OpenRouter is down, fallback to known good models for each category
+      if (apiKeys.supervisorBackupModel) {
+        availableModels.push({ id: apiKeys.supervisorBackupModel, context_length: 128000, pricing: { prompt: "0", completion: "0" } });
+      } else {
+        availableModels = [
+          { id: 'google/gemini-2.5-flash', context_length: 1048576, pricing: { prompt: "0", completion: "0" } },
+          { id: 'google/gemini-2.5-pro', context_length: 1048576, pricing: { prompt: "0", completion: "0" } },
+          { id: 'openai/gpt-4o-mini', context_length: 128000, pricing: { prompt: "0.00015", completion: "0.0006" } }
+        ];
+      }
     }
-    
-    const orData = await orRes.json();
-    let availableModels = orData.data || [];
 
     // Filter out image/embedding models (must have text modality)
     availableModels = availableModels.filter((m: any) => 

@@ -191,28 +191,42 @@ export async function POST(request: NextRequest) {
       }
 
       const currentDate = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-      const topicPrompt = `You are a Trending News & Job Alert researcher for India. 
+      const step1Prompt = `You are a Trending News & Job Alert researcher for India. 
       TODAY'S DATE IS: ${currentDate}.
       ${seedNews}
-      You must ONLY provide topics that are highly relevant, trending, or upcoming around THIS SPECIFIC DATE (${currentDate}). Do NOT provide old news from previous years.
-      If LIVE NEWS HEADLINES are provided above, you MUST prioritize generating topics based on them.
-      Provide exactly 41 highly specific, real, and currently trending topics in India.
-      Follow the 37+2+2 rule exactly:
-      - Include EXACTLY 37 Government Jobs, Exam Notifications, or Results. 
-        ⚠️ STRICT CRITICAL RULE ⚠️: You MUST provide exactly ONE real, current news topic for EACH of the 28 States of India, ONE for EACH of the 8 Union Territories, and ONE for the Central Government (28+8+1 = 37). 
-        ⚠️ ANTI-FAKE NEWS RULE ⚠️: ONLY generate topics for events that have ALREADY HAPPENED or BEEN OFFICIALLY RELEASED (e.g., 'SSC CHSL Official Notification Out', 'Bihar Police Result Declared'). YOU ARE STRICTLY FORBIDDEN FROM GENERATING EXPECTED OR FUTURE NOTIFICATIONS (e.g., NEVER generate 'SSC CGL 2027 Expected Date'). If the notification is not out, do not mention it!
-      - Include 2 Technology topics. MUST BE OFFICIALLY RELEASED OR LAUNCHED (e.g., 'Samsung S24 Ultra Officially Launched in India'). NEVER generate rumors or 'Upcoming/Expected' tech leaks.
-      - Include 2 Finance updates. MUST BE REAL AND HAPPENED TODAY/RECENTLY (e.g., 'RBI Repo Rate Increased Today', 'Income Tax New Rule Implemented'). NEVER generate 'Expected' budget news or stock market rumors.
-      Ensure the topics are highly specific (NOT generic like 'Education news in Bihar').
-      Respond ONLY with a valid JSON array of strings. No markdown, no backticks.
+      GENERATE A MASSIVE LIST OF 120 KEYWORDS.
+      This is Step 1 (Brainstorming). Generate a wide variety of Government Jobs, Exam Notifications, Technology trends, and Finance updates. 
+      Include topics from ALL 28 Indian States and 8 Union Territories.
+      Respond ONLY with a valid JSON array of strings. No markdown.
       Example format: ["Topic 1", "Topic 2", "Topic 3"]`;
 
       let rModel = settings.researcherModel || '';
-
       const researcherConfigForTopic = buildAgentConfig('researcher', 'openrouter', rModel || 'google/gemini-2.5-flash', 1500);
       
       try {
-        const topicRaw = await generateContentWithFallback(researcherConfigForTopic, "You output strict JSON arrays.", topicPrompt);
+        // STEP 1: Generate 120 Keywords
+        const step1Raw = await generateContentWithFallback(researcherConfigForTopic, "You output strict JSON arrays.", step1Prompt);
+        const firstBracket1 = step1Raw.indexOf('[');
+        const lastBracket1 = step1Raw.lastIndexOf(']');
+        const rawKeywordsList = (firstBracket1 !== -1 && lastBracket1 !== -1) ? step1Raw.substring(firstBracket1, lastBracket1 + 1) : "[]";
+        
+        // STEP 2: Filter down to exactly 41 strictly verified keywords
+        const step2Prompt = `You are a STRICT FACT-CHECKER AND EDITOR. 
+        TODAY'S DATE IS: ${currentDate}.
+        Here is a raw list of brainstormed topics:
+        ${rawKeywordsList}
+        
+        Your job is to filter this list and select EXACTLY 41 highly specific, real, and currently trending topics.
+        Follow the 37+2+2 rule exactly:
+        - Include EXACTLY 37 Government Jobs, Exam Notifications, or Results. 
+          ⚠️ STRICT CRITICAL RULE ⚠️: You MUST provide exactly ONE real, current news topic for EACH of the 28 States of India, ONE for EACH of the 8 Union Territories, and ONE for the Central Government (28+8+1 = 37). 
+          ⚠️ ANTI-FAKE NEWS RULE ⚠️: ONLY keep topics for events that have ALREADY HAPPENED or BEEN OFFICIALLY RELEASED (e.g., 'SSC CHSL Official Notification Out', 'Bihar Police Result Declared'). YOU ARE STRICTLY FORBIDDEN FROM KEEPING EXPECTED OR FUTURE NOTIFICATIONS (e.g., NEVER keep 'SSC CGL 2027 Expected Date'). If the notification is not out, discard it!
+        - Include 2 Technology topics. MUST BE OFFICIALLY RELEASED OR LAUNCHED. NEVER keep rumors or 'Upcoming/Expected' tech leaks.
+        - Include 2 Finance updates. MUST BE REAL AND HAPPENED TODAY/RECENTLY. NEVER keep 'Expected' budget news or stock market rumors.
+        Ensure the topics are highly specific (NOT generic like 'Education news in Bihar').
+        Respond ONLY with a valid JSON array of exactly 41 strings. No markdown.`;
+
+        const topicRaw = await generateContentWithFallback(researcherConfigForTopic, "You output strict JSON arrays.", step2Prompt);
         const firstBracket = topicRaw.indexOf('[');
         const lastBracket = topicRaw.lastIndexOf(']');
         if (firstBracket === -1 || lastBracket === -1) throw new Error("No JSON array found");
@@ -245,7 +259,7 @@ export async function POST(request: NextRequest) {
           // Return early to prevent Vercel 60s timeout limit. The next click will generate the actual blog.
           return NextResponse.json({ 
             status: 'empty', 
-            message: '45 Hot Topics Generated successfully! Please click "Run Now" again to write the first blog.' 
+            message: '41 Top-Filtered 100% Real Topics Generated successfully! Please click "Run Now" again to write the first blog.' 
           });
           
         } else {

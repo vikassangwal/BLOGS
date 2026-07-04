@@ -593,7 +593,7 @@ YOUR SEO SKILLS:
 - You use Google Dork links when exact URLs are unknown.
 - Every article ends with a WhatsApp share CTA and comment hook.`;
 
-      articleHtml = await generateAIContent(writerConfig, writerSystemPrompt, writerPrompt, 3500);
+      articleHtml = await generateAIContent(writerConfig, writerSystemPrompt, writerPrompt, 8000);
       
       // Wait 2 seconds to prevent OpenRouter Free Tier burst rate limit (429)
       await new Promise(resolve => setTimeout(resolve, 2000));

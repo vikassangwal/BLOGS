@@ -385,7 +385,8 @@ export async function POST(request: NextRequest) {
     7. HTML FORMAT ONLY: कंटेंट सीधे पब्लिश करने योग्य HTML (<h2>, <p>, <table>, <ul>) में होगा। Markdown (##, **) का उपयोग ना करें।
     8. OFFICIAL HOME PAGE LINKS ONLY: बाहरी लिंक के लिए केवल मुख्य वेबसाइट का होमपेज (जैसे https://ssc.gov.in) दें। अगर आपको पता है कि डायरेक्ट लिंक अभी वेबसाइट पर नहीं आया है, तो साफ़ शब्दों में लिखें: "⚠️ *नोट: अभी डायरेक्ट अप्लाई लिंक या पीडीएफ वेबसाइट पर एक्टिव नहीं हुआ है, कृपया ऑफिशियल वेबसाइट चेक करते रहें।*" कभी भी खुद से फेक लिंक ना बनाएँ।
     9. HINGLISH SEO: 2-3 Hinglish कीवर्ड्स ("kaise kare", "kab aayega") डालें।
-    10. NEVER TRUNCATE: पूरा आर्टिकल (Introduction से Conclusion तक) लिखें।
+    10. VIRAL LISTICLE FORMAT: जहाँ भी मुमकिन हो (खासकर Technology और Finance में), जानकारियों को "Top 5", "Top 10", या "Best X" वाले पॉइंट-वाइज़ लिस्ट (Listicle) फॉर्मेट में लिखें। यह रीडर्स को बहुत एंगेजिंग लगता है।
+    11. NEVER TRUNCATE: पूरा आर्टिकल (Introduction से Conclusion तक) लिखें।
     ===== END UNIVERSAL RULES =====
 
     3. IF the topic is about General News, Politics, Sports, Health, or any topic NOT covered by Finance/Tech/Education prompts below, you MUST follow this 🔥 NEWS MASTER PROMPT 🔥:

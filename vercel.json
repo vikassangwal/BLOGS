@@ -1,4 +1,14 @@
 {
   "buildCommand": "prisma generate && next build",
-  "installCommand": "npm install"
+  "installCommand": "npm install",
+  "crons": [
+    {
+      "path": "/api/auto-blog",
+      "schedule": "0 2 * * *"
+    },
+    {
+      "path": "/api/auto-blog",
+      "schedule": "0 14 * * *"
+    }
+  ]
 }

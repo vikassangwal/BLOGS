@@ -78,6 +78,10 @@ async function postToTwitter(bearerToken: string, text: string) {
 }
 
 
+export async function GET(request: NextRequest) {
+  return POST(request);
+}
+
 export async function POST(request: NextRequest) {
   try {
     // Auth check: only admin can trigger auto-blog (skip for cron calls with x-cron-secret header)

@@ -78,9 +78,6 @@ async function postToTwitter(bearerToken: string, text: string) {
 }
 
 
-export async function GET(request: NextRequest) {
-  return POST(request);
-}
 
 export async function POST(request: NextRequest) {
   try {
@@ -950,14 +947,15 @@ YOUR SEO SKILLS:
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
+    const expectedSecret = process.env.CRON_SECRET || 'knowora-cron-2026';
+    const authHeader = request.headers.get('authorization');
     
-    // Check if this is a cron trigger request
-    if (searchParams.get('action') === 'trigger') {
-      const cronSecret = searchParams.get('secret');
-      const expectedSecret = process.env.CRON_SECRET || 'knowora-cron-2026';
-      if (cronSecret !== expectedSecret) {
-        return NextResponse.json({ error: 'Unauthorized cron access' }, { status: 401 });
-      }
+    // Check if this is a cron trigger request (from Vercel Cron or manual trigger)
+    const isCron = 
+      searchParams.get('action') === 'trigger' && searchParams.get('secret') === expectedSecret ||
+      authHeader === `Bearer ${expectedSecret}`;
+      
+    if (isCron || searchParams.get('force-run') === 'true') {
       return POST(request);
     }
 

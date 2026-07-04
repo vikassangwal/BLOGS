@@ -8,7 +8,8 @@ export default function SettingsAdmin() {
     groq: '', mistral: '', together: '', fireworks: '', perplexity: '', cohere: '', xai: '',
     resend: '', twitter: '', facebook: '', instagram: '', instagramAccountId: '',
     onesignalAppId: '', onesignalApiKey: '', razorpayKey: '', razorpaySecret: '',
-    telegramToken: '', telegramChatId: '', whatsappToken: '', whatsappPhoneId: '', whatsappGroupId: ''
+    telegramToken: '', telegramChatId: '', whatsappToken: '', whatsappPhoneId: '', whatsappGroupId: '',
+    supervisorActive: true, supervisorStrategy: 'free'
   });
   const [isSaving, setIsSaving] = useState(false);
   const [activeTab, setActiveTab] = useState('general');
@@ -413,6 +414,29 @@ export default function SettingsAdmin() {
                 <div>
                   <label style={{ display: 'block', marginBottom: '0.3rem', fontWeight: 600, fontSize: '0.85rem' }}>Model Name</label>
                   <input type="text" value={apiKeys.imageGenModel || 'flux'} onChange={e => setApiKeys({ ...apiKeys, imageGenModel: e.target.value })} placeholder="e.g. dall-e-3, flux-pro" style={{ width: '100%', padding: '0.7rem', borderRadius: '8px', border: '1px solid var(--color-border)' }} />
+                </div>
+              </div>
+            </div>
+
+            {/* Agent 7: Supervisor Agent */}
+            <div style={{ background: 'rgba(16,185,129,0.08)', padding: '1.2rem', borderRadius: '12px', border: '1px solid rgba(16,185,129,0.2)', marginTop: '1rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.8rem' }}>
+                <h4 style={{ margin: 0, fontSize: '1rem', fontWeight: 700, color: '#10B981' }}>👑 Agent 7: Supervisor (Master Orchestrator)</h4>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.9rem', fontWeight: 600 }}>
+                  <input type="checkbox" checked={apiKeys.supervisorActive !== false} onChange={e => setApiKeys({ ...apiKeys, supervisorActive: e.target.checked })} style={{ transform: 'scale(1.2)' }} />
+                  Enable Auto-Update Models
+                </label>
+              </div>
+              <p style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', margin: '0 0 1rem' }}>यह एजेंट हर दिन सभी AI मॉडल्स की हेल्थ चेक करेगा। अगर कोई बेहतर मॉडल मिलता है, तो यह बाकी एजेंट्स को खुद अपडेट कर देगा।</p>
+              
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '0.8rem' }}>
+                <div>
+                  <label style={{ display: 'block', marginBottom: '0.3rem', fontWeight: 600, fontSize: '0.85rem' }}>Priority Strategy (नया मॉडल चुनने का तरीका)</label>
+                  <select value={apiKeys.supervisorStrategy || 'free'} onChange={e => setApiKeys({ ...apiKeys, supervisorStrategy: e.target.value })} style={{ width: '100%', padding: '0.7rem', borderRadius: '8px', border: '1px solid var(--color-border)' }}>
+                    <option value="free">💰 Cheapest / Free (सबसे सस्ता और फ्री मॉडल)</option>
+                    <option value="smart">🧠 Smartest / Highest IQ (सबसे अक्लमंद मॉडल - महंगा हो सकता है)</option>
+                    <option value="fast">⚡ Fastest (सबसे तेज़ रिप्लाई करने वाला)</option>
+                  </select>
                 </div>
               </div>
             </div>

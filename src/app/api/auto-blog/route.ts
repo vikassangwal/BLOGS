@@ -220,9 +220,10 @@ export async function POST(request: NextRequest) {
         Follow the 37+2+2 rule exactly:
         - Include EXACTLY 37 Government Jobs, Exam Notifications, or Results. 
           ⚠️ STRICT CRITICAL RULE ⚠️: You MUST provide exactly ONE real, current news topic for EACH of the 28 States of India, ONE for EACH of the 8 Union Territories, and ONE for the Central Government (28+8+1 = 37). 
-          ⚠️ ANTI-FAKE NEWS RULE ⚠️: ONLY keep topics for events that have ALREADY HAPPENED or BEEN OFFICIALLY RELEASED (e.g., 'SSC CHSL Official Notification Out', 'Bihar Police Result Declared'). YOU ARE STRICTLY FORBIDDEN FROM KEEPING EXPECTED OR FUTURE NOTIFICATIONS (e.g., NEVER keep 'SSC CGL 2027 Expected Date'). If the notification is not out, discard it!
-        - Include 2 Technology topics. MUST BE OFFICIALLY RELEASED OR LAUNCHED. NEVER keep rumors or 'Upcoming/Expected' tech leaks.
-        - Include 2 Finance updates. MUST BE REAL AND HAPPENED TODAY/RECENTLY. NEVER keep 'Expected' budget news or stock market rumors.
+          👉 WHAT COUNTS AS REAL: Since 37 new notifications are not released every single day, "Real" job topics MUST include: Recently released notifications, ONGOING application forms, UPCOMING Exam Dates/Syllabus, Expected Results, and Admit Card releases. 
+          ⚠️ ANTI-FAKE NEWS RULE ⚠️: DO NOT invent exams that don't exist. Keep real ongoing/upcoming exams (e.g., 'SSC CGL 2026 Expected Notification & Syllabus', 'UP Police Constable Result Update').
+        - Include 2 Technology topics. MUST BE REAL AND RECENT (e.g., 'Samsung S24 Ultra Launched').
+        - Include 2 Finance updates. MUST BE REAL AND RECENT (e.g., 'RBI Repo Rate Increased Today').
         Ensure the topics are highly specific (NOT generic like 'Education news in Bihar').
         Respond ONLY with a valid JSON array of exactly 41 strings. No markdown.`;
 
@@ -343,7 +344,8 @@ export async function POST(request: NextRequest) {
     const researchPrompt = `You are an expert Internet Researcher and SEO Analyst. The user wants to write a blog post about: "${targetTopic}".
     ${liveNewsContext}
     
-    CRITICAL RULE (STRICT): If the topic appears to be a rumor, a future event that hasn't been officially announced yet, or a fake notification (e.g., an exam notification for 2026 that hasn't actually been released yet), you MUST ONLY output the exact word "ABORT_FAKE_NEWS" and nothing else. Do not provide any research. ONLY provide research if the event/notification has OFFICIALLY HAPPENED.
+    CRITICAL RULE (STRICT): If the topic is a COMPLETELY FAKE exam that does not exist or a totally made-up rumor, you MUST ONLY output the exact word "ABORT_FAKE_NEWS" and nothing else. 
+    HOWEVER, if it is a real Upcoming Exam, an Expected Syllabus, an Ongoing Application, or an Expected Result, DO NOT ABORT! Provide research for it (mentioning it is expected/upcoming) so the writer can write an informative guide.
 
     You MUST extract the FULL NOTIFICATION DETAILS. Provide an exhaustive breakdown of ALL of the following (if available):
     1. FULL NOTIFICATION SUMMARY: What is the notification about? (Department, Post name, Total Vacancies).

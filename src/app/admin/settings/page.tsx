@@ -1,11 +1,15 @@
 'use client';
+'use client';
 import React, { useEffect, useState } from 'react';
 import MultiAgentSection from './MultiAgentSection';
 
 export default function SettingsAdmin() {
   const [settings, setSettings] = useState<any>(null);
   const [apiKeys, setApiKeys] = useState<any>({ 
-    openai: '', gemini: '', anthropic: '', deepseek: '', openrouter: '',
+    newsApiDataKey: '',
+    newsFeedUrls: '',
+    googleIndexingJson: '',
+    themeMode: 'dark', openai: '', gemini: '', anthropic: '', deepseek: '', openrouter: '',
     groq: '', mistral: '', together: '', fireworks: '', perplexity: '', cohere: '', xai: '',
     resend: '', twitter: '', facebook: '', instagram: '', instagramAccountId: '',
     onesignalAppId: '', onesignalApiKey: '', razorpayKey: '', razorpaySecret: '',
@@ -26,7 +30,11 @@ export default function SettingsAdmin() {
             const parsed = JSON.parse(data.aiApiKey);
             setApiKeys({
               ...apiKeys,
-              ...parsed
+              ...parsed,
+              newsApiDataKey: data.newsApiDataKey || '',
+              newsFeedUrls: data.newsFeedUrls || '',
+              googleIndexingJson: data.googleIndexingJson || '',
+              themeMode: data.themeMode || 'dark'
             });
           } else {
             setApiKeys({ ...apiKeys, openai: data?.aiApiKey || '' });
@@ -239,6 +247,34 @@ export default function SettingsAdmin() {
             </div>
 
             <MultiAgentSection apiKeys={apiKeys} setApiKeys={setApiKeys} />
+
+            <div style={{ marginTop: '2rem', padding: '1.5rem', borderRadius: '12px', background: 'rgba(234, 179, 8, 0.05)', border: '1px solid rgba(234, 179, 8, 0.3)' }}>
+              <h4 style={{ margin: '0 0 1rem', fontSize: '1.1rem', color: '#eab308' }}>🔄 Agent 10: Auto Blog Updater Settings</h4>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1rem' }}>
+                <div>
+                  <label style={{ display: 'block', marginBottom: '0.3rem', fontSize: '0.85rem' }}>RSS News Feed URLs (Optional - Comma separated)</label>
+                  <p style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', margin: '0 0 0.5rem' }}>If provided, Agent 10 will monitor these URLs for new news instead of just NewsData.io.</p>
+                  <input 
+                    type="text" 
+                    value={apiKeys.newsFeedUrls} 
+                    onChange={e => setApiKeys({ ...apiKeys, newsFeedUrls: e.target.value })} 
+                    placeholder="https://news.google.com/rss/search?q=technology, https://..." 
+                    style={{ width: '100%', padding: '0.7rem', borderRadius: '8px', border: '1px solid var(--color-border)', background: 'transparent' }} 
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', marginBottom: '0.3rem', fontSize: '0.85rem' }}>Google Indexing API JSON (Base64)</label>
+                  <p style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', margin: '0 0 0.5rem' }}>Base64 encoded service account JSON to auto-ping Google when a blog is updated.</p>
+                  <input 
+                    type="text" 
+                    value={apiKeys.googleIndexingJson} 
+                    onChange={e => setApiKeys({ ...apiKeys, googleIndexingJson: e.target.value })} 
+                    placeholder="eyJ0eXAiOiJKV1QiLCJhbGciOiJ..." 
+                    style={{ width: '100%', padding: '0.7rem', borderRadius: '8px', border: '1px solid var(--color-border)', background: 'transparent' }} 
+                  />
+                </div>
+              </div>
+            </div>
 
             {/* UI & UX Controls */}
             <hr style={{ border: 'none', borderTop: '1px solid var(--color-border)', margin: '0.5rem 0' }} />

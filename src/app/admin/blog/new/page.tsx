@@ -21,7 +21,8 @@ function BlogEditor() {
     seoKeywords: '',
     socialCaptions: '',
     socialHashtags: '',
-    tags: ''
+    tags: '',
+    allowAutoUpdate: true
   });
   const [isSaving, setIsSaving] = useState(false);
   const [aiLoading, setAiLoading] = useState(false);
@@ -50,7 +51,8 @@ function BlogEditor() {
               seoKeywords: data.seoKeywords || '',
               socialCaptions: data.socialCaptions || '',
               socialHashtags: data.socialHashtags || '',
-              tags: Array.isArray(data.tags) ? data.tags.join(', ') : ''
+              tags: Array.isArray(data.tags) ? data.tags.join(', ') : '',
+              allowAutoUpdate: data.allowAutoUpdate !== false
             });
           }
         });
@@ -401,6 +403,21 @@ function BlogEditor() {
               <option value="Published">Published</option>
               <option value="Scheduled">Scheduled</option>
             </select>
+
+            <div style={{ marginBottom: '1.5rem', padding: '0.8rem', background: 'rgba(234, 179, 8, 0.1)', border: '1px dashed rgba(234, 179, 8, 0.4)', borderRadius: '8px' }}>
+              <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+                <input 
+                  type="checkbox" 
+                  checked={formData.allowAutoUpdate} 
+                  onChange={e => setFormData({ ...formData, allowAutoUpdate: e.target.checked })} 
+                  style={{ transform: 'scale(1.2)', marginRight: '0.8rem' }} 
+                />
+                <div>
+                  <div style={{ fontSize: '0.95rem', fontWeight: 600, color: '#eab308' }}>Allow AI Auto-Update</div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', marginTop: '0.2rem' }}>Agent 10 will update this post with latest news over time.</div>
+                </div>
+              </label>
+            </div>
 
             <div style={{ display: 'flex', gap: '0.5rem' }}>
               <button type="button" onClick={() => setIsPreviewOpen(true)} className="btn-secondary" style={{ flex: 1 }}>

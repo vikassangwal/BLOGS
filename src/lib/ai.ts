@@ -47,6 +47,9 @@ const PROVIDER_REGISTRY: Record<string, ProviderProfile> = {
     buildBody: (model, sys, user, max) => ({
       contents: [{ parts: [{ text: `${sys}\n\n${user}` }] }],
       generationConfig: { maxOutputTokens: max, temperature: 0.7 },
+      tools: [
+        { googleSearch: {} }
+      ],
       safetySettings: [
         { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_NONE' },
         { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_NONE' },

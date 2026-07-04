@@ -265,6 +265,20 @@ export async function POST(request: NextRequest) {
     let sModel = settings.seoModel || '';
 
     const researcherConfig = buildAgentConfig('researcher', 'openrouter', rModel || 'google/gemini-2.5-flash', 1500);
+    
+    // Feature: Auto-inject Native Gemini for Google Search Grounding if key exists
+    let geminiKey = savedKeys['gemini'];
+    if (!geminiKey) {
+      try {
+        const dbKey = await prisma.apiKey.findFirst({ where: { provider: { in: ['gemini', 'google_ai'] }, isActive: true } });
+        if (dbKey) geminiKey = dbKey.apiKey;
+      } catch(e){}
+    }
+    if (geminiKey && geminiKey.length > 10) {
+      researcherConfig.fallback = { ...researcherConfig.primary }; // Keep OpenRouter as fallback
+      researcherConfig.primary = { provider: 'gemini', apiKey: geminiKey, model: 'gemini-1.5-flash' };
+    }
+
     const writerConfig = buildAgentConfig('writer', 'openrouter', wModel || 'openai/gpt-4o-mini', 6000);
     const seoConfig = buildAgentConfig('seo', 'openrouter', sModel || 'openai/gpt-4o-mini', 500);
 

@@ -201,8 +201,8 @@ export async function POST(request: NextRequest) {
       - Include EXACTLY 37 Government Jobs, Exam Notifications, or Results. 
         ⚠️ STRICT CRITICAL RULE ⚠️: You MUST provide exactly ONE real, current news topic for EACH of the 28 States of India, ONE for EACH of the 8 Union Territories, and ONE for the Central Government (28+8+1 = 37). 
         ⚠️ ANTI-FAKE NEWS RULE ⚠️: ONLY generate topics for events that have ALREADY HAPPENED or BEEN OFFICIALLY RELEASED (e.g., 'SSC CHSL Official Notification Out', 'Bihar Police Result Declared'). YOU ARE STRICTLY FORBIDDEN FROM GENERATING EXPECTED OR FUTURE NOTIFICATIONS (e.g., NEVER generate 'SSC CGL 2027 Expected Date'). If the notification is not out, do not mention it!
-      - Include 2 Technology trends (e.g., 'Samsung S24 Ultra Launch').
-      - Include 2 Finance updates (e.g., 'Budget 2026 Highlights').
+      - Include 2 Technology topics. MUST BE OFFICIALLY RELEASED OR LAUNCHED (e.g., 'Samsung S24 Ultra Officially Launched in India'). NEVER generate rumors or 'Upcoming/Expected' tech leaks.
+      - Include 2 Finance updates. MUST BE REAL AND HAPPENED TODAY/RECENTLY (e.g., 'RBI Repo Rate Increased Today', 'Income Tax New Rule Implemented'). NEVER generate 'Expected' budget news or stock market rumors.
       Ensure the topics are highly specific (NOT generic like 'Education news in Bihar').
       Respond ONLY with a valid JSON array of strings. No markdown, no backticks.
       Example format: ["Topic 1", "Topic 2", "Topic 3"]`;

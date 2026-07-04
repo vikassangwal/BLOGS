@@ -387,7 +387,8 @@ export default function AutoBlogAdmin() {
                 <button 
                   onClick={async () => {
                     if(confirm('Delete all pending keywords?')) {
-                      await Promise.all(keywords.filter(k => k.status === 'pending').map(k => deleteKeyword(k.id)));
+                      await fetch('/api/auto-blog/keywords?clearAll=true', { method: 'DELETE' });
+                      fetchKeywords();
                     }
                   }} 
                   style={{ background: '#ef4444', color: '#fff', border: 'none', padding: '0.4rem 0.8rem', borderRadius: '6px', cursor: 'pointer', fontSize: '0.8rem' }}

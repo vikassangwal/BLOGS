@@ -73,6 +73,12 @@ export async function DELETE(request: NextRequest) {
 
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
+    const clearAll = searchParams.get('clearAll');
+
+    if (clearAll === 'true') {
+      await prisma.autoBlogKeyword.deleteMany({ where: { status: 'pending' } });
+      return NextResponse.json({ success: true });
+    }
 
     if (!id) return NextResponse.json({ error: 'ID required' }, { status: 400 });
 

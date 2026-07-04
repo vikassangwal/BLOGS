@@ -444,6 +444,10 @@ export default function SettingsAdmin() {
                   <label style={{ display: 'block', marginBottom: '0.3rem', fontWeight: 600, fontSize: '0.85rem' }}>Max Tokens</label>
                   <input type="number" value={apiKeys.editorTokens || 4000} onChange={e => setApiKeys({ ...apiKeys, editorTokens: parseInt(e.target.value) || 4000 })} placeholder="4000" style={{ width: '100%', padding: '0.7rem', borderRadius: '8px', border: '1px solid var(--color-border)' }} />
                 </div>
+                <div>
+                  <label style={{ display: 'block', marginBottom: '0.3rem', fontWeight: 600, fontSize: '0.85rem' }}>Backup Model (Fallback)</label>
+                  <input type="text" value={apiKeys.editorBackupModel || ''} onChange={e => setApiKeys({ ...apiKeys, editorBackupModel: e.target.value })} placeholder="e.g. groq/llama3-8b" style={{ width: '100%', padding: '0.7rem', borderRadius: '8px', border: '1px solid var(--color-border)' }} />
+                </div>
               </div>
             </div>
 
@@ -521,7 +525,6 @@ export default function SettingsAdmin() {
               </div>
               <p style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', margin: '0 0 1rem' }}>यह एजेंट हर दिन सभी AI मॉडल्स की हेल्थ चेक करेगा। अगर कोई बेहतर मॉडल मिलता है, तो यह बाकी एजेंट्स को खुद अपडेट कर देगा।</p>
               
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '0.8rem' }}>
                 <div>
                   <label style={{ display: 'block', marginBottom: '0.3rem', fontWeight: 600, fontSize: '0.85rem' }}>Priority Strategy (नया मॉडल चुनने का तरीका)</label>
                   <select value={apiKeys.supervisorStrategy || 'free'} onChange={e => setApiKeys({ ...apiKeys, supervisorStrategy: e.target.value })} style={{ width: '100%', padding: '0.7rem', borderRadius: '8px', border: '1px solid var(--color-border)' }}>

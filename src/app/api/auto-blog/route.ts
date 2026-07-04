@@ -184,10 +184,11 @@ export async function POST(request: NextRequest) {
       ${seedNews}
       You must ONLY provide topics that are highly relevant, trending, or upcoming around THIS SPECIFIC DATE (${currentDate}). Do NOT provide old news from previous years.
       If LIVE NEWS HEADLINES are provided above, you MUST prioritize generating topics based on them.
-      Provide exactly 45 highly specific, real, and currently trending topics in India.
-      Include 30 Government Jobs, Exam Notifications, Admit Cards, or Exam Results (e.g., 'SSC CGL 2026 Notification', 'Bihar Police Constable Result', 'UPSC NDA 2026').
-      Include 10 Technology trends (e.g., 'Samsung S24 Ultra Launch', 'Latest AI tools 2026').
-      Include 5 Finance updates (e.g., 'Budget 2026 Highlights', 'Stock Market Sensex crash').
+      Provide exactly 41 highly specific, real, and currently trending topics in India.
+      Follow the 37+2+2 rule exactly:
+      - Include 37 Government Jobs, Exam Notifications, Admit Cards, or Exam Results (e.g., 'SSC CGL 2026 Notification', 'Bihar Police Result').
+      - Include 2 Technology trends (e.g., 'Samsung S24 Ultra Launch').
+      - Include 2 Finance updates (e.g., 'Budget 2026 Highlights').
       Ensure the topics are highly specific (NOT generic like 'Education news in Bihar').
       Respond ONLY with a valid JSON array of strings. No markdown, no backticks.
       Example format: ["Topic 1", "Topic 2", "Topic 3"]`;

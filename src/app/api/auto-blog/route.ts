@@ -379,18 +379,22 @@ export async function POST(request: NextRequest) {
        - Finance: "बजट 2026 में हुआ बड़ा बदलाव, टैक्सपेयर्स को मिला भारी तोहफा, जानिए पूरी डिटेल! (Budget 2026 Updates)"
        - News: "PM मोदी ने किया बड़ा ऐलान, करोड़ों लोगों की ज़िंदगी बदल जाएगी! (PM Modi Announcement)"
        ALWAYS write the main title first in Hindi (creating eagerness to read), then in brackets English.
-    ===== 💎 UNIVERSAL QUALITY RULES (इनका 100% पालन करना अनिवार्य है) =====
-    1. COMPLETENESS: आर्टिकल 100% पूरा होना चाहिए। CONCLUSION लिखकर ही खत्म करें।
-    2. ACCURACY & NO EVASIVE ANSWERS (STRICT): जो भी डेटा (Dates, Fees, Links, Exam Dates) दें, वो असली होना चाहिए। अगर एग्जैक्ट डेट नहीं पता है, तो अपनी नॉलेज से एक पक्का अंदाजा/अनुमान (Expected Date/Month) दें, जैसे "(Expected April 2026)"। कभी भी "नोटिफिकेशन में देखें", "जल्द घोषित होगी", या "चेक वेबसाइट" जैसे गोल-मोल जवाब हरगिज़ ना लिखें! अगर कुछ नहीं पता तो वह पंक्ति/रो हटा दें।
-    3. NO FILLER CONTENT: "आज के इस आर्टिकल में", "उम्मीद है", "कैसा लगा", "दोस्तों" जैसे शब्द BANNED हैं। सीधे काम की बात लिखें।
-    4. TABLES FOR DATA: कोई भी आंकड़ा (तारीख, फीस, सैलरी, स्पेसिफिकेशन) हो तो HTML <table> बनाकर दें।
-    5. BOLD IMPORTANT INFO: मुख्य शब्दों को <strong>Bold</strong> करें।
-    6. MOBILE-FIRST: कोई भी पैराग्राफ 3-4 लाइनों से बड़ा नहीं होना चाहिए।
-    7. HTML FORMAT ONLY: कंटेंट सीधे पब्लिश करने योग्य HTML (<h2>, <p>, <table>, <ul>) में होगा। Markdown (##, **) का उपयोग ना करें।
-    8. OFFICIAL HOME PAGE LINKS ONLY: बाहरी लिंक के लिए केवल मुख्य वेबसाइट का होमपेज (जैसे https://ssc.gov.in) दें। अगर आपको पता है कि डायरेक्ट लिंक अभी वेबसाइट पर नहीं आया है, तो साफ़ शब्दों में लिखें: "⚠️ *नोट: अभी डायरेक्ट अप्लाई लिंक या पीडीएफ वेबसाइट पर एक्टिव नहीं हुआ है, कृपया ऑफिशियल वेबसाइट चेक करते रहें।*" कभी भी खुद से फेक लिंक ना बनाएँ।
-    9. HINGLISH SEO: 2-3 Hinglish कीवर्ड्स ("kaise kare", "kab aayega") डालें।
-    10. VIRAL LISTICLE FORMAT: जहाँ भी मुमकिन हो (खासकर Technology और Finance में), जानकारियों को "Top 5", "Top 10", या "Best X" वाले पॉइंट-वाइज़ लिस्ट (Listicle) फॉर्मेट में लिखें। यह रीडर्स को बहुत एंगेजिंग लगता है।
-    11. NEVER TRUNCATE: पूरा आर्टिकल (Introduction से Conclusion तक) लिखें।
+    ===== 🚨 UNIVERSAL QUALITY RULES (इनका 100% पालन करना अनिवार्य है) =====
+    1. BANNED AI WORDS (NEVER USE THESE): "In conclusion", "Moreover", "Delve into", "Navigating the complexities", "Let's explore", "Today we will discuss", "Welcome to our blog", "It is important to note", "A testament to", "Tapestry", "Crucial", "Vital", "This article will", "आज के इस आर्टिकल में हम जानेंगे", "तो चलिए शुरू करते हैं", "आप सभी का स्वागत है". If you use ANY of these words, your output will be rejected.
+    2. FEW-SHOT TONE EXAMPLE: Write exactly like a top-tier human journalist (e.g. from NDTV or The Hindu). Start directly with a punchy hook. 
+       BAD START: "Today we will tell you about the SSC CGL notification that was released recently..."
+       GOOD START (MIMIC THIS): "The wait is finally over for millions of government job aspirants. The Staff Selection Commission (SSC) has officially released the much-anticipated CGL 2026 notification, unlocking thousands of Grade B and C vacancies across central ministries."
+    3. COMPLETENESS: आर्टिकल 100% पूरा होना चाहिए। CONCLUSION लिखकर ही खत्म करें।
+    4. ACCURACY & NO EVASIVE ANSWERS (STRICT): जो भी डेटा (Dates, Fees, Links, Exam Dates) दें, वो असली होना चाहिए। अगर एग्जैक्ट डेट नहीं पता है, तो अपनी नॉलेज से एक पक्का अंदाजा/अनुमान (Expected Date/Month) दें, जैसे "(Expected April 2026)"। कभी भी "नोटिफिकेशन में देखें", "जल्द घोषित होगी", या "चेक वेबसाइट" जैसे गोल-मोल जवाब हरगिज़ ना लिखें! अगर कुछ नहीं पता तो वह पंक्ति/रो हटा दें।
+    5. NO FILLER CONTENT: "आज के इस आर्टिकल में", "उम्मीद है", "कैसा लगा", "दोस्तों" जैसे शब्द BANNED हैं। सीधे काम की बात लिखें।
+    6. TABLES FOR DATA: कोई भी आंकड़ा (तारीख, फीस, सैलरी, स्पेसिफिकेशन) हो तो HTML <table> बनाकर दें।
+    7. BOLD IMPORTANT INFO: मुख्य शब्दों को <strong>Bold</strong> करें।
+    8. MOBILE-FIRST: कोई भी पैराग्राफ 3-4 लाइनों से बड़ा नहीं होना चाहिए।
+    9. HTML FORMAT ONLY: कंटेंट सीधे पब्लिश करने योग्य HTML (<h2>, <p>, <table>, <ul>) में होगा। Markdown (##, **) का उपयोग ना करें।
+    10. OFFICIAL HOME PAGE LINKS ONLY: बाहरी लिंक के लिए केवल मुख्य वेबसाइट का होमपेज (जैसे https://ssc.gov.in) दें। अगर आपको पता है कि डायरेक्ट लिंक अभी वेबसाइट पर नहीं आया है, तो साफ़ शब्दों में लिखें: "⚠️ *नोट: अभी डायरेक्ट अप्लाई लिंक या पीडीएफ वेबसाइट पर एक्टिव नहीं हुआ है, कृपया ऑफिशियल वेबसाइट चेक करते रहें।*" कभी भी खुद से फेक लिंक ना बनाएँ।
+    11. HINGLISH SEO: 2-3 Hinglish कीवर्ड्स ("kaise kare", "kab aayega") डालें।
+    12. VIRAL LISTICLE FORMAT: जहाँ भी मुमकिन हो (खासकर Technology और Finance में), जानकारियों को "Top 5", "Top 10", या "Best X" वाले पॉइंट-वाइज़ लिस्ट (Listicle) फॉर्मेट में लिखें। यह रीडर्स को बहुत एंगेजिंग लगता है।
+    13. NEVER TRUNCATE: पूरा आर्टिकल (Introduction से Conclusion तक) लिखें।
     ===== END UNIVERSAL RULES =====
 
     3. IF the topic is about General News, Politics, Sports, Health, or any topic NOT covered by Finance/Tech/Education prompts below, you MUST follow this 🔥 NEWS MASTER PROMPT 🔥:

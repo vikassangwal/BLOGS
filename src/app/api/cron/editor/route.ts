@@ -78,10 +78,11 @@ Content (HTML):
 ${uncheckedPost.content}
 
 Instructions:
-1. Improve the title and SEO fields if they are weak.
-2. Fix any broken HTML tags or bad formatting in the content.
-3. If the content is good, just return it as is.
-4. APPEND the exact string "<!-- QA_CHECKED -->" to the very end of the HTML content so I know it has been checked.
+1. IMPROVE TITLE: Make the title highly engaging, punchy, and irresistible (clickbait but factual).
+2. RUTHLESS CRITIC (BAN LIST): Scan the content and completely DELETE these words/phrases if found: "In conclusion", "Moreover", "Delve into", "Navigating the complexities", "Let's explore", "Today we will discuss", "Welcome to our blog", "It is important to note", "A testament to", "Tapestry", "Crucial", "Vital", "This article will", "आज के इस आर्टिकल में हम जानेंगे", "तो चलिए शुरू करते हैं", "आप सभी का स्वागत है".
+3. NO FILLER: Delete introductory fluff. Ensure the first paragraph hits the main point immediately like a top-tier journalist.
+4. FIX FORMATTING: Fix any broken HTML tags. Ensure data is in <table>.
+5. APPEND the exact string "<!-- QA_CHECKED -->" to the very end of the HTML content so I know it has been checked.
 5. Return a JSON object with this exact structure:
 {
   "newTitle": "...",

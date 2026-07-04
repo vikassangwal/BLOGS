@@ -457,13 +457,13 @@ function getDefaultModel(provider: string): string {
 
 function sanitizeGeminiModel(model: string): string {
   const clean = model.toLowerCase().trim();
-  if (clean.includes('2.0-flash') || clean.includes('2.0-flash-lite')) return 'gemini-2.0-flash';
-  if (clean.includes('1.5-pro')) return 'gemini-1.5-pro';
-  if (clean.includes('1.5-flash')) return 'gemini-1.5-flash';
+  if (clean.includes('2.0-flash') || clean.includes('2.0-flash-lite')) return 'gemini-2.0-flash-exp';
+  if (clean.includes('1.5-pro')) return 'gemini-1.5-pro-latest';
+  if (clean.includes('1.5-flash')) return 'gemini-1.5-flash-latest';
   if (clean.includes('2.5-flash')) return 'gemini-2.5-flash';
   if (clean.includes('2.5-pro')) return 'gemini-2.5-pro';
   if (clean.startsWith('gemini-')) return model.trim(); // Let user try any gemini- model
-  return 'gemini-2.0-flash'; // Safe default
+  return 'gemini-2.0-flash-exp'; // Safe default
 }
 
 // ---------------------------------------------------------------------------

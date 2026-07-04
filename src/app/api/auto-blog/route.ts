@@ -167,10 +167,23 @@ export async function POST(request: NextRequest) {
       // AI TOPIC GENERATOR (Triggered when queue is empty)
       // -------------------------------------------------------------
 
+      let seedNews = "";
+      if (savedKeys.newsdata) {
+          try {
+              const ndRes = await fetch(`https://newsdata.io/api/1/news?apikey=${savedKeys.newsdata}&country=in&language=en,hi`);
+              const ndJson = await ndRes.json();
+              if (ndJson.results) {
+                 seedNews = "LIVE NEWS HEADLINES RIGHT NOW (USE THESE TO GENERATE TOPICS):\n" + ndJson.results.map((r: any) => `- ${r.title}`).join('\n');
+              }
+          } catch(e) { console.error(e); }
+      }
+
       const currentDate = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
       const topicPrompt = `You are a Trending News & Job Alert researcher for India. 
       TODAY'S DATE IS: ${currentDate}.
+      ${seedNews}
       You must ONLY provide topics that are highly relevant, trending, or upcoming around THIS SPECIFIC DATE (${currentDate}). Do NOT provide old news from previous years.
+      If LIVE NEWS HEADLINES are provided above, you MUST prioritize generating topics based on them.
       Provide exactly 45 highly specific, real, and currently trending topics in India.
       Include 30 Government Jobs, Exam Notifications, Admit Cards, or Exam Results (e.g., 'SSC CGL 2026 Notification', 'Bihar Police Constable Result', 'UPSC NDA 2026').
       Include 10 Technology trends (e.g., 'Samsung S24 Ultra Launch', 'Latest AI tools 2026').

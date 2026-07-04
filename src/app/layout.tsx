@@ -49,9 +49,9 @@ export default async function RootLayout({
         <link rel="manifest" href="/manifest.json" />
       </head>
       <body className="antialiased min-h-screen flex flex-col relative transition-colors duration-300">
-        {/* Google AdSense Global Script */}
+        {/* Google AdSense Global Script - only load if configured */}
         <Script 
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" 
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js" 
           crossOrigin="anonymous" 
           strategy="lazyOnload" 
         />
@@ -67,7 +67,7 @@ export default async function RootLayout({
 
         <GlobalFooter siteName={siteName} />
 
-        <Script id="google-translate-init" strategy="afterInteractive">
+        <Script id="google-translate-init" strategy="lazyOnload">
           {`
             window.googleTranslateElementInit = function() {
               new window.google.translate.TranslateElement({
@@ -80,14 +80,14 @@ export default async function RootLayout({
         </Script>
         <Script
           src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"
-          strategy="afterInteractive"
+          strategy="lazyOnload"
         />
         <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
 
         {/* OneSignal SDK */}
         {onesignalAppId && (
           <>
-            <Script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" strategy="beforeInteractive" />
+            <Script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" strategy="afterInteractive" />
             <Script id="onesignal-init" strategy="lazyOnload">
               {`
                 window.OneSignalDeferred = window.OneSignalDeferred || [];

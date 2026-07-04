@@ -201,7 +201,7 @@ export async function POST(request: NextRequest) {
       If LIVE NEWS HEADLINES are provided above, you MUST prioritize generating topics based on them.
       Provide exactly 41 highly specific, real, and currently trending topics in India.
       Follow the 37+2+2 rule exactly:
-      - Include 37 Government Jobs, Exam Notifications, Admit Cards, or Exam Results. CRITICAL: ONLY generate topics for events that have ALREADY BEEN OFFICIALLY RELEASED TODAY or RECENTLY (e.g., 'SSC CHSL 2026 Official Notification Out', 'Bihar Police Result Declared'). NEVER generate future expected notifications that haven't happened yet.
+      - Include EXACTLY 37 Government Jobs, Exam Notifications, or Results. CRITICAL RULE: You MUST provide exactly ONE real, current news topic for EACH of the 28 States of India, ONE for EACH of the 8 Union Territories, and ONE for the Central Government (28+8+1 = 37). ONLY generate topics for events that have ALREADY BEEN OFFICIALLY RELEASED TODAY or RECENTLY. NEVER generate future expected notifications.
       - Include 2 Technology trends (e.g., 'Samsung S24 Ultra Launch').
       - Include 2 Finance updates (e.g., 'Budget 2026 Highlights').
       Ensure the topics are highly specific (NOT generic like 'Education news in Bihar').

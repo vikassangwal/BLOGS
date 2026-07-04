@@ -32,15 +32,15 @@ export async function GET(req: Request) {
     const apiKeys = await prisma.apiKey.findMany({ where: { isActive: true } });
     const aiKey = apiKeys.find(k => k.provider === 'openrouter' || k.provider === 'openai')?.apiKey;
 
-    let summary = \`Check out our latest article: **\${post.title}**\\n\\nRead the full post here: \${process.env.NEXT_PUBLIC_APP_URL || 'https://yourwebsite.com'}/blog/\${post.slug}\`;
+    let summary = `Check out our latest article: **${post.title}**\n\nRead the full post here: ${process.env.NEXT_PUBLIC_APP_URL || 'https://yourwebsite.com'}/blog/${post.slug}`;
 
     if (aiKey) {
-        const prompt = \`Summarize this blog post in 2-3 engaging sentences for social sharing: \${post.content.substring(0, 500)}...\`;
+        const prompt = `Summarize this blog post in 2-3 engaging sentences for social sharing: ${post.content.substring(0, 500)}...`;
         try {
             const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
                 method: 'POST',
                 headers: {
-                    'Authorization': \`Bearer \${aiKey}\`,
+                    'Authorization': `Bearer ${aiKey}`,
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
@@ -50,7 +50,7 @@ export async function GET(req: Request) {
             });
             const data = await response.json();
             if (data.choices?.[0]?.message?.content) {
-                summary = \`\${data.choices[0].message.content}\\n\\nRead the full article: \${process.env.NEXT_PUBLIC_APP_URL || 'https://yourwebsite.com'}/blog/\${post.slug}\`;
+                summary = `${data.choices[0].message.content}\n\nRead the full article: ${process.env.NEXT_PUBLIC_APP_URL || 'https://yourwebsite.com'}/blog/${post.slug}`;
             }
         } catch(e) {
             console.error("AI Summary generation failed", e);
@@ -63,19 +63,19 @@ export async function GET(req: Request) {
        try {
            // First get user ID
            const userRes = await fetch('https://api.medium.com/v1/me', {
-               headers: { 'Authorization': \`Bearer \${mediumApiToken}\`, 'Content-Type': 'application/json', 'Accept': 'application/json' }
+               headers: { 'Authorization': `Bearer ${mediumApiToken}`, 'Content-Type': 'application/json', 'Accept': 'application/json' }
            });
            const userData = await userRes.json();
            
            if (userData.data?.id) {
-               const postRes = await fetch(\`https://api.medium.com/v1/users/\${userData.data.id}/posts\`, {
+               const postRes = await fetch(`https://api.medium.com/v1/users/${userData.data.id}/posts`, {
                    method: 'POST',
-                   headers: { 'Authorization': \`Bearer \${mediumApiToken}\`, 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                   headers: { 'Authorization': `Bearer ${mediumApiToken}`, 'Content-Type': 'application/json', 'Accept': 'application/json' },
                    body: JSON.stringify({
                        title: post.title,
                        contentFormat: 'markdown',
                        content: summary,
-                       canonicalUrl: \`\${process.env.NEXT_PUBLIC_APP_URL || 'https://yourwebsite.com'}/blog/\${post.slug}\`,
+                       canonicalUrl: `${process.env.NEXT_PUBLIC_APP_URL || 'https://yourwebsite.com'}/blog/${post.slug}`,
                        publishStatus: 'public'
                    })
                });

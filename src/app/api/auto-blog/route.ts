@@ -195,7 +195,7 @@ export async function POST(request: NextRequest) {
       TODAY'S DATE IS: ${currentDate}.
       ${seedNews}
       GENERATE A MASSIVE LIST OF 120 KEYWORDS.
-      This is Step 1 (Brainstorming). Generate a wide variety of Government Job Vacancies (from the LAST 72 HOURS), Exam Notifications, Admit Cards, Answer Keys, Results, Counselling/Merit Lists, Timetables/Syllabus, Free Laptop/Coaching Schemes, Internships, Rojgar Mela/Apprenticeships, Army/Defense Rallies, Entrance Exams (NEET/JEE/CUET/TET), Top MNC Off-Campus Drives, Free Online Courses (Google/TCS), Skill Development (PMKVY), Scholarships, University Admissions/Results, IGNOU/Open University Updates, KVS/Navodaya Admissions, Nursing/Medical Courses, Bank/PSU Jobs (IBPS/SBI), School/College News, Career Courses (e.g. Best courses after 12th), Board Exam Updates, Technology trends, and Finance updates. 
+      This is Step 1 (Brainstorming). Generate a wide variety of Government Job Vacancies (from the LAST 72 HOURS), Exam Notifications, Admit Cards, Answer Keys, Results, Counselling/Merit Lists, Timetables/Syllabus, Free Laptop/Coaching Schemes, Internships, Rojgar Mela/Apprenticeships, Army/Defense Rallies, Entrance Exams (NEET/JEE/CUET/TET), Top MNC Off-Campus Drives, Free Online Courses (Google/TCS), Skill Development (PMKVY), Scholarships, University Admissions/Results, IGNOU/Open University Updates, KVS/Navodaya Admissions, Nursing/Medical Courses, Bank/PSU Jobs (IBPS/SBI), School/College News, Career Courses (e.g. Best courses after 12th), Board Exam Updates, Technology (Telecom plans, App updates, Smartphone launches), and Finance (Income Tax, RBI rules, Post Office schemes). 
       Include topics from ALL 28 Indian States and 8 Union Territories.
       Respond ONLY with a valid JSON array of strings. No markdown.
       Example format: ["Topic 1", "Topic 2", "Topic 3"]`;
@@ -223,8 +223,8 @@ export async function POST(request: NextRequest) {
           👉 2nd PRIORITY (FALLBACK) 👉: If (and ONLY if) there are not enough new updates today, you MUST fill the remaining slots with: Older Ongoing applications, General State Scholarship information, or Career Courses (e.g. 'Best courses after 12th').
           ⚠️ STRICT CRITICAL RULE ⚠️: You MUST provide exactly ONE real, current news topic for EACH of the 28 States of India, ONE for EACH of the 8 Union Territories, and ONE for the Central Government (28+8+1 = 37). 
           ⚠️ ANTI-FAKE NEWS RULE ⚠️: DO NOT invent exams, schemes, or results that don't exist. Keep real ongoing/upcoming exams, recent vacancies/schemes (last 72 hours), or real scholarship/university/school updates.
-        - Include 2 Technology topics. MUST BE REAL AND RELEASED IN THE LAST 72 HOURS (e.g., 'Latest smartphone launched today', 'New AI update').
-        - Include 2 Finance updates. MUST BE REAL AND RELEASED IN THE LAST 72 HOURS (e.g., 'RBI Repo Rate Increased Today', 'New stock market rule').
+        - Include 2 Technology topics. MUST BE REAL AND RELEASED IN THE LAST 72 HOURS. 🚨 TECH 1ST PRIORITY: New Telecom Recharge Plans (Jio/Airtel/BSNL/Vi), Major App Updates/Outages (WhatsApp/Instagram down), or Major Smartphone Launches.
+        - Include 2 Finance updates. MUST BE REAL AND RELEASED IN THE LAST 72 HOURS. 🚨 FINANCE 1ST PRIORITY: Income Tax rule changes, RBI Announcements/Repo Rate, Bank Rule updates, or Post Office/LIC Scheme interest rates.
         Ensure the topics are highly specific (NOT generic like 'Education news in Bihar').
         Respond ONLY with a valid JSON array of exactly 41 strings. No markdown.`;
 
@@ -346,7 +346,7 @@ export async function POST(request: NextRequest) {
     ${liveNewsContext}
     
     CRITICAL RULE (STRICT): If the topic is a COMPLETELY FAKE exam that does not exist or a totally made-up rumor, you MUST ONLY output the exact word "ABORT_FAKE_NEWS" and nothing else. 
-    HOWEVER, if it is a real Upcoming Exam, an Expected Syllabus, an Ongoing Application, an Expected Result, a State Scholarship, a Board Exam update, an Answer Key, a Counselling/Merit List schedule, a Free Laptop/Coaching Scheme, an Internship, a Rojgar Mela/Apprenticeship, an Army/Defense Rally, an Entrance Exam/TET update, a Top MNC Off-Campus Drive, a Free Online Course, a Skill Development (PMKVY) update, a KVS/Navodaya Admission, an IGNOU/Open University update, a Nursing Course form, a Bank/PSU Job, or a University Admission/Result, DO NOT ABORT! Provide research for it (mentioning it is expected/upcoming if applicable) so the writer can write an informative guide.
+    HOWEVER, if it is a real Upcoming Exam, an Expected Syllabus, an Ongoing Application, an Expected Result, a State Scholarship, a Board Exam update, an Answer Key, a Counselling/Merit List schedule, a Free Laptop/Coaching Scheme, an Internship, a Rojgar Mela/Apprenticeship, an Army/Defense Rally, an Entrance Exam/TET update, a Top MNC Off-Campus Drive, a Free Online Course, a Skill Development (PMKVY) update, a KVS/Navodaya Admission, an IGNOU/Open University update, a Nursing Course form, a Bank/PSU Job, a Telecom/Tech update, a Finance/Bank rule update, or a University Admission/Result, DO NOT ABORT! Provide research for it (mentioning it is expected/upcoming if applicable) so the writer can write an informative guide.
 
     You MUST extract the FULL NOTIFICATION DETAILS. Provide an exhaustive breakdown of ALL of the following (if available):
     1. FULL SUMMARY: What is the notification/scholarship/result/scheme about? (Department, Post name, Total Vacancies, Scheme benefits, or University name).

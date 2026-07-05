@@ -992,8 +992,9 @@ export async function GET(request: NextRequest) {
     
     // Check if this is a cron trigger request (from Vercel Cron or manual trigger)
     const isCron = 
-      searchParams.get('action') === 'trigger' && searchParams.get('secret') === expectedSecret ||
+      searchParams.get('secret') === expectedSecret ||
       authHeader === `Bearer ${expectedSecret}`;
+
       
     if (isCron || searchParams.get('force-run') === 'true') {
       return POST(request);
@@ -1024,6 +1025,3 @@ export async function GET(request: NextRequest) {
   }
 }
 
-export async function GET(request: NextRequest) {
-  return POST(request);
-}

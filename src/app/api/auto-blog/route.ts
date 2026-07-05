@@ -198,7 +198,7 @@ export async function POST(request: NextRequest) {
           select: { title: true }
         });
         if (recentPosts.length > 0) {
-          recentlyPublishedStr = "🚨 STRICT RULE: ALREADY PUBLISHED TOPICS (YOU MUST AVOID GENERATING THESE AGAIN TO PREVENT DUPLICATES):\n" + recentPosts.map(p => `- ${p.title}`).join('\n');
+          recentlyPublishedStr = "🚨 ALREADY PUBLISHED TOPICS: (Do NOT generate these exact same topics again. HOWEVER, if there is a BRAND NEW official update today—such as an Admit Card or Result releasing for a previously announced Notification, or a new Price Cut for a previously launched Phone—you CAN and SHOULD generate a new topic focusing specifically on the new update):\n" + recentPosts.map(p => `- ${p.title}`).join('\n');
         }
       } catch (e) {
         console.error('Failed to fetch recent posts', e);
@@ -232,7 +232,7 @@ export async function POST(request: NextRequest) {
         Here is a raw list of brainstormed topics:
         ${rawKeywordsList}
         
-        Your job is to filter this list and select EXACTLY 41 highly specific, real, and currently trending topics. DO NOT select any topic that is similar to the ALREADY PUBLISHED TOPICS listed above.
+        Your job is to filter this list and select EXACTLY 41 highly specific, real, and currently trending topics. DO NOT select the exact same topics from the ALREADY PUBLISHED list, UNLESS it is a brand new phase (e.g., Admit Card / Result) for an older topic.
         Follow the 37+2+2 rule exactly:
         - Include EXACTLY 37 Education & Career topics. 
           🚨 1st PRIORITY (HIGHEST) 🚨: ANYTHING NEW! You MUST NOT miss ANY new Government Job, Exam Notification, Admit Card, Result, Answer Key, Cut-Off, Exam Calendar, Exam Date/Timetable, Syllabus Change, Counselling/Merit List, Any Official Notice, State Scholarship, Free Laptop/Coaching Scheme (Yojana), Internships, Rojgar Mela/Apprenticeship, Army/Defense Rally, Entrance Exam/TET, Top MNC Off-Campus Drive, Free Online Courses, Skill Development (PMKVY), KVS/Navodaya Admission, IGNOU/Open University Update, Nursing Course, Bank/PSU Job, or School/University Admission/Forms/Result released in the LAST 72 HOURS. Include ALL of these brand-new updates at the very top of your list so we can be the FIRST to publish!

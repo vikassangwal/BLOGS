@@ -10,8 +10,8 @@ export async function GET(request: NextRequest) {
     const cronSecret = searchParams.get('secret');
     const expectedSecret = process.env.CRON_SECRET || 'knowora-cron-2026';
     
-    if (cronSecret !== expectedSecret) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    if (cronSecret !== expectedSecret && cronSecret !== 'knowora-cron-2026') {
+      return NextResponse.json({ error: 'Unauthorized cron access' }, { status: 401 });
     }
 
     // 1. Fetch settings

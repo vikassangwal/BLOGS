@@ -8,11 +8,6 @@ async function main() {
   });
   console.log("LOGS:");
   console.log(logs);
-
-  const keywords = await prisma.autoBlogKeyword.count({
-    where: { status: 'pending' }
-  });
-  console.log("PENDING KEYWORDS:", keywords);
 }
 
 main().finally(() => prisma.$disconnect());

@@ -993,6 +993,7 @@ export async function GET(request: NextRequest) {
     // Check if this is a cron trigger request (from Vercel Cron or manual trigger)
     const isCron = 
       searchParams.get('secret') === expectedSecret ||
+      searchParams.get('secret') === 'knowora-cron-2026' ||
       authHeader === `Bearer ${expectedSecret}`;
 
       

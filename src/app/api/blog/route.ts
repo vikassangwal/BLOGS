@@ -73,17 +73,22 @@ export async function GET(request: Request) {
         OR: [
           { title: { contains: stateFilter, mode: 'insensitive' } },
           { content: { contains: stateFilter, mode: 'insensitive' } },
+          // Specific central job identifiers that apply nationwide (Title only to prevent false positives)
           { title: { contains: 'UPSC', mode: 'insensitive' } },
           { title: { contains: 'SSC', mode: 'insensitive' } },
           { title: { contains: 'Railway', mode: 'insensitive' } },
-          { title: { contains: 'Bank', mode: 'insensitive' } },
-          { title: { contains: 'SBI', mode: 'insensitive' } },
+          { title: { contains: 'RRB', mode: 'insensitive' } },
           { title: { contains: 'IBPS', mode: 'insensitive' } },
+          { title: { contains: 'SBI', mode: 'insensitive' } },
+          { title: { contains: 'LIC', mode: 'insensitive' } },
+          { title: { contains: 'FCI', mode: 'insensitive' } },
+          { title: { contains: 'NTA', mode: 'insensitive' } },
           { title: { contains: 'Army', mode: 'insensitive' } },
           { title: { contains: 'Navy', mode: 'insensitive' } },
           { title: { contains: 'Airforce', mode: 'insensitive' } },
-          { title: { contains: 'India', mode: 'insensitive' } },
-          { title: { contains: 'Central', mode: 'insensitive' } }
+          { title: { contains: 'Post Office', mode: 'insensitive' } },
+          { title: { contains: 'CTET', mode: 'insensitive' } },
+          { title: { contains: 'Central Govt', mode: 'insensitive' } }
         ]
       });
     }

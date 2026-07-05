@@ -22,11 +22,14 @@ function BlogListContent() {
 
   const INDIAN_STATES = [
     'All India', 'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh', 
-    'Delhi', 'Goa', 'Gujarat', 'Haryana', 'Himachal Pradesh', 'Jharkhand', 'Karnataka', 
+    'Goa', 'Gujarat', 'Haryana', 'Himachal Pradesh', 'Jharkhand', 'Karnataka', 
     'Kerala', 'Madhya Pradesh', 'Maharashtra', 'Manipur', 'Meghalaya', 'Mizoram', 
     'Nagaland', 'Odisha', 'Punjab', 'Rajasthan', 'Sikkim', 'Tamil Nadu', 'Telangana', 
-    'Tripura', 'Uttar Pradesh', 'Uttarakhand', 'West Bengal'
-  ];
+    'Tripura', 'Uttar Pradesh', 'Uttarakhand', 'West Bengal',
+    // Union Territories
+    'Andaman and Nicobar Islands', 'Chandigarh', 'Dadra and Nagar Haveli and Daman and Diu',
+    'Delhi', 'Jammu and Kashmir', 'Ladakh', 'Lakshadweep', 'Puducherry'
+  ].sort((a, b) => a === 'All India' ? -1 : b === 'All India' ? 1 : a.localeCompare(b));
 
   // Auto-detect State based on IP
   useEffect(() => {
@@ -120,9 +123,9 @@ function BlogListContent() {
 
   const MAIN_CATEGORIES = ['Education & Career', 'Technology', 'Finance & Earning'];
   const getContextTags = (category: string) => {
-    if (category === 'Technology') return ['News', 'AI', 'Software', 'Gadgets', 'Mobiles'];
-    if (category === 'Finance & Earning') return ['News', 'Crypto', 'Stock Market', 'Business', 'Investment'];
-    if (category === 'Education & Career') return ['Study', 'Career', 'Vacancy', 'News', 'Results'];
+    if (category === 'Technology') return ['News', 'AI', 'Software', 'Gadgets', 'Mobiles', 'Telecom', 'Gaming'];
+    if (category === 'Finance & Earning') return ['News', 'Crypto', 'Stock Market', 'Business', 'Investment', 'Personal Finance', 'Banking', 'Schemes'];
+    if (category === 'Education & Career') return ['News', 'Vacancy', 'Study', 'Career', 'Results', 'Admit Card', 'Syllabus', 'Scholarship', 'Admissions', 'Answer Key'];
     return MAIN_CATEGORIES;
   };
 

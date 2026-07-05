@@ -2,6 +2,7 @@ import { NextResponse, NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { generateAIContent } from '@/lib/ai';
 import { revalidatePath } from 'next/cache';
+import { waitUntil } from '@vercel/functions';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300; 
@@ -16,7 +17,11 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized cron access' }, { status: 401 });
     }
 
-    return POST(request);
+    waitUntil(
+      POST(request).catch((err) => console.error("Background editor error:", err))
+    );
+
+    return NextResponse.json({ status: 'Processing in background' }, { status: 202 });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }

@@ -195,7 +195,7 @@ export async function POST(request: NextRequest) {
       TODAY'S DATE IS: ${currentDate}.
       ${seedNews}
       GENERATE A MASSIVE LIST OF 120 KEYWORDS.
-      This is Step 1 (Brainstorming). Generate a wide variety of Government Job Vacancies (from the LAST 72 HOURS), Exam Notifications, Admit Cards, Answer Keys, Results, Counselling/Merit Lists, Timetables/Syllabus, Free Laptop/Coaching Schemes, Internships, Rojgar Mela/Apprenticeships, Army/Defense Rallies, Entrance Exams (NEET/JEE/CUET/TET), Top MNC Off-Campus Drives, Scholarships, University Admissions/Results, School/College News, Career Courses (e.g. Best courses after 12th), Board Exam Updates, Technology trends, and Finance updates. 
+      This is Step 1 (Brainstorming). Generate a wide variety of Government Job Vacancies (from the LAST 72 HOURS), Exam Notifications, Admit Cards, Answer Keys, Results, Counselling/Merit Lists, Timetables/Syllabus, Free Laptop/Coaching Schemes, Internships, Rojgar Mela/Apprenticeships, Army/Defense Rallies, Entrance Exams (NEET/JEE/CUET/TET), Top MNC Off-Campus Drives, Free Online Courses (Google/TCS), Skill Development (PMKVY), Scholarships, University Admissions/Results, School/College News, Career Courses (e.g. Best courses after 12th), Board Exam Updates, Technology trends, and Finance updates. 
       Include topics from ALL 28 Indian States and 8 Union Territories.
       Respond ONLY with a valid JSON array of strings. No markdown.
       Example format: ["Topic 1", "Topic 2", "Topic 3"]`;
@@ -219,7 +219,7 @@ export async function POST(request: NextRequest) {
         Your job is to filter this list and select EXACTLY 41 highly specific, real, and currently trending topics.
         Follow the 37+2+2 rule exactly:
         - Include EXACTLY 37 Education & Career topics. 
-          🚨 1st PRIORITY (HIGHEST) 🚨: ANYTHING NEW! You MUST NOT miss ANY new Government Job, Exam Notification, Admit Card, Result, Answer Key, Cut-Off, Exam Calendar, Exam Date/Timetable, Syllabus Change, Counselling/Merit List, Any Official Notice, State Scholarship, Free Laptop/Coaching Scheme (Yojana), Internships, Rojgar Mela/Apprenticeship, Army/Defense Rally, Entrance Exam/TET, Top MNC Off-Campus Drive, or School/University Admission/Forms/Result released in the LAST 72 HOURS. Include ALL of these brand-new updates at the very top of your list so we can be the FIRST to publish!
+          🚨 1st PRIORITY (HIGHEST) 🚨: ANYTHING NEW! You MUST NOT miss ANY new Government Job, Exam Notification, Admit Card, Result, Answer Key, Cut-Off, Exam Calendar, Exam Date/Timetable, Syllabus Change, Counselling/Merit List, Any Official Notice, State Scholarship, Free Laptop/Coaching Scheme (Yojana), Internships, Rojgar Mela/Apprenticeship, Army/Defense Rally, Entrance Exam/TET, Top MNC Off-Campus Drive, Free Online Courses, Skill Development (PMKVY), or School/University Admission/Forms/Result released in the LAST 72 HOURS. Include ALL of these brand-new updates at the very top of your list so we can be the FIRST to publish!
           👉 2nd PRIORITY (FALLBACK) 👉: If (and ONLY if) there are not enough new updates today, you MUST fill the remaining slots with: Older Ongoing applications, General State Scholarship information, or Career Courses (e.g. 'Best courses after 12th').
           ⚠️ STRICT CRITICAL RULE ⚠️: You MUST provide exactly ONE real, current news topic for EACH of the 28 States of India, ONE for EACH of the 8 Union Territories, and ONE for the Central Government (28+8+1 = 37). 
           ⚠️ ANTI-FAKE NEWS RULE ⚠️: DO NOT invent exams, schemes, or results that don't exist. Keep real ongoing/upcoming exams, recent vacancies/schemes (last 72 hours), or real scholarship/university/school updates.
@@ -346,12 +346,12 @@ export async function POST(request: NextRequest) {
     ${liveNewsContext}
     
     CRITICAL RULE (STRICT): If the topic is a COMPLETELY FAKE exam that does not exist or a totally made-up rumor, you MUST ONLY output the exact word "ABORT_FAKE_NEWS" and nothing else. 
-    HOWEVER, if it is a real Upcoming Exam, an Expected Syllabus, an Ongoing Application, an Expected Result, a State Scholarship, a Board Exam update, an Answer Key, a Counselling/Merit List schedule, a Free Laptop/Coaching Scheme, an Internship, a Rojgar Mela/Apprenticeship, an Army/Defense Rally, an Entrance Exam/TET update, a Top MNC Off-Campus Drive, or a University Admission/Result, DO NOT ABORT! Provide research for it (mentioning it is expected/upcoming if applicable) so the writer can write an informative guide.
+    HOWEVER, if it is a real Upcoming Exam, an Expected Syllabus, an Ongoing Application, an Expected Result, a State Scholarship, a Board Exam update, an Answer Key, a Counselling/Merit List schedule, a Free Laptop/Coaching Scheme, an Internship, a Rojgar Mela/Apprenticeship, an Army/Defense Rally, an Entrance Exam/TET update, a Top MNC Off-Campus Drive, a Free Online Course, a Skill Development (PMKVY) update, or a University Admission/Result, DO NOT ABORT! Provide research for it (mentioning it is expected/upcoming if applicable) so the writer can write an informative guide.
 
     You MUST extract the FULL NOTIFICATION DETAILS. Provide an exhaustive breakdown of ALL of the following (if available):
     1. FULL SUMMARY: What is the notification/scholarship/result/scheme about? (Department, Post name, Total Vacancies, Scheme benefits, or University name).
     2. IMPORTANT DATES: Application Start Date, Last Date, Fee Payment Last Date, Exam/Rally Date, Counselling Date, or Result Date (if any).
-    3. VACANCY/SCHOLARSHIP DETAILS: Category-wise breakdown (UR, OBC, SC, ST, EWS), Scholarship Amount, or Scheme Eligibility if available.
+    3. VACANCY/SCHOLARSHIP/COURSE DETAILS: Category-wise breakdown (UR, OBC, SC, ST, EWS), Scholarship Amount, or Scheme Eligibility if available.
     4. ELIGIBILITY & AGE LIMIT: Educational qualifications required, Minimum/Maximum Age, and Age Relaxation rules (if applicable).
     5. APPLICATION FEES: Fees for General/OBC and SC/ST/Women.
     6. SELECTION PROCESS & SYLLABUS: How will candidates be selected? (Written, Physical, Interview) and basic syllabus topics (if job).

@@ -356,7 +356,7 @@ export async function POST(request: NextRequest) {
     5. APPLICATION FEES: Fees for General/OBC and SC/ST/Women.
     6. SELECTION PROCESS & SYLLABUS: How will candidates be selected? (Written, Physical, Interview) and basic syllabus topics (if job).
     7. SALARY/PAY SCALE: What is the expected salary or pay band?
-    8. HOW TO APPLY / DIRECT LINK INFO: Step-by-step application process and where to apply.
+    8. OFFICIAL LINKS & HOW TO APPLY: Provide the OFFICIAL website link (e.g., ssc.gov.in) and step-by-step application/download process. If it is an Answer Key, Result, or Admit Card, provide the official portal/login link where students can check it. (WARNING: Do NOT provide direct .pdf links from private competitor sites, only provide official government/organization portal links).
 
     🚨 FOR TECHNOLOGY & GADGETS: You MUST provide COMPLETE specs! (Processor, RAM/Storage, Camera MP, Battery/Charging, Display size). You MUST provide the exact Price in India and the Launch Date.
     🚨 FOR TELECOM/APPS: Provide exact old vs new recharge prices, validity, or step-by-step guide to use the new App feature.

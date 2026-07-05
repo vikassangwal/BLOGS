@@ -223,8 +223,8 @@ export async function POST(request: NextRequest) {
           👉 2nd PRIORITY (FALLBACK) 👉: If (and ONLY if) there are not enough new updates today, you MUST fill the remaining slots with: Older Ongoing applications, General State Scholarship information, or Career Courses (e.g. 'Best courses after 12th').
           ⚠️ STRICT CRITICAL RULE ⚠️: You MUST provide exactly ONE real, current news topic for EACH of the 28 States of India, ONE for EACH of the 8 Union Territories, and ONE for the Central Government (28+8+1 = 37). 
           ⚠️ ANTI-FAKE NEWS RULE ⚠️: DO NOT invent exams, schemes, or results that don't exist. Keep real ongoing/upcoming exams, recent vacancies/schemes (last 72 hours), or real scholarship/university/school updates.
-        - Include 2 Technology topics. MUST BE REAL AND RECENT (e.g., 'Samsung S24 Ultra Launched').
-        - Include 2 Finance updates. MUST BE REAL AND RECENT (e.g., 'RBI Repo Rate Increased Today').
+        - Include 2 Technology topics. MUST BE REAL AND RELEASED IN THE LAST 72 HOURS (e.g., 'Latest smartphone launched today', 'New AI update').
+        - Include 2 Finance updates. MUST BE REAL AND RELEASED IN THE LAST 72 HOURS (e.g., 'RBI Repo Rate Increased Today', 'New stock market rule').
         Ensure the topics are highly specific (NOT generic like 'Education news in Bihar').
         Respond ONLY with a valid JSON array of exactly 41 strings. No markdown.`;
 

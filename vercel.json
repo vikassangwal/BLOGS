@@ -3,12 +3,20 @@
   "installCommand": "npm install",
   "crons": [
     {
-      "path": "/api/auto-blog",
-      "schedule": "0 2 * * *"
+      "path": "/api/cron/auto-blog",
+      "schedule": "*/30 * * * *"
     },
     {
-      "path": "/api/auto-blog",
-      "schedule": "0 14 * * *"
+      "path": "/api/cron/translator",
+      "schedule": "*/30 * * * *"
+    },
+    {
+      "path": "/api/cron/editor",
+      "schedule": "*/30 * * * *"
+    },
+    {
+      "path": "/api/cron/update-content",
+      "schedule": "*/30 * * * *"
     }
   ]
 }

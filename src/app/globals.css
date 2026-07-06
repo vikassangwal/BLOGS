@@ -294,3 +294,44 @@ body { top: 0px !important; position: static !important; }
 .goog-text-highlight { background: none !important; box-shadow: none !important; pointer-events: none !important; }
 .goog-te-gadget { color: transparent !important; }
 .goog-te-gadget-icon, .goog-te-gadget-simple img { display: none !important; }
+
+/* Additional Premium UI Enhancements */
+.table-responsive-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin: 1.5rem 0;
+  border-radius: 12px;
+  border: 1px solid var(--color-border);
+}
+
+.table-responsive-wrapper table {
+  margin: 0 !important;
+}
+
+/* Accessibility & Touch Target Improvements */
+a, button {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-accent) !important;
+  outline-offset: 2px;
+}
+
+/* Print Styling for Clean Article Printing */
+@media print {
+  header, footer, nav, .social-share-bar, .no-print {
+    display: none !important;
+  }
+  body {
+    background: #fff !important;
+    color: #000 !important;
+  }
+  .blog-content {
+    font-size: 12pt;
+    line-height: 1.5;
+  }
+}

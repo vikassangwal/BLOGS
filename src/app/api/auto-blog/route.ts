@@ -432,6 +432,17 @@ export async function POST(request: NextRequest) {
     9. NO FAKE RUMOR DATES: Never write clickbait statements like 'Result releasing today at 5 PM' unless officially declared. If it is an unconfirmed rumor, label it clearly as '(Expected/संभावित Date)'.
     10. NO GUESSING VACANCY NUMBERS: If the official notification does not mention exact vacancy numbers, write 'विज्ञप्ति के अनुसार (To be Announced)'. DO NOT make up random numbers like 3000 or 5000.
     11. MULTI-POST NOTIFICATIONS (जैसे SSC CGL, RRB NTPC, IBPS, RPSC Combined): जब एक ही विभाग एक साथ कई अलग-अलग पदों (Multiple Posts) की भर्ती निकाले, तो Post-Wise HTML Table ज़रूर बनाओ। टेबल में मुख्य 5-8 पदों का नाम, प्रत्येक पद की योग्यता (Qualification), आयु सीमा (Age Limit), और पे-स्केल (Pay Scale) अलग-अलग Rows में साफ़-साफ़ दर्शाओ। खिचड़ी मत बनाओ!
+    12. DEEP ACCURACY & RECRUITMENT SPECIFICS (अति-महत्वपूर्ण नियम):
+    - AGE & RELAXATION: General category age limit साफ़-साफ़ लिखें (जैसे 18-30 वर्ष)। आरक्षित वर्गों की छूट को अलग से दर्शाएं: OBC (+3 वर्ष), SC/ST (+5 वर्ष)। मिलाकर एक बड़ी उम्र न लिखें।
+    - GENDER PHYSICAL STANDARDS: पुलिस/सेना भर्ती में पुरुष (Male) और महिला (Female) के शारीरिक माप (Height, Chest, Running) की टेबल अलग-अलग या स्पष्ट पंक्तियों में बनाएं।
+    - DOMICILE / OTHER STATES: यह स्पष्ट रूप से लिखें कि दूसरे राज्य के छात्र आवेदन कर सकते हैं या नहीं (General Quota के तहत)।
+    - QUALIFICATION & FINAL YEAR: यदि पद में विशेष विषय (जैसे B.Sc in Maths या B.Ed) चाहिए तो वही लिखें। यह भी स्पष्ट करें कि Final Year वाले विद्यार्थी पात्र हैं या नहीं।
+    - DATES & CORRECTION WINDOW: 'आवेदन की अंतिम तिथि', 'फीस भुगतान की अंतिम तिथि' और 'फॉर्म सुधार (Correction Window) की तारीख' को अलग-अलग बिंदु में स्पष्ट करें।
+    - FEE EXEMPTION: यदि महिला, SC, ST उम्मीदवारों के लिए फीस मुफ्त (₹0) है तो स्पष्ट ₹0 (Exempted) लिखें।
+    - EXAM PATTERN & NEGATIVE MARKING: ऋणात्मक अंकन (Negative Marking) का सटीक मान लिखें (जैसे 1/4 या 1/3)। यदि Tier-1 केवल Qualifying है तो स्पष्ट रूप से लिखें।
+    - BANK & SECTIONAL TIMING: यदि बैंक परीक्षा है, तो Sectional Timing (जैसे 20 मिनट प्रति विषय) का उल्लेख करें।
+    - PAY SCALE & LEVEL: 7th Pay Commission का Pay Level (जैसे Pay Level 4: ₹25,500 - ₹81,100) और सम्भावित इन-हैंड सैलरी दोनों दर्शाएं।
+    - SPECIFIC RECRUITMENT PORTAL: सामान्य सरकारी पोर्टल की जगह exact भर्ती पोर्टल लिंक (जैसे sso.rajasthan.gov.in या ssc.gov.in) ही दें।
     6. TABLES FOR DATA: कोई भी आंकड़ा (तारीख, फीस, सैलरी, स्पेसिफिकेशन) हो तो HTML <table> बनाकर दें।
     7. BOLD IMPORTANT INFO: मुख्य शब्दों को <strong>Bold</strong> करें।
     8. MOBILE-FIRST: कोई भी पैराग्राफ 3-4 लाइनों से बड़ा नहीं होना चाहिए।

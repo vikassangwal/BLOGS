@@ -120,45 +120,59 @@ export async function POST(request: NextRequest) {
       }
     } catch(e) {}
 
-    function buildAgentConfig(prefix: string, defaultProvider: string, defaultModel: string, defaultTokens: number) {
-      const provider = savedKeys[`${prefix}Provider`] || defaultProvider;
-      const model = (savedKeys[`${prefix}Model`] || defaultModel).trim();
-      const maxTokens = parseInt(savedKeys[`${prefix}Tokens`]) || defaultTokens;
-      
-      const fallbackProvider = savedKeys[`${prefix}FallbackProvider`] || null;
-      const fallbackModel = (savedKeys[`${prefix}FallbackModel`] || '').trim() || null;
-      
-      const getApiKey = (p: string) => {
-        let key = savedKeys[p] || '';
-        if (!key && siteSettings?.aiApiKey && !siteSettings.aiApiKey.startsWith('{')) key = siteSettings.aiApiKey;
-        if (!key) {
-          const allKeyNames = Object.keys(savedKeys).filter(k => 
-            !k.includes('Provider') && !k.includes('Model') && !k.includes('Token') && !k.includes('Id') &&
-            savedKeys[k] && savedKeys[k].length >= 10
-          );
-          if (allKeyNames.length > 0) key = savedKeys[allKeyNames[0]];
-        }
-        return key.trim();
-      };
-      
-      return {
-        primary: { provider: provider as any, apiKey: getApiKey(provider), model },
-        fallback: (fallbackProvider && fallbackModel) ? { provider: fallbackProvider as any, apiKey: getApiKey(fallbackProvider), model: fallbackModel } : null,
-        maxTokens
-      };
+    
+    function getApiKeyForProvider(p: string): string {
+      let key = (savedKeys[p] || '').trim();
+      if (!key) {
+        // Fallback to any valid key in savedKeys >= 10 chars
+        const fallback = Object.keys(savedKeys).find(k => 
+          !k.includes('Provider') && !k.includes('Model') && !k.includes('Token') && !k.includes('Id') &&
+          savedKeys[k] && typeof savedKeys[k] === 'string' && savedKeys[k].length >= 10
+        );
+        if (fallback) key = String(savedKeys[fallback]).trim();
+      }
+      return key;
     }
 
-    async function generateContentWithFallback(config: any, sysPrompt: string, userPrompt: string) {
-      try {
-        return await generateAIContent(config.primary, sysPrompt, userPrompt, config.maxTokens);
-      } catch (err: any) {
-        if (!config.fallback) {
-          throw err;
-        }
-        console.warn(`[Auto-Blog Fallback] Primary ${config.primary.provider} failed. Switching to fallback ${config.fallback.provider}...`, err.message);
-        return await generateAIContent(config.fallback, sysPrompt, userPrompt, config.maxTokens);
+    function buildAgentConfigs(prefix: string, defaultProvider: string, defaultModel: string, defaultTokens: number): { configs: AIConfig[]; maxTokens: number } {
+      const primaryProvider = savedKeys[`${prefix}Provider`] || siteSettings?.aiProvider || defaultProvider;
+      const primaryModel = (savedKeys[`${prefix}Model`] || siteSettings?.aiModel || defaultModel).trim();
+      const maxTokens = parseInt(savedKeys[`${prefix}Tokens`]) || defaultTokens;
+
+      const configs: AIConfig[] = [];
+      const key1 = getApiKeyForProvider(primaryProvider);
+      if (key1) {
+        configs.push({ provider: primaryProvider, apiKey: key1, model: primaryModel });
       }
+
+      // Add ALL available backup keys in priority order: gemini, gemini2, gemini3, openrouter, groq, openai, deepseek
+      const fallbackProviders = ['gemini', 'gemini2', 'gemini3', 'openrouter', 'groq', 'openai', 'deepseek'];
+      for (const prov of fallbackProviders) {
+        const k = (savedKeys[prov] || '').trim();
+        if (k && k.length >= 10 && prov !== primaryProvider) {
+          const m = prov.startsWith('gemini') ? 'gemini-2.0-flash' : prov === 'groq' ? 'llama-3.3-70b-versatile' : prov === 'openai' ? 'gpt-4o-mini' : 'google/gemini-2.5-flash';
+          configs.push({ provider: prov, apiKey: k, model: m });
+        }
+      }
+
+      // If still empty, try single fallback key
+      if (configs.length === 0) {
+        const anyKey = getApiKeyForProvider('gemini');
+        if (anyKey) {
+          configs.push({ provider: 'gemini', apiKey: anyKey, model: 'gemini-2.0-flash' });
+        }
+      }
+
+      return { configs, maxTokens };
     }
+
+    async function generateContentWithFallback(configObj: { configs: AIConfig[]; maxTokens: number }, sysPrompt: string, userPrompt: string) {
+      if (!configObj.configs || configObj.configs.length === 0) {
+        throw new Error("No AI API Keys found in Admin Settings. Please enter your Gemini API Key in Admin Panel > Settings.");
+      }
+      return await generateAIContent(configObj.configs, sysPrompt, userPrompt, configObj.maxTokens);
+    }
+
 
     // 2. DELETE OLD KEYWORDS (Older than 24 hours) TO ENSURE FRESH NEWS
     const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
@@ -234,7 +248,7 @@ export async function POST(request: NextRequest) {
       Example format: ["Topic 1", "Topic 2", "Topic 3"]`;
 
       let rModel = settings.researcherModel || '';
-      const researcherConfigForTopic = buildAgentConfig('researcher', 'openrouter', rModel || 'google/gemini-2.5-flash', 1500);
+      const researcherConfigForTopic = buildAgentConfigs('researcher', 'openrouter', rModel || 'google/gemini-2.5-flash', 1500);
       
       try {
         // STEP 1: Generate 120 Keywords
@@ -318,7 +332,7 @@ export async function POST(request: NextRequest) {
     let wModel = settings.writerModel || '';
     let sModel = settings.seoModel || '';
 
-    const researcherConfig = buildAgentConfig('researcher', 'openrouter', rModel || 'google/gemini-2.5-flash', 1500);
+    const researcherConfig = buildAgentConfigs('researcher', 'openrouter', rModel || 'google/gemini-2.5-flash', 1500);
     
     // Feature: Auto-inject Native Gemini for Google Search Grounding if key exists
     let geminiKey = savedKeys['gemini'];
@@ -333,8 +347,8 @@ export async function POST(request: NextRequest) {
       researcherConfig.primary = { provider: 'gemini', apiKey: geminiKey, model: 'gemini-1.5-flash' };
     }
 
-    const writerConfig = buildAgentConfig('writer', 'openrouter', wModel || 'openai/gpt-4o-mini', 6000);
-    const seoConfig = buildAgentConfig('seo', 'openrouter', sModel || 'openai/gpt-4o-mini', 500);
+    const writerConfig = buildAgentConfigs('writer', 'openrouter', wModel || 'openai/gpt-4o-mini', 6000);
+    const seoConfig = buildAgentConfigs('seo', 'openrouter', sModel || 'openai/gpt-4o-mini', 500);
 
     // Verify at least one agent has a valid API key
     if (!researcherConfig.primary.apiKey && !writerConfig.primary.apiKey && !seoConfig.primary.apiKey) {

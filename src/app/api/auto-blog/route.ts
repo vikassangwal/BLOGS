@@ -433,6 +433,13 @@ export async function POST(request: NextRequest) {
     10. NO GUESSING VACANCY NUMBERS: If the official notification does not mention exact vacancy numbers, write 'विज्ञप्ति के अनुसार (To be Announced)'. DO NOT make up random numbers like 3000 or 5000.
     11. MULTI-POST NOTIFICATIONS (जैसे SSC CGL, RRB NTPC, IBPS, RPSC Combined): जब एक ही विभाग एक साथ कई अलग-अलग पदों (Multiple Posts) की भर्ती निकाले, तो Post-Wise HTML Table ज़रूर बनाओ। टेबल में मुख्य 5-8 पदों का नाम, प्रत्येक पद की योग्यता (Qualification), आयु सीमा (Age Limit), और पे-स्केल (Pay Scale) अलग-अलग Rows में साफ़-साफ़ दर्शाओ। खिचड़ी मत बनाओ!
     12. DEEP ACCURACY & RECRUITMENT SPECIFICS (अति-महत्वपूर्ण नियम):
+    13. ULTRA-ADVANCED RECRUITMENT RULES (अति-सूक्ष्म कानूनी एवं तकनीकी नियम):
+    - APPRENTICESHIP VS PERMANENT: यदि भर्ती Apprenticeship (शिक्षुता) की है, तो उसे '1 वर्ष का प्रशिक्षण (Apprenticeship)' साफ़-साफ़ लिखें। इसे स्थायी (Permanent) सरकारी नौकरी कभी न लिखें।
+    - DEGREE VS DIPLOMA: B.Tech (Degree) और Diploma (Polytechnic) की पात्रता को अलग-अलग रखें। डिप्लोमा धारकों को B.Tech पदों पर पात्र न बताएं जब तक आधिकारिक नोटिस में न हो।
+    - CERTIFICATE DATES: OBC-NCL और EWS प्रमाण पत्र के लिए फॉर्म भरने की अंतिम तिथि (Cut-off Date) का विशेष उल्लेख करें।
+    - OTR & SERVICE BOND: यदि राज्य/केंद्र पोर्टल (जैसे OTR / SSO ID) पर रजिस्ट्रेशन अनिवार्य है, तो Step 1 में OTR का उल्लेख करें। बैंक/PSU नौकरी में सर्विस बॉन्ड (यदि लागू हो) की जानकारी दें।
+    - NORMALIZATION & MARKS: मल्टी-शिफ्ट कंप्यूटर परीक्षाओं (CBT) में Normalization प्रक्रिया और Tier-1 (Qualifying vs Merit) की स्थिति स्पष्ट करें।
+    - ADVT NUMBER: विज्ञापन संख्या (Advt No.) चालू वर्ष 2026 की ही लिखें, पुरानी कॉपी न करें।
     - AGE & RELAXATION: General category age limit साफ़-साफ़ लिखें (जैसे 18-30 वर्ष)। आरक्षित वर्गों की छूट को अलग से दर्शाएं: OBC (+3 वर्ष), SC/ST (+5 वर्ष)। मिलाकर एक बड़ी उम्र न लिखें।
     - GENDER PHYSICAL STANDARDS: पुलिस/सेना भर्ती में पुरुष (Male) और महिला (Female) के शारीरिक माप (Height, Chest, Running) की टेबल अलग-अलग या स्पष्ट पंक्तियों में बनाएं।
     - DOMICILE / OTHER STATES: यह स्पष्ट रूप से लिखें कि दूसरे राज्य के छात्र आवेदन कर सकते हैं या नहीं (General Quota के तहत)।

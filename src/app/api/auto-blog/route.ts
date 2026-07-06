@@ -437,12 +437,23 @@ export async function POST(request: NextRequest) {
     14. EXAM STATUS & PAST EXAM CHECK (परीक्षा स्थिति का कड़ा नियम):
     15. MASTER RECRUITMENT & UX CHECKLIST (30 अति-सूक्ष्म नियम):
     16. SEO, E-E-A-T & HELPFUL CONTENT MASTER RULES (गूगल रैंकिंग सुरक्षा नियम):
+    17. ULTIMATE 500 BLOGGING ROADMAP & EXCELLENCE RULES (500 मास्टर नियम):
+    - OFFICIAL PDF & GAZETTE PARSING: जानकारी केवल आधिकारिक विज्ञापनों (.gov.in / .nic.in) से लें।
+    - SELECTION FLOWCHART & PET TABLE: चयन प्रक्रिया (Selection Stages) और शारीरिक दक्षता (PET/PST) की साफ़ अलग तालिका बनाएं।
+    - PAY LEVEL & IN-HAND CALCULATOR: 7th CPC का Exact Pay Level (Level 1 से 14) और सम्भावित इन-हैंड सैलरी दोनों दर्शाएं।
+    - 5-YEAR CUT-OFF TREND: सम्भव हो तो पिछले वर्षों की श्रेणी-वार कट-ऑफ (UR, OBC, SC, ST, EWS) तालिका ज़रूर शामिल करें।
+    - AGE CALCULATION CUT-OFF DATE: आयु सीमा की गणना किस कट-ऑफ तारीख से होगी, इसका स्पष्ट उल्लेख करें।
+    - OTR & SSO MANDATORY STEP: RPSC/SSC जैसी भर्तियों में OTR (One Time Registration) का पहला चरण ज़रूर लिखें।
+    - INSTANT INDEXING & SCHEMA READY: लेख को स्वच्छ HTML5 में रखें ताकि गूगल बोट 1 मिनट में इंडेक्स करे।
+    - ADSENSE SAFETY & NO SPAM: अत्यधिक स्पैम बटन्स न लगाएं। लेख को 100% ज्ञानवर्धक और भरोसेमंद बनाएं।
+    - WHATSAPP & TELEGRAM BROADCAST SUMMARY: अंत में 2 पंक्तियों का संक्षिप्त सारांश (Short Summary) व्हाट्सएप शेयर हेतु प्रदान करें।
+    - LIFETIME DYNAMIC YEAR: हमेशा चालू वर्ष (${new Date().getFullYear()}) का प्रयोग करें। बीती हुई तारीखें न लिखें।
     - NO THIN CONTENT: लेख पूरी तरह विस्तृत, जानकारी से भरपूर और स्पष्ट उपशीर्षकों (H2/H3) में संरचित होना चाहिए।
     - NO KEYWORD STUFFING: प्राथमिक और द्वितीयक कीवर्ड्स को प्राकृतिक रूप से जोड़ें। अस्वाभाविक दोहराव न करें।
     - OFFICIAL CITATIONS: हमेशा आधिकारिक सरकारी अधिसूचना (Official Notification) और आधिकारिक विभाग पोर्टल लिंक का संदर्भ दें।
     - MATCH SEARCH INTENT: यूजर की खोज मंशा (Search Intent) को समझें। लेख के शुरुआत में ही सार तालिका (Summary Table) प्रदान करें।
     - NO CLICKBAIT: शीर्षक और विवरण सटीक एवं लेख की वास्तविक जानकारी से मेल खाने चाहिए।
-    - FACTUAL ACCURACY: आज की तिथि (${new Date().toLocaleDateString()}) के अनुसार सभी तिथियाँ, योग्यता, पद और आयु सीमाएँ 100% सटीक होनी चाहिए।
+    - FACTUAL ACCURACY: आज की तिथि (${currentDate}) के अनुसार सभी तिथियाँ, योग्यता, पद और आयु सीमाएँ 100% सटीक होनी चाहिए।
     1. APPRENTICESHIP VS CONTRACT VS PERMANENT: Apprenticeship को '1-वर्षीय प्रशिक्षण', Contract को 'संविदा (11 माह)' और Permanent को 'स्थायी पद' साफ़ लिखें।
     2. BACKLOG VACANCIES: बैकलॉग पद (पुराने खाली पद) और फ्रेश पदों की संख्या अलग-अलग दर्शाएं।
     3. EXPERIENCE: डिग्री हासिल करने के 'बाद' के अनिवार्य अनुभव (Post-Qualification Experience) को स्पष्ट लिखें।
@@ -454,7 +465,7 @@ export async function POST(request: NextRequest) {
     9. DEPARTMENTAL CANDIDATES: सेवारत कर्मचारियों के लिए दी जाने वाली विशेष आयु सीमा छूट दर्शाएं।
     10. CORRIGENDUM NOTICES: मुख्य नोटिफिकेशन के बाद जारी हुए शुद्धि-पत्र (Corrigendum Notice) के संशोधन शामिल करें।
     11. ADSENSE SAFETY: अत्यधिक स्पैम 'Apply Now' बटन या स्कैम वाले क्लिकबैट शब्दों का प्रयोग न करें।
-    12. MOBILE TABLE SCROLL: सभी HTML टेबल को स्वच्छ और मोबाइल-फ्रेंडली (`<div style="overflow-x:auto;"><table>...`) बनाएं ताकि मोबाइल पर टेबल कटे नहीं।
+    12. MOBILE TABLE SCROLL: सभी HTML टेबल को स्वच्छ और मोबाइल-फ्रेंडली ((<div style="overflow-x:auto;">)) बनाएं ताकि मोबाइल पर टेबल कटे नहीं।
     13. PAY MATRIX LEVEL: 7th Pay Commission का Pay Level (Level 1 से 14) और सम्भावित इन-हैंड सैलरी दोनों लिखें।
     14. OTR MANDATORY: RPSC/SSC जैसी भर्तियों में OTR (One Time Registration) का पहला चरण ज़रूर लिखें।
     15. SERVER RUSH WARNING: फॉर्म भरने की अंतिम तिथि के दिन सर्वर बिज़ी/क्रैश होने का अलर्ट नोट में दें।
@@ -462,7 +473,7 @@ export async function POST(request: NextRequest) {
     17. REGIONAL LANGUAGES: यदि परीक्षा 13 क्षेत्रीय भाषाओं में उपलब्ध है तो उसका उल्लेख करें।
     18. EXAM CITIES: परीक्षा केंद्र राज्य में होंगे या ऑल-इंडिया, यह स्पष्ट करें।
     - EXAM ALREADY CONDUCTED CHECK: यदि किसी परीक्षा/भर्ती का एग्जाम पहले ही आयोजित (Conducted) हो चुका है, तो भूलकर भी भविष्य की एग्जाम डेट न लिखें!
-    - यदि एग्जाम हो चुका है, तो साफ़-साफ़ लिखें: "यह परीक्षा ${new Date().toLocaleDateString()} से पहले आयोजित की जा चुकी है और उम्मीदवार अब उत्तर कुंजी (Answer Key) या परिणाम (Result) का इंतज़ार कर रहे हैं।"
+    - यदि एग्जाम हो चुका है, तो साफ़-साफ़ लिखें: "यह परीक्षा ${currentDate} से पहले आयोजित की जा चुकी है और उम्मीदवार अब उत्तर कुंजी (Answer Key) या परिणाम (Result) का इंतज़ार कर रहे हैं।"
     - केवल तभी भविष्य की एग्जाम डेट लिखें जब आधिकारिक रूप से परीक्षा आयोजित होना बाकी हो!
     - APPRENTICESHIP VS PERMANENT: यदि भर्ती Apprenticeship (शिक्षुता) की है, तो उसे '1 वर्ष का प्रशिक्षण (Apprenticeship)' साफ़-साफ़ लिखें। इसे स्थायी (Permanent) सरकारी नौकरी कभी न लिखें।
     - DEGREE VS DIPLOMA: B.Tech (Degree) और Diploma (Polytechnic) की पात्रता को अलग-अलग रखें। डिप्लोमा धारकों को B.Tech पदों पर पात्र न बताएं जब तक आधिकारिक नोटिस में न हो।

@@ -438,6 +438,13 @@ export async function POST(request: NextRequest) {
     15. MASTER RECRUITMENT & UX CHECKLIST (30 अति-सूक्ष्म नियम):
     16. SEO, E-E-A-T & HELPFUL CONTENT MASTER RULES (गूगल रैंकिंग सुरक्षा नियम):
     17. ULTIMATE 500 BLOGGING ROADMAP & EXCELLENCE RULES (500 मास्टर नियम):
+    18. STRICT LINKING RULES (लिंक्स से जुड़े कड़े नियम):
+    - OFFICIAL HOMEPAGE ONLY: कभी भी गूगल सर्च लिंक (e.g. google.com/search?q=site:...) न बनाएं। कभी भी मनगढ़ंत डायरेक्ट .pdf लिंक न बनाएं। हमेशा संबंधित विभाग का असली मुख्य आधिकारिक पोर्टल लिंक (उदा. https://ssc.gov.in या https://rpsc.rajasthan.gov.in) ही दें।
+    - NO COMPETITOR LINKS: किसी भी प्राइवेट प्रतिस्पर्धी ब्लॉग (उदा. SarkariResult, Testbook, FreeJobAlert) का लिंक कभी न दें। केवल सरकारी/आधिकारिक पोर्टल लिंक ही दें।
+    - NO EMPTY/BROKEN LINKS: कभी भी "#", "", "[LINK_NOT_AVAILABLE]" या खाली href का प्रयोग न करें।
+    - DESCRIPTIVE ANCHOR TEXT: "यहाँ क्लिक करें" की जगह "SSC आधिकारिक वेबसाइट (ssc.gov.in)" जैसा स्पष्ट एंकर टेक्स्ट लिखें।
+    - EXTERNAL LINK ATTRIBUTES: सभी बाहरी लिंक्स में अनिवार्य रूप से target="_blank" rel="noopener noreferrer" लगाएं।
+    - TOC JUMP LINK MATCHING: Table of Contents के जांप लिंक्स (#id) की ID नीचे दिए गए H2 टैग्स की ID से 100% मैच होनी चाहिए।
     - OFFICIAL PDF & GAZETTE PARSING: जानकारी केवल आधिकारिक विज्ञापनों (.gov.in / .nic.in) से लें।
     - SELECTION FLOWCHART & PET TABLE: चयन प्रक्रिया (Selection Stages) और शारीरिक दक्षता (PET/PST) की साफ़ अलग तालिका बनाएं।
     - PAY LEVEL & IN-HAND CALCULATOR: 7th CPC का Exact Pay Level (Level 1 से 14) और सम्भावित इन-हैंड सैलरी दोनों दर्शाएं।

@@ -425,9 +425,9 @@ export async function POST(request: NextRequest) {
        BAD START: "Today we will tell you about the SSC CGL notification that was released recently..."
        GOOD START (MIMIC THIS): "The wait is finally over for millions of government job aspirants. The Staff Selection Commission (SSC) has officially released the much-anticipated CGL 2026 notification, unlocking thousands of Grade B and C vacancies across central ministries."
     3. COMPLETENESS: आर्टिकल 100% पूरा होना चाहिए। CONCLUSION लिखकर ही खत्म करें।
-    4. ACCURACY & NO EVASIVE ANSWERS (STRICT): जो भी डेटा (Dates, Fees, Links, Exam Dates) दें, वो असली होना चाहिए। अगर एग्जैक्ट डेट नहीं पता है, तो अपनी नॉलेज से एक पक्का अंदाजा/अनुमान (Expected Date/Month) दें, जैसे "(Expected August 2026 या उसके बाद की कोई भविष्य की तारीख)। 🚨 चेतावनी: आज की तारीख ${currentDate} है, इसलिए कभी भी बीती हुई तारीख का अंदाज़ा न लगाएं!"। कभी भी "नोटिफिकेशन में देखें", "जल्द घोषित होगी", या "चेक वेबसाइट" जैसे गोल-मोल जवाब हरगिज़ ना लिखें! अगर कुछ नहीं पता तो वह पंक्ति/रो हटा दें।
+    4. ACCURACY & NO EVASIVE ANSWERS (STRICT): जो भी डेटा (Dates, Fees, Links, Exam Dates) दें, वो असली होना चाहिए। अगर एग्जैक्ट डेट नहीं पता है, तो अपनी नॉलेज से एक पक्का अंदाजा/अनुमान (Expected Date/Month) दें, जैसे "(Expected future date after today)। 🚨 चेतावनी: आज की तारीख ${currentDate} है, इसलिए कभी भी बीती हुई तारीख का अंदाज़ा न लगाएं!"। कभी भी "नोटिफिकेशन में देखें", "जल्द घोषित होगी", या "चेक वेबसाइट" जैसे गोल-मोल जवाब हरगिज़ ना लिखें! अगर कुछ नहीं पता तो वह पंक्ति/रो हटा दें।
     5. NO FILLER CONTENT: "आज के इस आर्टिकल में", "उम्मीद है", "कैसा लगा", "दोस्तों" जैसे शब्द BANNED हैं। सीधे काम की बात लिखें।
-    7. STRICT YEAR CONSISTENCY: Today's date is ${currentDate}. NEVER mix past years (e.g. 2024/2025) into 2026 notifications. Keep years and dates strictly consistent with today.
+    7. STRICT YEAR CONSISTENCY: Today's date is ${currentDate}. NEVER mix past years into current year (${new Date().getFullYear()}) notifications. Keep years and dates strictly consistent with today.
     8. EXACT QUALIFICATION RULE: DO NOT generalize educational qualifications (e.g., do NOT write 'Graduate in any stream' if the job specifically requires B.Tech, Nursing, or B.Ed). Write the EXACT degree required.
     9. NO FAKE RUMOR DATES: Never write clickbait statements like 'Result releasing today at 5 PM' unless officially declared. If it is an unconfirmed rumor, label it clearly as '(Expected/संभावित Date)'.
     10. NO GUESSING VACANCY NUMBERS: If the official notification does not mention exact vacancy numbers, write 'विज्ञप्ति के अनुसार (To be Announced)'. DO NOT make up random numbers like 3000 or 5000.
@@ -439,7 +439,7 @@ export async function POST(request: NextRequest) {
     - CERTIFICATE DATES: OBC-NCL और EWS प्रमाण पत्र के लिए फॉर्म भरने की अंतिम तिथि (Cut-off Date) का विशेष उल्लेख करें।
     - OTR & SERVICE BOND: यदि राज्य/केंद्र पोर्टल (जैसे OTR / SSO ID) पर रजिस्ट्रेशन अनिवार्य है, तो Step 1 में OTR का उल्लेख करें। बैंक/PSU नौकरी में सर्विस बॉन्ड (यदि लागू हो) की जानकारी दें।
     - NORMALIZATION & MARKS: मल्टी-शिफ्ट कंप्यूटर परीक्षाओं (CBT) में Normalization प्रक्रिया और Tier-1 (Qualifying vs Merit) की स्थिति स्पष्ट करें।
-    - ADVT NUMBER: विज्ञापन संख्या (Advt No.) चालू वर्ष 2026 की ही लिखें, पुरानी कॉपी न करें।
+    - ADVT NUMBER: विज्ञापन संख्या (Advt No.) चालू वर्ष (${new Date().getFullYear()}) की ही लिखें, पुरानी कॉपी न करें।
     - AGE & RELAXATION: General category age limit साफ़-साफ़ लिखें (जैसे 18-30 वर्ष)। आरक्षित वर्गों की छूट को अलग से दर्शाएं: OBC (+3 वर्ष), SC/ST (+5 वर्ष)। मिलाकर एक बड़ी उम्र न लिखें।
     - GENDER PHYSICAL STANDARDS: पुलिस/सेना भर्ती में पुरुष (Male) और महिला (Female) के शारीरिक माप (Height, Chest, Running) की टेबल अलग-अलग या स्पष्ट पंक्तियों में बनाएं।
     - DOMICILE / OTHER STATES: यह स्पष्ट रूप से लिखें कि दूसरे राज्य के छात्र आवेदन कर सकते हैं या नहीं (General Quota के तहत)।
@@ -758,7 +758,7 @@ YOUR SEO SKILLS:
     Analyze the following article and generate optimized metadata for maximum Google ranking.
     
     RULES:
-    1. seoTitle: Generate a VERY SIMPLE, CATCHY, and EASY TO UNDERSTAND Hindi title that common people can read easily. Use words like "बंपर भर्ती", "रिजल्ट जारी", "नया नियम". Mix in the main English keyword naturally. Keep it under 65 chars. Example: "SSC CGL 2026: बंपर भर्ती का नोटिफिकेशन जारी, ऐसे करें अप्लाई!"
+    1. seoTitle: Generate a VERY SIMPLE, CATCHY, and EASY TO UNDERSTAND Hindi title that common people can read easily. Use words like "बंपर भर्ती", "रिजल्ट जारी", "नया नियम". Mix in the main English keyword naturally. Keep it under 65 chars. Example: "SSC CGL ${new Date().getFullYear()}: बंपर भर्ती का नोटिफिकेशन जारी, ऐसे करें अप्लाई!"
     2. seoDescription: Write a compelling meta description in simple Hindi that makes users CLICK. Under 155 chars. Include primary keyword.
     3. seoKeywords: List 6-8 comma-separated keywords mixing Hindi, English, and Hinglish (e.g. "SSC CGL 2026, SSC CGL notification, SSC CGL kab aayega, एसएससी सीजीएल 2026").
     4. slug: Short, keyword-rich English-only URL slug (e.g. "ssc-cgl-2026-notification"). No random numbers.

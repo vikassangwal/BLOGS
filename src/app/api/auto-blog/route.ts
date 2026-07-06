@@ -1,3 +1,11 @@
+
+function getCurrentDateStr() {
+  return new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+}
+function getCurrentYearNum() {
+  return new Date().getFullYear();
+}
+
 import { NextRequest, NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
 import { prisma } from '@/lib/prisma';
@@ -80,6 +88,8 @@ async function postToTwitter(bearerToken: string, text: string) {
 
 
 export async function POST(request: NextRequest) {
+  const currentDate = getCurrentDateStr();
+  const currentYear = getCurrentYearNum();
   try {
     // Auth check: only admin can trigger auto-blog (skip for cron calls with x-cron-secret header)
     const expectedSecret = process.env.CRON_SECRET || 'knowora-cron-2026';
@@ -207,13 +217,13 @@ export async function POST(request: NextRequest) {
 
       const currentDate = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
       const step1Prompt = `You are a Trending News & Job Alert researcher for India. 
-      TODAY'S DATE IS: ${currentDate}.
+      TODAY'S DATE IS: ${getCurrentDateStr()}.
       ${seedNews}
       ${recentlyPublishedStr}
       GENERATE A MASSIVE LIST OF 120 KEYWORDS.
       This is Step 1 (Brainstorming). Generate a wide variety of Government Job Vacancies (from the LAST 72 HOURS), Exam Notifications, Admit Cards, Answer Keys, Results, Counselling/Merit Lists, Timetables/Syllabus, Free Laptop/Coaching Schemes, Internships, Rojgar Mela/Apprenticeships, Army/Defense Rallies, Entrance Exams (NEET/JEE/CUET/TET), Top MNC Off-Campus Drives, Free Online Courses (Google/TCS), Skill Development (PMKVY), Scholarships, University Admissions/Results, IGNOU/Open University Updates, KVS/Navodaya Admissions, Nursing/Medical Courses, Bank/PSU Jobs (IBPS/SBI), School/College News, Career Courses (e.g. Best courses after 12th), Board Exam Updates, Technology (Telecom/5G plans, Smartphone/Gadget launches, App updates/Outages, AI Tools, EV Scooters, Gaming updates, Cyber Scams, Tech How-To), and Finance/Earning (PM Kisan, EPF, Online Earning, Bank Rules, IPOs, Gold Rates, LIC/Post Office). 
       Include topics from ALL 28 Indian States and 8 Union Territories.
-        🚨 CRITICAL RULE FOR JOBS/EXAMS: NEVER include any job, recruitment, or exam where the 'Last Date to Apply' has ALREADY PASSED before ${currentDate}. If it's expired, DO NOT mention it! 🚨
+        🚨 CRITICAL RULE FOR JOBS/EXAMS: NEVER include any job, recruitment, or exam where the 'Last Date to Apply' has ALREADY PASSED before ${getCurrentDateStr()}. If it's expired, DO NOT mention it! 🚨
       Respond ONLY with a valid JSON array of strings. No markdown.
       Example format: ["Topic 1", "Topic 2", "Topic 3"]`;
 
@@ -229,7 +239,7 @@ export async function POST(request: NextRequest) {
         
         // STEP 2: Filter down to exactly 41 strictly verified keywords
         const step2Prompt = `You are a STRICT FACT-CHECKER AND EDITOR. 
-        TODAY'S DATE IS: ${currentDate}.
+        TODAY'S DATE IS: ${getCurrentDateStr()}.
         ${recentlyPublishedStr}
         Here is a raw list of brainstormed topics:
         ${rawKeywordsList}
@@ -240,7 +250,7 @@ export async function POST(request: NextRequest) {
           🚨 1st PRIORITY (HIGHEST) 🚨: ANYTHING NEW! You MUST NOT miss ANY new Government Job, Exam Notification, Admit Card, Result, Answer Key, Cut-Off, Exam Calendar, Exam Date/Timetable, Syllabus Change, Counselling/Merit List, Any Official Notice, State Scholarship, Free Laptop/Coaching Scheme (Yojana), Internships, Rojgar Mela/Apprenticeship, Army/Defense Rally, Entrance Exam/TET, Top MNC Off-Campus Drive, Free Online Courses, Skill Development (PMKVY), KVS/Navodaya Admission, IGNOU/Open University Update, Nursing Course, Bank/PSU Job, or School/University Admission/Forms/Result released in the LAST 72 HOURS. Include ALL of these brand-new updates at the very top of your list so we can be the FIRST to publish!
           👉 2nd PRIORITY (FALLBACK) 👉: If (and ONLY if) there are not enough new updates today, you MUST fill the remaining slots with: Older Ongoing applications, General State Scholarship information, or Career Courses (e.g. 'Best courses after 12th').
           ⚠️ STRICT CRITICAL RULE ⚠️: You MUST provide exactly ONE real, current news topic for EACH of the 28 States of India, ONE for EACH of the 8 Union Territories, and ONE for the Central Government (28+8+1 = 37). 
-          🚨 ANTI-FAKE NEWS & EXPIRY RULE 🚨: DO NOT invent exams, schemes, or results that don't exist. Keep real ongoing/upcoming exams. NEVER select a job/recruitment where the "Last Date to Apply" has already passed before today (${currentDate}). Writing about expired applications is completely useless and strictly forbidden!
+          🚨 ANTI-FAKE NEWS & EXPIRY RULE 🚨: DO NOT invent exams, schemes, or results that don't exist. Keep real ongoing/upcoming exams. NEVER select a job/recruitment where the "Last Date to Apply" has already passed before today (${getCurrentDateStr()}). Writing about expired applications is completely useless and strictly forbidden!
         - Include 2 Technology topics. MUST BE REAL AND RELEASED IN THE LAST 72 HOURS. 🚨 TECH 1ST PRIORITY: New Telecom Recharge/5G Plans (Jio/Airtel/BSNL), Major Smartphone/Gadget Launches, WhatsApp/Instagram Updates or Outages, AI Tools (ChatGPT/Gemini), E-challan/Aadhaar/PAN Online Tech Tips, EV Scooter Launches, BGMI/Gaming Updates, or Cyber Security/Scam Alerts.
         - Include 2 Finance & Earning topics. MUST BE REAL AND RELEASED IN THE LAST 72 HOURS. 🚨 FINANCE 1ST PRIORITY: RBI Rules, E-Shram/PM Kisan updates, Online Earning Apps/Work from home, EPF withdrawal, Zero Balance Accounts, IPOs, Gold Rates, or Post Office/LIC Schemes.
         Ensure the topics are highly specific (NOT generic like 'Education news in Bihar').
@@ -425,9 +435,9 @@ export async function POST(request: NextRequest) {
        BAD START: "Today we will tell you about the SSC CGL notification that was released recently..."
        GOOD START (MIMIC THIS): "The wait is finally over for millions of government job aspirants. The Staff Selection Commission (SSC) has officially released the much-anticipated CGL 2026 notification, unlocking thousands of Grade B and C vacancies across central ministries."
     3. COMPLETENESS: आर्टिकल 100% पूरा होना चाहिए। CONCLUSION लिखकर ही खत्म करें।
-    4. ACCURACY & NO EVASIVE ANSWERS (STRICT): जो भी डेटा (Dates, Fees, Links, Exam Dates) दें, वो असली होना चाहिए। अगर एग्जैक्ट डेट नहीं पता है, तो अपनी नॉलेज से एक पक्का अंदाजा/अनुमान (Expected Date/Month) दें, जैसे "(Expected future date after today)। 🚨 चेतावनी: आज की तारीख ${currentDate} है, इसलिए कभी भी बीती हुई तारीख का अंदाज़ा न लगाएं!"। कभी भी "नोटिफिकेशन में देखें", "जल्द घोषित होगी", या "चेक वेबसाइट" जैसे गोल-मोल जवाब हरगिज़ ना लिखें! अगर कुछ नहीं पता तो वह पंक्ति/रो हटा दें।
+    4. ACCURACY & NO EVASIVE ANSWERS (STRICT): जो भी डेटा (Dates, Fees, Links, Exam Dates) दें, वो असली होना चाहिए। अगर एग्जैक्ट डेट नहीं पता है, तो अपनी नॉलेज से एक पक्का अंदाजा/अनुमान (Expected Date/Month) दें, जैसे "(Expected future date after today)। 🚨 चेतावनी: आज की तारीख ${getCurrentDateStr()} है, इसलिए कभी भी बीती हुई तारीख का अंदाज़ा न लगाएं!"। कभी भी "नोटिफिकेशन में देखें", "जल्द घोषित होगी", या "चेक वेबसाइट" जैसे गोल-मोल जवाब हरगिज़ ना लिखें! अगर कुछ नहीं पता तो वह पंक्ति/रो हटा दें।
     5. NO FILLER CONTENT: "आज के इस आर्टिकल में", "उम्मीद है", "कैसा लगा", "दोस्तों" जैसे शब्द BANNED हैं। सीधे काम की बात लिखें।
-    7. STRICT YEAR CONSISTENCY: Today's date is Monday, July 6, 2026. NEVER mix past years into current year (${new Date().getFullYear()}) notifications. Keep years and dates strictly consistent with today.
+    7. STRICT YEAR CONSISTENCY: Today's date is Monday, July 6, 2026. NEVER mix past years into current year (${getCurrentYearNum()}) notifications. Keep years and dates strictly consistent with today.
     8. EXACT QUALIFICATION RULE: DO NOT generalize educational qualifications (e.g., do NOT write 'Graduate in any stream' if the job specifically requires B.Tech, Nursing, or B.Ed). Write the EXACT degree required.
     9. NO FAKE RUMOR DATES: Never write clickbait statements like 'Result releasing today at 5 PM' unless officially declared. If it is an unconfirmed rumor, label it clearly as '(Expected/संभावित Date)'.
     10. NO GUESSING VACANCY NUMBERS: If the official notification does not mention exact vacancy numbers, write 'विज्ञप्ति के अनुसार (To be Announced)'. DO NOT make up random numbers like 3000 or 5000.
@@ -454,13 +464,13 @@ export async function POST(request: NextRequest) {
     - INSTANT INDEXING & SCHEMA READY: लेख को स्वच्छ HTML5 में रखें ताकि गूगल बोट 1 मिनट में इंडेक्स करे।
     - ADSENSE SAFETY & NO SPAM: अत्यधिक स्पैम बटन्स न लगाएं। लेख को 100% ज्ञानवर्धक और भरोसेमंद बनाएं।
     - WHATSAPP & TELEGRAM BROADCAST SUMMARY: अंत में 2 पंक्तियों का संक्षिप्त सारांश (Short Summary) व्हाट्सएप शेयर हेतु प्रदान करें।
-    - LIFETIME DYNAMIC YEAR: हमेशा चालू वर्ष (${new Date().getFullYear()}) का प्रयोग करें। बीती हुई तारीखें न लिखें।
+    - LIFETIME DYNAMIC YEAR: हमेशा चालू वर्ष (${getCurrentYearNum()}) का प्रयोग करें। बीती हुई तारीखें न लिखें।
     - NO THIN CONTENT: लेख पूरी तरह विस्तृत, जानकारी से भरपूर और स्पष्ट उपशीर्षकों (H2/H3) में संरचित होना चाहिए।
     - NO KEYWORD STUFFING: प्राथमिक और द्वितीयक कीवर्ड्स को प्राकृतिक रूप से जोड़ें। अस्वाभाविक दोहराव न करें।
     - OFFICIAL CITATIONS: हमेशा आधिकारिक सरकारी अधिसूचना (Official Notification) और आधिकारिक विभाग पोर्टल लिंक का संदर्भ दें।
     - MATCH SEARCH INTENT: यूजर की खोज मंशा (Search Intent) को समझें। लेख के शुरुआत में ही सार तालिका (Summary Table) प्रदान करें।
     - NO CLICKBAIT: शीर्षक और विवरण सटीक एवं लेख की वास्तविक जानकारी से मेल खाने चाहिए।
-    - FACTUAL ACCURACY: आज की तिथि (${currentDate}) के अनुसार सभी तिथियाँ, योग्यता, पद और आयु सीमाएँ 100% सटीक होनी चाहिए।
+    - FACTUAL ACCURACY: आज की तिथि (${getCurrentDateStr()}) के अनुसार सभी तिथियाँ, योग्यता, पद और आयु सीमाएँ 100% सटीक होनी चाहिए।
     1. APPRENTICESHIP VS CONTRACT VS PERMANENT: Apprenticeship को '1-वर्षीय प्रशिक्षण', Contract को 'संविदा (11 माह)' और Permanent को 'स्थायी पद' साफ़ लिखें।
     2. BACKLOG VACANCIES: बैकलॉग पद (पुराने खाली पद) और फ्रेश पदों की संख्या अलग-अलग दर्शाएं।
     3. EXPERIENCE: डिग्री हासिल करने के 'बाद' के अनिवार्य अनुभव (Post-Qualification Experience) को स्पष्ट लिखें।
@@ -480,14 +490,14 @@ export async function POST(request: NextRequest) {
     17. REGIONAL LANGUAGES: यदि परीक्षा 13 क्षेत्रीय भाषाओं में उपलब्ध है तो उसका उल्लेख करें।
     18. EXAM CITIES: परीक्षा केंद्र राज्य में होंगे या ऑल-इंडिया, यह स्पष्ट करें।
     - EXAM ALREADY CONDUCTED CHECK: यदि किसी परीक्षा/भर्ती का एग्जाम पहले ही आयोजित (Conducted) हो चुका है, तो भूलकर भी भविष्य की एग्जाम डेट न लिखें!
-    - यदि एग्जाम हो चुका है, तो साफ़-साफ़ लिखें: "यह परीक्षा ${currentDate} से पहले आयोजित की जा चुकी है और उम्मीदवार अब उत्तर कुंजी (Answer Key) या परिणाम (Result) का इंतज़ार कर रहे हैं।"
+    - यदि एग्जाम हो चुका है, तो साफ़-साफ़ लिखें: "यह परीक्षा ${getCurrentDateStr()} से पहले आयोजित की जा चुकी है और उम्मीदवार अब उत्तर कुंजी (Answer Key) या परिणाम (Result) का इंतज़ार कर रहे हैं।"
     - केवल तभी भविष्य की एग्जाम डेट लिखें जब आधिकारिक रूप से परीक्षा आयोजित होना बाकी हो!
     - APPRENTICESHIP VS PERMANENT: यदि भर्ती Apprenticeship (शिक्षुता) की है, तो उसे '1 वर्ष का प्रशिक्षण (Apprenticeship)' साफ़-साफ़ लिखें। इसे स्थायी (Permanent) सरकारी नौकरी कभी न लिखें।
     - DEGREE VS DIPLOMA: B.Tech (Degree) और Diploma (Polytechnic) की पात्रता को अलग-अलग रखें। डिप्लोमा धारकों को B.Tech पदों पर पात्र न बताएं जब तक आधिकारिक नोटिस में न हो।
     - CERTIFICATE DATES: OBC-NCL और EWS प्रमाण पत्र के लिए फॉर्म भरने की अंतिम तिथि (Cut-off Date) का विशेष उल्लेख करें।
     - OTR & SERVICE BOND: यदि राज्य/केंद्र पोर्टल (जैसे OTR / SSO ID) पर रजिस्ट्रेशन अनिवार्य है, तो Step 1 में OTR का उल्लेख करें। बैंक/PSU नौकरी में सर्विस बॉन्ड (यदि लागू हो) की जानकारी दें।
     - NORMALIZATION & MARKS: मल्टी-शिफ्ट कंप्यूटर परीक्षाओं (CBT) में Normalization प्रक्रिया और Tier-1 (Qualifying vs Merit) की स्थिति स्पष्ट करें।
-    - ADVT NUMBER: विज्ञापन संख्या (Advt No.) चालू वर्ष (${new Date().getFullYear()}) की ही लिखें, पुरानी कॉपी न करें।
+    - ADVT NUMBER: विज्ञापन संख्या (Advt No.) चालू वर्ष (${getCurrentYearNum()}) की ही लिखें, पुरानी कॉपी न करें।
     - AGE & RELAXATION: General category age limit साफ़-साफ़ लिखें (जैसे 18-30 वर्ष)। आरक्षित वर्गों की छूट को अलग से दर्शाएं: OBC (+3 वर्ष), SC/ST (+5 वर्ष)। मिलाकर एक बड़ी उम्र न लिखें।
     - GENDER PHYSICAL STANDARDS: पुलिस/सेना भर्ती में पुरुष (Male) और महिला (Female) के शारीरिक माप (Height, Chest, Running) की टेबल अलग-अलग या स्पष्ट पंक्तियों में बनाएं।
     - DOMICILE / OTHER STATES: यह स्पष्ट रूप से लिखें कि दूसरे राज्य के छात्र आवेदन कर सकते हैं या नहीं (General Quota के तहत)।
@@ -806,7 +816,7 @@ YOUR SEO SKILLS:
     Analyze the following article and generate optimized metadata for maximum Google ranking.
     
     RULES:
-    1. seoTitle: Generate a VERY SIMPLE, CATCHY, and EASY TO UNDERSTAND Hindi title that common people can read easily. Use words like "बंपर भर्ती", "रिजल्ट जारी", "नया नियम". Mix in the main English keyword naturally. Keep it under 65 chars. Example: "SSC CGL ${new Date().getFullYear()}: बंपर भर्ती का नोटिफिकेशन जारी, ऐसे करें अप्लाई!"
+    1. seoTitle: Generate a VERY SIMPLE, CATCHY, and EASY TO UNDERSTAND Hindi title that common people can read easily. Use words like "बंपर भर्ती", "रिजल्ट जारी", "नया नियम". Mix in the main English keyword naturally. Keep it under 65 chars. Example: "SSC CGL ${getCurrentYearNum()}: बंपर भर्ती का नोटिफिकेशन जारी, ऐसे करें अप्लाई!"
     2. seoDescription: Write a compelling meta description in simple Hindi that makes users CLICK. Under 155 chars. Include primary keyword.
     3. seoKeywords: List 6-8 comma-separated keywords mixing Hindi, English, and Hinglish (e.g. "SSC CGL 2026, SSC CGL notification, SSC CGL kab aayega, एसएससी सीजीएल 2026").
     4. slug: Short, keyword-rich English-only URL slug (e.g. "ssc-cgl-2026-notification"). No random numbers.

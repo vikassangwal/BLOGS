@@ -436,6 +436,13 @@ export async function POST(request: NextRequest) {
     13. ULTRA-ADVANCED RECRUITMENT RULES (अति-सूक्ष्म कानूनी एवं तकनीकी नियम):
     14. EXAM STATUS & PAST EXAM CHECK (परीक्षा स्थिति का कड़ा नियम):
     15. MASTER RECRUITMENT & UX CHECKLIST (30 अति-सूक्ष्म नियम):
+    16. SEO, E-E-A-T & HELPFUL CONTENT MASTER RULES (गूगल रैंकिंग सुरक्षा नियम):
+    - NO THIN CONTENT: लेख पूरी तरह विस्तृत, जानकारी से भरपूर और स्पष्ट उपशीर्षकों (H2/H3) में संरचित होना चाहिए।
+    - NO KEYWORD STUFFING: प्राथमिक और द्वितीयक कीवर्ड्स को प्राकृतिक रूप से जोड़ें। अस्वाभाविक दोहराव न करें।
+    - OFFICIAL CITATIONS: हमेशा आधिकारिक सरकारी अधिसूचना (Official Notification) और आधिकारिक विभाग पोर्टल लिंक का संदर्भ दें।
+    - MATCH SEARCH INTENT: यूजर की खोज मंशा (Search Intent) को समझें। लेख के शुरुआत में ही सार तालिका (Summary Table) प्रदान करें।
+    - NO CLICKBAIT: शीर्षक और विवरण सटीक एवं लेख की वास्तविक जानकारी से मेल खाने चाहिए।
+    - FACTUAL ACCURACY: आज की तिथि (${new Date().toLocaleDateString()}) के अनुसार सभी तिथियाँ, योग्यता, पद और आयु सीमाएँ 100% सटीक होनी चाहिए।
     1. APPRENTICESHIP VS CONTRACT VS PERMANENT: Apprenticeship को '1-वर्षीय प्रशिक्षण', Contract को 'संविदा (11 माह)' और Permanent को 'स्थायी पद' साफ़ लिखें।
     2. BACKLOG VACANCIES: बैकलॉग पद (पुराने खाली पद) और फ्रेश पदों की संख्या अलग-अलग दर्शाएं।
     3. EXPERIENCE: डिग्री हासिल करने के 'बाद' के अनिवार्य अनुभव (Post-Qualification Experience) को स्पष्ट लिखें।

@@ -9,7 +9,7 @@ export default function SettingsAdmin() {
     newsApiDataKey: '',
     newsFeedUrls: '',
     googleIndexingJson: '',
-    themeMode: 'dark', openai: '', gemini: '', anthropic: '', deepseek: '', openrouter: '',
+    themeMode: 'dark', openai: '', gemini: '', gemini2: '', gemini3: '', anthropic: '', deepseek: '', openrouter: '',
     groq: '', mistral: '', together: '', fireworks: '', perplexity: '', cohere: '', xai: '',
     resend: '', twitter: '', facebook: '', instagram: '', instagramAccountId: '',
     onesignalAppId: '', onesignalApiKey: '', razorpayKey: '', razorpaySecret: '',
@@ -157,13 +157,34 @@ export default function SettingsAdmin() {
                 <input type="password" value={apiKeys.openai || ''} onChange={e => setApiKeys({ ...apiKeys, openai: e.target.value })} placeholder="sk-..." style={{ width: '100%', padding: '0.7rem', borderRadius: '8px', border: '1px solid var(--color-border)' }} />
                 <p style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', margin: '0.3rem 0 0' }}>Models: gpt-4o, gpt-4o-mini, gpt-4-turbo</p>
               </div>
+              
+              {/* GEMINI KEY 1 */}
               <div style={{ background: 'rgba(255,255,255,0.02)', padding: '1rem', borderRadius: '10px', border: '1px solid var(--color-border)' }}>
                 <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem', fontWeight: 700, fontSize: '0.95rem' }}>
-                  <span style={{ background: '#4285F4', color: '#fff', padding: '2px 8px', borderRadius: '6px', fontSize: '0.7rem' }}>Google</span> Gemini API Key
+                  <span style={{ background: '#4285F4', color: '#fff', padding: '2px 8px', borderRadius: '6px', fontSize: '0.7rem' }}>Google</span> Gemini API Key 1
                 </label>
-                <input type="password" value={apiKeys.gemini || ''} onChange={e => setApiKeys({ ...apiKeys, gemini: e.target.value })} placeholder="AIzaSy..." style={{ width: '100%', padding: '0.7rem', borderRadius: '8px', border: '1px solid var(--color-border)' }} />
-                <p style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', margin: '0.3rem 0 0' }}>Models: gemini-2.5-flash, gemini-2.5-pro</p>
+                <input type="password" value={apiKeys.gemini || ''} onChange={e => setApiKeys({ ...apiKeys, gemini: e.target.value })} placeholder="AIzaSy... (Primary Key)" style={{ width: '100%', padding: '0.7rem', borderRadius: '8px', border: '1px solid var(--color-border)' }} />
+                <p style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', margin: '0.3rem 0 0' }}>Primary Key (gemini-2.0-flash / 1.5-flash)</p>
               </div>
+
+              {/* GEMINI KEY 2 */}
+              <div style={{ background: 'rgba(255,255,255,0.02)', padding: '1rem', borderRadius: '10px', border: '1px solid var(--color-border)' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem', fontWeight: 700, fontSize: '0.95rem' }}>
+                  <span style={{ background: '#34A853', color: '#fff', padding: '2px 8px', borderRadius: '6px', fontSize: '0.7rem' }}>Google</span> Gemini API Key 2 (Backup)
+                </label>
+                <input type="password" value={apiKeys.gemini2 || ''} onChange={e => setApiKeys({ ...apiKeys, gemini2: e.target.value })} placeholder="AIzaSy... (Secondary Key)" style={{ width: '100%', padding: '0.7rem', borderRadius: '8px', border: '1px solid var(--color-border)' }} />
+                <p style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', margin: '0.3rem 0 0' }}>Fallback Key 2 (अगर Key 1 की लिमिट समाप्त हो जाए)</p>
+              </div>
+
+              {/* GEMINI KEY 3 */}
+              <div style={{ background: 'rgba(255,255,255,0.02)', padding: '1rem', borderRadius: '10px', border: '1px solid var(--color-border)' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem', fontWeight: 700, fontSize: '0.95rem' }}>
+                  <span style={{ background: '#EA4335', color: '#fff', padding: '2px 8px', borderRadius: '6px', fontSize: '0.7rem' }}>Google</span> Gemini API Key 3 (Backup)
+                </label>
+                <input type="password" value={apiKeys.gemini3 || ''} onChange={e => setApiKeys({ ...apiKeys, gemini3: e.target.value })} placeholder="AIzaSy... (Tertiary Key)" style={{ width: '100%', padding: '0.7rem', borderRadius: '8px', border: '1px solid var(--color-border)' }} />
+                <p style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', margin: '0.3rem 0 0' }}>Fallback Key 3 (अगर Key 1 और Key 2 दोनों खत्म हो जाएं)</p>
+              </div>
+
               <div style={{ background: 'rgba(255,255,255,0.02)', padding: '1rem', borderRadius: '10px', border: '1px solid var(--color-border)' }}>
                 <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem', fontWeight: 700, fontSize: '0.95rem' }}>
                   <span style={{ background: '#D97706', color: '#fff', padding: '2px 8px', borderRadius: '6px', fontSize: '0.7rem' }}>Claude</span> Anthropic API Key

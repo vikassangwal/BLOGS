@@ -435,6 +435,25 @@ export async function POST(request: NextRequest) {
     12. DEEP ACCURACY & RECRUITMENT SPECIFICS (अति-महत्वपूर्ण नियम):
     13. ULTRA-ADVANCED RECRUITMENT RULES (अति-सूक्ष्म कानूनी एवं तकनीकी नियम):
     14. EXAM STATUS & PAST EXAM CHECK (परीक्षा स्थिति का कड़ा नियम):
+    15. MASTER RECRUITMENT & UX CHECKLIST (30 अति-सूक्ष्म नियम):
+    1. APPRENTICESHIP VS CONTRACT VS PERMANENT: Apprenticeship को '1-वर्षीय प्रशिक्षण', Contract को 'संविदा (11 माह)' और Permanent को 'स्थायी पद' साफ़ लिखें।
+    2. BACKLOG VACANCIES: बैकलॉग पद (पुराने खाली पद) और फ्रेश पदों की संख्या अलग-अलग दर्शाएं।
+    3. EXPERIENCE: डिग्री हासिल करने के 'बाद' के अनिवार्य अनुभव (Post-Qualification Experience) को स्पष्ट लिखें।
+    4. TYPING SPEED & FONT: टाइपिंग टेस्ट हेतु स्पीड (30/35 WPM) और फ़ॉन्ट (Kruti Dev / Mangal Font) की शर्त लिखें।
+    5. CORRECTION FEE: फॉर्म सुधार (Correction Window) की फीस (उदा. ₹200-₹500) का उल्लेख करें।
+    6. INTERVIEW QUALIFYING MARKS: साक्षात्कार के न्यूनतम अर्हता अंक (Qualifying Marks) की शर्त दर्शाएं।
+    7. PET EXEMPTIONS: पूर्व सैनिकों (Ex-Servicemen) एवं दिव्यांगजनों (PwBD) के लिए PET/PST छूट का उल्लेख करें।
+    8. FEE REFUND RULE: RRB/SSC की तरह CBT-1 परीक्षा देने पर फीस रिफंड (उदा. ₹400 वापस) का नियम लिखें।
+    9. DEPARTMENTAL CANDIDATES: सेवारत कर्मचारियों के लिए दी जाने वाली विशेष आयु सीमा छूट दर्शाएं।
+    10. CORRIGENDUM NOTICES: मुख्य नोटिफिकेशन के बाद जारी हुए शुद्धि-पत्र (Corrigendum Notice) के संशोधन शामिल करें।
+    11. ADSENSE SAFETY: अत्यधिक स्पैम 'Apply Now' बटन या स्कैम वाले क्लिकबैट शब्दों का प्रयोग न करें।
+    12. MOBILE TABLE SCROLL: सभी HTML टेबल को स्वच्छ और मोबाइल-फ्रेंडली (`<div style="overflow-x:auto;"><table>...`) बनाएं ताकि मोबाइल पर टेबल कटे नहीं।
+    13. PAY MATRIX LEVEL: 7th Pay Commission का Pay Level (Level 1 से 14) और सम्भावित इन-हैंड सैलरी दोनों लिखें।
+    14. OTR MANDATORY: RPSC/SSC जैसी भर्तियों में OTR (One Time Registration) का पहला चरण ज़रूर लिखें।
+    15. SERVER RUSH WARNING: फॉर्म भरने की अंतिम तिथि के दिन सर्वर बिज़ी/क्रैश होने का अलर्ट नोट में दें।
+    16. FORM HARCOPY NOTE: आवेदकों को 'Application Form Hardcopy & Fee Receipt' सुरक्षित रखने का नोट लिखें।
+    17. REGIONAL LANGUAGES: यदि परीक्षा 13 क्षेत्रीय भाषाओं में उपलब्ध है तो उसका उल्लेख करें।
+    18. EXAM CITIES: परीक्षा केंद्र राज्य में होंगे या ऑल-इंडिया, यह स्पष्ट करें।
     - EXAM ALREADY CONDUCTED CHECK: यदि किसी परीक्षा/भर्ती का एग्जाम पहले ही आयोजित (Conducted) हो चुका है, तो भूलकर भी भविष्य की एग्जाम डेट न लिखें!
     - यदि एग्जाम हो चुका है, तो साफ़-साफ़ लिखें: "यह परीक्षा ${new Date().toLocaleDateString()} से पहले आयोजित की जा चुकी है और उम्मीदवार अब उत्तर कुंजी (Answer Key) या परिणाम (Result) का इंतज़ार कर रहे हैं।"
     - केवल तभी भविष्य की एग्जाम डेट लिखें जब आधिकारिक रूप से परीक्षा आयोजित होना बाकी हो!

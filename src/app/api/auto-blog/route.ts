@@ -222,7 +222,13 @@ export async function POST(request: NextRequest) {
       ${recentlyPublishedStr}
       GENERATE A MASSIVE LIST OF 120 KEYWORDS.
       This is Step 1 (Brainstorming). Generate a wide variety of Government Job Vacancies (from the LAST 72 HOURS), Exam Notifications, Admit Cards, Answer Keys, Results, Counselling/Merit Lists, Timetables/Syllabus, Free Laptop/Coaching Schemes, Internships, Rojgar Mela/Apprenticeships, Army/Defense Rallies, Entrance Exams (NEET/JEE/CUET/TET), Top MNC Off-Campus Drives, Free Online Courses (Google/TCS), Skill Development (PMKVY), Scholarships, University Admissions/Results, IGNOU/Open University Updates, KVS/Navodaya Admissions, Nursing/Medical Courses, Bank/PSU Jobs (IBPS/SBI), School/College News, Career Courses (e.g. Best courses after 12th), Board Exam Updates, Technology (Telecom/5G plans, Smartphone/Gadget launches, App updates/Outages, AI Tools, EV Scooters, Gaming updates, Cyber Scams, Tech How-To), and Finance/Earning (PM Kisan, EPF, Online Earning, Bank Rules, IPOs, Gold Rates, LIC/Post Office). 
-      Include topics from ALL 28 Indian States and 8 Union Territories.
+      Include topics from ALL 28 Indian States and 8 Union Territories. 
+
+      🚨 TOP TRUSTED INDIA SOURCES RULE 🚨: 
+      For research, ONLY search and verify topics from India's Premier Official Portals:
+      1. Central Recruitment: ssc.gov.in, upsc.gov.in, ibps.in, indianrailways.gov.in, nta.ac.in, pib.gov.in, ncs.gov.in
+      2. State Portals: rpsc.rajasthan.gov.in, rssb.rajasthan.gov.in, uppsc.up.nic.in, upsssc.gov.in, bpsc.bih.nic.in, mppsc.mp.gov.in, jssc.jharkhand.gov.in, hssc.gov.in
+      DO NOT pick unverified rumors from unknown blogs. Verify that the notice is officially published before selecting the topic!
         🚨 CRITICAL RULE FOR JOBS/EXAMS: NEVER include any job, recruitment, or exam where the 'Last Date to Apply' has ALREADY PASSED before ${getCurrentDateStr()}. If it's expired, DO NOT mention it! 🚨
       Respond ONLY with a valid JSON array of strings. No markdown.
       Example format: ["Topic 1", "Topic 2", "Topic 3"]`;

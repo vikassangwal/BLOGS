@@ -1,6 +1,6 @@
 import { NextResponse, NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { generateAIContent } from '@/lib/ai';
+import { generateAIContent, AIConfig } from '@/lib/ai';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300; 
@@ -28,36 +28,59 @@ export async function GET(request: NextRequest) {
     const siteSettings = await prisma.siteSettings.findUnique({ where: { id: 'default' } });
     if (!siteSettings) throw new Error("Settings not found");
 
-    let apiKeys: any = {};
+    let savedKeys: any = {};
     if (siteSettings?.aiApiKey?.startsWith('{')) {
-      try { apiKeys = JSON.parse(siteSettings.aiApiKey); } catch(e) {}
+      try { savedKeys = JSON.parse(siteSettings.aiApiKey); } catch(e) {}
+    } else if (siteSettings?.aiApiKey) {
+      savedKeys['openai'] = siteSettings.aiApiKey;
+      savedKeys['gemini'] = siteSettings.aiApiKey;
+      savedKeys['openrouter'] = siteSettings.aiApiKey;
     }
 
-    if (apiKeys.aiTranslatorActive === false) {
+    if (savedKeys.aiTranslatorActive === false) {
       return NextResponse.json({ status: 'skip', message: 'AI Translator Agent is disabled in Admin Panel.' });
     }
 
-    const provider = apiKeys.translatorProvider || 'openrouter';
-    const model = (apiKeys.translatorModel || 'google/gemini-2.5-flash').trim();
-    const maxTokens = parseInt(apiKeys.translatorTokens) || 4000;
-
-    const getApiKey = (p: string) => {
-      let key = apiKeys[p] || '';
-      if (!key && siteSettings?.aiApiKey && !siteSettings.aiApiKey.startsWith('{')) key = siteSettings.aiApiKey;
+    function getApiKeyForProvider(p: string): string {
+      let key = (savedKeys[p] || '').trim();
       if (!key) {
-        const allKeyNames = Object.keys(apiKeys).filter(k => 
-          !k.includes('Provider') && !k.includes('Model') && !k.includes('Token') && !k.includes('Id') &&
-          apiKeys[k] && apiKeys[k].length >= 10
-        );
-        if (allKeyNames.length > 0) key = apiKeys[allKeyNames[0]];
+        const fallback = Object.values(savedKeys).find((v: any) => v && typeof v === 'string' && v.length >= 10);
+        if (fallback) key = String(fallback).trim();
       }
-      return key.trim();
-    };
+      return key;
+    }
 
-    const aiConfig = { provider: provider as any, apiKey: getApiKey(provider), model, maxTokens };
+    function buildTranslatorConfigs(): AIConfig[] {
+      const list: AIConfig[] = [];
+      const primaryProvider = savedKeys.translatorProvider || siteSettings?.aiProvider || 'gemini';
+      const primaryModel = savedKeys.translatorModel || siteSettings?.aiModel || 'gemini-2.0-flash';
+      const key1 = getApiKeyForProvider(primaryProvider);
+
+      if (key1) {
+        list.push({ provider: primaryProvider, apiKey: key1, model: primaryModel });
+      }
+
+      // Add fallbacks
+      const fallbackProviders = ['gemini', 'openrouter', 'groq', 'openai', 'deepseek'];
+      for (const prov of fallbackProviders) {
+        if (prov !== primaryProvider) {
+          const k = getApiKeyForProvider(prov);
+          if (k) {
+            const m = prov === 'gemini' ? 'gemini-2.0-flash' : prov === 'groq' ? 'llama-3.3-70b-versatile' : 'gpt-4o-mini';
+            list.push({ provider: prov, apiKey: k, model: m });
+          }
+        }
+      }
+
+      return list;
+    }
+
+    const translatorConfigs = buildTranslatorConfigs();
+    if (translatorConfigs.length === 0) {
+      throw new Error("No valid AI API keys configured for Translator Agent.");
+    }
 
     // 2. Find a post that needs translation
-    // Since we can't easily query inside JSON in Prisma (depends on DB type), we fetch a few recent posts and check in memory
     const recentPosts = await prisma.blogPost.findMany({
       where: { status: 'Published' },
       orderBy: { publishedAt: 'desc' },
@@ -85,9 +108,9 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ status: 'skip', message: 'All recent posts are fully translated!' });
     }
 
-    // 3. Translate using AI
+    // 3. Translate using AI Multi-AI Fallback
     const sysPrompt = "You are an expert, native-level translator. You must return ONLY a valid JSON object. Do not include markdown blocks like ```json.";
-    const userPrompt = `Translate the following English blog post into ${targetLangName}. 
+    const userPrompt = `Translate the following blog post into ${targetLangName}. 
 Ensure the translation sounds natural and professional. Retain all HTML tags exactly as they are. Do not translate HTML attributes, classes, or IDs. Only translate the text content.
 
 Current Title: ${targetPost.title}
@@ -104,23 +127,10 @@ Respond ONLY with the JSON.`;
 
     let aiResponse;
     try {
-      aiResponse = await generateAIContent(aiConfig, sysPrompt, userPrompt, aiConfig.maxTokens);
-    } catch (error) {
-      console.warn("Primary Translator Model failed, attempting fallback...");
-      const backupStr = apiKeys.translatorBackupModel?.trim();
-      if (backupStr) {
-        let backupProvider = provider;
-        let backupModelName = backupStr;
-        if (backupStr.includes('/')) {
-          const parts = backupStr.split('/');
-          backupProvider = parts[0];
-          backupModelName = parts.slice(1).join('/');
-        }
-        const backupConfig = { provider: backupProvider as any, apiKey: getApiKey(backupProvider), model: backupModelName, maxTokens };
-        aiResponse = await generateAIContent(backupConfig, sysPrompt, userPrompt, backupConfig.maxTokens);
-      } else {
-        throw error;
-      }
+      aiResponse = await generateAIContent(translatorConfigs, sysPrompt, userPrompt, 4000);
+    } catch (error: any) {
+      console.error("Translator AI Generation Failed:", error);
+      return NextResponse.json({ status: 'error', message: `Translator Agent failed: ${error.message}` });
     }
     
     let parsedData;

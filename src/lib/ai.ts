@@ -359,19 +359,52 @@ async function parseErrorResponse(res: Response, providerName: string): Promise<
 }
 
 // ---------------------------------------------------------------------------
-// MAIN: Generate AI Content — Universal for ALL providers
+// TELEGRAM ALERT SYSTEM (P2)
+// ---------------------------------------------------------------------------
+export async function sendTelegramAlert(message: string) {
+  try {
+    const settings = await prisma.siteSettings.findUnique({ where: { id: 'default' } });
+    if (!settings || !settings.aiApiKey) return;
+    let keys = {};
+    if (settings.aiApiKey.startsWith('{')) keys = JSON.parse(settings.aiApiKey);
+    const token = (keys as any).telegramToken;
+    const chatId = (keys as any).telegramChatId;
+    
+    if (token && chatId) {
+      await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ chat_id: chatId, text: message })
+      });
+    }
+  } catch (e) {
+    console.error('[Telegram Alert Failed]', e);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// MAIN: Generate AI Content — Universal for ALL providers (P1: Fallback Array)
 // ---------------------------------------------------------------------------
 export async function generateAIContent(
-  config: AIConfig,
+  configOrConfigs: AIConfig | AIConfig[],
   systemPrompt: string,
   userPrompt: string,
   maxTokens: number = 2000
 ): Promise<string> {
 
-  // Pre-flight validation
-  if (!config.apiKey?.trim()) {
-    throw new Error(`API Key खाली है। कृपया Admin Panel > Settings में API Key डालें।`);
-  }
+  const configs = Array.isArray(configOrConfigs) ? configOrConfigs : [configOrConfigs];
+  if (configs.length === 0) throw new Error("No AI config provided.");
+
+  let lastError: Error | null = null;
+
+  for (let i = 0; i < configs.length; i++) {
+    const config = configs[i];
+    
+    // Pre-flight validation
+    if (!config.apiKey?.trim()) {
+      lastError = new Error(`API Key खाली है। कृपया Admin Panel > Settings में API Key डालें।`);
+      continue;
+    }
 
   // Resolve provider: explicit name or auto-detect from key/model
   let providerName = config.provider?.toLowerCase().trim() || autoDetectProvider(config.apiKey, config.model);
@@ -397,44 +430,61 @@ export async function generateAIContent(
     }
   }
 
-  // Default model if not specified
-  const model = config.model?.trim() || getDefaultModel(providerName);
+    // Default model if not specified
+    const model = config.model?.trim() || getDefaultModel(providerName);
 
-  // Build request URL
-  let url = profile.baseUrl;
-  if (providerName === 'gemini') {
-    // Gemini uses URL-based auth and model name in URL
-    const safeModel = sanitizeGeminiModel(model);
-    url = url.replace('{MODEL}', safeModel).replace('{KEY}', config.apiKey.trim());
-  }
-
-  // Build request
-  const headers = profile.authHeader(config.apiKey.trim());
-  const body = profile.buildBody(model, systemPrompt, userPrompt, maxTokens);
-
-  // Execute with retry
-  const res = await fetchWithRetry(url, {
-    method: 'POST',
-    headers,
-    body: JSON.stringify(body)
-  });
-
-  if (!res.ok) {
-    throw new Error(await parseErrorResponse(res, profile.name));
-  }
-
-  const data = await res.json();
-  const content = profile.extractContent(data);
-
-  if (!content) {
-    // Special check for Gemini prompt block
-    if (providerName === 'gemini' && data.promptFeedback?.blockReason) {
-      throw new Error(`Gemini: Prompt blocked (${data.promptFeedback.blockReason})`);
+    // Build request URL
+    let url = profile.baseUrl;
+    if (providerName === 'gemini') {
+      // Gemini uses URL-based auth and model name in URL
+      const safeModel = sanitizeGeminiModel(model);
+      url = url.replace('{MODEL}', safeModel).replace('{KEY}', config.apiKey.trim());
     }
-    throw new Error(`${profile.name} ने खाली response दिया। कृपया दोबारा कोशिश करें।`);
+
+    // Build request
+    const headers = profile.authHeader(config.apiKey.trim());
+    const body = profile.buildBody(model, systemPrompt, userPrompt, maxTokens);
+
+    try {
+      // Execute with retry
+      const res = await fetchWithRetry(url, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(body)
+      });
+
+      if (!res.ok) {
+        throw new Error(await parseErrorResponse(res, profile.name));
+      }
+
+      const data = await res.json();
+      const content = profile.extractContent(data);
+
+      if (!content) {
+        // Special check for Gemini prompt block
+        if (providerName === 'gemini' && data.promptFeedback?.blockReason) {
+          throw new Error(`Gemini: Prompt blocked (${data.promptFeedback.blockReason})`);
+        }
+        throw new Error(`${profile.name} ने खाली response दिया। कृपया दोबारा कोशिश करें।`);
+      }
+
+      return content;
+    } catch (err: any) {
+      console.warn(`[AI] Config ${i + 1}/${configs.length} (${providerName}) failed:`, err.message);
+      lastError = err;
+      
+      // If this is the primary provider and there are fallbacks, send alert!
+      if (i === 0 && configs.length > 1) {
+        const nextProvider = configs[i+1].provider;
+        await sendTelegramAlert(`🚨 CRITICAL: Primary AI API (${providerName}) failed!\nError: ${err.message}\n\nAuto-Switching to Fallback: ${nextProvider} 🔄`);
+      }
+      
+      // Continue to next fallback config
+      continue;
+    }
   }
 
-  return content;
+  throw lastError || new Error('All AI providers failed.');
 }
 
 // ---------------------------------------------------------------------------

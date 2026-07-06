@@ -213,6 +213,7 @@ export async function POST(request: NextRequest) {
       GENERATE A MASSIVE LIST OF 120 KEYWORDS.
       This is Step 1 (Brainstorming). Generate a wide variety of Government Job Vacancies (from the LAST 72 HOURS), Exam Notifications, Admit Cards, Answer Keys, Results, Counselling/Merit Lists, Timetables/Syllabus, Free Laptop/Coaching Schemes, Internships, Rojgar Mela/Apprenticeships, Army/Defense Rallies, Entrance Exams (NEET/JEE/CUET/TET), Top MNC Off-Campus Drives, Free Online Courses (Google/TCS), Skill Development (PMKVY), Scholarships, University Admissions/Results, IGNOU/Open University Updates, KVS/Navodaya Admissions, Nursing/Medical Courses, Bank/PSU Jobs (IBPS/SBI), School/College News, Career Courses (e.g. Best courses after 12th), Board Exam Updates, Technology (Telecom/5G plans, Smartphone/Gadget launches, App updates/Outages, AI Tools, EV Scooters, Gaming updates, Cyber Scams, Tech How-To), and Finance/Earning (PM Kisan, EPF, Online Earning, Bank Rules, IPOs, Gold Rates, LIC/Post Office). 
       Include topics from ALL 28 Indian States and 8 Union Territories.
+        🚨 CRITICAL RULE FOR JOBS/EXAMS: NEVER include any job, recruitment, or exam where the 'Last Date to Apply' has ALREADY PASSED before ${currentDate}. If it's expired, DO NOT mention it! 🚨
       Respond ONLY with a valid JSON array of strings. No markdown.
       Example format: ["Topic 1", "Topic 2", "Topic 3"]`;
 
@@ -239,10 +240,11 @@ export async function POST(request: NextRequest) {
           🚨 1st PRIORITY (HIGHEST) 🚨: ANYTHING NEW! You MUST NOT miss ANY new Government Job, Exam Notification, Admit Card, Result, Answer Key, Cut-Off, Exam Calendar, Exam Date/Timetable, Syllabus Change, Counselling/Merit List, Any Official Notice, State Scholarship, Free Laptop/Coaching Scheme (Yojana), Internships, Rojgar Mela/Apprenticeship, Army/Defense Rally, Entrance Exam/TET, Top MNC Off-Campus Drive, Free Online Courses, Skill Development (PMKVY), KVS/Navodaya Admission, IGNOU/Open University Update, Nursing Course, Bank/PSU Job, or School/University Admission/Forms/Result released in the LAST 72 HOURS. Include ALL of these brand-new updates at the very top of your list so we can be the FIRST to publish!
           👉 2nd PRIORITY (FALLBACK) 👉: If (and ONLY if) there are not enough new updates today, you MUST fill the remaining slots with: Older Ongoing applications, General State Scholarship information, or Career Courses (e.g. 'Best courses after 12th').
           ⚠️ STRICT CRITICAL RULE ⚠️: You MUST provide exactly ONE real, current news topic for EACH of the 28 States of India, ONE for EACH of the 8 Union Territories, and ONE for the Central Government (28+8+1 = 37). 
-          ⚠️ ANTI-FAKE NEWS RULE ⚠️: DO NOT invent exams, schemes, or results that don't exist. Keep real ongoing/upcoming exams, recent vacancies/schemes (last 72 hours), or real scholarship/university/school updates.
+          🚨 ANTI-FAKE NEWS & EXPIRY RULE 🚨: DO NOT invent exams, schemes, or results that don't exist. Keep real ongoing/upcoming exams. NEVER select a job/recruitment where the "Last Date to Apply" has already passed before today (${currentDate}). Writing about expired applications is completely useless and strictly forbidden!
         - Include 2 Technology topics. MUST BE REAL AND RELEASED IN THE LAST 72 HOURS. 🚨 TECH 1ST PRIORITY: New Telecom Recharge/5G Plans (Jio/Airtel/BSNL), Major Smartphone/Gadget Launches, WhatsApp/Instagram Updates or Outages, AI Tools (ChatGPT/Gemini), E-challan/Aadhaar/PAN Online Tech Tips, EV Scooter Launches, BGMI/Gaming Updates, or Cyber Security/Scam Alerts.
         - Include 2 Finance & Earning topics. MUST BE REAL AND RELEASED IN THE LAST 72 HOURS. 🚨 FINANCE 1ST PRIORITY: RBI Rules, E-Shram/PM Kisan updates, Online Earning Apps/Work from home, EPF withdrawal, Zero Balance Accounts, IPOs, Gold Rates, or Post Office/LIC Schemes.
         Ensure the topics are highly specific (NOT generic like 'Education news in Bihar').
+          🚨 NO COMBO/GENERIC JOBS RULE: Every job topic MUST be for ONE SPECIFIC department and ONE SPECIFIC post (e.g. 'RPSC Programmer Recruitment 2026' or 'Goa Police Constable Vacancy 2026'). NEVER combine multiple departments or multiple unrelated posts into a single topic (e.g., NEVER write 'Goa Govt Jobs: Teacher, Clerk & Police 5000 Posts').
         Respond ONLY with a valid JSON array of exactly 41 strings. No markdown.`;
 
         const topicRaw = await generateContentWithFallback(researcherConfigForTopic, "You output strict JSON arrays.", step2Prompt);
@@ -373,7 +375,7 @@ export async function POST(request: NextRequest) {
     5. APPLICATION FEES: Fees for General/OBC and SC/ST/Women.
     6. SELECTION PROCESS & SYLLABUS: How will candidates be selected? (Written, Physical, Interview) and basic syllabus topics (if job).
     7. SALARY/PAY SCALE: What is the expected salary or pay band?
-    8. OFFICIAL LINKS & HOW TO APPLY: Provide the OFFICIAL website link (e.g., ssc.gov.in) and step-by-step application/download process. If it is an Answer Key, Result, or Admit Card, provide the official portal/login link where students can check it. (WARNING: Do NOT provide direct .pdf links from private competitor sites, only provide official government/organization portal links).
+    8. OFFICIAL LINKS & HOW TO APPLY: First, identify the exact conducting authority/department for the exam. Provide the OFFICIAL website link of THAT specific department (e.g., rpsc.rajasthan.gov.in, ssc.gov.in) where all information is available, and provide the step-by-step application/download process. If it is an Answer Key, Result, or Admit Card, provide the official portal/login link where students can check it. (WARNING: Do NOT provide direct .pdf links from private competitor sites, only provide official government/organization portal links).
 
     🚨 FOR TECHNOLOGY & GADGETS: You MUST provide COMPLETE specs! (Processor, RAM/Storage, Camera MP, Battery/Charging, Display size). You MUST provide the exact Price in India and the Launch Date.
     🚨 FOR TELECOM/APPS: Provide exact old vs new recharge prices, validity, or step-by-step guide to use the new App feature.
@@ -423,8 +425,13 @@ export async function POST(request: NextRequest) {
        BAD START: "Today we will tell you about the SSC CGL notification that was released recently..."
        GOOD START (MIMIC THIS): "The wait is finally over for millions of government job aspirants. The Staff Selection Commission (SSC) has officially released the much-anticipated CGL 2026 notification, unlocking thousands of Grade B and C vacancies across central ministries."
     3. COMPLETENESS: आर्टिकल 100% पूरा होना चाहिए। CONCLUSION लिखकर ही खत्म करें।
-    4. ACCURACY & NO EVASIVE ANSWERS (STRICT): जो भी डेटा (Dates, Fees, Links, Exam Dates) दें, वो असली होना चाहिए। अगर एग्जैक्ट डेट नहीं पता है, तो अपनी नॉलेज से एक पक्का अंदाजा/अनुमान (Expected Date/Month) दें, जैसे "(Expected April 2026)"। कभी भी "नोटिफिकेशन में देखें", "जल्द घोषित होगी", या "चेक वेबसाइट" जैसे गोल-मोल जवाब हरगिज़ ना लिखें! अगर कुछ नहीं पता तो वह पंक्ति/रो हटा दें।
+    4. ACCURACY & NO EVASIVE ANSWERS (STRICT): जो भी डेटा (Dates, Fees, Links, Exam Dates) दें, वो असली होना चाहिए। अगर एग्जैक्ट डेट नहीं पता है, तो अपनी नॉलेज से एक पक्का अंदाजा/अनुमान (Expected Date/Month) दें, जैसे "(Expected August 2026 या उसके बाद की कोई भविष्य की तारीख)। 🚨 चेतावनी: आज की तारीख ${currentDate} है, इसलिए कभी भी बीती हुई तारीख का अंदाज़ा न लगाएं!"। कभी भी "नोटिफिकेशन में देखें", "जल्द घोषित होगी", या "चेक वेबसाइट" जैसे गोल-मोल जवाब हरगिज़ ना लिखें! अगर कुछ नहीं पता तो वह पंक्ति/रो हटा दें।
     5. NO FILLER CONTENT: "आज के इस आर्टिकल में", "उम्मीद है", "कैसा लगा", "दोस्तों" जैसे शब्द BANNED हैं। सीधे काम की बात लिखें।
+    7. STRICT YEAR CONSISTENCY: Today's date is ${currentDate}. NEVER mix past years (e.g. 2024/2025) into 2026 notifications. Keep years and dates strictly consistent with today.
+    8. EXACT QUALIFICATION RULE: DO NOT generalize educational qualifications (e.g., do NOT write 'Graduate in any stream' if the job specifically requires B.Tech, Nursing, or B.Ed). Write the EXACT degree required.
+    9. NO FAKE RUMOR DATES: Never write clickbait statements like 'Result releasing today at 5 PM' unless officially declared. If it is an unconfirmed rumor, label it clearly as '(Expected/संभावित Date)'.
+    10. NO GUESSING VACANCY NUMBERS: If the official notification does not mention exact vacancy numbers, write 'विज्ञप्ति के अनुसार (To be Announced)'. DO NOT make up random numbers like 3000 or 5000.
+    11. MULTI-POST NOTIFICATIONS (जैसे SSC CGL, RRB NTPC, IBPS, RPSC Combined): जब एक ही विभाग एक साथ कई अलग-अलग पदों (Multiple Posts) की भर्ती निकाले, तो Post-Wise HTML Table ज़रूर बनाओ। टेबल में मुख्य 5-8 पदों का नाम, प्रत्येक पद की योग्यता (Qualification), आयु सीमा (Age Limit), और पे-स्केल (Pay Scale) अलग-अलग Rows में साफ़-साफ़ दर्शाओ। खिचड़ी मत बनाओ!
     6. TABLES FOR DATA: कोई भी आंकड़ा (तारीख, फीस, सैलरी, स्पेसिफिकेशन) हो तो HTML <table> बनाकर दें।
     7. BOLD IMPORTANT INFO: मुख्य शब्दों को <strong>Bold</strong> करें।
     8. MOBILE-FIRST: कोई भी पैराग्राफ 3-4 लाइनों से बड़ा नहीं होना चाहिए।
@@ -640,11 +647,11 @@ export async function POST(request: NextRequest) {
 
         <h2 id="details">Vacancy, Age Limit & Salary (पद, आयु सीमा और वेतन)</h2>
         Create an HTML Table for this section. DO NOT WRITE PARAGRAPHS.
-        Example Rows: Post Name, Number of Vacancies, Age Limit (आयु सीमा), Educational Qualification, Salary (वेतन).
+        CRITICAL: The Overview Table MUST be for ONE single recruitment. DO NOT list 5 different departments or posts in one table. Example Rows: Department Name (एक विभाग), Post Name (पद), Number of Vacancies, Age Limit (आयु सीमा), Educational Qualification, Salary (वेतन).
 
         <h2 id="selection">Selection Process & Exam Pattern (चयन प्रक्रिया और सिलेबस)</h2>
         Create an HTML Table for this section. DO NOT WRITE PARAGRAPHS.
-        Example Rows: Stage 1 (e.g. CBT Exam), Stage 2 (PET/PST), Stage 3 (Interview/DV), Negative Marking (Yes/No).
+        Example Rows: Stage 1 (e.g. CBT Exam), Stage 2 (PET/PST), Stage 3 (Interview/DV), Syllabus Topics (मुख्य विषय), Negative Marking (Yes/No).
 
         <h2 id="links">Important Links (महत्वपूर्ण लिंक)</h2>
         Create an HTML Table for ALL important links. DO NOT WRITE PARAGRAPHS.
@@ -670,10 +677,7 @@ export async function POST(request: NextRequest) {
         <p class="font-bold text-blue-600 mt-2">💬 <strong>आपकी बारी:</strong> आपको क्या लगता है, इस बार कॉम्पिटिशन कैसा रहेगा? नीचे कमेंट करके अपनी राय ज़रूर दें!</p>
         --- END MASTER PROMPT ---
 
-    11. CRITICAL LINKING RULE: If you do not know the exact direct URL for an official link (Result, Apply, Notification), you MUST generate a targeted Google Search URL that searches ONLY the official domain. 
-        Format: "https://www.google.com/search?q=site:[OFFICIAL_DOMAIN]+[SPECIFIC_KEYWORD]". 
-        Example for SSC CGL: <a href="https://www.google.com/search?q=site:ssc.nic.in+SSC+CGL+apply+online+link" target="_blank">👉 Click Here</a>. 
-        NEVER use "[LINK_NOT_AVAILABLE]" or "#" or empty href. Always provide a Google Dork link if unsure so the user can easily find it.
+    11. CRITICAL LINKING RULE: First, identify which department is conducting the exam. If you do not know the exact direct URL for an official link (Result, Apply, Notification), you MUST ONLY provide the Official Homepage URL of that specific conducting department (e.g. "https://rpsc.rajasthan.gov.in"). NEVER use "[LINK_NOT_AVAILABLE]" or empty href. NEVER generate fake specific URLs. NEVER generate Google Search/Dork links. Just give the official homepage.
     
     ${recentPostsHtml ? `
     AUTO-INTERNAL LINKING:
@@ -706,7 +710,7 @@ CRITICAL INSTRUCTIONS (PENALTY FOR FAILING):
 
 YOUR SEO SKILLS:
 - You create clickable Table of Contents with jump links (<a href="#id">).
-- You use Google Dork links when exact URLs are unknown (e.g., search links).
+- You provide official homepage links when exact URLs are unknown.
 - Every article ends with a WhatsApp/Telegram share CTA and an engaging comment hook.`;
 
       articleHtml = await generateContentWithFallback(writerConfig, writerSystemPrompt, writerPrompt);
@@ -736,8 +740,8 @@ YOUR SEO SKILLS:
     Analyze the following article and generate optimized metadata for maximum Google ranking.
     
     RULES:
-    1. seoTitle: MUST be "Hindi Curiosity Title (English Keyword)" format. Under 60 chars. Include the MAIN keyword.
-    2. seoDescription: Write a compelling meta description in Hindi that makes users CLICK. Under 155 chars. Include primary keyword.
+    1. seoTitle: Generate a VERY SIMPLE, CATCHY, and EASY TO UNDERSTAND Hindi title that common people can read easily. Use words like "बंपर भर्ती", "रिजल्ट जारी", "नया नियम". Mix in the main English keyword naturally. Keep it under 65 chars. Example: "SSC CGL 2026: बंपर भर्ती का नोटिफिकेशन जारी, ऐसे करें अप्लाई!"
+    2. seoDescription: Write a compelling meta description in simple Hindi that makes users CLICK. Under 155 chars. Include primary keyword.
     3. seoKeywords: List 6-8 comma-separated keywords mixing Hindi, English, and Hinglish (e.g. "SSC CGL 2026, SSC CGL notification, SSC CGL kab aayega, एसएससी सीजीएल 2026").
     4. slug: Short, keyword-rich English-only URL slug (e.g. "ssc-cgl-2026-notification"). No random numbers.
     5. expiryDate: ONLY for job/recruitment posts with a specific last date. Otherwise null.

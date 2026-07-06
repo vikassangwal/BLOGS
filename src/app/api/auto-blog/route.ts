@@ -434,6 +434,10 @@ export async function POST(request: NextRequest) {
     11. MULTI-POST NOTIFICATIONS (जैसे SSC CGL, RRB NTPC, IBPS, RPSC Combined): जब एक ही विभाग एक साथ कई अलग-अलग पदों (Multiple Posts) की भर्ती निकाले, तो Post-Wise HTML Table ज़रूर बनाओ। टेबल में मुख्य 5-8 पदों का नाम, प्रत्येक पद की योग्यता (Qualification), आयु सीमा (Age Limit), और पे-स्केल (Pay Scale) अलग-अलग Rows में साफ़-साफ़ दर्शाओ। खिचड़ी मत बनाओ!
     12. DEEP ACCURACY & RECRUITMENT SPECIFICS (अति-महत्वपूर्ण नियम):
     13. ULTRA-ADVANCED RECRUITMENT RULES (अति-सूक्ष्म कानूनी एवं तकनीकी नियम):
+    14. EXAM STATUS & PAST EXAM CHECK (परीक्षा स्थिति का कड़ा नियम):
+    - EXAM ALREADY CONDUCTED CHECK: यदि किसी परीक्षा/भर्ती का एग्जाम पहले ही आयोजित (Conducted) हो चुका है, तो भूलकर भी भविष्य की एग्जाम डेट न लिखें!
+    - यदि एग्जाम हो चुका है, तो साफ़-साफ़ लिखें: "यह परीक्षा ${new Date().toLocaleDateString()} से पहले आयोजित की जा चुकी है और उम्मीदवार अब उत्तर कुंजी (Answer Key) या परिणाम (Result) का इंतज़ार कर रहे हैं।"
+    - केवल तभी भविष्य की एग्जाम डेट लिखें जब आधिकारिक रूप से परीक्षा आयोजित होना बाकी हो!
     - APPRENTICESHIP VS PERMANENT: यदि भर्ती Apprenticeship (शिक्षुता) की है, तो उसे '1 वर्ष का प्रशिक्षण (Apprenticeship)' साफ़-साफ़ लिखें। इसे स्थायी (Permanent) सरकारी नौकरी कभी न लिखें।
     - DEGREE VS DIPLOMA: B.Tech (Degree) और Diploma (Polytechnic) की पात्रता को अलग-अलग रखें। डिप्लोमा धारकों को B.Tech पदों पर पात्र न बताएं जब तक आधिकारिक नोटिस में न हो।
     - CERTIFICATE DATES: OBC-NCL और EWS प्रमाण पत्र के लिए फॉर्म भरने की अंतिम तिथि (Cut-off Date) का विशेष उल्लेख करें।

@@ -310,21 +310,22 @@ export async function getAIConfig(): Promise<AIConfig | null> {
 // ---------------------------------------------------------------------------
 // FETCH WITH RETRY — Exponential backoff for rate limits
 // ---------------------------------------------------------------------------
-async function fetchWithRetry(url: string, options: any, maxRetries = 3): Promise<Response> {
+async function fetchWithRetry(url: string, options: any, maxRetries = 5): Promise<Response> {
   let lastError: Error | null = null;
 
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
       const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 45000);
+      const timeout = setTimeout(() => controller.abort(), 60000); // 60s timeout for complex requests
 
       const res = await fetch(url, { ...options, signal: controller.signal });
       clearTimeout(timeout);
 
       if (res.status === 429) {
         if (attempt >= maxRetries - 1) return res;
-        const waitTime = Math.pow(2, attempt + 1) * 1000;
-        console.warn(`[AI] Rate limit (429). Retry ${attempt + 1}/${maxRetries} in ${waitTime}ms`);
+        // Wait 15s for first rate limit, and 30s for subsequent retries to completely clear Google's 1-minute rate limit window!
+        const waitTime = (attempt === 0) ? 15000 : 30000;
+        console.warn(`[AI Rate Limit] Got 429 from API. Waiting ${waitTime / 1000} seconds before retry ${attempt + 1}/${maxRetries}...`);
         await new Promise(r => setTimeout(r, waitTime));
         continue;
       }
@@ -332,11 +333,11 @@ async function fetchWithRetry(url: string, options: any, maxRetries = 3): Promis
     } catch (error: any) {
       lastError = error;
       if (error.name === 'AbortError') {
-        if (attempt >= maxRetries - 1) throw new Error('AI API request timed out (45s)');
+        if (attempt >= maxRetries - 1) throw new Error('AI API request timed out (60s)');
         continue;
       }
       if (attempt >= maxRetries - 1) throw error;
-      await new Promise(r => setTimeout(r, 2000));
+      await new Promise(r => setTimeout(r, 3000));
     }
   }
   throw lastError || new Error('AI API failed after retries');

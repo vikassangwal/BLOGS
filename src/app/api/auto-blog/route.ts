@@ -306,7 +306,7 @@ export async function POST(request: NextRequest) {
         - Include 2 Technology topics. MUST BE REAL AND RELEASED IN THE LAST 72 HOURS. 🚨 TECH 1ST PRIORITY: New Telecom Recharge/5G Plans (Jio/Airtel/BSNL), Major Smartphone/Gadget Launches, WhatsApp/Instagram Updates or Outages, AI Tools (ChatGPT/Gemini), E-challan/Aadhaar/PAN Online Tech Tips, EV Scooter Launches, BGMI/Gaming Updates, or Cyber Security/Scam Alerts.
         - Include 2 Finance & Earning topics. MUST BE REAL AND RELEASED IN THE LAST 72 HOURS. 🚨 FINANCE 1ST PRIORITY: RBI Rules, E-Shram/PM Kisan updates, Online Earning Apps/Work from home, EPF withdrawal, Zero Balance Accounts, IPOs, Gold Rates, or Post Office/LIC Schemes.
         Ensure the topics are highly specific (NOT generic like 'Education news in Bihar').
-          🚨 NO COMBO/GENERIC JOBS RULE: Every job topic MUST be for ONE SPECIFIC department and ONE SPECIFIC post (e.g. 'RPSC Programmer Recruitment 2026' or 'Goa Police Constable Vacancy 2026'). NEVER combine multiple departments or multiple unrelated posts into a single topic (e.g., NEVER write 'Goa Govt Jobs: Teacher, Clerk & Police 5000 Posts').
+           🚨 NO COMBO/GENERIC JOBS RULE: Every job topic MUST be for ONE SPECIFIC department and ONE SPECIFIC post (e.g. 'RPSC Programmer Recruitment 2026' or 'Goa Police Constable Vacancy 2026'). NEVER combine multiple departments (like HSSC and HPSC together) or multiple unrelated posts into a single topic. If a state has no real active government job notification right now, do NOT create a fake/generic combination job notification; instead, generate a real scholarship scheme, a university admission alert, or a career guide for that state (e.g. 'Haryana Board Scholarship Scheme 2026' or 'Top Engineering Colleges in Haryana 2026').
         Respond ONLY with a valid JSON array of exactly 41 strings. No markdown.`;
 
         const topicRaw = await generateContentWithFallback(researcherConfigForTopic, "You output strict JSON arrays.", step2Prompt);
@@ -741,7 +741,7 @@ export async function POST(request: NextRequest) {
         - Link Format: जहाँ भी कोई आधिकारिक बाहरी लिंक (वेबसाइट, नोटिफिकेशन आदि) देना हो, वहाँ अनिवार्य रूप से <a href="..." target="_blank" rel="nofollow">👉 Click Here</a> लिखें। 
         - Mobile-First Readability: कोई भी पैराग्राफ 3-4 लाइनों से बड़ा नहीं होना चाहिए। जानकारी को Bullet Points में तोड़ें।
         - Context-Aware Logic: केवल वही हेडिंग्स और लिंक्स दें जो वर्तमान में लागू हों। (उदा: अगर सिर्फ फॉर्म निकले हैं, तो एडमिट कार्ड या रिजल्ट की हेडिंग/लिंक बिल्कुल न दें)।
-        - Smart Dates: आँख बंद करके "Coming Soon" न लिखें। यदि तिथि तय नहीं है, तो कैलेंडर या पिछले ट्रेंड के आधार पर संभावित महीने (जैसे: "जून-जुलाई 2026 (संभावित)") का अंदाज़ा लगाएँ।
+        - Smart Dates: यदि आवेदन या परीक्षा की तिथि घोषित नहीं हुई है, तो केवल "Coming Soon" (जल्द आ रहा है) लिखें या आज की तारीख के बाद वाले भविष्य के महीनों (जैसे: अगस्त-सितंबर 2026) का अंदाज़ा लगाएं। आज की तारीख (${getCurrentDateStr()}) से पहले के किसी भी बीते हुए महीने या तारीख (जैसे मार्च, अप्रैल, मई 2026) को बिल्कुल न लिखें। बीती हुई तारीखें लिखने से जानकारी पुरानी और नकली लगती है।
         - Highlighting: पूरे लेख में सबसे अहम जानकारी (जैसे: वेतन ₹35,000, अंतिम तिथि 25 जुलाई, कुल पद 5,000) को हमेशा <strong>Bold</strong> करें।
         - Hinglish Keywords (Indian SEO): पैराग्राफ और हेडिंग्स के बीच में नेचुरली 2-3 Hinglish कीवर्ड्स (जैसे: "kaise check kare", "kab aayega", "download link") का इस्तेमाल करें।
         
@@ -805,7 +805,10 @@ export async function POST(request: NextRequest) {
         <p class="font-bold text-blue-600 mt-2">💬 <strong>आपकी बारी:</strong> आपको क्या लगता है, इस बार कॉम्पिटिशन कैसा रहेगा? नीचे कमेंट करके अपनी राय ज़रूर दें!</p>
         --- END MASTER PROMPT ---
 
-    11. CRITICAL LINKING RULE: First, identify which department is conducting the exam. If you do not know the exact direct URL for an official link (Result, Apply, Notification), you MUST ONLY provide the Official Homepage URL of that specific conducting department (e.g. "https://rpsc.rajasthan.gov.in"). NEVER use "[LINK_NOT_AVAILABLE]" or empty href. NEVER generate fake specific URLs. NEVER generate Google Search/Dork links. Just give the official homepage.
+    11. CRITICAL LINKING RULE: 
+    - If the Notification has NOT been released yet, or the Application/Apply Link is NOT active yet, do NOT generate any dummy, placeholder, or fake link. In the link table cell, simply write the text "Coming Soon" (जल्द आ रहा है) without any <a> tag.
+    - For active or available links (like Official Website), do NOT generate specific deep-page sub-URLs. ONLY provide the direct Official Homepage URL of that specific conducting department (e.g., "https://ssc.gov.in", "https://rpsc.rajasthan.gov.in", "https://rssb.rajasthan.gov.in", "https://upsc.gov.in") so users can click to visit the main page and navigate it directly.
+    - NEVER use "#", "[LINK_NOT_AVAILABLE]", or empty href attributes.
     
     ${recentPostsHtml ? `
     AUTO-INTERNAL LINKING:

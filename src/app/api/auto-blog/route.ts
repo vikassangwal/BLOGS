@@ -9,8 +9,9 @@ function getCurrentYearNum() {
 import { NextRequest, NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
 import { prisma } from '@/lib/prisma';
-import { getAIConfig, generateAIContent } from '@/lib/ai';
+import { getAIConfig, generateAIContent, AIConfig } from '@/lib/ai';
 import { verifyToken } from '@/lib/auth';
+import { waitUntil } from '@vercel/functions';
 // Code cleaned up: RSS fetching is no longer used.
 export const maxDuration = 60; // Vercel hobby allows up to 60s for serverless
 export const dynamic = 'force-dynamic'; // Prevent caching for cron jobs
@@ -104,6 +105,37 @@ export async function POST(request: NextRequest) {
       const tokenMatch = cookieHeader.match(/automata_auth_token=([^;]+)/);
       const user = tokenMatch ? verifyToken(tokenMatch[1]) : null;
       if (!user) return NextResponse.json({ success: false, error: 'Unauthorized. Please login as admin.' }, { status: 401 });
+    }
+
+    // Background Dispatch Wrapper to prevent Vercel 504 Gateway Timeout
+    const isBgRun = request.headers.get('x-bg-run') === 'true' || new URL(request.url).searchParams.get('bg-run') === 'true';
+    if (!isBgRun) {
+      const targetUrl = new URL(request.url);
+      targetUrl.searchParams.set('bg-run', 'true');
+      
+      const dispatchHeaders = new Headers();
+      if (authHeader) dispatchHeaders.set('authorization', authHeader);
+      if (request.headers.get('cookie')) dispatchHeaders.set('cookie', request.headers.get('cookie')!);
+      if (request.headers.get('x-cron-secret')) dispatchHeaders.set('x-cron-secret', request.headers.get('x-cron-secret')!);
+      if (request.headers.get('x-force-run')) dispatchHeaders.set('x-force-run', request.headers.get('x-force-run')!);
+      dispatchHeaders.set('x-bg-run', 'true');
+
+      console.log("[Auto-Blog] Dispatching background worker execution to avoid Vercel 504 Timeout...");
+      waitUntil(
+        fetch(targetUrl.toString(), {
+          method: 'POST',
+          headers: dispatchHeaders
+        }).then(r => {
+          console.log(`[Auto-Blog Background worker completed] Status: ${r.status}`);
+        }).catch(err => {
+          console.error("[Auto-Blog Background worker failed to execute]:", err);
+        })
+      );
+
+      return NextResponse.json({ 
+        success: true, 
+        message: "Auto-blog generation successfully triggered in the background. Check logs tab in 1-2 minutes." 
+      }, { status: 202 });
     }
 
     // 1. GET SETTINGS
@@ -1050,15 +1082,24 @@ YOUR SEO SKILLS:
     }
 
     // -------------------------------------------------------------
-    // SEO: PING GOOGLE SITEMAP
+    // SEO: PING GOOGLE SITEMAP & GOOGLE INDEXING API
     // -------------------------------------------------------------
     if (settings.autoPublish) {
       try {
         await fetch(`https://www.google.com/ping?sitemap=https://www.knowora.in/sitemap.xml`);
-        // If Google Indexing API JSON is provided, you would use googleapis here. 
-        // For serverless simplicity, sitemap ping is highly effective for fast indexing.
       } catch (e) {
         console.error("Google ping failed", e);
+      }
+
+      if (savedKeys.googleIndexingJson) {
+        try {
+          const { submitToGoogleIndexing } = require('@/lib/google-indexing');
+          const postUrl = `https://knowora.in/blog/${newPost.slug}`;
+          console.log("[Auto-Blog] Submitting auto-generated post to Google Indexing API:", postUrl);
+          await submitToGoogleIndexing(postUrl, 'URL_UPDATED', savedKeys.googleIndexingJson);
+        } catch (e) {
+          console.error("[Auto-Blog] Google Indexing API failed:", e);
+        }
       }
     }
 

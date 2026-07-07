@@ -21,15 +21,19 @@ function BlogListContent() {
   const [isStateDetected, setIsStateDetected] = useState(false);
 
   const INDIAN_STATES = [
-    'All India', 'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh', 
-    'Goa', 'Gujarat', 'Haryana', 'Himachal Pradesh', 'Jharkhand', 'Karnataka', 
-    'Kerala', 'Madhya Pradesh', 'Maharashtra', 'Manipur', 'Meghalaya', 'Mizoram', 
-    'Nagaland', 'Odisha', 'Punjab', 'Rajasthan', 'Sikkim', 'Tamil Nadu', 'Telangana', 
-    'Tripura', 'Uttar Pradesh', 'Uttarakhand', 'West Bengal',
-    // Union Territories
-    'Andaman and Nicobar Islands', 'Chandigarh', 'Dadra and Nagar Haveli and Daman and Diu',
-    'Delhi', 'Jammu and Kashmir', 'Ladakh', 'Lakshadweep', 'Puducherry'
-  ].sort((a, b) => a === 'All India' ? -1 : b === 'All India' ? 1 : a.localeCompare(b));
+    'All India',
+    'Central Government',
+    ...[
+      'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh', 
+      'Goa', 'Gujarat', 'Haryana', 'Himachal Pradesh', 'Jharkhand', 'Karnataka', 
+      'Kerala', 'Madhya Pradesh', 'Maharashtra', 'Manipur', 'Meghalaya', 'Mizoram', 
+      'Nagaland', 'Odisha', 'Punjab', 'Rajasthan', 'Sikkim', 'Tamil Nadu', 'Telangana', 
+      'Tripura', 'Uttar Pradesh', 'Uttarakhand', 'West Bengal',
+      // Union Territories
+      'Andaman and Nicobar Islands', 'Chandigarh', 'Dadra and Nagar Haveli and Daman and Diu',
+      'Delhi', 'Jammu and Kashmir', 'Ladakh', 'Lakshadweep', 'Puducherry'
+    ].sort((a, b) => a.localeCompare(b))
+  ];
 
   // Auto-detect State based on IP
   useEffect(() => {
@@ -213,7 +217,7 @@ function BlogListContent() {
             >
               {INDIAN_STATES.map(s => (
                 <option key={s} value={s} style={{ background: '#121212', color: '#fff' }}>
-                  {s === 'All India' ? 'National News (All India)' : `${s} News`}
+                  {s === 'All India' ? 'National News (All India)' : s === 'Central Government' ? 'Central News (India)' : `${s} News`}
                 </option>
               ))}
             </select>

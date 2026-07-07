@@ -255,7 +255,7 @@ export async function POST(request: NextRequest) {
           select: { title: true }
         });
         if (recentPosts.length > 0) {
-          recentlyPublishedStr = "🚨 ALREADY PUBLISHED TOPICS: (Do NOT generate these exact same topics again. EXCEPTIONS WHERE YOU MUST GENERATE A NEW TOPIC: 1) A brand new phase like Admit Card/Result for an old notification. 2) A NEW YEAR/CYCLE (e.g. if we published 'NEET 2025' before, then 'NEET 2026' is a BRAND NEW topic and NOT a duplicate). 3) A new price cut for an old gadget.):\n" + recentPosts.map(p => `- ${p.title}`).join('\n');
+          recentlyPublishedStr = `🚨 ALREADY PUBLISHED TOPICS: (Do NOT generate these exact same topics again. EXCEPTIONS WHERE YOU MUST GENERATE A NEW TOPIC: 1) A brand new phase like Admit Card/Result for an old notification. 2) A NEW YEAR/CYCLE (e.g. if we published 'NEET ${currentYear - 1}' before, then 'NEET ${currentYear}' is a BRAND NEW topic and NOT a duplicate). 3) A new price cut for an old gadget.):\n` + recentPosts.map(p => `- ${p.title}`).join('\n');
         }
       } catch (e) {
         console.error('Failed to fetch recent posts', e);
@@ -269,7 +269,7 @@ export async function POST(request: NextRequest) {
       GENERATE A MASSIVE LIST OF 120 KEYWORDS.
       This is Step 1 (Brainstorming). Generate a wide variety of Government Job Vacancies (from the LAST 72 HOURS), Exam Notifications, Admit Cards, Answer Keys, Results, Counselling/Merit Lists, Timetables/Syllabus, Free Laptop/Coaching Schemes, Internships, Rojgar Mela/Apprenticeships, Army/Defense Rallies, Entrance Exams (NEET/JEE/CUET/TET), Top MNC Off-Campus Drives, Free Online Courses (Google/TCS), Skill Development (PMKVY), Scholarships, University Admissions/Results, IGNOU/Open University Updates, KVS/Navodaya Admissions, Nursing/Medical Courses, Bank/PSU Jobs (IBPS/SBI), School/College News, Career Courses (e.g. Best courses after 12th), Board Exam Updates, Technology (Telecom/5G plans, Smartphone/Gadget launches, App updates/Outages, AI Tools, EV Scooters, Gaming updates, Cyber Scams, Tech How-To), and Finance/Earning (PM Kisan, EPF, Online Earning, Bank Rules, IPOs, Gold Rates, LIC/Post Office). 
       Include topics from ALL 28 Indian States and 8 Union Territories. 
-
+      
       🚨 TOP TRUSTED INDIA SOURCES RULE 🚨: 
       For research, ONLY search and verify topics from India's Premier Official Portals:
       1. Central Recruitment: ssc.gov.in, upsc.gov.in, ibps.in, indianrailways.gov.in, nta.ac.in, pib.gov.in, ncs.gov.in
@@ -296,17 +296,22 @@ export async function POST(request: NextRequest) {
         Here is a raw list of brainstormed topics:
         ${rawKeywordsList}
         
-        Your job is to filter this list and select EXACTLY 41 highly specific, real, and currently trending topics. DO NOT select the exact same topics from the ALREADY PUBLISHED list, UNLESS it is a brand new phase (e.g., Admit Card) OR a completely new year/cycle (e.g., NEET 2026 vs NEET 2025).
+        Your job is to filter this list and select EXACTLY 41 highly specific, real, and currently trending topics. DO NOT select the exact same topics from the ALREADY PUBLISHED list, UNLESS it is a brand new phase (e.g., Admit Card) OR a completely new year/cycle (e.g., NEET ${currentYear} vs NEET ${currentYear - 1}).
         Follow the 37+2+2 rule exactly:
         - Include EXACTLY 37 Education & Career topics. 
           🚨 1st PRIORITY (HIGHEST) 🚨: ANYTHING NEW! You MUST NOT miss ANY new Government Job, Exam Notification, Admit Card, Result, Answer Key, Cut-Off, Exam Calendar, Exam Date/Timetable, Syllabus Change, Counselling/Merit List, Any Official Notice, State Scholarship, Free Laptop/Coaching Scheme (Yojana), Internships, Rojgar Mela/Apprenticeship, Army/Defense Rally, Entrance Exam/TET, Top MNC Off-Campus Drive, Free Online Courses, Skill Development (PMKVY), KVS/Navodaya Admission, IGNOU/Open University Update, Nursing Course, Bank/PSU Job, or School/University Admission/Forms/Result released in the LAST 72 HOURS. Include ALL of these brand-new updates at the very top of your list so we can be the FIRST to publish!
-          👉 2nd PRIORITY (FALLBACK) 👉: If (and ONLY if) there are not enough new updates today, you MUST fill the remaining slots with: Older Ongoing applications, General State Scholarship information, or Career Courses (e.g. 'Best courses after 12th').
+          👉 2nd PRIORITY (FALLBACK) 👉: If (and ONLY if) there are not enough new government job updates today for a specific state, you MUST search and fill the slot with:
+          1. Active Contractual Recruitment (संविदा भर्ती - Savidha Job) currently open in that state (e.g., NHM contractual nurses, contractual teachers, computer operators, bus conductors).
+          2. Trusted Private Sector Jobs (प्राइवेट जॉब) currently open for candidates of that state (e.g., TCS off-campus, top private bank vacancies, or localized industry openings).
+          3. Older ongoing applications with active deadlines.
+          4. State Scholarship Schemes or Career Course roadmaps (e.g., "Best courses after 12th").
+          🚨 STRICT RULE: Every topic must have active open applications and solid proof. NEVER guess dates or write an article based on guesses! If a deadline is not announced, write "Coming Soon" (जल्द आ रहा है) instead of guessing a month.
           ⚠️ STRICT CRITICAL RULE ⚠️: You MUST provide exactly ONE real, current news topic for EACH of the 28 States of India, ONE for EACH of the 8 Union Territories, and ONE for the Central Government (28+8+1 = 37). 
           🚨 ANTI-FAKE NEWS & EXPIRY RULE 🚨: DO NOT invent exams, schemes, or results that don't exist. Keep real ongoing/upcoming exams. NEVER select a job/recruitment where the "Last Date to Apply" has already passed before today (${getCurrentDateStr()}). Writing about expired applications is completely useless and strictly forbidden!
         - Include 2 Technology topics. MUST BE REAL AND RELEASED IN THE LAST 72 HOURS. 🚨 TECH 1ST PRIORITY: New Telecom Recharge/5G Plans (Jio/Airtel/BSNL), Major Smartphone/Gadget Launches, WhatsApp/Instagram Updates or Outages, AI Tools (ChatGPT/Gemini), E-challan/Aadhaar/PAN Online Tech Tips, EV Scooter Launches, BGMI/Gaming Updates, or Cyber Security/Scam Alerts.
         - Include 2 Finance & Earning topics. MUST BE REAL AND RELEASED IN THE LAST 72 HOURS. 🚨 FINANCE 1ST PRIORITY: RBI Rules, E-Shram/PM Kisan updates, Online Earning Apps/Work from home, EPF withdrawal, Zero Balance Accounts, IPOs, Gold Rates, or Post Office/LIC Schemes.
         Ensure the topics are highly specific (NOT generic like 'Education news in Bihar').
-           🚨 NO COMBO/GENERIC JOBS RULE: Every job topic MUST be for ONE SPECIFIC department and ONE SPECIFIC post (e.g. 'RPSC Programmer Recruitment 2026' or 'Goa Police Constable Vacancy 2026'). NEVER combine multiple departments (like HSSC and HPSC together) or multiple unrelated posts into a single topic. If a state has no real active government job notification right now, do NOT create a fake/generic combination job notification; instead, generate a real scholarship scheme, a university admission alert, or a career guide for that state (e.g. 'Haryana Board Scholarship Scheme 2026' or 'Top Engineering Colleges in Haryana 2026').
+           🚨 NO COMBO/GENERIC JOBS RULE: Every job topic MUST be for ONE SPECIFIC department and ONE SPECIFIC post (e.g. 'RPSC Programmer Recruitment ${currentYear}' or 'Goa Police Constable Vacancy ${currentYear}'). NEVER combine multiple departments (like HSSC and HPSC together) or multiple unrelated posts into a single topic. If a state has no real active government job notification right now, do NOT create a fake/generic combination job notification; instead, generate a real scholarship scheme, a university admission alert, or a career guide for that state (e.g. 'Haryana Board Scholarship Scheme ${currentYear}' or 'Top Engineering Colleges in Haryana ${currentYear}').
         Respond ONLY with a valid JSON array of exactly 41 strings. No markdown.`;
 
         const topicRaw = await generateContentWithFallback(researcherConfigForTopic, "You output strict JSON arrays.", step2Prompt);

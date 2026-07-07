@@ -215,6 +215,18 @@ export async function PUT(request: NextRequest, context: { params: Promise<{ slu
               })
             }).catch(() => {});
           }
+
+          // 6. Google Indexing API Submission (Instant indexation for manual edits)
+          if (savedKeys.googleIndexingJson) {
+            try {
+              const { submitToGoogleIndexing } = require('@/lib/google-indexing');
+              const postUrl = `https://knowora.in/blog/${updatedPost.slug}`;
+              console.log("Submitting manually edited post to Google Indexing API:", postUrl);
+              await submitToGoogleIndexing(postUrl, 'URL_UPDATED', savedKeys.googleIndexingJson);
+            } catch (e) {
+              console.error("Google Indexing failed for edited post:", e);
+            }
+          }
         }
       } catch (err) {
         console.error('Failed to trigger social media auto-post', err);

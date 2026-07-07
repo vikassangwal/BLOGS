@@ -71,7 +71,9 @@ export default function MultiAgentSection({ apiKeys, setApiKeys }: any) {
                 {agentId === 'imageGen' && <option value="pollinations">Pollinations.ai</option>}
                 <option value="openrouter">OpenRouter</option>
                 <option value="openai">OpenAI</option>
-                <option value="gemini">Google Gemini</option>
+                <option value="gemini">Google Gemini (Key 1)</option>
+                <option value="gemini2">Google Gemini (Key 2)</option>
+                <option value="gemini3">Google Gemini (Key 3)</option>
                 <option value="anthropic">Anthropic (Claude)</option>
                 <option value="deepseek">DeepSeek</option>
                 <option value="groq">Groq</option>
@@ -115,7 +117,9 @@ export default function MultiAgentSection({ apiKeys, setApiKeys }: any) {
                 <option value="">No Fallback</option>
                 <option value="openrouter">OpenRouter</option>
                 <option value="openai">OpenAI</option>
-                <option value="gemini">Google Gemini</option>
+                <option value="gemini">Google Gemini (Key 1)</option>
+                <option value="gemini2">Google Gemini (Key 2)</option>
+                <option value="gemini3">Google Gemini (Key 3)</option>
                 <option value="groq">Groq</option>
                 <option value="together">Together AI</option>
                 <option value="deepseek">DeepSeek</option>

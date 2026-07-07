@@ -34,47 +34,60 @@ export async function POST(request: NextRequest) {
       try { savedKeys = JSON.parse(siteSettings.aiApiKey); } catch(e) {}
     }
 
-    function buildAgentConfig(prefix: string, defaultProvider: string, defaultModel: string, defaultTokens: number) {
-      const provider = savedKeys[`${prefix}Provider`] || defaultProvider;
-      const model = (savedKeys[`${prefix}Model`] || defaultModel).trim();
-      const maxTokens = parseInt(savedKeys[`${prefix}Tokens`]) || defaultTokens;
-      const fallbackProvider = savedKeys[`${prefix}FallbackProvider`] || null;
-      const fallbackModel = (savedKeys[`${prefix}FallbackModel`] || '').trim() || null;
-      
-      const getApiKey = (p: string) => {
-        let key = savedKeys[p] || '';
-        if (!key && siteSettings?.aiApiKey && !siteSettings.aiApiKey.startsWith('{')) key = siteSettings.aiApiKey;
-        if (!key) {
-          const allKeyNames = Object.keys(savedKeys).filter(k => 
-            !k.includes('Provider') && !k.includes('Model') && !k.includes('Token') && !k.includes('Id') &&
-            savedKeys[k] && savedKeys[k].length >= 10
-          );
-          if (allKeyNames.length > 0) key = savedKeys[allKeyNames[0]];
-        }
-        return key.trim();
-      };
-      
-      return {
-        primary: { provider: provider as any, apiKey: getApiKey(provider), model },
-        fallback: (fallbackProvider && fallbackModel) ? { provider: fallbackProvider as any, apiKey: getApiKey(fallbackProvider), model: fallbackModel } : null,
-        maxTokens
-      };
+    function getApiKeyForProvider(p: string): string {
+      let key = (savedKeys[p] || '').trim();
+      if (!key) {
+        const fallback = Object.keys(savedKeys).find(k => 
+          !k.includes('Provider') && !k.includes('Model') && !k.includes('Token') && !k.includes('Id') &&
+          savedKeys[k] && typeof savedKeys[k] === 'string' && savedKeys[k].length >= 10
+        );
+        if (fallback) key = String(savedKeys[fallback]).trim();
+      }
+      return key;
     }
 
-    async function generateContentWithFallback(config: any, sysPrompt: string, userPrompt: string) {
-      try {
-        return await generateAIContent(config.primary, sysPrompt, userPrompt, config.maxTokens);
-      } catch (err: any) {
-        if (!config.fallback) throw err;
-        console.warn(`[Updater Fallback] Primary failed. Switching to ${config.fallback.provider}...`);
-        return await generateAIContent(config.fallback, sysPrompt, userPrompt, config.maxTokens);
+    function buildAgentConfigs(prefix: string, defaultProvider: string, defaultModel: string, defaultTokens: number) {
+      const primaryProvider = savedKeys[`${prefix}Provider`] || siteSettings?.aiProvider || defaultProvider;
+      const primaryModel = (savedKeys[`${prefix}Model`] || siteSettings?.aiModel || defaultModel).trim();
+      const maxTokens = parseInt(savedKeys[`${prefix}Tokens`]) || defaultTokens;
+
+      const configs: any[] = [];
+      const key1 = getApiKeyForProvider(primaryProvider);
+      if (key1) {
+        configs.push({ provider: primaryProvider, apiKey: key1, model: primaryModel });
       }
+
+      // Add fallbacks
+      const fallbackProviders = ['gemini', 'gemini2', 'gemini3', 'openrouter', 'groq', 'openai', 'deepseek'];
+      for (const prov of fallbackProviders) {
+        const k = (savedKeys[prov] || '').trim();
+        if (k && k.length >= 10 && prov !== primaryProvider) {
+          const m = prov.startsWith('gemini') ? 'gemini-2.0-flash' : prov === 'groq' ? 'llama-3.3-70b-versatile' : prov === 'openai' ? 'gpt-4o-mini' : 'google/gemini-2.5-flash';
+          configs.push({ provider: prov, apiKey: k, model: m });
+        }
+      }
+
+      if (configs.length === 0) {
+        const anyKey = getApiKeyForProvider('gemini');
+        if (anyKey) {
+          configs.push({ provider: 'gemini', apiKey: anyKey, model: 'gemini-2.0-flash' });
+        }
+      }
+
+      return { configs, maxTokens };
+    }
+
+    async function generateContentWithFallback(configObj: any, sysPrompt: string, userPrompt: string) {
+      if (!configObj.configs || configObj.configs.length === 0) {
+        throw new Error("No AI API Keys found in Admin Settings. Please enter your Gemini API Key.");
+      }
+      return await generateAIContent(configObj.configs, sysPrompt, userPrompt, configObj.maxTokens);
     }
 
     const rModel = settings.researcherModel || '';
     const wModel = settings.writerModel || '';
-    const researcherConfig = buildAgentConfig('researcher', 'openrouter', rModel || 'google/gemini-2.5-flash', 1500);
-    const writerConfig = buildAgentConfig('writer', 'openrouter', wModel || 'openai/gpt-4o-mini', 4000);
+    const researcherConfig = buildAgentConfigs('researcher', 'openrouter', rModel || 'google/gemini-2.5-flash', 1500);
+    const writerConfig = buildAgentConfigs('writer', 'openrouter', wModel || 'openai/gpt-4o-mini', 4000);
 
     // 2. Find the oldest published post (older than 30 days) to update
     const thirtyDaysAgo = new Date();
@@ -139,6 +152,22 @@ ${oldPost.content}`;
       revalidatePath(`/blog/${oldPost.slug}`);
       revalidatePath(`/blog`);
     } catch(e) {}
+
+    // Google Indexing API submission for updated post
+    if (siteSettings?.aiApiKey?.startsWith('{')) {
+      try {
+        const keys = JSON.parse(siteSettings.aiApiKey);
+        const indexingJson = keys.googleIndexingJson;
+        if (indexingJson) {
+          const { submitToGoogleIndexing } = require('@/lib/google-indexing');
+          const postUrl = `https://knowora.in/blog/${oldPost.slug}`;
+          console.log("Submitting updated post to Google Indexing API:", postUrl);
+          await submitToGoogleIndexing(postUrl, 'URL_UPDATED', indexingJson);
+        }
+      } catch (e) {
+        console.error("Google Indexing failed for updated post:", e);
+      }
+    }
 
     return NextResponse.json({ 
       status: 'success', 

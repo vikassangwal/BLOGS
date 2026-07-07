@@ -409,6 +409,10 @@ export async function generateAIContent(
   // Resolve provider: explicit name or auto-detect from key/model
   let providerName = config.provider?.toLowerCase().trim() || autoDetectProvider(config.apiKey, config.model);
 
+  if (providerName === 'gemini2' || providerName === 'gemini3') {
+    providerName = 'gemini';
+  }
+
   // Get provider profile (or use OpenAI-compatible fallback)
   let profile = PROVIDER_REGISTRY[providerName];
 

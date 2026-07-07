@@ -61,12 +61,12 @@ export async function GET(request: NextRequest) {
       }
 
       // Add fallbacks
-      const fallbackProviders = ['gemini', 'openrouter', 'groq', 'openai', 'deepseek'];
+      const fallbackProviders = ['gemini', 'gemini2', 'gemini3', 'openrouter', 'groq', 'openai', 'deepseek'];
       for (const prov of fallbackProviders) {
         if (prov !== primaryProvider) {
           const k = getApiKeyForProvider(prov);
           if (k) {
-            const m = prov === 'gemini' ? 'gemini-2.0-flash' : prov === 'groq' ? 'llama-3.3-70b-versatile' : 'gpt-4o-mini';
+            const m = prov.startsWith('gemini') ? 'gemini-2.0-flash' : prov === 'groq' ? 'llama-3.3-70b-versatile' : 'gpt-4o-mini';
             list.push({ provider: prov, apiKey: k, model: m });
           }
         }
@@ -110,20 +110,25 @@ export async function GET(request: NextRequest) {
 
     // 3. Translate using AI Multi-AI Fallback
     const sysPrompt = "You are an expert, native-level translator. You must return ONLY a valid JSON object. Do not include markdown blocks like ```json.";
-    const userPrompt = `Translate the following blog post into ${targetLangName}. 
-Ensure the translation sounds natural and professional. Retain all HTML tags exactly as they are. Do not translate HTML attributes, classes, or IDs. Only translate the text content.
+    const userPrompt = `You are tasked with translating the following blog post into ${targetLangName}.
 
-Current Title: ${targetPost.title}
+CRITICAL RULES:
+1. Translate the Title: You MUST translate the "Current Title" below. The translated title must represent the actual topic of the article. Do NOT replace it with section names from the content (e.g., do NOT use generic titles like "एक नज़र में", "Key Highlights", "अवलोकन", "At a Glance"). It must be high-CTR, engaging, and professional.
+2. English Terms Preservation: For Indian languages, preserve common English acronyms, keywords, and job titles in Latin/English characters (e.g., keep "SSC GD", "UPSC", "admit card", "answer key", "apply online", "salary", "syllabus" in English as they are widely searched this way).
+3. Preserve HTML: Retain all HTML tags exactly as they are. Do not translate HTML tag names, attributes, classes, or IDs. Only translate the text nodes.
 
-Content (HTML):
+Current Title to Translate: ${targetPost.title}
+
+Content (HTML) to Translate:
 ${targetPost.content}
 
-Return a JSON object with this exact structure:
+Response Format:
+Return ONLY a JSON object with this structure:
 {
-  "title": "Translated title here",
-  "content": "Translated HTML content here"
+  "title": "Your translated high-CTR title here",
+  "content": "Your translated HTML content here"
 }
-Respond ONLY with the JSON.`;
+Do not include any explanation or markdown formatting outside the JSON.`;
 
     let aiResponse;
     try {
@@ -135,11 +140,12 @@ Respond ONLY with the JSON.`;
     
     let parsedData;
     try {
-      const cleanJson = aiResponse.replace(/^```json\n?|```$/g, '').trim();
+      const match = aiResponse.match(/\{[\s\S]*\}/);
+      const cleanJson = match ? match[0] : aiResponse;
       parsedData = JSON.parse(cleanJson);
     } catch (e) {
       console.error("Failed to parse translator JSON response", aiResponse);
-      return NextResponse.json({ status: 'error', message: 'Failed to parse AI translation JSON.' });
+      return NextResponse.json({ status: 'error', message: 'Failed to parse AI translation JSON. Check AI response formatting.' });
     }
 
     // 4. Update the Database

@@ -208,6 +208,17 @@ export default function BlogPostClient({ post, ads, relatedPosts, whatsappLinks 
     contentHtml = contentHtml.substring(0, charLimit) + '...';
   }
 
+  const isJobPost = post.tags?.some((t: any) => {
+    const name = typeof t === 'string' ? t : (t.tag?.name || t.name);
+    return ['Vacancy', 'Career', 'Job', 'Job Digest'].includes(name);
+  });
+
+  const getApplyLink = (html: string) => {
+    const match = html.match(/<a\s+[^>]*href=["'](https?:\/\/[^"']+)["'][^>]*>([\s\S]*?)<\/a>/i);
+    return match ? match[1] : null;
+  };
+  const applyLink = getApplyLink(post.content || '');
+
   return (
     <div style={{ background: 'var(--color-bg-primary)', color: 'var(--color-text-primary)' }}>
       {/* Header Ad */}
@@ -289,6 +300,69 @@ export default function BlogPostClient({ post, ads, relatedPosts, whatsappLinks 
           <figure style={{ margin: '0 0 2rem', borderRadius: '24px', overflow: 'hidden', boxShadow: '0 20px 40px rgba(0,0,0,0.1)', position: 'relative', width: '100%', aspectRatio: '16/9' }}>
             <Image src={post.featuredImage} alt={displayTitle} fill style={{ objectFit: 'cover' }} sizes="(max-width: 768px) 100vw, 800px" priority />
           </figure>
+        )}
+
+        {/* Quick Job Summary Table (सर्करी जॉब त्वरित विवरण) */}
+        {isJobPost && (
+          <div style={{
+            background: 'rgba(255, 255, 255, 0.03)',
+            border: '1px solid rgba(59, 130, 246, 0.2)',
+            borderRadius: '16px',
+            padding: '1.5rem',
+            marginBottom: '2.5rem',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2)'
+          }}>
+            <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#60a5fa', margin: '0 0 1rem 0', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              📊 Quick Job Facts (त्वरित भर्ती विवरण)
+            </h3>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
+              <div style={{ background: 'rgba(255, 255, 255, 0.02)', padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--color-border)' }}>
+                <span style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', display: 'block', marginBottom: '0.2rem' }}>भर्ती विभाग (Department)</span>
+                <span style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--color-text-primary)' }}>
+                  {post.title.split(/[:|-]/)[0]?.trim() || 'Government Sector'}
+                </span>
+              </div>
+              <div style={{ background: 'rgba(255, 255, 255, 0.02)', padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--color-border)' }}>
+                <span style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', display: 'block', marginBottom: '0.2rem' }}>अंतिम तिथि (Last Date)</span>
+                <span style={{ fontSize: '0.9rem', fontWeight: 700, color: post.expiryDate ? '#f87171' : 'var(--color-text-primary)' }}>
+                  {post.expiryDate ? new Date(post.expiryDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }) : 'Apply Soon'}
+                </span>
+              </div>
+              <div style={{ background: 'rgba(255, 255, 255, 0.02)', padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--color-border)' }}>
+                <span style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', display: 'block', marginBottom: '0.2rem' }}>योग्यता (Qualification)</span>
+                <span style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--color-text-primary)' }}>
+                  {post.tags?.map((t: any) => typeof t === 'string' ? t : (t.tag?.name || t.name)).filter((name: string) => name.toLowerCase().includes('pass') || name.toLowerCase().includes('grad') || name.toLowerCase().includes('tech') || name.toLowerCase().includes('diploma')).join(', ') || '10th / 12th / Graduate'}
+                </span>
+              </div>
+              {applyLink && (
+                <div style={{ gridColumn: 'span 1', display: 'flex', alignItems: 'center' }}>
+                  <a 
+                    href={applyLink} 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    style={{
+                      background: 'linear-gradient(135deg, #2563eb, #1d4ed8)',
+                      color: '#fff',
+                      padding: '0.8rem 1.2rem',
+                      borderRadius: '8px',
+                      fontWeight: 700,
+                      textDecoration: 'none',
+                      width: '100%',
+                      textAlign: 'center',
+                      fontSize: '0.9rem',
+                      boxShadow: '0 4px 15px rgba(37,99,235,0.3)',
+                      display: 'inline-block',
+                      transition: 'transform 0.2s'
+                    }}
+                    onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.02)'}
+                    onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+                  >
+                    👉 Apply Online / Notification
+                  </a>
+                </div>
+              )}
+            </div>
+          </div>
         )}
 
         {/* Post Content */}

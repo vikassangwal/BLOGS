@@ -53,6 +53,7 @@ export async function GET(request: Request) {
     const limit = parseInt(searchParams.get('limit') || '10');
     const search = searchParams.get('search') || '';
     const tag = searchParams.get('tag') || '';
+    const qualification = searchParams.get('qualification') || '';
     const status = searchParams.get('status') || '';
     const publishedOnly = searchParams.get('published') === 'true';
     const stateFilter = searchParams.get('stateFilter') || '';
@@ -132,6 +133,10 @@ export async function GET(request: Request) {
 
     if (tag) {
       where.AND.push({ tags: { some: { tag: { name: tag } } } });
+    }
+
+    if (qualification) {
+      where.AND.push({ tags: { some: { tag: { name: qualification } } } });
     }
 
     if (where.AND.length === 0) {

@@ -18,7 +18,18 @@ function BlogListContent() {
   const [totalPages, setTotalPages] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedState, setSelectedState] = useState('All India');
+  const [selectedQualification, setSelectedQualification] = useState('All Qualifications');
   const [isStateDetected, setIsStateDetected] = useState(false);
+
+  const QUALIFICATIONS = [
+    'All Qualifications',
+    '10th Pass',
+    '12th Pass',
+    'Graduate',
+    'Post Graduate',
+    'B.Tech / BE',
+    'ITI / Diploma'
+  ];
 
   const INDIAN_STATES = [
     'All India',
@@ -89,6 +100,9 @@ function BlogListContent() {
       if (selectedState && selectedState !== 'All India') {
         url.searchParams.append('stateFilter', selectedState);
       }
+      if (selectedQualification && selectedQualification !== 'All Qualifications') {
+        url.searchParams.append('qualification', selectedQualification);
+      }
 
       const res = await fetch(url.toString());
       const data = await res.json();
@@ -114,7 +128,7 @@ function BlogListContent() {
     if (isStateDetected) {
       fetchPosts();
     }
-  }, [page, activeTag, isStateDetected, selectedState]);
+  }, [page, activeTag, isStateDetected, selectedState, selectedQualification]);
 
   // Debounced search
   useEffect(() => {
@@ -193,34 +207,65 @@ function BlogListContent() {
           </span>
         </div>
 
-        {/* State Filter - ONLY SHOW FOR EDUCATION & CAREER */}
+        {/* Filters - ONLY SHOW FOR EDUCATION & CAREER */}
         {activeTag === 'Education & Career' && (
-          <div style={{ maxWidth: '400px', margin: '1rem auto 0', display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(255,255,255,0.03)', padding: '0.5rem 1.2rem', borderRadius: '25px', border: '1px solid var(--color-border)' }}>
-            <span style={{ opacity: 0.7 }}>📍</span>
-            <select 
-              value={selectedState}
-              onChange={(e) => {
-                setSelectedState(e.target.value);
-                localStorage.setItem('user_state', e.target.value);
-                setPage(1);
-              }}
-              style={{
-                background: 'transparent',
-                border: 'none',
-                color: 'var(--color-text-primary)',
-                width: '100%',
-                outline: 'none',
-                fontSize: '0.95rem',
-                fontWeight: 500,
-                cursor: 'pointer'
-              }}
-            >
-              {INDIAN_STATES.map(s => (
-                <option key={s} value={s} style={{ background: '#121212', color: '#fff' }}>
-                  {s === 'All India' ? 'National News (All India)' : s === 'Central Government' ? 'Central News (India)' : `${s} News`}
-                </option>
-              ))}
-            </select>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', maxWidth: '400px', margin: '1rem auto 0' }}>
+            {/* State Filter */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(255,255,255,0.03)', padding: '0.5rem 1.2rem', borderRadius: '25px', border: '1px solid var(--color-border)' }}>
+              <span style={{ opacity: 0.7 }}>📍</span>
+              <select 
+                value={selectedState}
+                onChange={(e) => {
+                  setSelectedState(e.target.value);
+                  localStorage.setItem('user_state', e.target.value);
+                  setPage(1);
+                }}
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  color: 'var(--color-text-primary)',
+                  width: '100%',
+                  outline: 'none',
+                  fontSize: '0.95rem',
+                  fontWeight: 500,
+                  cursor: 'pointer'
+                }}
+              >
+                {INDIAN_STATES.map(s => (
+                  <option key={s} value={s} style={{ background: '#121212', color: '#fff' }}>
+                    {s === 'All India' ? 'National News (All India)' : s === 'Central Government' ? 'Central News (India)' : `${s} News`}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Qualification Filter */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(255,255,255,0.03)', padding: '0.5rem 1.2rem', borderRadius: '25px', border: '1px solid var(--color-border)' }}>
+              <span style={{ opacity: 0.7 }}>🎓</span>
+              <select 
+                value={selectedQualification}
+                onChange={(e) => {
+                  setSelectedQualification(e.target.value);
+                  setPage(1);
+                }}
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  color: 'var(--color-text-primary)',
+                  width: '100%',
+                  outline: 'none',
+                  fontSize: '0.95rem',
+                  fontWeight: 500,
+                  cursor: 'pointer'
+                }}
+              >
+                {QUALIFICATIONS.map(q => (
+                  <option key={q} value={q} style={{ background: '#121212', color: '#fff' }}>
+                    {q === 'All Qualifications' ? 'All Qualifications (सभी योग्यताएं)' : `${q} Jobs`}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
         )}
               {/* Tags */}
@@ -347,6 +392,22 @@ function BlogListContent() {
                         <p style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', margin: 0, whiteSpace: 'nowrap' }}>
                           {new Date(post.publishedAt || post.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                         </p>
+                        {post.expiryDate && (
+                          <span style={{
+                            background: 'rgba(239, 68, 68, 0.1)',
+                            color: '#f87171',
+                            padding: '0.2rem 0.6rem',
+                            borderRadius: '12px',
+                            fontSize: '0.65rem',
+                            fontWeight: 600,
+                            whiteSpace: 'nowrap',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '0.2rem'
+                          }}>
+                            ⏰ Last Date: {new Date(post.expiryDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                          </span>
+                        )}
                       </div>
                       <h2 className="text-base sm:text-lg font-bold m-0 mb-1 leading-snug line-clamp-2 text-ellipsis overflow-hidden">
                         {post.title}

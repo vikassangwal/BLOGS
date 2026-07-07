@@ -33,6 +33,24 @@ export default function GlobalHeader({ siteName, translateActive }: { siteName?:
   ];
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
+  const [currentLang, setCurrentLang] = React.useState('default');
+
+  React.useEffect(() => {
+    try {
+      const cookies = document.cookie.split(';');
+      for (let c of cookies) {
+        c = c.trim();
+        if (c.startsWith('googtrans=')) {
+          const parts = c.split('/');
+          if (parts.length >= 3) {
+            setCurrentLang(parts[2]);
+            return;
+          }
+        }
+      }
+    } catch (e) {}
+    setCurrentLang('default');
+  }, [pathname]);
 
   return (
     <header className="sticky top-0 z-50 glass-panel w-full" style={{ borderBottom: '1px solid var(--color-border)', position: 'relative' }}>
@@ -83,17 +101,23 @@ export default function GlobalHeader({ siteName, translateActive }: { siteName?:
               <div className="flex items-center gap-1 notranslate">
                 <span className="hidden lg:inline" style={{fontSize: '0.85rem', color: 'var(--color-text-secondary)', fontWeight: 600}}>Lang:</span>
                 <select
+                  value={currentLang}
                   onChange={(e) => {
                     const lang = e.target.value;
                     const domain = window.location.hostname;
                     const topDomain = '.' + domain.replace(/^www\./, '');
-                    document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-                    document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=${domain}`;
-                    document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=${topDomain}`;
+                    
+                    // Clear all possible cookies on default reset
+                    const domains = [domain, topDomain, '.' + domain, ''];
+                    domains.forEach(d => {
+                      document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;${d ? ` domain=${d};` : ''}`;
+                      document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/blog;${d ? ` domain=${d};` : ''}`;
+                    });
 
                     if (lang !== 'default') {
-                      document.cookie = `googtrans=/auto/${lang}; path=/`;
                       document.cookie = `googtrans=/auto/${lang}; path=/; domain=${topDomain}`;
+                      document.cookie = `googtrans=/auto/${lang}; path=/; domain=${domain}`;
+                      document.cookie = `googtrans=/auto/${lang}; path=/`;
                     }
                     window.location.reload();
                   }}
@@ -117,18 +141,18 @@ export default function GlobalHeader({ siteName, translateActive }: { siteName?:
                     fontFamily: 'inherit',
                   }}
                 >
-                  <option value="default">Default</option>
-                  <option value="en">EN</option>
-                  <option value="hi">HI</option>
-                  <option value="bn">BN</option>
-                  <option value="te">TE</option>
-                  <option value="mr">MR</option>
-                  <option value="ta">TA</option>
-                  <option value="gu">GU</option>
-                  <option value="ur">UR</option>
-                  <option value="kn">KN</option>
-                  <option value="ml">ML</option>
-                  <option value="pa">PA</option>
+                  <option value="default">Default (Original)</option>
+                  <option value="en">English</option>
+                  <option value="hi">Hindi (हिन्दी)</option>
+                  <option value="bn">Bengali (বাংলা)</option>
+                  <option value="te">Telugu (తెలుగు)</option>
+                  <option value="mr">Marathi (मराठी)</option>
+                  <option value="ta">Tamil (தமிழ்)</option>
+                  <option value="gu">Gujarati (ગુજરાતી)</option>
+                  <option value="ur">Urdu (اردو)</option>
+                  <option value="kn">Kannada (ಕನ್ನಡ)</option>
+                  <option value="ml">Malayalam (മലയാളം)</option>
+                  <option value="pa">Punjabi (ਪੰਜਾਬੀ)</option>
                 </select>
               </div>
             </>

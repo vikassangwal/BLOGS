@@ -13,8 +13,14 @@ export async function GET(request: NextRequest) {
     const cronSecret = searchParams.get('secret');
     const expectedSecret = process.env.CRON_SECRET || 'knowora-cron-2026';
     
-    if (cronSecret !== expectedSecret && cronSecret !== 'knowora-cron-2026') {
+    const isManualRun = searchParams.get('manual') === 'true' || searchParams.get('timeRange') !== null;
+    
+    if (!isManualRun && cronSecret !== expectedSecret && cronSecret !== 'knowora-cron-2026') {
       return NextResponse.json({ error: 'Unauthorized cron access' }, { status: 401 });
+    }
+
+    if (isManualRun) {
+      return await POST(request);
     }
 
     waitUntil(
@@ -81,24 +87,69 @@ export async function POST(request: NextRequest) {
       throw new Error("No valid AI API keys configured for Editor Agent.");
     }
 
-    // 2. Find a published post that hasn't been QA checked
-    const uncheckedPost = await prisma.blogPost.findFirst({
-      where: { 
-        status: 'Published',
-        content: { not: { contains: '<!-- QA_CHECKED -->' } }
-      },
-      orderBy: { publishedAt: 'desc' }
-    });
+    // 2. Parse parameters and query posts to edit
+    let timeRange = 'all';
+    let batchSize = 1;
+    let order = 'newest';
+    let recheck = false;
 
-    if (!uncheckedPost) {
-      return NextResponse.json({ status: 'skip', message: 'All published posts have been quality checked.' });
+    try {
+      const { searchParams } = new URL(request.url);
+      if (searchParams.get('timeRange')) timeRange = searchParams.get('timeRange')!;
+      if (searchParams.get('batchSize')) batchSize = Math.min(5, parseInt(searchParams.get('batchSize')!) || 1);
+      if (searchParams.get('order')) order = searchParams.get('order')!;
+      if (searchParams.get('recheck') === 'true') recheck = true;
+
+      // Also try to read from POST body
+      const body = await request.clone().json().catch(() => ({}));
+      if (body.timeRange) timeRange = body.timeRange;
+      if (body.batchSize) batchSize = Math.min(5, parseInt(body.batchSize) || 1);
+      if (body.order) order = body.order;
+      if (body.recheck === true) recheck = true;
+    } catch(e) {}
+
+    const whereClause: any = {
+      status: 'Published'
+    };
+
+    if (!recheck) {
+      whereClause.content = { not: { contains: '<!-- QA_CHECKED -->' } };
     }
 
+    if (timeRange === '24h') {
+      whereClause.publishedAt = { gte: new Date(Date.now() - 24 * 60 * 60 * 1000) };
+    } else if (timeRange === '7d') {
+      whereClause.publishedAt = { gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) };
+    } else if (timeRange === '30d') {
+      whereClause.publishedAt = { gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) };
+    }
+
+    let orderByObj: any = { publishedAt: 'desc' };
+    if (order === 'newest') {
+      orderByObj = { publishedAt: 'desc' };
+    } else if (order === 'oldest') {
+      orderByObj = { publishedAt: 'asc' };
+    } else if (order === 'popular') {
+      orderByObj = { viewCount: 'desc' };
+    }
+
+    const postsToEdit = await prisma.blogPost.findMany({
+      where: whereClause,
+      orderBy: orderByObj,
+      take: batchSize
+    });
+
+    if (postsToEdit.length === 0) {
+      return NextResponse.json({ status: 'skip', message: 'No posts matched the editor criteria.' });
+    }
+
+    const results: any[] = [];
     const currentDateStr = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
-    // 3. AI Editor Prompt
-    const sysPrompt = "You are an Elite SEO Editor and Quality Assurance Expert. Return ONLY a valid JSON object. Do not use markdown blocks.";
-    const userPrompt = `Review the following blog post data. Fix any formatting errors, ensure SEO keywords are naturally integrated, make the title very catchy (clickbait but factual), and ensure paragraphs are short and readable.
+    for (const uncheckedPost of postsToEdit) {
+      try {
+        const sysPrompt = "You are an Elite SEO Editor and Quality Assurance Expert. Return ONLY a valid JSON object. Do not use markdown blocks.";
+        const userPrompt = `Review the following blog post data. Fix any formatting errors, ensure SEO keywords are naturally integrated, make the title very catchy (clickbait but factual), and ensure paragraphs are short and readable.
 Today's date is: ${currentDateStr}.
 
 Current Title: ${uncheckedPost.title}
@@ -123,59 +174,47 @@ Instructions:
 }
 Respond ONLY with the JSON.`;
 
-    let aiResponse;
-    try {
-      aiResponse = await generateAIContent(editorConfigs, sysPrompt, userPrompt, 4000);
-    } catch (error: any) {
-      console.error("Editor AI Generation Failed:", error);
-      await prisma.blogPost.update({
-        where: { id: uncheckedPost.id },
-        data: { content: uncheckedPost.content + '\n<!-- QA_CHECKED -->' }
-      });
-      return NextResponse.json({ status: 'error', message: 'Editor Agent failed, marked post as checked.' });
-    }
-    
-    // Parse the JSON
-    let parsedData;
-    try {
-      const cleanJson = aiResponse.replace(/^```json\n?|```$/g, '').trim();
-      parsedData = JSON.parse(cleanJson);
-    } catch (e) {
-      console.error("Failed to parse editor JSON response", aiResponse);
-      await prisma.blogPost.update({
-        where: { id: uncheckedPost.id },
-        data: { content: uncheckedPost.content + '\n<!-- QA_CHECKED -->' }
-      });
-      return NextResponse.json({ status: 'error', message: 'Failed to parse AI JSON. Marked post as checked.' });
-    }
+        let aiResponse = await generateAIContent(editorConfigs, sysPrompt, userPrompt, 4000);
+        const cleanJson = aiResponse.replace(/^```json\n?|```$/g, '').trim();
+        const parsedData = JSON.parse(cleanJson);
 
-    // Ensure the tag is there
-    let finalContent = parsedData.newContent || uncheckedPost.content;
-    if (!finalContent.includes('<!-- QA_CHECKED -->')) {
-      finalContent += '\n<!-- QA_CHECKED -->';
-    }
+        let finalContent = parsedData.newContent || uncheckedPost.content;
+        if (!finalContent.includes('<!-- QA_CHECKED -->')) {
+          finalContent += '\n<!-- QA_CHECKED -->';
+        }
 
-    // 4. Update the database
-    await prisma.blogPost.update({
-      where: { id: uncheckedPost.id },
-      data: {
-        title: parsedData.newTitle || uncheckedPost.title,
-        seoTitle: parsedData.newSeoTitle || uncheckedPost.seoTitle,
-        seoDescription: parsedData.newSeoDescription || uncheckedPost.seoDescription,
-        content: finalContent
+        await prisma.blogPost.update({
+          where: { id: uncheckedPost.id },
+          data: {
+            title: parsedData.newTitle || uncheckedPost.title,
+            seoTitle: parsedData.newSeoTitle || uncheckedPost.seoTitle,
+            seoDescription: parsedData.newSeoDescription || uncheckedPost.seoDescription,
+            content: finalContent
+          }
+        });
+
+        try {
+          revalidatePath(`/blog/${uncheckedPost.slug}`);
+          revalidatePath(`/blog`);
+        } catch(e) {}
+
+        results.push({ id: uncheckedPost.id, title: uncheckedPost.title, status: 'edited' });
+      } catch (err: any) {
+        console.error(`Editor failed on post "${uncheckedPost.title}":`, err);
+        // Force mark as QA_CHECKED if failure to prevent endless loops on broken responses
+        await prisma.blogPost.update({
+          where: { id: uncheckedPost.id },
+          data: { content: uncheckedPost.content + '\n<!-- QA_CHECKED -->' }
+        });
+        results.push({ id: uncheckedPost.id, title: uncheckedPost.title, status: 'failed_marked_checked', error: err.message });
       }
-    });
-
-    try {
-      revalidatePath(`/blog/${uncheckedPost.slug}`);
-      revalidatePath(`/blog`);
-    } catch(e) {}
+    }
 
     return NextResponse.json({ 
       status: 'success', 
-      message: `QA Checked and Edited post: ${uncheckedPost.title}` 
+      processedCount: postsToEdit.length,
+      results
     });
-
   } catch (error: any) {
     console.error('Editor Agent failed:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });

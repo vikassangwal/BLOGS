@@ -9,6 +9,52 @@ export default function AutoBlogAdmin() {
   const [newKeywords, setNewKeywords] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [isRunning, setIsRunning] = useState(false);
+  const [isDigestRunning, setIsDigestRunning] = useState(false);
+
+  const [runnerState, setRunnerState] = useState({
+    agent: 'updater', // 'updater' | 'editor'
+    timeRange: 'all',
+    batchSize: 1,
+    order: 'oldest',
+    recheck: false
+  });
+  const [isRunnerActive, setIsRunnerActive] = useState(false);
+  const [runnerLogs, setRunnerLogs] = useState<any[]>([]);
+
+  const handleManualRunner = async () => {
+    setIsRunnerActive(true);
+    setRunnerLogs([]);
+    try {
+      const endpoint = runnerState.agent === 'updater' ? '/api/cron/update-content' : '/api/cron/editor';
+      const params = new URLSearchParams({
+        manual: 'true',
+        timeRange: runnerState.timeRange,
+        batchSize: String(runnerState.batchSize),
+        order: runnerState.order,
+        recheck: String(runnerState.recheck)
+      });
+      
+      const res = await fetch(`${endpoint}?${params.toString()}`);
+      const data = await res.json();
+      
+      if (data.status === 'skip') {
+        setRunnerLogs([{ message: data.message || 'No posts matched the criteria.', type: 'info' }]);
+      } else if (data.status === 'success') {
+        const list = data.results || [];
+        setRunnerLogs(list.map((r: any) => ({
+          message: `${r.title}: ${r.status === 'updated' ? '✅ Updated' : r.status === 'edited' ? '✏️ QA Checked' : r.status === 'checked_no_update' ? '🔍 Checked (No New Info)' : '❌ Failed'}`,
+          type: r.status === 'failed' ? 'error' : 'success'
+        })));
+      } else {
+        setRunnerLogs([{ message: data.error || 'Runner execution failed.', type: 'error' }]);
+      }
+    } catch (e: any) {
+      setRunnerLogs([{ message: e.message || 'An error occurred during runner execution.', type: 'error' }]);
+    } finally {
+      setIsRunnerActive(false);
+      fetchData(); // refresh stats
+    }
+  };
 
   const fetchData = async () => {
     try {
@@ -101,6 +147,32 @@ export default function AutoBlogAdmin() {
     }
   };
 
+  const triggerDigestRun = async () => {
+    setIsDigestRunning(true);
+    try {
+      const res = await fetch('/api/cron/active-digest?force=true');
+      let data;
+      try {
+        data = await res.json();
+      } catch (err) {
+        throw new Error(`Server returned invalid JSON. Status: ${res.status}`);
+      }
+
+      if (data.status === 'skip') {
+        alert(data.message || 'Skipped generating digest.');
+      } else if (data.status === 'success') {
+        alert('Active Jobs Digest compiled successfully!\nUrl: ' + data.postUrl);
+        fetchData();
+      } else {
+        alert('Failed: ' + (data.error || data.message));
+      }
+    } catch (error: any) {
+      alert('Digest trigger failed: ' + (error?.message || error));
+    } finally {
+      setIsDigestRunning(false);
+    }
+  };
+
   if (!settings) return <div>Loading...</div>;
 
   return (
@@ -110,13 +182,22 @@ export default function AutoBlogAdmin() {
           <h1 style={{ fontSize: '2rem', fontWeight: 800, margin: '0 0 0.5rem 0', color: 'var(--color-text-primary)' }}>AI Auto-Blogging</h1>
           <p style={{ color: 'var(--color-text-secondary)', margin: 0 }}>Configure and monitor your automated content pipeline.</p>
         </div>
-        <button 
-          onClick={triggerRun} 
-          disabled={isRunning}
-          style={{ background: 'linear-gradient(135deg, #0066cc, #004999)', color: 'rgba(255, 255, 255, 0.05)', border: 'none', padding: '0.8rem 1.5rem', borderRadius: '8px', fontWeight: 600, cursor: isRunning ? 'not-allowed' : 'pointer', opacity: isRunning ? 0.7 : 1 }}
-        >
-          {isRunning ? 'Running...' : '▶ Run Now (Force Trigger)'}
-        </button>
+        <div style={{ display: 'flex', gap: '1rem' }}>
+          <button 
+            onClick={triggerDigestRun} 
+            disabled={isDigestRunning || isRunning}
+            style={{ background: 'linear-gradient(135deg, #10b981, #059669)', color: '#fff', border: 'none', padding: '0.8rem 1.5rem', borderRadius: '8px', fontWeight: 600, cursor: (isDigestRunning || isRunning) ? 'not-allowed' : 'pointer', opacity: (isDigestRunning || isRunning) ? 0.7 : 1 }}
+          >
+            {isDigestRunning ? 'Compiling Digest...' : '📰 Compile Active Jobs Digest'}
+          </button>
+          <button 
+            onClick={triggerRun} 
+            disabled={isRunning || isDigestRunning}
+            style={{ background: 'linear-gradient(135deg, #0066cc, #004999)', color: '#fff', border: 'none', padding: '0.8rem 1.5rem', borderRadius: '8px', fontWeight: 600, cursor: (isRunning || isDigestRunning) ? 'not-allowed' : 'pointer', opacity: (isRunning || isDigestRunning) ? 0.7 : 1 }}
+          >
+            {isRunning ? 'Running...' : '▶ Run Now (Force Trigger)'}
+          </button>
+        </div>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1.5rem', marginBottom: '2rem' }}>
@@ -391,6 +472,124 @@ export default function AutoBlogAdmin() {
 
         {/* Manual Keyword Queue Input Removed */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+
+          {/* Manual Agent Runner Panel */}
+          <div style={{ background: 'rgba(255, 255, 255, 0.05)', padding: '1.5rem', borderRadius: '16px', border: '1px solid var(--color-border)' }}>
+            <h2 style={{ fontSize: '1.2rem', fontWeight: 700, margin: '0 0 1rem 0', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              ⚙️ Manual Agent Runner (मैनुअल एजेंट रनर)
+            </h2>
+            <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.85rem', margin: '-0.5rem 0 1.5rem 0' }}>
+              Select an agent, configure parameters, and manually run background updates on existing posts.
+            </p>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
+              <div>
+                <label style={{ display: 'block', marginBottom: '0.3rem', fontWeight: 600, fontSize: '0.85rem' }}>Select Agent (एजेंट चुनें)</label>
+                <select
+                  value={runnerState.agent}
+                  onChange={e => setRunnerState({ ...runnerState, agent: e.target.value })}
+                  style={{ width: '100%', padding: '0.7rem', borderRadius: '8px', border: '1px solid var(--color-border)', background: 'rgba(0,0,0,0.3)', color: '#fff' }}
+                >
+                  <option value="updater">🔄 Agent 10: Auto Blog Updater (पुरानी पोस्ट अपडेट)</option>
+                  <option value="editor">✏️ Agent 8: Editor & Quality QA (भाषा / SEO सुधारें)</option>
+                </select>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.8rem' }}>
+                <div>
+                  <label style={{ display: 'block', marginBottom: '0.3rem', fontWeight: 600, fontSize: '0.85rem' }}>Time Range (ब्लॉग की उम्र)</label>
+                  <select
+                    value={runnerState.timeRange}
+                    onChange={e => setRunnerState({ ...runnerState, timeRange: e.target.value })}
+                    style={{ width: '100%', padding: '0.7rem', borderRadius: '8px', border: '1px solid var(--color-border)', background: 'rgba(0,0,0,0.3)', color: '#fff' }}
+                  >
+                    <option value="all">All Time (सभी समय के)</option>
+                    <option value="24h">Last 24 Hours (पिछले 24 घंटे)</option>
+                    <option value="7d">Last 7 Days (पिछले 7 दिन)</option>
+                    <option value="30d">Last 30 Days (पिछले 30 दिन)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', marginBottom: '0.3rem', fontWeight: 600, fontSize: '0.85rem' }}>Batch Size (ब्लॉग संख्या)</label>
+                  <select
+                    value={runnerState.batchSize}
+                    onChange={e => setRunnerState({ ...runnerState, batchSize: parseInt(e.target.value) || 1 })}
+                    style={{ width: '100%', padding: '0.7rem', borderRadius: '8px', border: '1px solid var(--color-border)', background: 'rgba(0,0,0,0.3)', color: '#fff' }}
+                  >
+                    <option value={1}>1 Blog</option>
+                    <option value={2}>2 Blogs</option>
+                    <option value={3}>3 Blogs</option>
+                    <option value={5}>5 Blogs (Max)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label style={{ display: 'block', marginBottom: '0.3rem', fontWeight: 600, fontSize: '0.85rem' }}>Scan Order (चेक करने का क्रम)</label>
+                <select
+                  value={runnerState.order}
+                  onChange={e => setRunnerState({ ...runnerState, order: e.target.value })}
+                  style={{ width: '100%', padding: '0.7rem', borderRadius: '8px', border: '1px solid var(--color-border)', background: 'rgba(0,0,0,0.3)', color: '#fff' }}
+                >
+                  <option value="oldest">⬇️ Oldest First (नीचे से / सबसे पुराने पहले)</option>
+                  <option value="newest">⬆️ Newest First (ऊपर से / सबसे नए पहले)</option>
+                  <option value="popular">⭐ Popular First (सबसे ज़्यादा देखे गए पहले)</option>
+                </select>
+              </div>
+
+              {runnerState.agent === 'editor' && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', background: 'rgba(255,255,255,0.02)', padding: '0.6rem 0.8rem', borderRadius: '8px', border: '1px solid var(--color-border)' }}>
+                  <input
+                    type="checkbox"
+                    id="recheck"
+                    checked={runnerState.recheck}
+                    onChange={e => setRunnerState({ ...runnerState, recheck: e.target.checked })}
+                    style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+                  />
+                  <label htmlFor="recheck" style={{ fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer' }}>
+                    Re-check Already QA Checked Blogs (दोबारा जाँचें)
+                  </label>
+                </div>
+              )}
+
+              <button
+                onClick={handleManualRunner}
+                disabled={isRunnerActive || isRunning || isDigestRunning}
+                style={{
+                  background: 'linear-gradient(135deg, #a855f7, #7c3aed)',
+                  color: '#fff',
+                  border: 'none',
+                  padding: '0.8rem 1.5rem',
+                  borderRadius: '8px',
+                  fontWeight: 600,
+                  cursor: (isRunnerActive || isRunning || isDigestRunning) ? 'not-allowed' : 'pointer',
+                  opacity: (isRunnerActive || isRunning || isDigestRunning) ? 0.7 : 1,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.5rem',
+                  width: '100%',
+                  marginTop: '0.5rem'
+                }}
+              >
+                {isRunnerActive ? '⏳ Executing Agent...' : '▶ Run Configured Agent'}
+              </button>
+
+              {runnerLogs.length > 0 && (
+                <div style={{ marginTop: '1rem', background: 'rgba(0,0,0,0.3)', border: '1px solid var(--color-border)', borderRadius: '8px', padding: '0.8rem' }}>
+                  <p style={{ margin: '0 0 0.5rem 0', fontSize: '0.85rem', fontWeight: 700 }}>Execution Logs:</p>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', maxHeight: '150px', overflowY: 'auto', fontSize: '0.85rem' }}>
+                    {runnerLogs.map((log, index) => (
+                      <div key={index} style={{ color: log.type === 'error' ? '#f87171' : log.type === 'success' ? '#4ade80' : '#60a5fa' }}>
+                        {log.message}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
 
           <div style={{ background: 'rgba(255, 255, 255, 0.05)', padding: '1.5rem', borderRadius: '16px', border: '1px solid var(--color-border)', flex: 1, display: 'flex', flexDirection: 'column' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>

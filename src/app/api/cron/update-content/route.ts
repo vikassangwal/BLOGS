@@ -89,41 +89,80 @@ export async function POST(request: NextRequest) {
     const researcherConfig = buildAgentConfigs('researcher', 'openrouter', rModel || 'google/gemini-2.5-flash', 1500);
     const writerConfig = buildAgentConfigs('writer', 'openrouter', wModel || 'openai/gpt-4o-mini', 4000);
 
-    // 2. Find the oldest published post (older than 30 days) to update
-    const thirtyDaysAgo = new Date();
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    // 2. Parse parameters and query posts to update
+    let timeRange = 'all';
+    let batchSize = 1;
+    let order = 'oldest';
 
-    const oldPost = await prisma.blogPost.findFirst({
-      where: { 
-        status: 'Published',
-        updatedAt: { lt: thirtyDaysAgo }
-      },
-      orderBy: { updatedAt: 'asc' }
+    try {
+      const { searchParams } = new URL(request.url);
+      if (searchParams.get('timeRange')) timeRange = searchParams.get('timeRange')!;
+      if (searchParams.get('batchSize')) batchSize = Math.min(5, parseInt(searchParams.get('batchSize')!) || 1);
+      if (searchParams.get('order')) order = searchParams.get('order')!;
+
+      // Also try to read from POST body
+      const body = await request.clone().json().catch(() => ({}));
+      if (body.timeRange) timeRange = body.timeRange;
+      if (body.batchSize) batchSize = Math.min(5, parseInt(body.batchSize) || 1);
+      if (body.order) order = body.order;
+    } catch(e) {}
+
+    const whereClause: any = {
+      status: 'Published',
+      allowAutoUpdate: true,
+    };
+
+    if (timeRange === '24h') {
+      whereClause.publishedAt = { gte: new Date(Date.now() - 24 * 60 * 60 * 1000) };
+    } else if (timeRange === '7d') {
+      whereClause.publishedAt = { gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) };
+    } else if (timeRange === '30d') {
+      whereClause.publishedAt = { gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) };
+    }
+
+    let orderByObj: any = { updatedAt: 'asc' };
+    if (order === 'newest') {
+      orderByObj = { publishedAt: 'desc' };
+    } else if (order === 'oldest') {
+      orderByObj = { publishedAt: 'asc' };
+    } else if (order === 'popular') {
+      orderByObj = { viewCount: 'desc' };
+    }
+
+    const postsToUpdate = await prisma.blogPost.findMany({
+      where: whereClause,
+      orderBy: orderByObj,
+      take: batchSize
     });
 
-    if (!oldPost) {
-      return NextResponse.json({ status: 'skip', message: 'No old posts require updating right now.' });
+    if (postsToUpdate.length === 0) {
+      return NextResponse.json({ status: 'skip', message: 'No posts matched the update criteria.' });
     }
 
-    // 3. Researcher Agent: Find new info
+    const results: any[] = [];
     const currentDate = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-    const researchPrompt = `Find the latest news, updates, or changes regarding the topic: "${oldPost.title}". 
+
+    for (const oldPost of postsToUpdate) {
+      try {
+        // 3. Researcher Agent: Find new info
+        const researchPrompt = `Find the latest news, updates, or changes regarding the topic: "${oldPost.title}". 
 Today's date is ${currentDate}. 
 Provide a short bulleted list of only NEW facts or developments that have happened recently. If there are no new updates, reply with "NO_NEW_UPDATES".`;
-    
-    const newResearch = await generateContentWithFallback(researcherConfig, "You are a factual news researcher. Reply only with new facts.", researchPrompt);
+        
+        const newResearch = await generateContentWithFallback(researchConfig, "You are a factual news researcher. Reply only with new facts.", researchPrompt);
 
-    if (newResearch.includes("NO_NEW_UPDATES")) {
-      // Just bump the updatedAt timestamp so we don't check it again soon
-      await prisma.blogPost.update({
-        where: { id: oldPost.id },
-        data: { updatedAt: new Date() }
-      });
-      return NextResponse.json({ status: 'success', message: `Post "${oldPost.title}" checked. No updates needed.` });
-    }
+        if (newResearch.includes("NO_NEW_UPDATES")) {
+          // Just bump the updatedAt timestamp so we don't check it again soon
+          await prisma.blogPost.update({
+            where: { id: oldPost.id },
+            data: { updatedAt: new Date() }
+          });
+          results.push({ id: oldPost.id, title: oldPost.title, status: 'checked_no_update' });
+          continue;
+        }
 
-    // 4. Writer Agent: Append new section to the article
-    const writerPrompt = `I have an existing blog post. I need you to write an "Update: ${currentDate}" section to be appended at the TOP of the article.
+        // 4. Writer Agent: Append new section to the article
+        const writerPrompt = `I have an existing blog post. I need you to write an "Update: ${currentDate}" section to be appended at the TOP of the article.
 Here is the new information to include:
 ${newResearch}
 
@@ -131,47 +170,55 @@ Write 2-3 engaging paragraphs in Hindi (Devanagari script) mixed with English te
 Format it in HTML. Start with an <h2>Latest Update: ${new Date().getFullYear()}</h2> and include the new facts organically.
 Respond ONLY with the HTML snippet. Do not include markdown \`\`\`html tags.`;
 
-    const writerResponse = await generateContentWithFallback(writerConfig, "You are an expert SEO Hindi Blogger.", writerPrompt);
-    const cleanUpdateHtml = writerResponse.replace(/^```html\n?|```$/g, '').trim();
+        const writerResponse = await generateContentWithFallback(writerConfig, "You are an expert SEO Hindi Blogger.", writerPrompt);
+        const cleanUpdateHtml = writerResponse.replace(/^```html\n?|```$/g, '').trim();
 
-    // 5. Prepend update and save
-    const updatedContent = `<div class="latest-update-box" style="background: #f8f9fa; padding: 15px; border-left: 4px solid #0066cc; margin-bottom: 20px;">
+        // 5. Prepend update and save
+        const updatedContent = `<div class="latest-update-box" style="background: #f8f9fa; padding: 15px; border-left: 4px solid #0066cc; margin-bottom: 20px;">
   ${cleanUpdateHtml}
 </div>
 ${oldPost.content}`;
 
-    await prisma.blogPost.update({
-      where: { id: oldPost.id },
-      data: { 
-        content: updatedContent,
-        updatedAt: new Date()
-      }
-    });
+        await prisma.blogPost.update({
+          where: { id: oldPost.id },
+          data: { 
+            content: updatedContent,
+            updatedAt: new Date()
+          }
+        });
 
-    try {
-      revalidatePath(`/blog/${oldPost.slug}`);
-      revalidatePath(`/blog`);
-    } catch(e) {}
+        try {
+          revalidatePath(`/blog/${oldPost.slug}`);
+          revalidatePath(`/blog`);
+        } catch(e) {}
 
-    // Google Indexing API submission for updated post
-    if (siteSettings?.aiApiKey?.startsWith('{')) {
-      try {
-        const keys = JSON.parse(siteSettings.aiApiKey);
-        const indexingJson = keys.googleIndexingJson;
-        if (indexingJson) {
-          const { submitToGoogleIndexing } = require('@/lib/google-indexing');
-          const postUrl = `https://knowora.in/blog/${oldPost.slug}`;
-          console.log("Submitting updated post to Google Indexing API:", postUrl);
-          await submitToGoogleIndexing(postUrl, 'URL_UPDATED', indexingJson);
+        // Google Indexing API submission for updated post
+        if (siteSettings?.aiApiKey?.startsWith('{')) {
+          try {
+            const keys = JSON.parse(siteSettings.aiApiKey);
+            const indexingJson = keys.googleIndexingJson;
+            if (indexingJson) {
+              const { submitToGoogleIndexing } = require('@/lib/google-indexing');
+              const postUrl = `https://knowora.in/blog/${oldPost.slug}`;
+              console.log("Submitting updated post to Google Indexing API:", postUrl);
+              await submitToGoogleIndexing(postUrl, 'URL_UPDATED', indexingJson);
+            }
+          } catch (e) {
+            console.error("Google Indexing failed for updated post:", e);
+          }
         }
-      } catch (e) {
-        console.error("Google Indexing failed for updated post:", e);
+
+        results.push({ id: oldPost.id, title: oldPost.title, status: 'updated' });
+      } catch (err: any) {
+        console.error(`Failed to update post "${oldPost.title}":`, err);
+        results.push({ id: oldPost.id, title: oldPost.title, status: 'failed', error: err.message });
       }
     }
 
     return NextResponse.json({ 
       status: 'success', 
-      message: `Successfully updated post: ${oldPost.title}` 
+      processedCount: postsToUpdate.length,
+      results
     });
 
   } catch (error: any) {

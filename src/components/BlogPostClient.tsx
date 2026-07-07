@@ -23,6 +23,21 @@ export default function BlogPostClient({ post, ads, relatedPosts, whatsappLinks 
   const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
 
   const [activeTranslation, setActiveTranslation] = useState<any>(null);
+  const [imageSrc, setImageSrc] = useState(post.featuredImage);
+
+  useEffect(() => {
+    if (post.featuredImage && post.featuredImage.includes('source.unsplash.com')) {
+      // Parse the search query parameter from old source.unsplash.com url
+      let query = 'education';
+      try {
+        const urlObj = new URL(post.featuredImage);
+        query = urlObj.search ? urlObj.search.replace('?', '') : 'education';
+      } catch (e) {}
+      setImageSrc(`https://image.pollinations.ai/prompt/professional%20education%20career%20banner%20design%20for%20${query}?width=800&height=450&nologo=true`);
+    } else {
+      setImageSrc(post.featuredImage);
+    }
+  }, [post.featuredImage]);
 
   useEffect(() => {
     synthRef.current = window.speechSynthesis;
@@ -296,9 +311,19 @@ export default function BlogPostClient({ post, ads, relatedPosts, whatsappLinks 
         </header>
 
         {/* Featured Image */}
-        {post.featuredImage && (
+        {imageSrc && (
           <figure style={{ margin: '0 0 2rem', borderRadius: '24px', overflow: 'hidden', boxShadow: '0 20px 40px rgba(0,0,0,0.1)', position: 'relative', width: '100%', aspectRatio: '16/9' }}>
-            <Image src={post.featuredImage} alt={displayTitle} fill style={{ objectFit: 'cover' }} sizes="(max-width: 768px) 100vw, 800px" priority />
+            <Image 
+              src={imageSrc} 
+              alt={displayTitle} 
+              fill 
+              style={{ objectFit: 'cover' }} 
+              sizes="(max-width: 768px) 100vw, 800px" 
+              priority 
+              onError={() => {
+                setImageSrc('/default-og.png');
+              }}
+            />
           </figure>
         )}
 

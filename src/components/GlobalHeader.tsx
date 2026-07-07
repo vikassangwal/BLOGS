@@ -80,7 +80,7 @@ export default function GlobalHeader({ siteName, translateActive }: { siteName?:
             <>
               <div id="google_translate_element" style={{ display: 'none' }}></div>
               <div className="flex items-center gap-1 notranslate">
-                <span style={{fontSize: '0.85rem', color: 'var(--color-text-secondary)', fontWeight: 600}}>Lang:</span>
+                <span className="hidden md:inline" style={{fontSize: '0.85rem', color: 'var(--color-text-secondary)', fontWeight: 600}}>Lang:</span>
                 <select
                   onChange={(e) => {
                     const lang = e.target.value;
@@ -106,9 +106,9 @@ export default function GlobalHeader({ siteName, translateActive }: { siteName?:
                     backgroundSize: '10px',
                     border: '1px solid var(--color-border)',
                     color: 'var(--color-text-primary)',
-                    padding: '6px 24px 6px 12px',
+                    padding: '4px 20px 4px 8px',
                     borderRadius: '8px',
-                    fontSize: '14px',
+                    fontSize: '12px',
                     fontWeight: 500,
                     cursor: 'pointer',
                     outline: 'none',

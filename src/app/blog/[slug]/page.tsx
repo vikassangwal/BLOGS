@@ -75,7 +75,7 @@ export default async function BlogPostPage({ params }: Props) {
   const slug = resolvedParams.slug;
 
   // Fetch all necessary data server-side for immediate HTML rendering (SEO)
-  const [post, ads, relatedPostsRaw, siteSettings, whatsappLinks] = await Promise.all([
+  let [post, ads, relatedPostsRaw, siteSettings, whatsappLinks] = await Promise.all([
     prisma.blogPost.findUnique({
       where: { slug },
       include: { 
@@ -93,6 +93,22 @@ export default async function BlogPostPage({ params }: Props) {
     prisma.siteSettings.findUnique({ where: { id: 'default' } }),
     prisma.socialLink.findMany({ where: { platform: 'whatsapp', isActive: true } })
   ]);
+
+  if (!post) {
+    // Smart Fallback: if user typed a short slug or prefix, match it using contains/insensitive
+    post = await prisma.blogPost.findFirst({
+      where: {
+        slug: {
+          contains: slug,
+          mode: 'insensitive'
+        }
+      },
+      include: { 
+        tags: { include: { tag: true } },
+        author: { select: { name: true } }
+      }
+    });
+  }
 
   if (!post) {
     notFound();

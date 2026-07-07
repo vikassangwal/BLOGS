@@ -22,7 +22,8 @@ function BlogEditor() {
     socialCaptions: '',
     socialHashtags: '',
     tags: '',
-    allowAutoUpdate: true
+    allowAutoUpdate: true,
+    doubleLinkFormat: false
   });
   const [isSaving, setIsSaving] = useState(false);
   const [aiLoading, setAiLoading] = useState(false);
@@ -30,6 +31,7 @@ function BlogEditor() {
   const [modelOverride, setModelOverride] = useState('');
 
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [isModalEditMode, setIsModalEditMode] = useState(false);
 
   useEffect(() => {
     // Edit mode: fetch from server
@@ -52,7 +54,8 @@ function BlogEditor() {
               socialCaptions: data.socialCaptions || '',
               socialHashtags: data.socialHashtags || '',
               tags: Array.isArray(data.tags) ? data.tags.join(', ') : '',
-              allowAutoUpdate: data.allowAutoUpdate !== false
+              allowAutoUpdate: data.allowAutoUpdate !== false,
+              doubleLinkFormat: !!data.translations?.metadata?.doubleLinkFormat
             });
           }
         });
@@ -186,6 +189,16 @@ function BlogEditor() {
       };
       reader.readAsDataURL(file);
     }
+  };
+
+  const formatHtmlLinks = (html: string, useDoubleFormat: boolean) => {
+    if (!useDoubleFormat) return html;
+    return html.replace(/<a\s+[^>]*href=["'](https?:\/\/[^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi, (match, href, text) => {
+      if (text.includes('<img') || text.includes(href) || text.includes('(' + href + ')')) {
+        return match;
+      }
+      return `<a href="${href}" target="_blank" rel="noopener noreferrer" style="color: var(--color-accent); font-weight: bold; text-decoration: underline;">${text}</a> (${href})`;
+    });
   };
 
   return (
@@ -419,8 +432,23 @@ function BlogEditor() {
               </label>
             </div>
 
+            <div style={{ marginBottom: '1.5rem', padding: '0.8rem', background: 'rgba(59, 130, 246, 0.1)', border: '1px dashed rgba(59, 130, 246, 0.4)', borderRadius: '8px' }}>
+              <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+                <input 
+                  type="checkbox" 
+                  checked={formData.doubleLinkFormat} 
+                  onChange={e => setFormData({ ...formData, doubleLinkFormat: e.target.checked })} 
+                  style={{ transform: 'scale(1.2)', marginRight: '0.8rem' }} 
+                />
+                <div>
+                  <div style={{ fontSize: '0.95rem', fontWeight: 600, color: '#3b82f6' }}>Double Link Format (Bracket URL)</div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', marginTop: '0.2rem' }}>Shows URLs in brackets next to link text (e.g. Text (https://url.com))</div>
+                </div>
+              </label>
+            </div>
+
             <div style={{ display: 'flex', gap: '0.5rem' }}>
-              <button type="button" onClick={() => setIsPreviewOpen(true)} className="btn-secondary" style={{ flex: 1 }}>
+              <button type="button" onClick={() => { setIsModalEditMode(false); setIsPreviewOpen(true); }} className="btn-secondary" style={{ flex: 1 }}>
                 Preview
               </button>
               <button type="submit" disabled={isSaving} className="btn-primary" style={{ flex: 2 }}>
@@ -477,32 +505,109 @@ function BlogEditor() {
       {/* Preview Modal */}
       {isPreviewOpen && (
         <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(10px)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
-          <div style={{ background: 'var(--color-bg-primary)', width: '100%', maxWidth: '800px', height: '100%', maxHeight: '90vh', borderRadius: '16px', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-            <div style={{ padding: '1.5rem', borderBottom: '1px solid var(--color-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <h2 style={{ margin: 0 }}>Preview</h2>
-              <div>
-                <button onClick={() => setIsPreviewOpen(false)} className="btn-primary" style={{ marginRight: '1rem', padding: '0.4rem 1rem', fontSize: '0.9rem' }}>✏️ Edit Post</button>
-                <button onClick={() => setIsPreviewOpen(false)} style={{ background: 'none', border: 'none', color: 'var(--color-text-primary)', fontSize: '1.5rem', cursor: 'pointer' }}>✕</button>
+          <div style={{ background: 'var(--color-bg-primary)', width: '100%', maxWidth: '1000px', height: '100%', maxHeight: '90vh', borderRadius: '16px', overflow: 'hidden', display: 'flex', flexDirection: 'column', border: '1px solid var(--color-border)' }}>
+            <div style={{ padding: '1.5rem', borderBottom: '1px solid var(--color-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.02)' }}>
+              <h2 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 700 }}>{isModalEditMode ? '✏️ Edit Post Inline' : '👁️ Post Preview'}</h2>
+              <div style={{ display: 'flex', gap: '0.8rem', alignItems: 'center' }}>
+                {isModalEditMode ? (
+                  <>
+                    <button type="button" onClick={() => setIsModalEditMode(false)} className="btn-secondary" style={{ padding: '0.5rem 1rem', fontSize: '0.9rem' }}>
+                      👁️ Preview Mode
+                    </button>
+                    <button type="button" onClick={() => { setIsModalEditMode(false); setIsPreviewOpen(false); }} className="btn-primary" style={{ background: 'linear-gradient(135deg, #10b981, #059669)', border: 'none', padding: '0.5rem 1rem', fontSize: '0.9rem' }}>
+                      💾 Save Changes
+                    </button>
+                    <button type="button" onClick={(e) => { setIsModalEditMode(false); setIsPreviewOpen(false); handleSubmit(e); }} className="btn-primary" style={{ padding: '0.5rem 1rem', fontSize: '0.9rem' }}>
+                      ⚡ Save & Publish
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button type="button" onClick={() => setIsModalEditMode(true)} className="btn-primary" style={{ padding: '0.5rem 1rem', fontSize: '0.9rem' }}>
+                      ✏️ Edit Post
+                    </button>
+                    <button type="button" onClick={() => setIsPreviewOpen(false)} style={{ background: 'none', border: 'none', color: 'var(--color-text-primary)', fontSize: '1.5rem', cursor: 'pointer', padding: '0.2rem 0.5rem' }}>✕</button>
+                  </>
+                )}
               </div>
             </div>
             <div style={{ flex: 1, overflowY: 'auto', padding: '2rem' }}>
-              <h1 style={{ fontSize: '2.5rem', fontWeight: 800, marginBottom: '1rem' }}>{formData.title || 'Untitled Post'}</h1>
-              {formData.subtitle && <h2 style={{ fontSize: '1.5rem', color: 'var(--color-text-secondary)', marginBottom: '1rem' }}>{formData.subtitle}</h2>}
-              {formData.featuredImage && <img src={formData.featuredImage} alt="Featured" style={{ width: '100%', borderRadius: '12px', marginBottom: '2rem' }} />}
-              <style>{`
-                .admin-preview-content a::after {
-                  content: " (" attr(href) ")";
-                  font-size: 0.85em;
-                  color: #0ea5e9;
-                  margin-left: 4px;
-                  font-family: monospace;
-                  word-break: break-all;
-                  background: rgba(14, 165, 233, 0.1);
-                  padding: 2px 4px;
-                  border-radius: 4px;
-                }
-              `}</style>
-              <div dangerouslySetInnerHTML={{ __html: formData.content }} className="blog-content admin-preview-content" style={{ fontSize: '1.1rem', lineHeight: 1.8 }} />
+              {isModalEditMode ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                  <div>
+                    <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.5rem', color: 'var(--color-text-primary)' }}>Post Title</label>
+                    <input
+                      type="text"
+                      value={formData.title}
+                      onChange={e => setFormData({ ...formData, title: e.target.value })}
+                      style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--color-border)', background: 'rgba(0,0,0,0.3)', color: '#fff', fontSize: '1.1rem' }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.5rem', color: 'var(--color-text-primary)' }}>Subtitle (Optional)</label>
+                    <input
+                      type="text"
+                      value={formData.subtitle}
+                      onChange={e => setFormData({ ...formData, subtitle: e.target.value })}
+                      style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--color-border)', background: 'rgba(0,0,0,0.3)', color: '#fff' }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.5rem', color: 'var(--color-text-primary)' }}>Content (HTML)</label>
+                    <textarea
+                      value={formData.content}
+                      onChange={e => setFormData({ ...formData, content: e.target.value })}
+                      style={{ width: '100%', minHeight: '400px', padding: '1rem', borderRadius: '8px', border: '1px solid var(--color-border)', background: 'rgba(0,0,0,0.3)', color: '#e2e8f0', fontFamily: 'monospace', lineHeight: 1.6 }}
+                    />
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                    <div>
+                      <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.5rem', color: 'var(--color-text-primary)' }}>URL Slug</label>
+                      <input
+                        type="text"
+                        value={formData.slug}
+                        onChange={e => setFormData({ ...formData, slug: e.target.value })}
+                        style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--color-border)', background: 'rgba(0,0,0,0.3)', color: '#fff' }}
+                      />
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.5rem', color: 'var(--color-text-primary)' }}>Tags (comma-separated)</label>
+                      <input
+                        type="text"
+                        value={formData.tags}
+                        onChange={e => setFormData({ ...formData, tags: e.target.value })}
+                        style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--color-border)', background: 'rgba(0,0,0,0.3)', color: '#fff' }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <h1 style={{ fontSize: '2.5rem', fontWeight: 800, marginBottom: '1rem', color: 'var(--color-text-primary)' }}>{formData.title || 'Untitled Post'}</h1>
+                  {formData.subtitle && <h2 style={{ fontSize: '1.5rem', color: 'var(--color-text-secondary)', marginBottom: '1.5rem', fontWeight: 400 }}>{formData.subtitle}</h2>}
+                  {formData.featuredImage && <img src={formData.featuredImage} alt="Featured" style={{ width: '100%', borderRadius: '12px', marginBottom: '2rem', maxHeight: '400px', objectFit: 'cover' }} />}
+                  <style>{`
+                    .admin-preview-content a {
+                      color: var(--color-accent);
+                      text-decoration: underline;
+                      font-weight: bold;
+                    }
+                    .admin-preview-content a::after {
+                      content: " (" attr(href) ")";
+                      font-size: 0.85em;
+                      color: #0ea5e9;
+                      margin-left: 4px;
+                      font-family: monospace;
+                      word-break: break-all;
+                      background: rgba(14, 165, 233, 0.1);
+                      padding: 2px 4px;
+                      border-radius: 4px;
+                      font-weight: normal;
+                    }
+                  `}</style>
+                  <div dangerouslySetInnerHTML={{ __html: formatHtmlLinks(formData.content, formData.doubleLinkFormat) }} className="blog-content admin-preview-content" style={{ fontSize: '1.1rem', lineHeight: 1.8 }} />
+                </>
+              )}
             </div>
           </div>
         </div>

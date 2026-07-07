@@ -384,7 +384,7 @@ export async function POST(request: NextRequest) {
       researcherConfig.primary = { provider: 'gemini', apiKey: geminiKey, model: 'gemini-1.5-flash' };
     }
 
-    const writerConfig = buildAgentConfigs('writer', 'openrouter', wModel || 'openai/gpt-4o-mini', 6000);
+    const writerConfig = buildAgentConfigs('writer', 'openrouter', wModel || 'openai/gpt-4o-mini', 8000);
     const seoConfig = buildAgentConfigs('seo', 'openrouter', sModel || 'openai/gpt-4o-mini', 500);
 
     // Verify at least one agent has a valid API key
@@ -782,9 +782,17 @@ export async function POST(request: NextRequest) {
         Create an HTML Table for this section. DO NOT WRITE PARAGRAPHS.
         CRITICAL: The Overview Table MUST be for ONE single recruitment. DO NOT list 5 different departments or posts in one table. Example Rows: Department Name (एक विभाग), Post Name (पद), Number of Vacancies, Age Limit (आयु सीमा), Educational Qualification, Salary (वेतन).
 
-        <h2 id="selection">Selection Process & Exam Pattern (चयन प्रक्रिया और सिलेबस)</h2>
+        <h2 id="selection">Selection Process (चयन प्रक्रिया)</h2>
         Create an HTML Table for this section. DO NOT WRITE PARAGRAPHS.
-        Example Rows: Stage 1 (e.g. CBT Exam), Stage 2 (PET/PST), Stage 3 (Interview/DV), Syllabus Topics (मुख्य विषय), Negative Marking (Yes/No).
+        Example Rows: Stage 1 (e.g. CBT Exam), Stage 2 (PET/PST), Stage 3 (Interview/DV).
+
+        <h2 id="syllabus">Exam Syllabus & Pattern (परीक्षा सिलेबस और पैटर्न)</h2>
+        Detailed breakdown of subjects, questions, and marks.
+        - Create a clean HTML table summarizing: विषय (Subject Name), प्रश्नों की संख्या (Questions), कुल अंक (Marks), परीक्षा समय (Duration), and नेगेटिव मार्किंग (Negative Marking).
+        - List the main syllabus sub-topics (e.g. General Knowledge, Quantitative Aptitude, Reasoning, Language) in a clean bulleted list.
+
+        <h2 id="cutoff">Previous Year Cut-off Marks (पिछले वर्षों की कट-ऑफ)</h2>
+        Create a clean category-wise HTML table comparing UR (General), OBC, SC, ST, and EWS cut-off marks/percentages from the previous exam cycle. If the exact data is unavailable or it is a new recruitment, provide expected/general target percentages (e.g., UR: 70-75%, OBC: 65-70%) to help candidates set a target score.
 
         <h2 id="links">Important Links (महत्वपूर्ण लिंक)</h2>
         Create an HTML Table for ALL important links. DO NOT WRITE PARAGRAPHS.
@@ -792,8 +800,6 @@ export async function POST(request: NextRequest) {
 
         <h2 id="apply">How to Apply (आवेदन कैसे करें)</h2>
         Step-by-step process in 3-4 simple points.
-        
-        (IF TOPIC IS RESULT OR ADMIT CARD, add a section: <h2 id="cutoff">Expected Cut-off / Safe Score</h2>)
         
         <h2 id="faq">FAQ (अक्सर पूछे जाने वाले प्रश्न)</h2>
         Use <details><summary>[Question]</summary><p>[Answer]</p></details> format. Provide EXACTLY 2 most important FAQs.

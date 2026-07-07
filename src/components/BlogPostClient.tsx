@@ -189,6 +189,20 @@ export default function BlogPostClient({ post, ads, relatedPosts, whatsappLinks 
   const displayTitle = activeTranslation ? activeTranslation.title : post.title;
   let contentHtml = activeTranslation ? activeTranslation.content : (post.content || '');
   
+  const doubleLinkFormat = !!(post.translations as any)?.metadata?.doubleLinkFormat;
+  
+  function formatHtmlLinks(html: string, useDoubleFormat: boolean): string {
+    if (!useDoubleFormat) return html;
+    return html.replace(/<a\s+[^>]*href=["'](https?:\/\/[^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi, (match, href, text) => {
+      if (text.includes('<img') || text.includes(href) || text.includes('(' + href + ')')) {
+        return match;
+      }
+      return `<a href="${href}" target="_blank" rel="noopener noreferrer" style="color: var(--color-accent); font-weight: bold; text-decoration: underline;">${text}</a> (${href})`;
+    });
+  }
+
+  contentHtml = formatHtmlLinks(contentHtml, doubleLinkFormat);
+
   if (isPremium && !isUnlocked) {
     const charLimit = Math.floor(contentHtml.length * 0.3);
     contentHtml = contentHtml.substring(0, charLimit) + '...';

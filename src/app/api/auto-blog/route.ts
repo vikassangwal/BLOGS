@@ -92,6 +92,9 @@ export async function POST(request: NextRequest) {
   const currentDate = getCurrentDateStr();
   const currentYear = getCurrentYearNum();
   try {
+    const searchParams = new URL(request.url).searchParams;
+    const customKeyword = searchParams.get('keyword') || '';
+    const customSourceUrl = searchParams.get('sourceUrl') || '';
     // Auth check: only admin can trigger auto-blog (skip for cron calls with x-cron-secret header)
     const expectedSecret = process.env.CRON_SECRET || 'knowora-cron-2026';
     const authHeader = request.headers.get('authorization');
@@ -218,16 +221,35 @@ export async function POST(request: NextRequest) {
     } catch (e) { console.error('Failed to clear old keywords', e); }
 
     // 3. FETCH KEYWORD
-    let pendingKeyword = await prisma.autoBlogKeyword.findFirst({
-      where: { status: 'pending' },
-      orderBy: [{ priority: 'desc' }, { createdAt: 'asc' }]
-    });
-
     let targetTopic = '';
     let keywordId = null;
     let selectedCategory = 'News';
+    let pendingKeyword = null;
 
-    if (!pendingKeyword) {
+    if (customKeyword) {
+      targetTopic = customKeyword;
+      const tLower = customKeyword.toLowerCase();
+      if (tLower.includes('job') || tLower.includes('result') || tLower.includes('exam') || tLower.includes('admit') || tLower.includes('notification') || tLower.includes('vacancy') || tLower.includes('recruitment') || tLower.includes('syllabus')) {
+        selectedCategory = 'Education & Career';
+      } else if (tLower.includes('tech') || tLower.includes('launch') || tLower.includes('ai') || tLower.includes('phone') || tLower.includes('app')) {
+        selectedCategory = 'Technology';
+      } else if (tLower.includes('finance') || tLower.includes('stock') || tLower.includes('budget') || tLower.includes('market') || tLower.includes('bank') || tLower.includes('earn')) {
+        selectedCategory = 'Finance & Earning';
+      }
+    } else {
+      pendingKeyword = await prisma.autoBlogKeyword.findFirst({
+        where: { status: 'pending' },
+        orderBy: [{ priority: 'desc' }, { createdAt: 'asc' }]
+      });
+
+      if (pendingKeyword) {
+        targetTopic = pendingKeyword.keyword;
+        keywordId = pendingKeyword.id;
+        selectedCategory = pendingKeyword.niche || 'News';
+      }
+    }
+
+    if (!targetTopic) {
       // ALWAYS generate topics when queue is empty, regardless of isNewsActive setting
       // Since manual run button was pressed, or the cron is active, we should restock the queue.
 
@@ -458,6 +480,10 @@ export async function POST(request: NextRequest) {
     } catch (e: any) {
       if (e.message?.includes('429')) throw new Error("API Limit (429): AI की फ्री लिमिट खत्म हो गई है या सर्वर बिज़ी है। कृपया 1 घंटे बाद कोशिश करें या अपना API Key बदलें।");
       researchData = `Topic: ${targetTopic}. Provide a comprehensive overview. ${liveNewsContext}`;
+    }
+
+    if (customSourceUrl) {
+      researchData += `\n\n🚨 MANDATORY OFFICIAL APPLY / NOTIFICATION URL: You MUST use the following URL for the application/notification link: ${customSourceUrl}. Do NOT use any other link or guess the official link.`;
     }
 
     if (researchData.includes("ABORT_FAKE_NEWS")) {

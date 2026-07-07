@@ -96,6 +96,12 @@ export default function AdminDashboard() {
           </p>
         </div>
         <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+          <Link href="/admin/job-alerts" style={{ 
+            textDecoration: 'none', padding: '0.7rem 1.5rem', borderRadius: '12px',
+            background: 'linear-gradient(135deg, #10b981, #059669)', color: '#fff',
+            fontWeight: 700, fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.5rem',
+            boxShadow: '0 4px 15px rgba(16, 185, 129, 0.3)', transition: 'all 0.3s'
+          }}>📡 Job Feed</Link>
           <Link href="/admin/blog/new" style={{ 
             textDecoration: 'none', padding: '0.7rem 1.5rem', borderRadius: '12px',
             background: 'linear-gradient(135deg, #3b82f6, #2563eb)', color: '#fff',
@@ -372,6 +378,7 @@ export default function AdminDashboard() {
           {[
             { href: '/admin/blog', icon: '📝', label: 'All Posts', color: '#3b82f6' },
             { href: '/admin/auto-blog', icon: '🤖', label: 'Auto-Blog', color: '#a855f7' },
+            { href: '/admin/job-alerts', icon: '📡', label: 'Sourcing Feed', color: '#10b981' },
             { href: '/admin/leads', icon: '🎯', label: 'Leads', color: '#10b981' },
             { href: '/admin/settings', icon: '⚙️', label: 'Settings', color: '#6366f1' },
             { href: '/admin/social-links', icon: '🔗', label: 'Social Links', color: '#ec4899' },

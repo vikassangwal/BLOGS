@@ -68,7 +68,12 @@ async function getPostsByTags(tags: string[], limit: number = 8) {
 
 export default async function HomePage() {
   // Fetch all categories in parallel on the server
-  const [allPosts, techPosts, eduPosts, financePosts, whatsappLinks, siteSettings, latestJobs, admitCards, examResults] = await Promise.all([
+  const [
+    allPosts, techPosts, eduPosts, financePosts, whatsappLinks, siteSettings,
+    latestJobs, admitCards, examResults,
+    universityUpdates, govtSchemes, scholarships,
+    techMobile, financeBanking, earningCourses
+  ] = await Promise.all([
     prisma.blogPost.findMany({ where: { status: 'Published' }, orderBy: { publishedAt: 'desc' }, take: 10, select: { id: true, title: true, slug: true, publishedAt: true, featuredImage: true } }),
     getPostsByTag('Technology'),
     getPostsByTag('Education & Career'),
@@ -77,7 +82,13 @@ export default async function HomePage() {
     prisma.siteSettings.findUnique({ where: { id: 'default' } }),
     getPostsByTags(['Vacancy', 'Career', 'Job'], 8),
     getPostsByTags(['Admit Card'], 8),
-    getPostsByTags(['Results', 'Result', 'Answer Key', 'Syllabus'], 8)
+    getPostsByTags(['Results', 'Result', 'Answer Key', 'Syllabus'], 8),
+    getPostsByTags(['University', 'IGNOU', 'College', 'Admission', 'Counselling', 'State University'], 8),
+    getPostsByTags(['Scheme', 'Yojana', 'Government Scheme', 'PM Kisan', 'Sarkari Yojana'], 8),
+    getPostsByTags(['Scholarship', 'National Scholarship', 'Scholarships'], 8),
+    getPostsByTags(['Technology', 'Smartphone', 'Tech', 'Mobile', 'Gadget'], 8),
+    getPostsByTags(['Finance', 'Banking', 'Bank', 'LIC', 'EPFO', 'Savings'], 8),
+    getPostsByTags(['Earning', 'Online Earning', 'Course', 'Free Course'], 8)
   ]);
 
   let apiKeys: any = {};
@@ -180,18 +191,18 @@ export default async function HomePage() {
       <div className="max-w-6xl w-full mx-auto mt-20 px-4">
         <div className="text-center mb-10">
           <h2 className="text-3xl md:text-4xl font-extrabold text-white mb-3">
-            🎯 Sarkari Job Central Grid (सरकारी जॉब ग्रिड)
+            🎯 Job & Info Portal Grid (सरकारी जॉब एवं जानकारी ग्रिड)
           </h2>
           <p className="text-gray-400 text-sm md:text-base">
-            लेटेस्ट सरकारी व प्राइवेट भर्ती, एडमिट कार्ड और परीक्षा परिणाम एक नज़र में।
+            लेटेस्ट सरकारी भर्ती, एडमिट कार्ड, परीक्षा परिणाम, विश्वविद्यालय अपडेट्स, और सरकारी योजनाओं की जानकारी एक नज़र में।
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Column 1: Latest Jobs */}
-          <div className="glass-panel border border-emerald-500/10 hover:border-emerald-500/30 rounded-2xl overflow-hidden shadow-[0_4px_30px_rgba(0,0,0,0.2)] bg-white/5 backdrop-blur-md flex flex-col h-[520px]">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {/* Box 1: Latest Jobs */}
+          <div className="glass-panel border border-emerald-500/10 hover:border-emerald-500/30 rounded-2xl overflow-hidden shadow-[0_4px_30px_rgba(0,0,0,0.2)] bg-white/5 backdrop-blur-md flex flex-col h-[480px]">
             <div className="bg-emerald-600/20 border-b border-emerald-500/20 px-5 py-4 flex items-center justify-between">
-              <h3 className="text-lg font-bold text-emerald-400 flex items-center gap-2">
+              <h3 className="text-base font-bold text-emerald-400 flex items-center gap-2">
                 🔥 नवीनतम नौकरियां (Latest Jobs)
               </h3>
               <span className="relative flex h-2 w-2">
@@ -205,16 +216,16 @@ export default async function HomePage() {
                   const isNew = post.publishedAt && (new Date().getTime() - new Date(post.publishedAt).getTime()) < 3 * 24 * 60 * 60 * 1000;
                   return (
                     <div key={post.id} className="group border-b border-white/5 pb-2.5 last:border-0">
-                      <Link href={`/blog/${post.slug}`} className="text-sm font-semibold text-gray-200 group-hover:text-emerald-400 transition-colors line-clamp-2 leading-snug">
+                      <Link href={`/blog/${post.slug}`} className="text-xs font-semibold text-gray-200 group-hover:text-emerald-400 transition-colors line-clamp-2 leading-snug">
                         {post.title}
                         {isNew && (
-                          <span className="ml-1.5 inline-flex items-center px-1.5 py-0.5 text-[9px] font-bold text-white bg-red-500 rounded animate-pulse whitespace-nowrap">
+                          <span className="ml-1.5 inline-flex items-center px-1.5 py-0.5 text-[8px] font-bold text-white bg-red-500 rounded animate-pulse whitespace-nowrap">
                             NEW
                           </span>
                         )}
                       </Link>
                       {post.expiryDate && (
-                        <p className="text-[10px] text-red-400/80 mt-1 font-medium">
+                        <p className="text-[9px] text-red-400/80 mt-1 font-medium">
                           ⏰ Last Date: {new Date(post.expiryDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
                         </p>
                       )}
@@ -222,20 +233,20 @@ export default async function HomePage() {
                   );
                 })
               ) : (
-                <p className="text-gray-500 text-sm text-center py-10">No active job listings.</p>
+                <p className="text-gray-500 text-xs text-center py-10">No active job listings.</p>
               )}
             </div>
-            <div className="bg-white/2 py-3 px-5 text-center border-t border-white/5">
+            <div className="bg-white/2 py-2.5 px-5 text-center border-t border-white/5">
               <Link href="/blog?tag=Vacancy" className="text-xs font-semibold text-emerald-400 hover:text-emerald-300 transition-colors">
                 View All Jobs →
               </Link>
             </div>
           </div>
 
-          {/* Column 2: Admit Cards */}
-          <div className="glass-panel border border-blue-500/10 hover:border-blue-500/30 rounded-2xl overflow-hidden shadow-[0_4px_30px_rgba(0,0,0,0.2)] bg-white/5 backdrop-blur-md flex flex-col h-[520px]">
+          {/* Box 2: Admit Cards */}
+          <div className="glass-panel border border-blue-500/10 hover:border-blue-500/30 rounded-2xl overflow-hidden shadow-[0_4px_30px_rgba(0,0,0,0.2)] bg-white/5 backdrop-blur-md flex flex-col h-[480px]">
             <div className="bg-blue-600/20 border-b border-blue-500/20 px-5 py-4 flex items-center justify-between">
-              <h3 className="text-lg font-bold text-blue-400 flex items-center gap-2">
+              <h3 className="text-base font-bold text-blue-400 flex items-center gap-2">
                 🎟️ एडमिट कार्ड (Admit Cards)
               </h3>
               <span className="relative flex h-2 w-2">
@@ -249,35 +260,35 @@ export default async function HomePage() {
                   const isNew = post.publishedAt && (new Date().getTime() - new Date(post.publishedAt).getTime()) < 3 * 24 * 60 * 60 * 1000;
                   return (
                     <div key={post.id} className="group border-b border-white/5 pb-2.5 last:border-0">
-                      <Link href={`/blog/${post.slug}`} className="text-sm font-semibold text-gray-200 group-hover:text-blue-400 transition-colors line-clamp-2 leading-snug">
+                      <Link href={`/blog/${post.slug}`} className="text-xs font-semibold text-gray-200 group-hover:text-blue-400 transition-colors line-clamp-2 leading-snug">
                         {post.title}
                         {isNew && (
-                          <span className="ml-1.5 inline-flex items-center px-1.5 py-0.5 text-[9px] font-bold text-white bg-red-500 rounded animate-pulse whitespace-nowrap">
+                          <span className="ml-1.5 inline-flex items-center px-1.5 py-0.5 text-[8px] font-bold text-white bg-red-500 rounded animate-pulse whitespace-nowrap">
                             NEW
                           </span>
                         )}
                       </Link>
-                      <p className="text-[10px] text-gray-400 mt-1">
+                      <p className="text-[9px] text-gray-400 mt-1">
                         📅 Published: {new Date(post.publishedAt || post.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
                       </p>
                     </div>
                   );
                 })
               ) : (
-                <p className="text-gray-500 text-sm text-center py-10">No recent admit cards.</p>
+                <p className="text-gray-500 text-xs text-center py-10">No recent admit cards.</p>
               )}
             </div>
-            <div className="bg-white/2 py-3 px-5 text-center border-t border-white/5">
+            <div className="bg-white/2 py-2.5 px-5 text-center border-t border-white/5">
               <Link href="/blog?tag=Admit%20Card" className="text-xs font-semibold text-blue-400 hover:text-blue-300 transition-colors">
                 View All Admit Cards →
               </Link>
             </div>
           </div>
 
-          {/* Column 3: Results & Syllabus */}
-          <div className="glass-panel border border-purple-500/10 hover:border-purple-500/30 rounded-2xl overflow-hidden shadow-[0_4px_30px_rgba(0,0,0,0.2)] bg-white/5 backdrop-blur-md flex flex-col h-[520px]">
+          {/* Box 3: Results & Syllabus */}
+          <div className="glass-panel border border-purple-500/10 hover:border-purple-500/30 rounded-2xl overflow-hidden shadow-[0_4px_30px_rgba(0,0,0,0.2)] bg-white/5 backdrop-blur-md flex flex-col h-[480px]">
             <div className="bg-purple-600/20 border-b border-purple-500/20 px-5 py-4 flex items-center justify-between">
-              <h3 className="text-lg font-bold text-purple-400 flex items-center gap-2">
+              <h3 className="text-base font-bold text-purple-400 flex items-center gap-2">
                 🏆 परिणाम और सिलेबस (Results & Syllabus)
               </h3>
               <span className="relative flex h-2 w-2">
@@ -291,27 +302,279 @@ export default async function HomePage() {
                   const isNew = post.publishedAt && (new Date().getTime() - new Date(post.publishedAt).getTime()) < 3 * 24 * 60 * 60 * 1000;
                   return (
                     <div key={post.id} className="group border-b border-white/5 pb-2.5 last:border-0">
-                      <Link href={`/blog/${post.slug}`} className="text-sm font-semibold text-gray-200 group-hover:text-purple-400 transition-colors line-clamp-2 leading-snug">
+                      <Link href={`/blog/${post.slug}`} className="text-xs font-semibold text-gray-200 group-hover:text-purple-400 transition-colors line-clamp-2 leading-snug">
                         {post.title}
                         {isNew && (
-                          <span className="ml-1.5 inline-flex items-center px-1.5 py-0.5 text-[9px] font-bold text-white bg-red-500 rounded animate-pulse whitespace-nowrap">
+                          <span className="ml-1.5 inline-flex items-center px-1.5 py-0.5 text-[8px] font-bold text-white bg-red-500 rounded animate-pulse whitespace-nowrap">
                             NEW
                           </span>
                         )}
                       </Link>
-                      <p className="text-[10px] text-gray-400 mt-1">
+                      <p className="text-[9px] text-gray-400 mt-1">
                         📅 Published: {new Date(post.publishedAt || post.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
                       </p>
                     </div>
                   );
                 })
               ) : (
-                <p className="text-gray-500 text-sm text-center py-10">No recent exam results.</p>
+                <p className="text-gray-500 text-xs text-center py-10">No recent exam results.</p>
               )}
             </div>
-            <div className="bg-white/2 py-3 px-5 text-center border-t border-white/5">
+            <div className="bg-white/2 py-2.5 px-5 text-center border-t border-white/5">
               <Link href="/blog?tag=Results" className="text-xs font-semibold text-purple-400 hover:text-purple-300 transition-colors">
                 View All Results →
+              </Link>
+            </div>
+          </div>
+
+          {/* Box 4: University Updates */}
+          <div className="glass-panel border border-cyan-500/10 hover:border-cyan-500/30 rounded-2xl overflow-hidden shadow-[0_4px_30px_rgba(0,0,0,0.2)] bg-white/5 backdrop-blur-md flex flex-col h-[480px]">
+            <div className="bg-cyan-600/20 border-b border-cyan-500/20 px-5 py-4 flex items-center justify-between">
+              <h3 className="text-base font-bold text-cyan-400 flex items-center gap-2">
+                🎓 विश्वविद्यालय अपडेट्स (University Info)
+              </h3>
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-500"></span>
+              </span>
+            </div>
+            <div className="p-4 flex-grow overflow-y-auto flex flex-col gap-3.5 scrollbar-thin">
+              {universityUpdates.length > 0 ? (
+                universityUpdates.map((post) => {
+                  const isNew = post.publishedAt && (new Date().getTime() - new Date(post.publishedAt).getTime()) < 3 * 24 * 60 * 60 * 1000;
+                  return (
+                    <div key={post.id} className="group border-b border-white/5 pb-2.5 last:border-0">
+                      <Link href={`/blog/${post.slug}`} className="text-xs font-semibold text-gray-200 group-hover:text-cyan-400 transition-colors line-clamp-2 leading-snug">
+                        {post.title}
+                        {isNew && (
+                          <span className="ml-1.5 inline-flex items-center px-1.5 py-0.5 text-[8px] font-bold text-white bg-red-500 rounded animate-pulse whitespace-nowrap">
+                            NEW
+                          </span>
+                        )}
+                      </Link>
+                      <p className="text-[9px] text-gray-400 mt-1">
+                        📅 Published: {new Date(post.publishedAt || post.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
+                      </p>
+                    </div>
+                  );
+                })
+              ) : (
+                <p className="text-gray-500 text-xs text-center py-10">No recent university updates.</p>
+              )}
+            </div>
+            <div className="bg-white/2 py-2.5 px-5 text-center border-t border-white/5">
+              <Link href="/blog?tag=University" className="text-xs font-semibold text-cyan-400 hover:text-cyan-300 transition-colors">
+                View University Info →
+              </Link>
+            </div>
+          </div>
+
+          {/* Box 5: Government Schemes */}
+          <div className="glass-panel border border-orange-500/10 hover:border-orange-500/30 rounded-2xl overflow-hidden shadow-[0_4px_30px_rgba(0,0,0,0.2)] bg-white/5 backdrop-blur-md flex flex-col h-[480px]">
+            <div className="bg-orange-600/20 border-b border-orange-500/20 px-5 py-4 flex items-center justify-between">
+              <h3 className="text-base font-bold text-orange-400 flex items-center gap-2">
+                🎁 सरकारी योजनाएं (Govt Schemes)
+              </h3>
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-orange-500"></span>
+              </span>
+            </div>
+            <div className="p-4 flex-grow overflow-y-auto flex flex-col gap-3.5 scrollbar-thin">
+              {govtSchemes.length > 0 ? (
+                govtSchemes.map((post) => {
+                  const isNew = post.publishedAt && (new Date().getTime() - new Date(post.publishedAt).getTime()) < 3 * 24 * 60 * 60 * 1000;
+                  return (
+                    <div key={post.id} className="group border-b border-white/5 pb-2.5 last:border-0">
+                      <Link href={`/blog/${post.slug}`} className="text-xs font-semibold text-gray-200 group-hover:text-orange-400 transition-colors line-clamp-2 leading-snug">
+                        {post.title}
+                        {isNew && (
+                          <span className="ml-1.5 inline-flex items-center px-1.5 py-0.5 text-[8px] font-bold text-white bg-red-500 rounded animate-pulse whitespace-nowrap">
+                            NEW
+                          </span>
+                        )}
+                      </Link>
+                      <p className="text-[9px] text-gray-400 mt-1">
+                        📅 Published: {new Date(post.publishedAt || post.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
+                      </p>
+                    </div>
+                  );
+                })
+              ) : (
+                <p className="text-gray-500 text-xs text-center py-10">No active government schemes.</p>
+              )}
+            </div>
+            <div className="bg-white/2 py-2.5 px-5 text-center border-t border-white/5">
+              <Link href="/blog?tag=Scheme" className="text-xs font-semibold text-orange-400 hover:text-orange-300 transition-colors">
+                View All Schemes →
+              </Link>
+            </div>
+          </div>
+
+          {/* Box 6: Scholarships */}
+          <div className="glass-panel border border-yellow-500/10 hover:border-yellow-500/30 rounded-2xl overflow-hidden shadow-[0_4px_30px_rgba(0,0,0,0.2)] bg-white/5 backdrop-blur-md flex flex-col h-[480px]">
+            <div className="bg-yellow-600/20 border-b border-yellow-500/20 px-5 py-4 flex items-center justify-between">
+              <h3 className="text-base font-bold text-yellow-400 flex items-center gap-2">
+                🎓 छात्रवृत्ति अलर्ट (Scholarship Alerts)
+              </h3>
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-yellow-500"></span>
+              </span>
+            </div>
+            <div className="p-4 flex-grow overflow-y-auto flex flex-col gap-3.5 scrollbar-thin">
+              {scholarships.length > 0 ? (
+                scholarships.map((post) => {
+                  const isNew = post.publishedAt && (new Date().getTime() - new Date(post.publishedAt).getTime()) < 3 * 24 * 60 * 60 * 1000;
+                  return (
+                    <div key={post.id} className="group border-b border-white/5 pb-2.5 last:border-0">
+                      <Link href={`/blog/${post.slug}`} className="text-xs font-semibold text-gray-200 group-hover:text-yellow-400 transition-colors line-clamp-2 leading-snug">
+                        {post.title}
+                        {isNew && (
+                          <span className="ml-1.5 inline-flex items-center px-1.5 py-0.5 text-[8px] font-bold text-white bg-red-500 rounded animate-pulse whitespace-nowrap">
+                            NEW
+                          </span>
+                        )}
+                      </Link>
+                      <p className="text-[9px] text-gray-400 mt-1">
+                        📅 Published: {new Date(post.publishedAt || post.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
+                      </p>
+                    </div>
+                  );
+                })
+              ) : (
+                <p className="text-gray-500 text-xs text-center py-10">No active scholarships.</p>
+              )}
+            </div>
+            <div className="bg-white/2 py-2.5 px-5 text-center border-t border-white/5">
+              <Link href="/blog?tag=Scholarship" className="text-xs font-semibold text-yellow-400 hover:text-yellow-300 transition-colors">
+                View Scholarships →
+              </Link>
+            </div>
+          </div>
+
+          {/* Box 7: Tech & Mobile */}
+          <div className="glass-panel border border-red-500/10 hover:border-red-500/30 rounded-2xl overflow-hidden shadow-[0_4px_30px_rgba(0,0,0,0.2)] bg-white/5 backdrop-blur-md flex flex-col h-[480px]">
+            <div className="bg-red-600/20 border-b border-red-500/20 px-5 py-4 flex items-center justify-between">
+              <h3 className="text-base font-bold text-red-400 flex items-center gap-2">
+                📱 टेक और गैजेट्स (Tech & Mobiles)
+              </h3>
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+              </span>
+            </div>
+            <div className="p-4 flex-grow overflow-y-auto flex flex-col gap-3.5 scrollbar-thin">
+              {techMobile.length > 0 ? (
+                techMobile.map((post) => {
+                  const isNew = post.publishedAt && (new Date().getTime() - new Date(post.publishedAt).getTime()) < 3 * 24 * 60 * 60 * 1000;
+                  return (
+                    <div key={post.id} className="group border-b border-white/5 pb-2.5 last:border-0">
+                      <Link href={`/blog/${post.slug}`} className="text-xs font-semibold text-gray-200 group-hover:text-red-400 transition-colors line-clamp-2 leading-snug">
+                        {post.title}
+                        {isNew && (
+                          <span className="ml-1.5 inline-flex items-center px-1.5 py-0.5 text-[8px] font-bold text-white bg-red-500 rounded animate-pulse whitespace-nowrap">
+                            NEW
+                          </span>
+                        )}
+                      </Link>
+                      <p className="text-[9px] text-gray-400 mt-1">
+                        📅 Published: {new Date(post.publishedAt || post.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
+                      </p>
+                    </div>
+                  );
+                })
+              ) : (
+                <p className="text-gray-500 text-xs text-center py-10">No recent tech articles.</p>
+              )}
+            </div>
+            <div className="bg-white/2 py-2.5 px-5 text-center border-t border-white/5">
+              <Link href="/blog?tag=Technology" className="text-xs font-semibold text-red-400 hover:text-red-300 transition-colors">
+                View Tech News →
+              </Link>
+            </div>
+          </div>
+
+          {/* Box 8: Finance & Banking */}
+          <div className="glass-panel border border-sky-500/10 hover:border-sky-500/30 rounded-2xl overflow-hidden shadow-[0_4px_30px_rgba(0,0,0,0.2)] bg-white/5 backdrop-blur-md flex flex-col h-[480px]">
+            <div className="bg-sky-600/20 border-b border-sky-500/20 px-5 py-4 flex items-center justify-between">
+              <h3 className="text-base font-bold text-sky-400 flex items-center gap-2">
+                📊 फाइनेंस और बैंकिंग (Finance & Bank)
+              </h3>
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-sky-500"></span>
+              </span>
+            </div>
+            <div className="p-4 flex-grow overflow-y-auto flex flex-col gap-3.5 scrollbar-thin">
+              {financeBanking.length > 0 ? (
+                financeBanking.map((post) => {
+                  const isNew = post.publishedAt && (new Date().getTime() - new Date(post.publishedAt).getTime()) < 3 * 24 * 60 * 60 * 1000;
+                  return (
+                    <div key={post.id} className="group border-b border-white/5 pb-2.5 last:border-0">
+                      <Link href={`/blog/${post.slug}`} className="text-xs font-semibold text-gray-200 group-hover:text-sky-400 transition-colors line-clamp-2 leading-snug">
+                        {post.title}
+                        {isNew && (
+                          <span className="ml-1.5 inline-flex items-center px-1.5 py-0.5 text-[8px] font-bold text-white bg-red-500 rounded animate-pulse whitespace-nowrap">
+                            NEW
+                          </span>
+                        )}
+                      </Link>
+                      <p className="text-[9px] text-gray-400 mt-1">
+                        📅 Published: {new Date(post.publishedAt || post.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
+                      </p>
+                    </div>
+                  );
+                })
+              ) : (
+                <p className="text-gray-500 text-xs text-center py-10">No recent finance articles.</p>
+              )}
+            </div>
+            <div className="bg-white/2 py-2.5 px-5 text-center border-t border-white/5">
+              <Link href="/blog?tag=Finance%20%26%20Earning" className="text-xs font-semibold text-sky-400 hover:text-sky-300 transition-colors">
+                View Finance Info →
+              </Link>
+            </div>
+          </div>
+
+          {/* Box 9: Earning & Free Courses */}
+          <div className="glass-panel border border-pink-500/10 hover:border-pink-500/30 rounded-2xl overflow-hidden shadow-[0_4px_30px_rgba(0,0,0,0.2)] bg-white/5 backdrop-blur-md flex flex-col h-[480px]">
+            <div className="bg-pink-600/20 border-b border-pink-500/20 px-5 py-4 flex items-center justify-between">
+              <h3 className="text-base font-bold text-pink-400 flex items-center gap-2">
+                💸 कमाई और फ्री कोर्सेस (Earning & Courses)
+              </h3>
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-pink-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-pink-500"></span>
+              </span>
+            </div>
+            <div className="p-4 flex-grow overflow-y-auto flex flex-col gap-3.5 scrollbar-thin">
+              {earningCourses.length > 0 ? (
+                earningCourses.map((post) => {
+                  const isNew = post.publishedAt && (new Date().getTime() - new Date(post.publishedAt).getTime()) < 3 * 24 * 60 * 60 * 1000;
+                  return (
+                    <div key={post.id} className="group border-b border-white/5 pb-2.5 last:border-0">
+                      <Link href={`/blog/${post.slug}`} className="text-xs font-semibold text-gray-200 group-hover:text-pink-400 transition-colors line-clamp-2 leading-snug">
+                        {post.title}
+                        {isNew && (
+                          <span className="ml-1.5 inline-flex items-center px-1.5 py-0.5 text-[8px] font-bold text-white bg-red-500 rounded animate-pulse whitespace-nowrap">
+                            NEW
+                          </span>
+                        )}
+                      </Link>
+                      <p className="text-[9px] text-gray-400 mt-1">
+                        📅 Published: {new Date(post.publishedAt || post.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
+                      </p>
+                    </div>
+                  );
+                })
+              ) : (
+                <p className="text-gray-500 text-xs text-center py-10">No recent learning/earning articles.</p>
+              )}
+            </div>
+            <div className="bg-white/2 py-2.5 px-5 text-center border-t border-white/5">
+              <Link href="/blog?tag=Earning" className="text-xs font-semibold text-pink-400 hover:text-pink-300 transition-colors">
+                View Earning Info →
               </Link>
             </div>
           </div>

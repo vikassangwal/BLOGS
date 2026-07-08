@@ -54,40 +54,101 @@ export async function GET(request: NextRequest) {
 
     const alerts: ScrapedAlert[] = [];
 
-    // UPSC XML Feed
+    // 1. Direct UPSC XML Feed (with browser headers)
     try {
-      const upscRes = await fetch('https://www.upsc.gov.in/feed/whatsnew.xml', { next: { revalidate: 300 } });
+      const upscRes = await fetch('https://www.upsc.gov.in/feed/whatsnew.xml', {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+        },
+        next: { revalidate: 300 }
+      });
       if (upscRes.ok) {
         const text = await upscRes.text();
-        const parsed = parseRssFeed(text, 'UPSC Official');
+        const parsed = parseRssFeed(text, 'UPSC Official Direct');
         alerts.push(...parsed.slice(0, 10));
       }
     } catch (e) {
-      console.error('UPSC RSS Fetch failed:', e);
+      console.error('UPSC RSS Direct Fetch failed:', e);
     }
 
-    // Google News - PIB / Employment News recruitment feed
-    try {
-      const gNewsUrl = `https://news.google.com/rss/search?q=recruitment+vacancy+(site:pib.gov.in+OR+site:employmentnews.gov.in+OR+upsc+OR+ssc)&hl=en-IN&gl=IN&ceid=IN:en`;
-      const gNewsRes = await fetch(gNewsUrl, { next: { revalidate: 300 } });
-      if (gNewsRes.ok) {
-        const text = await gNewsRes.text();
-        const parsed = parseRssFeed(text, 'PIB / Employment News');
-        alerts.push(...parsed.slice(0, 25));
+    // 2. Define multiple separate queries to Google News search RSS
+    const feeds = [
+      {
+        name: 'UPSC Search',
+        url: 'https://news.google.com/rss/search?q=recruitment+OR+vacancy+site:upsc.gov.in&hl=en-IN&gl=IN&ceid=IN:en',
+        limit: 8
+      },
+      {
+        name: 'SSC Official',
+        url: 'https://news.google.com/rss/search?q=recruitment+OR+vacancy+site:ssc.gov.in&hl=en-IN&gl=IN&ceid=IN:en',
+        limit: 8
+      },
+      {
+        name: 'Employment News',
+        url: 'https://news.google.com/rss/search?q=recruitment+OR+vacancy+site:employmentnews.gov.in&hl=en-IN&gl=IN&ceid=IN:en',
+        limit: 8
+      },
+      {
+        name: 'Bank Jobs (IBPS/SBI)',
+        url: 'https://news.google.com/rss/search?q=recruitment+OR+vacancy+(site:ibps.in+OR+site:sbi.co.in)&hl=en-IN&gl=IN&ceid=IN:en',
+        limit: 6
+      },
+      {
+        name: 'Railways (RRB)',
+        url: 'https://news.google.com/rss/search?q=recruitment+OR+vacancy+site:rrcb.gov.in&hl=en-IN&gl=IN&ceid=IN:en',
+        limit: 6
+      },
+      {
+        name: 'Defense (Army/Navy/AirForce)',
+        url: 'https://news.google.com/rss/search?q=recruitment+OR+vacancy+(site:drdo.gov.in+OR+site:joinindianarmy.nic.in+OR+site:indianairforce.nic.in+OR+site:joinindiannavy.gov.in)&hl=en-IN&gl=IN&ceid=IN:en',
+        limit: 6
+      },
+      {
+        name: 'PIB Press Releases',
+        url: 'https://news.google.com/rss/search?q=recruitment+OR+vacancy+site:pib.gov.in&hl=en-IN&gl=IN&ceid=IN:en',
+        limit: 8
       }
-    } catch (e) {
-      console.error('Google News RSS Fetch failed:', e);
+    ];
+
+    // Fetch all Google News queries in parallel
+    const results = await Promise.all(
+      feeds.map(async (feed) => {
+        try {
+          const res = await fetch(feed.url, {
+            headers: {
+              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+            },
+            next: { revalidate: 300 }
+          });
+          if (res.ok) {
+            const xml = await res.text();
+            return parseRssFeed(xml, feed.name).slice(0, feed.limit);
+          }
+        } catch (e) {
+          console.error(`Fetch failed for ${feed.name}:`, e);
+        }
+        return [];
+      })
+    );
+
+    // Merge all batches
+    for (const batch of results) {
+      alerts.push(...batch);
     }
 
-    // Sort or filter if needed, de-duplicate by URL
+    // Sort or filter if needed, de-duplicate by URL or title prefix
     const uniqueAlerts: ScrapedAlert[] = [];
     const seenUrls = new Set<string>();
+    const seenTitles = new Set<string>();
 
     for (const alert of alerts) {
       // Clean redirect urls or extract from Google News if possible
       const cleanUrl = alert.sourceUrl.split('?')[0];
-      if (!seenUrls.has(cleanUrl)) {
+      const titlePrefix = alert.title.substring(0, 30).toLowerCase();
+
+      if (!seenUrls.has(cleanUrl) && !seenTitles.has(titlePrefix)) {
         seenUrls.add(cleanUrl);
+        seenTitles.add(titlePrefix);
         uniqueAlerts.push(alert);
       }
     }

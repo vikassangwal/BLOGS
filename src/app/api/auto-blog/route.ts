@@ -1059,6 +1059,15 @@ YOUR SEO SKILLS:
       detectedTagsSet.add('Vacancy');
       detectedTagsSet.add('Career');
     }
+    if (lowerTopic.includes('upcoming') || lowerTopic.includes('expected') || lowerTopic.includes('संभावित') || lowerTopic.includes('coming soon') || lowerTopic.includes('agami')) {
+      detectedTagsSet.add('Upcoming');
+    }
+    if (lowerTopic.includes('rule') || lowerTopic.includes('rules') || lowerTopic.includes('नियम') || lowerTopic.includes('अधिकार') || lowerTopic.includes('rights')) {
+      detectedTagsSet.add('Rules & Rights');
+    }
+    if (lowerTopic.includes('guideline') || lowerTopic.includes('guidelines') || lowerTopic.includes('निर्देश') || lowerTopic.includes('गाइडलाइन')) {
+      detectedTagsSet.add('Guidelines');
+    }
     if (lowerTopic.includes('admit') || lowerTopic.includes('admit card') || lowerTopic.includes(' प्रवेश पत्र')) {
       detectedTagsSet.add('Admit Card');
     }

@@ -66,6 +66,64 @@ async function getPostsByTags(tags: string[], limit: number = 8) {
   }
 }
 
+async function getActiveJobs(limit: number = 8) {
+  try {
+    return await prisma.blogPost.findMany({
+      where: {
+        status: 'Published',
+        tags: { some: { tag: { name: { in: ['Job', 'Vacancy', 'Career'] } } } },
+        NOT: [
+          { tags: { some: { tag: { name: { in: ['Upcoming', 'Upcoming Job', 'Agami'] } } } } },
+          { title: { contains: 'संभावित' } },
+          { title: { contains: 'Upcoming' } }
+        ]
+      },
+      orderBy: { publishedAt: 'desc' },
+      take: limit,
+      select: {
+        id: true,
+        title: true,
+        slug: true,
+        publishedAt: true,
+        createdAt: true,
+        expiryDate: true
+      }
+    });
+  } catch (err) {
+    console.error('Failed to fetch active jobs:', err);
+    return [];
+  }
+}
+
+async function getUpcomingJobs(limit: number = 8) {
+  try {
+    return await prisma.blogPost.findMany({
+      where: {
+        status: 'Published',
+        tags: { some: { tag: { name: { in: ['Job', 'Vacancy', 'Career'] } } } },
+        OR: [
+          { tags: { some: { tag: { name: { in: ['Upcoming', 'Upcoming Job', 'Agami'] } } } } },
+          { title: { contains: 'संभावित' } },
+          { title: { contains: 'Upcoming' } }
+        ]
+      },
+      orderBy: { publishedAt: 'desc' },
+      take: limit,
+      select: {
+        id: true,
+        title: true,
+        slug: true,
+        publishedAt: true,
+        createdAt: true,
+        expiryDate: true
+      }
+    });
+  } catch (err) {
+    console.error('Failed to fetch upcoming jobs:', err);
+    return [];
+  }
+}
+
 export default async function HomePage() {
   const now = new Date();
   const sevenDaysAgo = new Date();
@@ -73,20 +131,20 @@ export default async function HomePage() {
 
   // Fetch all categories in parallel on the server
   const [
-    allPosts, techPosts, eduPosts, financePosts, whatsappLinks, siteSettings,
+    allPosts, guidelinesPosts, rulesRightsPosts, whatsappLinks, siteSettings,
     latestJobs, admitCards, examResults,
     universityUpdates, govtSchemes, scholarships,
     techMobile, financeBanking, earningCourses,
     closingSoonJobs, liveUpdates,
-    activeJobsCount, recentResultsCount, recentAdmitCardsCount, activeSchemesCount
+    activeJobsCount, recentResultsCount, recentAdmitCardsCount, activeSchemesCount,
+    upcomingJobs, upcomingJobsCount
   ] = await Promise.all([
     prisma.blogPost.findMany({ where: { status: 'Published' }, orderBy: { publishedAt: 'desc' }, take: 10, select: { id: true, title: true, slug: true, publishedAt: true, featuredImage: true } }),
-    getPostsByTag('Technology'),
-    getPostsByTag('Education & Career'),
-    getPostsByTag('Finance & Earning'),
+    getPostsByTag('Guidelines'),
+    getPostsByTag('Rules & Rights'),
     prisma.socialLink.findMany({ where: { platform: 'whatsapp', isActive: true } }),
     prisma.siteSettings.findUnique({ where: { id: 'default' } }),
-    getPostsByTags(['Vacancy', 'Career', 'Job'], 8),
+    getActiveJobs(8),
     getPostsByTags(['Admit Card'], 8),
     getPostsByTags(['Results', 'Result', 'Answer Key', 'Syllabus'], 8),
     getPostsByTags(['University', 'IGNOU', 'College', 'Admission', 'Counselling', 'State University'], 8),
@@ -114,6 +172,11 @@ export default async function HomePage() {
       where: {
         status: 'Published',
         tags: { some: { tag: { name: { in: ['Job', 'Vacancy', 'Career'] } } } },
+        NOT: [
+          { tags: { some: { tag: { name: { in: ['Upcoming', 'Upcoming Job', 'Agami'] } } } } },
+          { title: { contains: 'संभावित' } },
+          { title: { contains: 'Upcoming' } }
+        ],
         OR: [
           { expiryDate: { gte: now } },
           { expiryDate: null }
@@ -138,6 +201,18 @@ export default async function HomePage() {
       where: {
         status: 'Published',
         tags: { some: { tag: { name: { in: ['Scheme', 'Yojana', 'Government Scheme'] } } } }
+      }
+    }),
+    getUpcomingJobs(8),
+    prisma.blogPost.count({
+      where: {
+        status: 'Published',
+        tags: { some: { tag: { name: { in: ['Job', 'Vacancy', 'Career'] } } } },
+        OR: [
+          { tags: { some: { tag: { name: { in: ['Upcoming', 'Upcoming Job', 'Agami'] } } } } },
+          { title: { contains: 'संभावित' } },
+          { title: { contains: 'Upcoming' } }
+        ]
       }
     })
   ]);
@@ -165,10 +240,10 @@ export default async function HomePage() {
   const CategorySection = ({ title, posts, tag }: { title: string, posts: any[], tag: string }) => {
     if (posts.length === 0) return null;
     return (
-      <div className="mt-20 w-full animate-slide-up">
-        <div className="flex justify-between items-end mb-8">
-          <h2 className="text-3xl font-bold text-white">{title}</h2>
-          <Link href={`/blog?tag=${encodeURIComponent(tag)}`} className="text-blue-400 hover:text-blue-300 font-medium text-sm transition-colors">
+      <div className="w-full animate-slide-up">
+        <div className="flex justify-between items-end mb-6">
+          <h2 className="text-xl sm:text-2xl font-bold text-white leading-snug">{title}</h2>
+          <Link href={`/blog?tag=${encodeURIComponent(tag)}`} className="text-blue-400 hover:text-blue-300 font-medium text-xs transition-colors shrink-0 whitespace-nowrap ml-4">
             View All →
           </Link>
         </div>
@@ -205,88 +280,97 @@ export default async function HomePage() {
   return (
     <div className="flex flex-col items-center justify-center px-3 sm:px-4 pt-4 pb-10">
       {/* Hero Section */}
-      <div className="max-w-4xl mx-auto text-center animate-slide-up mt-2 sm:mt-6">
-        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full glass-panel text-xs text-blue-400 mb-4 border-blue-500/20 shadow-[0_0_20px_rgba(59,130,246,0.1)]">
-          <span className="relative flex h-2.5 w-2.5">
+      <div className="max-w-4xl mx-auto text-center animate-slide-up mt-1 sm:mt-4">
+        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full glass-panel text-[10px] sm:text-xs text-blue-400 mb-2 border-blue-500/10 shadow-[0_0_15px_rgba(59,130,246,0.05)]">
+          <span className="relative flex h-1.5 w-1.5">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-blue-500"></span>
+            <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-blue-500"></span>
           </span>
-          AI-Powered Content Generation is Live
+          Real-Time Updates Dashboard
         </div>
         
-        <h1 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight mb-3 leading-tight text-white">
-          Next-Generation <br className="hidden sm:block" />
-          <span className="premium-gradient-text">Blogging Platform</span>
+        <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight mb-2 leading-tight text-white">
+          Stay Updated with <span className="premium-gradient-text">Knowora Portal</span>
         </h1>
         
-        <p className="text-xs sm:text-sm text-gray-400 mb-5 max-w-xl mx-auto font-light leading-relaxed px-4">
-          Discover expertly curated and AI-assisted insights in Technology, Education & Career, and Finance & Earning. High-quality knowledge for the modern world.
+        <p className="text-[11px] sm:text-xs text-gray-400 mb-3.5 max-w-lg mx-auto leading-relaxed px-4">
+          Instant job alerts, admit cards, exam results, admission guidelines, and public schemes updates.
         </p>
         
-        <div className="flex gap-4 justify-center items-center">
-          <Link href="/blog" className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm font-bold rounded-full transition-all hover:scale-105 shadow-[0_0_20px_rgba(37,99,235,0.3)]">
-            Read Our Articles
+        <div className="flex gap-3 justify-center items-center">
+          <Link href="/blog" className="px-5 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-[11px] sm:text-xs font-bold rounded-full transition-all hover:scale-105 shadow-[0_4px_15px_rgba(37,99,235,0.2)]">
+            Browse All Notifications
           </Link>
         </div>
 
         {/* Quick Category Links */}
-        <div className="mt-5 flex flex-wrap justify-center gap-2.5">
-          <Link href="/blog?tag=Technology" className="px-4 py-2 glass-panel hover:bg-blue-500/10 border border-white/5 hover:border-blue-500/30 rounded-full text-xs font-semibold transition-all text-gray-300 hover:text-white">
-            💻 Technology
+        <div className="mt-4 flex flex-wrap justify-center gap-1.5 px-4">
+          <Link href="/blog?tag=Job" className="px-3 py-1.5 glass-panel hover:bg-emerald-500/10 border border-white/5 hover:border-emerald-500/20 rounded-full text-[10px] font-semibold transition-all text-gray-300 hover:text-white">
+            💼 Job Alerts
           </Link>
-          <Link href="/blog?tag=Education%20%26%20Career" className="px-4 py-2 glass-panel hover:bg-blue-500/10 border border-white/5 hover:border-blue-500/30 rounded-full text-xs font-semibold transition-all text-gray-300 hover:text-white">
-            🎓 Education & Career
+          <Link href="/blog?tag=Admit%20Card" className="px-3 py-1.5 glass-panel hover:bg-blue-500/10 border border-white/5 hover:border-blue-500/20 rounded-full text-[10px] font-semibold transition-all text-gray-300 hover:text-white">
+            🎟️ Admit Cards
           </Link>
-          <Link href="/blog?tag=Finance%20%26%20Earning" className="px-4 py-2 glass-panel hover:bg-blue-500/10 border border-white/5 hover:border-blue-500/30 rounded-full text-xs font-semibold transition-all text-gray-300 hover:text-white">
-            💰 Finance & Earning
+          <Link href="/blog?tag=Results" className="px-3 py-1.5 glass-panel hover:bg-purple-500/10 border border-white/5 hover:border-purple-500/20 rounded-full text-[10px] font-semibold transition-all text-gray-300 hover:text-white">
+            🏆 Exam Results
           </Link>
-          <Link href="/blog?tag=News" className="px-4 py-2 glass-panel hover:bg-blue-500/10 border border-white/5 hover:border-blue-500/30 rounded-full text-xs font-semibold transition-all text-gray-300 hover:text-white">
-            📰 News
+          <Link href="/blog?tag=Guidelines" className="px-3 py-1.5 glass-panel hover:bg-cyan-500/10 border border-white/5 hover:border-cyan-500/20 rounded-full text-[10px] font-semibold transition-all text-gray-300 hover:text-white">
+            📖 Guidelines
           </Link>
-          <Link href="/blog" className="px-4 py-2 glass-panel hover:bg-blue-500/10 border border-white/5 hover:border-blue-500/30 rounded-full text-xs font-semibold transition-all text-gray-300 hover:text-white">
-            ✨ View All
+          <Link href="/blog?tag=Scheme" className="px-3 py-1.5 glass-panel hover:bg-orange-500/10 border border-white/5 hover:border-orange-500/20 rounded-full text-[10px] font-semibold transition-all text-gray-300 hover:text-white">
+            🎁 Schemes
           </Link>
         </div>
       </div>
 
       {/* 🚀 Dashboard Squares (डैशबोर्ड बॉक्स) */}
       <div className="max-w-6xl w-full mx-auto mt-8 px-4 animate-slide-up">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
           {/* Square 1: Active Jobs */}
           <Link href="/blog?tag=Job" className="block group">
-            <div className="glass-panel border border-emerald-500/10 hover:border-emerald-500/30 p-4 rounded-2xl text-center bg-white/5 transition-all hover:-translate-y-1 shadow-[0_4px_30px_rgba(16,185,129,0.05)]">
-              <div className="text-2xl mb-1">🔥</div>
-              <div className="text-xl sm:text-2xl font-black text-emerald-400">{activeJobsCount}</div>
+            <div className="glass-panel border border-emerald-500/10 hover:border-emerald-500/30 p-3 sm:p-4 rounded-xl sm:rounded-2xl text-center bg-white/5 transition-all hover:-translate-y-1 shadow-[0_4px_30px_rgba(16,185,129,0.05)]">
+              <div className="text-xl sm:text-2xl mb-1">🔥</div>
+              <div className="text-lg sm:text-2xl font-black text-emerald-400">{activeJobsCount}</div>
               <div className="text-[10px] sm:text-xs text-gray-300 font-semibold mt-1">सक्रिय भर्ती</div>
               <div className="text-[8px] text-gray-500 mt-0.5">Active Jobs</div>
             </div>
           </Link>
+
+          {/* Square 2: Upcoming Jobs */}
+          <Link href="/blog?tag=Upcoming" className="block group">
+            <div className="glass-panel border border-cyan-500/10 hover:border-cyan-500/30 p-3 sm:p-4 rounded-xl sm:rounded-2xl text-center bg-white/5 transition-all hover:-translate-y-1 shadow-[0_4px_30px_rgba(34,211,238,0.05)]">
+              <div className="text-xl sm:text-2xl mb-1">🚀</div>
+              <div className="text-lg sm:text-2xl font-black text-cyan-400">{upcomingJobsCount}</div>
+              <div className="text-[10px] sm:text-xs text-gray-300 font-semibold mt-1">आगामी भर्ती</div>
+              <div className="text-[8px] text-gray-500 mt-0.5">Upcoming Jobs</div>
+            </div>
+          </Link>
           
-          {/* Square 2: Recent Results */}
+          {/* Square 3: Recent Results */}
           <Link href="/blog?tag=Results" className="block group">
-            <div className="glass-panel border border-amber-500/10 hover:border-amber-500/30 p-4 rounded-2xl text-center bg-white/5 transition-all hover:-translate-y-1 shadow-[0_4px_30px_rgba(245,158,11,0.05)]">
-              <div className="text-2xl mb-1">🏆</div>
-              <div className="text-xl sm:text-2xl font-black text-amber-400">{recentResultsCount}</div>
+            <div className="glass-panel border border-amber-500/10 hover:border-amber-500/30 p-3 sm:p-4 rounded-xl sm:rounded-2xl text-center bg-white/5 transition-all hover:-translate-y-1 shadow-[0_4px_30px_rgba(245,158,11,0.05)]">
+              <div className="text-xl sm:text-2xl mb-1">🏆</div>
+              <div className="text-lg sm:text-2xl font-black text-amber-400">{recentResultsCount}</div>
               <div className="text-[10px] sm:text-xs text-gray-300 font-semibold mt-1">परीक्षा परिणाम (7d)</div>
               <div className="text-[8px] text-gray-500 mt-0.5">Exam Results</div>
             </div>
           </Link>
 
-          {/* Square 3: Admit Cards */}
+          {/* Square 4: Admit Cards */}
           <Link href="/blog?tag=Admit%20Card" className="block group">
-            <div className="glass-panel border border-blue-500/10 hover:border-blue-500/30 p-4 rounded-2xl text-center bg-white/5 transition-all hover:-translate-y-1 shadow-[0_4px_30px_rgba(59,130,246,0.05)]">
-              <div className="text-2xl mb-1">🎟️</div>
-              <div className="text-xl sm:text-2xl font-black text-blue-400">{recentAdmitCardsCount}</div>
+            <div className="glass-panel border border-blue-500/10 hover:border-blue-500/30 p-3 sm:p-4 rounded-xl sm:rounded-2xl text-center bg-white/5 transition-all hover:-translate-y-1 shadow-[0_4px_30px_rgba(59,130,246,0.05)]">
+              <div className="text-xl sm:text-2xl mb-1">🎟️</div>
+              <div className="text-lg sm:text-2xl font-black text-blue-400">{recentAdmitCardsCount}</div>
               <div className="text-[10px] sm:text-xs text-gray-300 font-semibold mt-1">प्रवेश पत्र (7d)</div>
               <div className="text-[8px] text-gray-500 mt-0.5">Admit Cards</div>
             </div>
           </Link>
 
-          {/* Square 4: Govt Schemes */}
+          {/* Square 5: Govt Schemes */}
           <Link href="/blog?tag=Scheme" className="block group">
-            <div className="glass-panel border border-purple-500/10 hover:border-purple-500/30 p-4 rounded-2xl text-center bg-white/5 transition-all hover:-translate-y-1 shadow-[0_4px_30px_rgba(168,85,247,0.05)]">
-              <div className="text-2xl mb-1">📜</div>
-              <div className="text-xl sm:text-2xl font-black text-purple-400">{activeSchemesCount}</div>
+            <div className="glass-panel border border-purple-500/10 hover:border-purple-500/30 p-3 sm:p-4 rounded-xl sm:rounded-2xl text-center bg-white/5 transition-all hover:-translate-y-1 shadow-[0_4px_30px_rgba(168,85,247,0.05)]">
+              <div className="text-xl sm:text-2xl mb-1">📜</div>
+              <div className="text-lg sm:text-2xl font-black text-purple-400">{activeSchemesCount}</div>
               <div className="text-[10px] sm:text-xs text-gray-300 font-semibold mt-1">सरकारी योजनाएं</div>
               <div className="text-[8px] text-gray-500 mt-0.5">Govt Schemes</div>
             </div>
@@ -308,7 +392,7 @@ export default async function HomePage() {
                 </h3>
               </div>
               <div className="p-4 flex flex-col gap-2.5 max-h-[220px] overflow-y-auto scrollbar-thin">
-                {liveUpdates.map((post) => (
+                {liveUpdates.slice(0, 3).map((post) => (
                   <div key={post.id} className="flex items-start justify-between gap-4 border-b border-white/5 pb-2 last:border-0 last:pb-0">
                     <Link href={`/blog/${post.slug}`} className="text-xs sm:text-sm font-medium text-gray-200 hover:text-red-400 transition-colors line-clamp-1">
                       {post.title}
@@ -318,6 +402,13 @@ export default async function HomePage() {
                     </span>
                   </div>
                 ))}
+                {liveUpdates.length > 3 && (
+                  <div className="text-center pt-2 mt-1 border-t border-white/5">
+                    <Link href="/blog" className="text-xs font-bold text-red-400 hover:text-red-300 transition-colors">
+                      Read More (और पढ़ें) →
+                    </Link>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -408,34 +499,34 @@ export default async function HomePage() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6">
           {/* Box 1: Latest Jobs */}
-          <div className="glass-panel border border-emerald-500/10 hover:border-emerald-500/30 rounded-2xl overflow-hidden shadow-[0_4px_30px_rgba(0,0,0,0.2)] bg-white/5 backdrop-blur-md flex flex-col h-[480px]">
-            <div className="bg-emerald-600/20 border-b border-emerald-500/20 px-5 py-4 flex items-center justify-between">
-              <h3 className="text-base font-bold text-emerald-400 flex items-center gap-2">
-                🔥 नवीनतम नौकरियां (Latest Jobs)
+          <div className="glass-panel border border-emerald-500/10 hover:border-emerald-500/30 rounded-xl sm:rounded-2xl overflow-hidden shadow-[0_4px_30px_rgba(0,0,0,0.2)] bg-white/5 backdrop-blur-md flex flex-col h-[380px] sm:h-[480px]">
+            <div className="bg-emerald-600/20 border-b border-emerald-500/20 px-3 py-2.5 sm:px-5 sm:py-4 flex items-center justify-between">
+              <h3 className="text-[10px] sm:text-base font-bold text-emerald-400 flex items-center gap-1 sm:gap-2">
+                🔥 नवीनतम नौकरियां (Jobs)
               </h3>
-              <span className="relative flex h-2 w-2">
+              <span className="relative flex h-1.5 w-1.5 sm:h-2 sm:w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                <span className="relative inline-flex rounded-full h-1.5 w-1.5 sm:h-2 sm:w-2 bg-emerald-500"></span>
               </span>
             </div>
-            <div className="p-4 flex-grow overflow-y-auto flex flex-col gap-3.5 scrollbar-thin">
+            <div className="p-2.5 sm:p-4 flex-grow overflow-y-auto flex flex-col gap-2.5 sm:gap-3.5 scrollbar-thin">
               {latestJobs.length > 0 ? (
                 latestJobs.map((post) => {
                   const isNew = post.publishedAt && (new Date().getTime() - new Date(post.publishedAt).getTime()) < 3 * 24 * 60 * 60 * 1000;
                   return (
-                    <div key={post.id} className="group border-b border-white/5 pb-2.5 last:border-0">
-                      <Link href={`/blog/${post.slug}`} className="text-xs font-semibold text-gray-200 group-hover:text-emerald-400 transition-colors line-clamp-2 leading-snug">
+                    <div key={post.id} className="group border-b border-white/5 pb-2 sm:pb-2.5 last:border-0 last:pb-0">
+                      <Link href={`/blog/${post.slug}`} className="text-[10px] sm:text-xs font-semibold text-gray-200 group-hover:text-emerald-400 transition-colors line-clamp-2 leading-snug">
                         {post.title}
                         {isNew && (
-                          <span className="ml-1.5 inline-flex items-center px-1.5 py-0.5 text-[8px] font-bold text-white bg-red-500 rounded animate-pulse whitespace-nowrap">
+                          <span className="ml-1 inline-flex items-center px-1.5 py-0.5 text-[7px] sm:text-[8px] font-bold text-white bg-red-500 rounded animate-pulse whitespace-nowrap">
                             NEW
                           </span>
                         )}
                       </Link>
                       {post.expiryDate && (
-                        <p className="text-[9px] text-red-400/80 mt-1 font-medium">
+                        <p className="text-[8px] sm:text-[9px] text-red-400/80 mt-0.5 sm:mt-1 font-medium">
                           ⏰ Last Date: {new Date(post.expiryDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
                         </p>
                       )}
@@ -443,365 +534,406 @@ export default async function HomePage() {
                   );
                 })
               ) : (
-                <p className="text-gray-500 text-xs text-center py-10">No active job listings.</p>
+                <p className="text-gray-500 text-[10px] sm:text-xs text-center py-10">No active job listings.</p>
               )}
             </div>
-            <div className="bg-white/2 py-2.5 px-5 text-center border-t border-white/5">
-              <Link href="/blog?tag=Vacancy" className="text-xs font-semibold text-emerald-400 hover:text-emerald-300 transition-colors">
+            <div className="bg-white/2 py-2 sm:py-2.5 px-3 sm:px-5 text-center border-t border-white/5">
+              <Link href="/blog?tag=Vacancy" className="text-[10px] sm:text-xs font-semibold text-emerald-400 hover:text-emerald-300 transition-colors">
                 View All Jobs →
               </Link>
             </div>
           </div>
 
-          {/* Box 2: Admit Cards */}
-          <div className="glass-panel border border-blue-500/10 hover:border-blue-500/30 rounded-2xl overflow-hidden shadow-[0_4px_30px_rgba(0,0,0,0.2)] bg-white/5 backdrop-blur-md flex flex-col h-[480px]">
-            <div className="bg-blue-600/20 border-b border-blue-500/20 px-5 py-4 flex items-center justify-between">
-              <h3 className="text-base font-bold text-blue-400 flex items-center gap-2">
-                🎟️ एडमिट कार्ड (Admit Cards)
+          {/* Box 2: Upcoming Jobs */}
+          <div className="glass-panel border border-sky-500/10 hover:border-sky-500/30 rounded-xl sm:rounded-2xl overflow-hidden shadow-[0_4px_30px_rgba(0,0,0,0.2)] bg-white/5 backdrop-blur-md flex flex-col h-[380px] sm:h-[480px]">
+            <div className="bg-sky-600/20 border-b border-sky-500/20 px-3 py-2.5 sm:px-5 sm:py-4 flex items-center justify-between">
+              <h3 className="text-[10px] sm:text-base font-bold text-sky-400 flex items-center gap-1 sm:gap-2">
+                🚀 आगामी भर्ती (Upcoming)
               </h3>
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+              <span className="relative flex h-1.5 w-1.5 sm:h-2 sm:w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-1.5 w-1.5 sm:h-2 sm:w-2 bg-sky-500"></span>
               </span>
             </div>
-            <div className="p-4 flex-grow overflow-y-auto flex flex-col gap-3.5 scrollbar-thin">
-              {admitCards.length > 0 ? (
-                admitCards.map((post) => {
+            <div className="p-2.5 sm:p-4 flex-grow overflow-y-auto flex flex-col gap-2.5 sm:gap-3.5 scrollbar-thin">
+              {upcomingJobs.length > 0 ? (
+                upcomingJobs.map((post) => {
                   const isNew = post.publishedAt && (new Date().getTime() - new Date(post.publishedAt).getTime()) < 3 * 24 * 60 * 60 * 1000;
                   return (
-                    <div key={post.id} className="group border-b border-white/5 pb-2.5 last:border-0">
-                      <Link href={`/blog/${post.slug}`} className="text-xs font-semibold text-gray-200 group-hover:text-blue-400 transition-colors line-clamp-2 leading-snug">
+                    <div key={post.id} className="group border-b border-white/5 pb-2 sm:pb-2.5 last:border-0 last:pb-0">
+                      <Link href={`/blog/${post.slug}`} className="text-[10px] sm:text-xs font-semibold text-gray-200 group-hover:text-sky-400 transition-colors line-clamp-2 leading-snug">
                         {post.title}
                         {isNew && (
-                          <span className="ml-1.5 inline-flex items-center px-1.5 py-0.5 text-[8px] font-bold text-white bg-red-500 rounded animate-pulse whitespace-nowrap">
+                          <span className="ml-1 inline-flex items-center px-1.5 py-0.5 text-[7px] sm:text-[8px] font-bold text-white bg-red-500 rounded animate-pulse whitespace-nowrap">
                             NEW
                           </span>
                         )}
                       </Link>
-                      <p className="text-[9px] text-gray-400 mt-1">
+                      <p className="text-[8px] sm:text-[9px] text-gray-400 mt-0.5 sm:mt-1">
                         📅 Published: {new Date(post.publishedAt || post.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
                       </p>
                     </div>
                   );
                 })
               ) : (
-                <p className="text-gray-500 text-xs text-center py-10">No recent admit cards.</p>
+                <p className="text-gray-500 text-[10px] sm:text-xs text-center py-10">No upcoming job listings.</p>
               )}
             </div>
-            <div className="bg-white/2 py-2.5 px-5 text-center border-t border-white/5">
-              <Link href="/blog?tag=Admit%20Card" className="text-xs font-semibold text-blue-400 hover:text-blue-300 transition-colors">
-                View All Admit Cards →
+            <div className="bg-white/2 py-2 sm:py-2.5 px-3 sm:px-5 text-center border-t border-white/5">
+              <Link href="/blog?tag=Upcoming" className="text-[10px] sm:text-xs font-semibold text-sky-400 hover:text-sky-300 transition-colors">
+                View All Upcoming →
               </Link>
             </div>
           </div>
 
-          {/* Box 3: Results & Syllabus */}
-          <div className="glass-panel border border-purple-500/10 hover:border-purple-500/30 rounded-2xl overflow-hidden shadow-[0_4px_30px_rgba(0,0,0,0.2)] bg-white/5 backdrop-blur-md flex flex-col h-[480px]">
-            <div className="bg-purple-600/20 border-b border-purple-500/20 px-5 py-4 flex items-center justify-between">
-              <h3 className="text-base font-bold text-purple-400 flex items-center gap-2">
-                🏆 परिणाम और सिलेबस (Results & Syllabus)
+          {/* Box 3: Admit Cards */}
+          <div className="glass-panel border border-blue-500/10 hover:border-blue-500/30 rounded-xl sm:rounded-2xl overflow-hidden shadow-[0_4px_30px_rgba(0,0,0,0.2)] bg-white/5 backdrop-blur-md flex flex-col h-[380px] sm:h-[480px]">
+            <div className="bg-blue-600/20 border-b border-blue-500/20 px-3 py-2.5 sm:px-5 sm:py-4 flex items-center justify-between">
+              <h3 className="text-[10px] sm:text-base font-bold text-blue-400 flex items-center gap-1 sm:gap-2">
+                🎟️ एडमिट कार्ड (Admit Cards)
               </h3>
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-purple-500"></span>
+              <span className="relative flex h-1.5 w-1.5 sm:h-2 sm:w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-1.5 w-1.5 sm:h-2 sm:w-2 bg-blue-500"></span>
               </span>
             </div>
-            <div className="p-4 flex-grow overflow-y-auto flex flex-col gap-3.5 scrollbar-thin">
-              {examResults.length > 0 ? (
-                examResults.map((post) => {
+            <div className="p-2.5 sm:p-4 flex-grow overflow-y-auto flex flex-col gap-2.5 sm:gap-3.5 scrollbar-thin">
+              {admitCards.length > 0 ? (
+                admitCards.map((post) => {
                   const isNew = post.publishedAt && (new Date().getTime() - new Date(post.publishedAt).getTime()) < 3 * 24 * 60 * 60 * 1000;
                   return (
-                    <div key={post.id} className="group border-b border-white/5 pb-2.5 last:border-0">
-                      <Link href={`/blog/${post.slug}`} className="text-xs font-semibold text-gray-200 group-hover:text-purple-400 transition-colors line-clamp-2 leading-snug">
+                    <div key={post.id} className="group border-b border-white/5 pb-2 sm:pb-2.5 last:border-0 last:pb-0">
+                      <Link href={`/blog/${post.slug}`} className="text-[10px] sm:text-xs font-semibold text-gray-200 group-hover:text-blue-400 transition-colors line-clamp-2 leading-snug">
                         {post.title}
                         {isNew && (
-                          <span className="ml-1.5 inline-flex items-center px-1.5 py-0.5 text-[8px] font-bold text-white bg-red-500 rounded animate-pulse whitespace-nowrap">
+                          <span className="ml-1 inline-flex items-center px-1.5 py-0.5 text-[7px] sm:text-[8px] font-bold text-white bg-red-500 rounded animate-pulse whitespace-nowrap">
                             NEW
                           </span>
                         )}
                       </Link>
-                      <p className="text-[9px] text-gray-400 mt-1">
+                      <p className="text-[8px] sm:text-[9px] text-gray-400 mt-0.5 sm:mt-1">
                         📅 Published: {new Date(post.publishedAt || post.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
                       </p>
                     </div>
                   );
                 })
               ) : (
-                <p className="text-gray-500 text-xs text-center py-10">No recent exam results.</p>
+                <p className="text-gray-500 text-[10px] sm:text-xs text-center py-10">No recent admit cards.</p>
               )}
             </div>
-            <div className="bg-white/2 py-2.5 px-5 text-center border-t border-white/5">
-              <Link href="/blog?tag=Results" className="text-xs font-semibold text-purple-400 hover:text-purple-300 transition-colors">
+            <div className="bg-white/2 py-2 sm:py-2.5 px-3 sm:px-5 text-center border-t border-white/5">
+              <Link href="/blog?tag=Admit%20Card" className="text-[10px] sm:text-xs font-semibold text-blue-400 hover:text-blue-300 transition-colors">
+                View Admit Cards →
+              </Link>
+            </div>
+          </div>
+
+          {/* Box 4: Results & Syllabus */}
+          <div className="glass-panel border border-purple-500/10 hover:border-purple-500/30 rounded-xl sm:rounded-2xl overflow-hidden shadow-[0_4px_30px_rgba(0,0,0,0.2)] bg-white/5 backdrop-blur-md flex flex-col h-[380px] sm:h-[480px]">
+            <div className="bg-purple-600/20 border-b border-purple-500/20 px-3 py-2.5 sm:px-5 sm:py-4 flex items-center justify-between">
+              <h3 className="text-[10px] sm:text-base font-bold text-purple-400 flex items-center gap-1 sm:gap-2">
+                🏆 परिणाम & सिलेबस (Results)
+              </h3>
+              <span className="relative flex h-1.5 w-1.5 sm:h-2 sm:w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-1.5 w-1.5 sm:h-2 sm:w-2 bg-blue-500"></span>
+              </span>
+            </div>
+            <div className="p-2.5 sm:p-4 flex-grow overflow-y-auto flex flex-col gap-2.5 sm:gap-3.5 scrollbar-thin">
+              {examResults.length > 0 ? (
+                examResults.map((post) => {
+                  const isNew = post.publishedAt && (new Date().getTime() - new Date(post.publishedAt).getTime()) < 3 * 24 * 60 * 60 * 1000;
+                  return (
+                    <div key={post.id} className="group border-b border-white/5 pb-2 sm:pb-2.5 last:border-0 last:pb-0">
+                      <Link href={`/blog/${post.slug}`} className="text-[10px] sm:text-xs font-semibold text-gray-200 group-hover:text-purple-400 transition-colors line-clamp-2 leading-snug">
+                        {post.title}
+                        {isNew && (
+                          <span className="ml-1 inline-flex items-center px-1.5 py-0.5 text-[7px] sm:text-[8px] font-bold text-white bg-red-500 rounded animate-pulse whitespace-nowrap">
+                            NEW
+                          </span>
+                        )}
+                      </Link>
+                      <p className="text-[8px] sm:text-[9px] text-gray-400 mt-0.5 sm:mt-1">
+                        📅 Published: {new Date(post.publishedAt || post.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
+                      </p>
+                    </div>
+                  );
+                })
+              ) : (
+                <p className="text-gray-500 text-[10px] sm:text-xs text-center py-10">No recent exam results.</p>
+              )}
+            </div>
+            <div className="bg-white/2 py-2 sm:py-2.5 px-3 sm:px-5 text-center border-t border-white/5">
+              <Link href="/blog?tag=Results" className="text-[10px] sm:text-xs font-semibold text-purple-400 hover:text-purple-300 transition-colors">
                 View All Results →
               </Link>
             </div>
           </div>
 
-          {/* Box 4: University Updates */}
-          <div className="glass-panel border border-cyan-500/10 hover:border-cyan-500/30 rounded-2xl overflow-hidden shadow-[0_4px_30px_rgba(0,0,0,0.2)] bg-white/5 backdrop-blur-md flex flex-col h-[480px]">
-            <div className="bg-cyan-600/20 border-b border-cyan-500/20 px-5 py-4 flex items-center justify-between">
-              <h3 className="text-base font-bold text-cyan-400 flex items-center gap-2">
-                🎓 विश्वविद्यालय अपडेट्स (University Info)
+          {/* Box 5: University Updates */}
+          <div className="glass-panel border border-cyan-500/10 hover:border-cyan-500/30 rounded-xl sm:rounded-2xl overflow-hidden shadow-[0_4px_30px_rgba(0,0,0,0.2)] bg-white/5 backdrop-blur-md flex flex-col h-[380px] sm:h-[480px]">
+            <div className="bg-cyan-600/20 border-b border-cyan-500/20 px-3 py-2.5 sm:px-5 sm:py-4 flex items-center justify-between">
+              <h3 className="text-[10px] sm:text-base font-bold text-cyan-400 flex items-center gap-1 sm:gap-2">
+                🎓 विश्वविद्यालय (University)
               </h3>
-              <span className="relative flex h-2 w-2">
+              <span className="relative flex h-1.5 w-1.5 sm:h-2 sm:w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-500"></span>
+                <span className="relative inline-flex rounded-full h-1.5 w-1.5 sm:h-2 sm:w-2 bg-emerald-500"></span>
               </span>
             </div>
-            <div className="p-4 flex-grow overflow-y-auto flex flex-col gap-3.5 scrollbar-thin">
+            <div className="p-2.5 sm:p-4 flex-grow overflow-y-auto flex flex-col gap-2.5 sm:gap-3.5 scrollbar-thin">
               {universityUpdates.length > 0 ? (
                 universityUpdates.map((post) => {
                   const isNew = post.publishedAt && (new Date().getTime() - new Date(post.publishedAt).getTime()) < 3 * 24 * 60 * 60 * 1000;
                   return (
-                    <div key={post.id} className="group border-b border-white/5 pb-2.5 last:border-0">
-                      <Link href={`/blog/${post.slug}`} className="text-xs font-semibold text-gray-200 group-hover:text-cyan-400 transition-colors line-clamp-2 leading-snug">
+                    <div key={post.id} className="group border-b border-white/5 pb-2 sm:pb-2.5 last:border-0 last:pb-0">
+                      <Link href={`/blog/${post.slug}`} className="text-[10px] sm:text-xs font-semibold text-gray-200 group-hover:text-cyan-400 transition-colors line-clamp-2 leading-snug">
                         {post.title}
                         {isNew && (
-                          <span className="ml-1.5 inline-flex items-center px-1.5 py-0.5 text-[8px] font-bold text-white bg-red-500 rounded animate-pulse whitespace-nowrap">
+                          <span className="ml-1 inline-flex items-center px-1.5 py-0.5 text-[7px] sm:text-[8px] font-bold text-white bg-red-500 rounded animate-pulse whitespace-nowrap">
                             NEW
                           </span>
                         )}
                       </Link>
-                      <p className="text-[9px] text-gray-400 mt-1">
+                      <p className="text-[8px] sm:text-[9px] text-gray-400 mt-0.5 sm:mt-1">
                         📅 Published: {new Date(post.publishedAt || post.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
                       </p>
                     </div>
                   );
                 })
               ) : (
-                <p className="text-gray-500 text-xs text-center py-10">No recent university updates.</p>
+                <p className="text-gray-500 text-[10px] sm:text-xs text-center py-10">No recent university updates.</p>
               )}
             </div>
-            <div className="bg-white/2 py-2.5 px-5 text-center border-t border-white/5">
-              <Link href="/blog?tag=University" className="text-xs font-semibold text-cyan-400 hover:text-cyan-300 transition-colors">
-                View University Info →
+            <div className="bg-white/2 py-2 sm:py-2.5 px-3 sm:px-5 text-center border-t border-white/5">
+              <Link href="/blog?tag=University" className="text-[10px] sm:text-xs font-semibold text-cyan-400 hover:text-cyan-300 transition-colors">
+                View University →
               </Link>
             </div>
           </div>
 
-          {/* Box 5: Government Schemes */}
-          <div className="glass-panel border border-orange-500/10 hover:border-orange-500/30 rounded-2xl overflow-hidden shadow-[0_4px_30px_rgba(0,0,0,0.2)] bg-white/5 backdrop-blur-md flex flex-col h-[480px]">
-            <div className="bg-orange-600/20 border-b border-orange-500/20 px-5 py-4 flex items-center justify-between">
-              <h3 className="text-base font-bold text-orange-400 flex items-center gap-2">
-                🎁 सरकारी योजनाएं (Govt Schemes)
+          {/* Box 6: Government Schemes */}
+          <div className="glass-panel border border-orange-500/10 hover:border-orange-500/30 rounded-xl sm:rounded-2xl overflow-hidden shadow-[0_4px_30px_rgba(0,0,0,0.2)] bg-white/5 backdrop-blur-md flex flex-col h-[380px] sm:h-[480px]">
+            <div className="bg-orange-600/20 border-b border-orange-500/20 px-3 py-2.5 sm:px-5 sm:py-4 flex items-center justify-between">
+              <h3 className="text-[10px] sm:text-base font-bold text-orange-400 flex items-center gap-1 sm:gap-2">
+                🎁 सरकारी योजनाएं (Schemes)
               </h3>
-              <span className="relative flex h-2 w-2">
+              <span className="relative flex h-1.5 w-1.5 sm:h-2 sm:w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-orange-500"></span>
+                <span className="relative inline-flex rounded-full h-1.5 w-1.5 sm:h-2 sm:w-2 bg-emerald-500"></span>
               </span>
             </div>
-            <div className="p-4 flex-grow overflow-y-auto flex flex-col gap-3.5 scrollbar-thin">
+            <div className="p-2.5 sm:p-4 flex-grow overflow-y-auto flex flex-col gap-2.5 sm:gap-3.5 scrollbar-thin">
               {govtSchemes.length > 0 ? (
                 govtSchemes.map((post) => {
                   const isNew = post.publishedAt && (new Date().getTime() - new Date(post.publishedAt).getTime()) < 3 * 24 * 60 * 60 * 1000;
                   return (
-                    <div key={post.id} className="group border-b border-white/5 pb-2.5 last:border-0">
-                      <Link href={`/blog/${post.slug}`} className="text-xs font-semibold text-gray-200 group-hover:text-orange-400 transition-colors line-clamp-2 leading-snug">
+                    <div key={post.id} className="group border-b border-white/5 pb-2 sm:pb-2.5 last:border-0 last:pb-0">
+                      <Link href={`/blog/${post.slug}`} className="text-[10px] sm:text-xs font-semibold text-gray-200 group-hover:text-orange-400 transition-colors line-clamp-2 leading-snug">
                         {post.title}
                         {isNew && (
-                          <span className="ml-1.5 inline-flex items-center px-1.5 py-0.5 text-[8px] font-bold text-white bg-red-500 rounded animate-pulse whitespace-nowrap">
+                          <span className="ml-1 inline-flex items-center px-1.5 py-0.5 text-[7px] sm:text-[8px] font-bold text-white bg-red-500 rounded animate-pulse whitespace-nowrap">
                             NEW
                           </span>
                         )}
                       </Link>
-                      <p className="text-[9px] text-gray-400 mt-1">
+                      <p className="text-[8px] sm:text-[9px] text-gray-400 mt-0.5 sm:mt-1">
                         📅 Published: {new Date(post.publishedAt || post.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
                       </p>
                     </div>
                   );
                 })
               ) : (
-                <p className="text-gray-500 text-xs text-center py-10">No active government schemes.</p>
+                <p className="text-gray-500 text-[10px] sm:text-xs text-center py-10">No active government schemes.</p>
               )}
             </div>
-            <div className="bg-white/2 py-2.5 px-5 text-center border-t border-white/5">
-              <Link href="/blog?tag=Scheme" className="text-xs font-semibold text-orange-400 hover:text-orange-300 transition-colors">
+            <div className="bg-white/2 py-2 sm:py-2.5 px-3 sm:px-5 text-center border-t border-white/5">
+              <Link href="/blog?tag=Scheme" className="text-[10px] sm:text-xs font-semibold text-orange-400 hover:text-orange-300 transition-colors">
                 View All Schemes →
               </Link>
             </div>
           </div>
 
-          {/* Box 6: Scholarships */}
-          <div className="glass-panel border border-yellow-500/10 hover:border-yellow-500/30 rounded-2xl overflow-hidden shadow-[0_4px_30px_rgba(0,0,0,0.2)] bg-white/5 backdrop-blur-md flex flex-col h-[480px]">
-            <div className="bg-yellow-600/20 border-b border-yellow-500/20 px-5 py-4 flex items-center justify-between">
-              <h3 className="text-base font-bold text-yellow-400 flex items-center gap-2">
-                🎓 छात्रवृत्ति अलर्ट (Scholarship Alerts)
+          {/* Box 7: Scholarships */}
+          <div className="glass-panel border border-yellow-500/10 hover:border-yellow-500/30 rounded-xl sm:rounded-2xl overflow-hidden shadow-[0_4px_30px_rgba(0,0,0,0.2)] bg-white/5 backdrop-blur-md flex flex-col h-[380px] sm:h-[480px]">
+            <div className="bg-yellow-600/20 border-b border-yellow-500/20 px-3 py-2.5 sm:px-5 sm:py-4 flex items-center justify-between">
+              <h3 className="text-[10px] sm:text-base font-bold text-yellow-400 flex items-center gap-1 sm:gap-2">
+                🎓 छात्रवृत्ति अलर्ट (Scholarship)
               </h3>
-              <span className="relative flex h-2 w-2">
+              <span className="relative flex h-1.5 w-1.5 sm:h-2 sm:w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-yellow-500"></span>
+                <span className="relative inline-flex rounded-full h-1.5 w-1.5 sm:h-2 sm:w-2 bg-emerald-500"></span>
               </span>
             </div>
-            <div className="p-4 flex-grow overflow-y-auto flex flex-col gap-3.5 scrollbar-thin">
+            <div className="p-2.5 sm:p-4 flex-grow overflow-y-auto flex flex-col gap-2.5 sm:gap-3.5 scrollbar-thin">
               {scholarships.length > 0 ? (
                 scholarships.map((post) => {
                   const isNew = post.publishedAt && (new Date().getTime() - new Date(post.publishedAt).getTime()) < 3 * 24 * 60 * 60 * 1000;
                   return (
-                    <div key={post.id} className="group border-b border-white/5 pb-2.5 last:border-0">
-                      <Link href={`/blog/${post.slug}`} className="text-xs font-semibold text-gray-200 group-hover:text-yellow-400 transition-colors line-clamp-2 leading-snug">
+                    <div key={post.id} className="group border-b border-white/5 pb-2 sm:pb-2.5 last:border-0 last:pb-0">
+                      <Link href={`/blog/${post.slug}`} className="text-[10px] sm:text-xs font-semibold text-gray-200 group-hover:text-yellow-400 transition-colors line-clamp-2 leading-snug">
                         {post.title}
                         {isNew && (
-                          <span className="ml-1.5 inline-flex items-center px-1.5 py-0.5 text-[8px] font-bold text-white bg-red-500 rounded animate-pulse whitespace-nowrap">
+                          <span className="ml-1 inline-flex items-center px-1.5 py-0.5 text-[7px] sm:text-[8px] font-bold text-white bg-red-500 rounded animate-pulse whitespace-nowrap">
                             NEW
                           </span>
                         )}
                       </Link>
-                      <p className="text-[9px] text-gray-400 mt-1">
+                      <p className="text-[8px] sm:text-[9px] text-gray-400 mt-0.5 sm:mt-1">
                         📅 Published: {new Date(post.publishedAt || post.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
                       </p>
                     </div>
                   );
                 })
               ) : (
-                <p className="text-gray-500 text-xs text-center py-10">No active scholarships.</p>
+                <p className="text-gray-500 text-[10px] sm:text-xs text-center py-10">No active scholarships.</p>
               )}
             </div>
-            <div className="bg-white/2 py-2.5 px-5 text-center border-t border-white/5">
-              <Link href="/blog?tag=Scholarship" className="text-xs font-semibold text-yellow-400 hover:text-yellow-300 transition-colors">
-                View Scholarships →
+            <div className="bg-white/2 py-2 sm:py-2.5 px-3 sm:px-5 text-center border-t border-white/5">
+              <Link href="/blog?tag=Scholarship" className="text-[10px] sm:text-xs font-semibold text-yellow-400 hover:text-yellow-300 transition-colors">
+                View Scholarship →
               </Link>
             </div>
           </div>
 
-          {/* Box 7: Tech & Mobile */}
-          <div className="glass-panel border border-red-500/10 hover:border-red-500/30 rounded-2xl overflow-hidden shadow-[0_4px_30px_rgba(0,0,0,0.2)] bg-white/5 backdrop-blur-md flex flex-col h-[480px]">
-            <div className="bg-red-600/20 border-b border-red-500/20 px-5 py-4 flex items-center justify-between">
-              <h3 className="text-base font-bold text-red-400 flex items-center gap-2">
-                📱 टेक और गैजेट्स (Tech & Mobiles)
+          {/* Box 8: Tech & Mobile */}
+          <div className="glass-panel border border-red-500/10 hover:border-red-500/30 rounded-xl sm:rounded-2xl overflow-hidden shadow-[0_4px_30px_rgba(0,0,0,0.2)] bg-white/5 backdrop-blur-md flex flex-col h-[380px] sm:h-[480px]">
+            <div className="bg-red-600/20 border-b border-red-500/20 px-3 py-2.5 sm:px-5 sm:py-4 flex items-center justify-between">
+              <h3 className="text-[10px] sm:text-base font-bold text-red-400 flex items-center gap-1 sm:gap-2">
+                📱 टेक समाचार (Tech News)
               </h3>
-              <span className="relative flex h-2 w-2">
+              <span className="relative flex h-1.5 w-1.5 sm:h-2 sm:w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                <span className="relative inline-flex rounded-full h-1.5 w-1.5 sm:h-2 sm:w-2 bg-emerald-500"></span>
               </span>
             </div>
-            <div className="p-4 flex-grow overflow-y-auto flex flex-col gap-3.5 scrollbar-thin">
+            <div className="p-2.5 sm:p-4 flex-grow overflow-y-auto flex flex-col gap-2.5 sm:gap-3.5 scrollbar-thin">
               {techMobile.length > 0 ? (
                 techMobile.map((post) => {
                   const isNew = post.publishedAt && (new Date().getTime() - new Date(post.publishedAt).getTime()) < 3 * 24 * 60 * 60 * 1000;
                   return (
-                    <div key={post.id} className="group border-b border-white/5 pb-2.5 last:border-0">
-                      <Link href={`/blog/${post.slug}`} className="text-xs font-semibold text-gray-200 group-hover:text-red-400 transition-colors line-clamp-2 leading-snug">
+                    <div key={post.id} className="group border-b border-white/5 pb-2 sm:pb-2.5 last:border-0 last:pb-0">
+                      <Link href={`/blog/${post.slug}`} className="text-[10px] sm:text-xs font-semibold text-gray-200 group-hover:text-red-400 transition-colors line-clamp-2 leading-snug">
                         {post.title}
                         {isNew && (
-                          <span className="ml-1.5 inline-flex items-center px-1.5 py-0.5 text-[8px] font-bold text-white bg-red-500 rounded animate-pulse whitespace-nowrap">
+                          <span className="ml-1 inline-flex items-center px-1.5 py-0.5 text-[7px] sm:text-[8px] font-bold text-white bg-red-500 rounded animate-pulse whitespace-nowrap">
                             NEW
                           </span>
                         )}
                       </Link>
-                      <p className="text-[9px] text-gray-400 mt-1">
+                      <p className="text-[8px] sm:text-[9px] text-gray-400 mt-0.5 sm:mt-1">
                         📅 Published: {new Date(post.publishedAt || post.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
                       </p>
                     </div>
                   );
                 })
               ) : (
-                <p className="text-gray-500 text-xs text-center py-10">No recent tech articles.</p>
+                <p className="text-gray-500 text-[10px] sm:text-xs text-center py-10">No recent tech articles.</p>
               )}
             </div>
-            <div className="bg-white/2 py-2.5 px-5 text-center border-t border-white/5">
-              <Link href="/blog?tag=Technology" className="text-xs font-semibold text-red-400 hover:text-red-300 transition-colors">
+            <div className="bg-white/2 py-2 sm:py-2.5 px-3 sm:px-5 text-center border-t border-white/5">
+              <Link href="/blog?tag=Technology" className="text-[10px] sm:text-xs font-semibold text-red-400 hover:text-red-300 transition-colors">
                 View Tech News →
               </Link>
             </div>
           </div>
 
-          {/* Box 8: Finance & Banking */}
-          <div className="glass-panel border border-sky-500/10 hover:border-sky-500/30 rounded-2xl overflow-hidden shadow-[0_4px_30px_rgba(0,0,0,0.2)] bg-white/5 backdrop-blur-md flex flex-col h-[480px]">
-            <div className="bg-sky-600/20 border-b border-sky-500/20 px-5 py-4 flex items-center justify-between">
-              <h3 className="text-base font-bold text-sky-400 flex items-center gap-2">
-                📊 फाइनेंस और बैंकिंग (Finance & Bank)
+          {/* Box 9: Finance & Banking */}
+          <div className="glass-panel border border-indigo-500/10 hover:border-indigo-500/30 rounded-xl sm:rounded-2xl overflow-hidden shadow-[0_4px_30px_rgba(0,0,0,0.2)] bg-white/5 backdrop-blur-md flex flex-col h-[380px] sm:h-[480px]">
+            <div className="bg-indigo-600/20 border-b border-indigo-500/20 px-3 py-2.5 sm:px-5 sm:py-4 flex items-center justify-between">
+              <h3 className="text-[10px] sm:text-base font-bold text-indigo-400 flex items-center gap-1 sm:gap-2">
+                📊 फाइनेंस & बैंक (Finance)
               </h3>
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-sky-500"></span>
+              <span className="relative flex h-1.5 w-1.5 sm:h-2 sm:w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-1.5 w-1.5 sm:h-2 sm:w-2 bg-emerald-500"></span>
               </span>
             </div>
-            <div className="p-4 flex-grow overflow-y-auto flex flex-col gap-3.5 scrollbar-thin">
+            <div className="p-2.5 sm:p-4 flex-grow overflow-y-auto flex flex-col gap-2.5 sm:gap-3.5 scrollbar-thin">
               {financeBanking.length > 0 ? (
                 financeBanking.map((post) => {
                   const isNew = post.publishedAt && (new Date().getTime() - new Date(post.publishedAt).getTime()) < 3 * 24 * 60 * 60 * 1000;
                   return (
-                    <div key={post.id} className="group border-b border-white/5 pb-2.5 last:border-0">
-                      <Link href={`/blog/${post.slug}`} className="text-xs font-semibold text-gray-200 group-hover:text-sky-400 transition-colors line-clamp-2 leading-snug">
+                    <div key={post.id} className="group border-b border-white/5 pb-2 sm:pb-2.5 last:border-0 last:pb-0">
+                      <Link href={`/blog/${post.slug}`} className="text-[10px] sm:text-xs font-semibold text-gray-200 group-hover:text-indigo-400 transition-colors line-clamp-2 leading-snug">
                         {post.title}
                         {isNew && (
-                          <span className="ml-1.5 inline-flex items-center px-1.5 py-0.5 text-[8px] font-bold text-white bg-red-500 rounded animate-pulse whitespace-nowrap">
+                          <span className="ml-1 inline-flex items-center px-1.5 py-0.5 text-[7px] sm:text-[8px] font-bold text-white bg-red-500 rounded animate-pulse whitespace-nowrap">
                             NEW
                           </span>
                         )}
                       </Link>
-                      <p className="text-[9px] text-gray-400 mt-1">
+                      <p className="text-[8px] sm:text-[9px] text-gray-400 mt-0.5 sm:mt-1">
                         📅 Published: {new Date(post.publishedAt || post.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
                       </p>
                     </div>
                   );
                 })
               ) : (
-                <p className="text-gray-500 text-xs text-center py-10">No recent finance articles.</p>
+                <p className="text-gray-500 text-[10px] sm:text-xs text-center py-10">No recent finance articles.</p>
               )}
             </div>
-            <div className="bg-white/2 py-2.5 px-5 text-center border-t border-white/5">
-              <Link href="/blog?tag=Finance%20%26%20Earning" className="text-xs font-semibold text-sky-400 hover:text-sky-300 transition-colors">
-                View Finance Info →
+            <div className="bg-white/2 py-2 sm:py-2.5 px-3 sm:px-5 text-center border-t border-white/5">
+              <Link href="/blog?tag=Finance%20%26%20Earning" className="text-[10px] sm:text-xs font-semibold text-indigo-400 hover:text-indigo-300 transition-colors">
+                View Finance →
               </Link>
             </div>
           </div>
 
-          {/* Box 9: Earning & Free Courses */}
-          <div className="glass-panel border border-pink-500/10 hover:border-pink-500/30 rounded-2xl overflow-hidden shadow-[0_4px_30px_rgba(0,0,0,0.2)] bg-white/5 backdrop-blur-md flex flex-col h-[480px]">
-            <div className="bg-pink-600/20 border-b border-pink-500/20 px-5 py-4 flex items-center justify-between">
-              <h3 className="text-base font-bold text-pink-400 flex items-center gap-2">
-                💸 कमाई और फ्री कोर्सेस (Earning & Courses)
+          {/* Box 10: Earning & Free Courses */}
+          <div className="glass-panel border border-pink-500/10 hover:border-pink-500/30 rounded-xl sm:rounded-2xl overflow-hidden shadow-[0_4px_30px_rgba(0,0,0,0.2)] bg-white/5 backdrop-blur-md flex flex-col h-[380px] sm:h-[480px]">
+            <div className="bg-pink-600/20 border-b border-pink-500/20 px-3 py-2.5 sm:px-5 sm:py-4 flex items-center justify-between">
+              <h3 className="text-[10px] sm:text-base font-bold text-pink-400 flex items-center gap-1 sm:gap-2">
+                💸 कमाई & कोर्सेज (Earning)
               </h3>
-              <span className="relative flex h-2 w-2">
+              <span className="relative flex h-1.5 w-1.5 sm:h-2 sm:w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-pink-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-pink-500"></span>
+                <span className="relative inline-flex rounded-full h-1.5 w-1.5 sm:h-2 sm:w-2 bg-emerald-500"></span>
               </span>
             </div>
-            <div className="p-4 flex-grow overflow-y-auto flex flex-col gap-3.5 scrollbar-thin">
+            <div className="p-2.5 sm:p-4 flex-grow overflow-y-auto flex flex-col gap-2.5 sm:gap-3.5 scrollbar-thin">
               {earningCourses.length > 0 ? (
                 earningCourses.map((post) => {
                   const isNew = post.publishedAt && (new Date().getTime() - new Date(post.publishedAt).getTime()) < 3 * 24 * 60 * 60 * 1000;
                   return (
-                    <div key={post.id} className="group border-b border-white/5 pb-2.5 last:border-0">
-                      <Link href={`/blog/${post.slug}`} className="text-xs font-semibold text-gray-200 group-hover:text-pink-400 transition-colors line-clamp-2 leading-snug">
+                    <div key={post.id} className="group border-b border-white/5 pb-2 sm:pb-2.5 last:border-0 last:pb-0">
+                      <Link href={`/blog/${post.slug}`} className="text-[10px] sm:text-xs font-semibold text-gray-200 group-hover:text-pink-400 transition-colors line-clamp-2 leading-snug">
                         {post.title}
                         {isNew && (
-                          <span className="ml-1.5 inline-flex items-center px-1.5 py-0.5 text-[8px] font-bold text-white bg-red-500 rounded animate-pulse whitespace-nowrap">
+                          <span className="ml-1 inline-flex items-center px-1.5 py-0.5 text-[7px] sm:text-[8px] font-bold text-white bg-red-500 rounded animate-pulse whitespace-nowrap">
                             NEW
                           </span>
                         )}
                       </Link>
-                      <p className="text-[9px] text-gray-400 mt-1">
+                      <p className="text-[8px] sm:text-[9px] text-gray-400 mt-0.5 sm:mt-1">
                         📅 Published: {new Date(post.publishedAt || post.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
                       </p>
                     </div>
                   );
                 })
               ) : (
-                <p className="text-gray-500 text-xs text-center py-10">No recent learning/earning articles.</p>
+                <p className="text-gray-500 text-[10px] sm:text-xs text-center py-10">No recent learning/earning articles.</p>
               )}
             </div>
-            <div className="bg-white/2 py-2.5 px-5 text-center border-t border-white/5">
-              <Link href="/blog?tag=Earning" className="text-xs font-semibold text-pink-400 hover:text-pink-300 transition-colors">
-                View Earning Info →
+            <div className="bg-white/2 py-2 sm:py-2.5 px-3 sm:px-5 text-center border-t border-white/5">
+              <Link href="/blog?tag=Earning" className="text-[10px] sm:text-xs font-semibold text-pink-400 hover:text-pink-300 transition-colors">
+                View Earning →
               </Link>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Latest & Trending Sections */}
+      {/* Latest & Guidelines/Rules Sections */}
       <div className="max-w-6xl w-full mx-auto mt-20 pb-10">
-        {(techPosts.length > 0 || eduPosts.length > 0 || financePosts.length > 0) ? (
-          <>
-            <CategorySection title="Trending in Technology" posts={techPosts} tag="Technology" />
-            <CategorySection title="Education & Career" posts={eduPosts} tag="Education & Career" />
-            <CategorySection title="Finance & Earning" posts={financePosts} tag="Finance & Earning" />
-          </>
+        {(guidelinesPosts.length > 0 || rulesRightsPosts.length > 0) ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
+            <CategorySection title="📖 महत्वपूर्ण गाइडलाइंस (Guidelines)" posts={guidelinesPosts} tag="Guidelines" />
+            <CategorySection title="⚖️ नियम और अधिकार (Rules & Rights)" posts={rulesRightsPosts} tag="Rules & Rights" />
+          </div>
         ) : (
           <div className="text-center text-gray-500 mt-20 p-10 glass-panel rounded-2xl animate-fade-in">
-            <p>More categorized articles coming soon!</p>
+            <p>More guidelines & rules articles coming soon!</p>
           </div>
         )}
       </div>

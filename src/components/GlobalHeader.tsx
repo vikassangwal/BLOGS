@@ -34,6 +34,23 @@ export default function GlobalHeader({ siteName, translateActive }: { siteName?:
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
   const [currentLang, setCurrentLang] = React.useState('default');
+  const [socialLinks, setSocialLinks] = React.useState<any[]>([]);
+
+  React.useEffect(() => {
+    fetch('/api/social-links')
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data)) {
+          // Filter only WhatsApp, Telegram, Instagram
+          const filtered = data.filter(link => {
+            const p = link.platform.toLowerCase();
+            return p.includes('whatsapp') || p.includes('telegram') || p.includes('instagram');
+          });
+          setSocialLinks(filtered);
+        }
+      })
+      .catch(console.error);
+  }, []);
 
   React.useEffect(() => {
     try {
@@ -198,30 +215,157 @@ export default function GlobalHeader({ siteName, translateActive }: { siteName?:
             backdropFilter: 'blur(20px)'
           }}
         >
-          <nav className="flex flex-col p-4 gap-3 font-semibold text-sm">
-            {navLinks.map((link) => {
-              const active = isActive(link.path, link.tag);
-              return (
+          <nav className="flex flex-col p-4 gap-4 font-semibold text-sm max-h-[75vh] overflow-y-auto">
+            {/* Standard Nav Links */}
+            <div className="flex flex-col gap-2">
+              <a 
+                href="/" 
+                onClick={() => setIsMobileMenuOpen(false)} 
+                className="flex items-center gap-2 p-2 hover:bg-white/5 rounded-lg transition-colors text-white"
+              >
+                🏠 Home (मुख्य पृष्ठ)
+              </a>
+              <a 
+                href="/about" 
+                onClick={() => setIsMobileMenuOpen(false)} 
+                className="flex items-center gap-2 p-2 hover:bg-white/5 rounded-lg transition-colors text-white"
+              >
+                ℹ️ About Us (हमारे बारे में)
+              </a>
+            </div>
+
+            <hr className="border-white/10" />
+
+            {/* Grid Jump Links */}
+            <div>
+              <div className="text-[10px] uppercase tracking-wider text-gray-400 font-bold mb-2.5 px-1">
+                📂 Quick Jump to Grid (श्रेणियों के सीधे लिंक)
+              </div>
+              <div className="grid grid-cols-2 gap-2 text-xs">
                 <a 
-                  key={link.name} 
-                  href={link.href} 
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  style={{
-                    color: active ? 'var(--color-accent)' : 'var(--color-text-primary)',
-                    padding: '0.8rem 1rem',
-                    borderRadius: '8px',
-                    background: active ? 'rgba(59, 130, 246, 0.08)' : 'transparent',
-                    display: 'block',
-                    width: '100%',
-                    textDecoration: 'none',
-                    transition: 'all 0.2s'
-                  }}
+                  href="/blog?tag=Vacancy" 
+                  onClick={() => setIsMobileMenuOpen(false)} 
+                  className="flex flex-col p-2.5 bg-white/5 border border-emerald-500/10 hover:border-emerald-500/30 rounded-xl transition-all hover:bg-white/10"
                 >
-                  {link.name}
+                  <span className="text-[11px] text-emerald-400 font-bold">🔥 नवीनतम नौकरियां</span>
+                  <span className="text-[8px] text-gray-400 mt-0.5">Latest Jobs</span>
                 </a>
-              );
-            })}
+                <a 
+                  href="/blog?tag=Upcoming" 
+                  onClick={() => setIsMobileMenuOpen(false)} 
+                  className="flex flex-col p-2.5 bg-white/5 border border-sky-500/10 hover:border-sky-500/30 rounded-xl transition-all hover:bg-white/10"
+                >
+                  <span className="text-[11px] text-sky-400 font-bold">🚀 आगामी भर्ती</span>
+                  <span className="text-[8px] text-gray-400 mt-0.5">Upcoming Jobs</span>
+                </a>
+                <a 
+                  href="/blog?tag=Admit%20Card" 
+                  onClick={() => setIsMobileMenuOpen(false)} 
+                  className="flex flex-col p-2.5 bg-white/5 border border-blue-500/10 hover:border-blue-500/30 rounded-xl transition-all hover:bg-white/10"
+                >
+                  <span className="text-[11px] text-blue-400 font-bold">🎟️ प्रवेश पत्र</span>
+                  <span className="text-[8px] text-gray-400 mt-0.5">Admit Cards</span>
+                </a>
+                <a 
+                  href="/blog?tag=Results" 
+                  onClick={() => setIsMobileMenuOpen(false)} 
+                  className="flex flex-col p-2.5 bg-white/5 border border-purple-500/10 hover:border-purple-500/30 rounded-xl transition-all hover:bg-white/10"
+                >
+                  <span className="text-[11px] text-purple-400 font-bold">🏆 परिणाम & सिलेबस</span>
+                  <span className="text-[8px] text-gray-400 mt-0.5">Results & Syllabus</span>
+                </a>
+                <a 
+                  href="/blog?tag=University" 
+                  onClick={() => setIsMobileMenuOpen(false)} 
+                  className="flex flex-col p-2.5 bg-white/5 border border-cyan-500/10 hover:border-cyan-500/30 rounded-xl transition-all hover:bg-white/10"
+                >
+                  <span className="text-[11px] text-cyan-400 font-bold">🎓 विश्वविद्यालय</span>
+                  <span className="text-[8px] text-gray-400 mt-0.5">University Info</span>
+                </a>
+                <a 
+                  href="/blog?tag=Scheme" 
+                  onClick={() => setIsMobileMenuOpen(false)} 
+                  className="flex flex-col p-2.5 bg-white/5 border border-orange-500/10 hover:border-orange-500/30 rounded-xl transition-all hover:bg-white/10"
+                >
+                  <span className="text-[11px] text-orange-400 font-bold">🎁 सरकारी योजनाएं</span>
+                  <span className="text-[8px] text-gray-400 mt-0.5">Govt Schemes</span>
+                </a>
+                <a 
+                  href="/blog?tag=Scholarship" 
+                  onClick={() => setIsMobileMenuOpen(false)} 
+                  className="flex flex-col p-2.5 bg-white/5 border border-yellow-500/10 hover:border-yellow-500/30 rounded-xl transition-all hover:bg-white/10"
+                >
+                  <span className="text-[11px] text-yellow-400 font-bold">🎓 छात्रवृत्ति अलर्ट</span>
+                  <span className="text-[8px] text-gray-400 mt-0.5">Scholarships</span>
+                </a>
+                <a 
+                  href="/blog?tag=Technology" 
+                  onClick={() => setIsMobileMenuOpen(false)} 
+                  className="flex flex-col p-2.5 bg-white/5 border border-red-500/10 hover:border-red-500/30 rounded-xl transition-all hover:bg-white/10"
+                >
+                  <span className="text-[11px] text-red-400 font-bold">📱 टेक और गैजेट्स</span>
+                  <span className="text-[8px] text-gray-400 mt-0.5">Tech & Mobiles</span>
+                </a>
+                <a 
+                  href="/blog?tag=Finance%20%26%20Earning" 
+                  onClick={() => setIsMobileMenuOpen(false)} 
+                  className="flex flex-col p-2.5 bg-white/5 border border-indigo-500/10 hover:border-indigo-500/30 rounded-xl transition-all hover:bg-white/10"
+                >
+                  <span className="text-[11px] text-indigo-400 font-bold">📊 फाइनेंस & बैंक</span>
+                  <span className="text-[8px] text-gray-400 mt-0.5">Finance & Banking</span>
+                </a>
+                <a 
+                  href="/blog?tag=Earning" 
+                  onClick={() => setIsMobileMenuOpen(false)} 
+                  className="flex flex-col p-2.5 bg-white/5 border border-pink-500/10 hover:border-pink-500/30 rounded-xl transition-all hover:bg-white/10"
+                >
+                  <span className="text-[11px] text-pink-400 font-bold">💸 कमाई & कोर्सेज</span>
+                  <span className="text-[8px] text-gray-400 mt-0.5">Earning & Courses</span>
+                </a>
+              </div>
+            </div>
           </nav>
+        </div>
+      )}
+      {/* Join Social Media groups bar (1 line always, scrollable on very small screens) */}
+      {socialLinks.length > 0 && (
+        <div className="w-full bg-gradient-to-r from-blue-600/10 via-purple-600/10 to-pink-600/10 border-t border-white/10 py-2 px-4 overflow-hidden select-none">
+          <div className="container mx-auto flex flex-row items-center justify-center gap-3 overflow-x-auto whitespace-nowrap scrollbar-none text-[10px] sm:text-xs">
+            <span className="font-bold text-gray-300 flex items-center gap-1 shrink-0">
+              📢 हमसे जुड़ें (Join Groups):
+            </span>
+            <div className="flex flex-row items-center gap-2">
+              {socialLinks.map((link: any) => {
+                const platform = link.platform.toLowerCase();
+                let icon = '🔗';
+                let styleClass = 'bg-white/5 text-white border-white/10 hover:bg-white/10';
+                
+                if (platform.includes('whatsapp')) {
+                  icon = '💬';
+                  styleClass = 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/20';
+                } else if (platform.includes('telegram')) {
+                  icon = '✈️';
+                  styleClass = 'bg-sky-500/10 text-sky-400 border-sky-500/20 hover:bg-sky-500/20';
+                } else if (platform.includes('instagram')) {
+                  icon = '📸';
+                  styleClass = 'bg-pink-500/10 text-pink-400 border-pink-500/20 hover:bg-pink-500/20';
+                }
+
+                return (
+                  <a
+                    key={link.id}
+                    href={link.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 sm:px-3 sm:py-1 font-bold rounded-full border transition-all hover:scale-105 shrink-0 ${styleClass}`}
+                  >
+                    <span>{icon}</span>
+                    <span>{link.label || link.platform}</span>
+                  </a>
+                );
+              })}
+            </div>
+          </div>
         </div>
       )}
     </header>

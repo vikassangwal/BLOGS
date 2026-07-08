@@ -148,6 +148,23 @@ export default async function BlogPostPage({ params }: Props) {
     description: post.seoDescription || post.excerpt
   };
 
+  // Generate FAQ Schema from H2 headings
+  const faqItems: { question: string; answer: string }[] = [];
+  const h2Regex = /<h2[^>]*>(.*?)<\/h2>/gi;
+  const contentStr = post.content || '';
+  let h2Match;
+  while ((h2Match = h2Regex.exec(contentStr)) !== null) {
+    const question = h2Match[1].replace(/<[^>]+>/g, '').trim();
+    // Get text between this H2 and the next H2 (or end), limit to 200 chars
+    const startIdx = h2Match.index + h2Match[0].length;
+    const nextH2 = contentStr.indexOf('<h2', startIdx);
+    const answerHtml = contentStr.substring(startIdx, nextH2 === -1 ? startIdx + 500 : nextH2);
+    const answer = answerHtml.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().substring(0, 200);
+    if (question && answer && answer.length > 20) {
+      faqItems.push({ question, answer });
+    }
+  }
+
   return (
     <>
       {/* Inject JSON-LD into the head of the document */}
@@ -155,6 +172,33 @@ export default async function BlogPostPage({ params }: Props) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
+
+      {/* Breadcrumb Schema */}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'BreadcrumbList',
+        'itemListElement': [
+          { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://knowora.in' },
+          { '@type': 'ListItem', position: 2, name: 'Blog', item: 'https://knowora.in/blog' },
+          { '@type': 'ListItem', position: 3, name: post.title, item: `https://knowora.in/blog/${slug}` }
+        ]
+      }) }} />
+
+      {/* FAQ Schema */}
+      {faqItems.length > 0 && (
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+          '@context': 'https://schema.org',
+          '@type': 'FAQPage',
+          'mainEntity': faqItems.slice(0, 10).map(faq => ({
+            '@type': 'Question',
+            'name': faq.question,
+            'acceptedAnswer': {
+              '@type': 'Answer',
+              'text': faq.answer
+            }
+          }))
+        }) }} />
+      )}
       
       {/* Pass data to the Client Component for interactivity */}
       <BlogPostClient 

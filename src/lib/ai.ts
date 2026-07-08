@@ -484,6 +484,12 @@ export async function generateAIContent(
         await sendTelegramAlert(`🚨 CRITICAL: Primary AI API (${providerName}) failed!\nError: ${err.message}\n\nAuto-Switching to Fallback: ${nextProvider} 🔄`);
       }
       
+      // Wait 5 seconds before trying the next fallback key (cools down IP rate limits)
+      if (i < configs.length - 1) {
+        console.log(`⏳ Waiting 5 seconds before trying fallback ${configs[i+1].provider}...`);
+        await new Promise(resolve => setTimeout(resolve, 5000));
+      }
+      
       // Continue to next fallback config
       continue;
     }

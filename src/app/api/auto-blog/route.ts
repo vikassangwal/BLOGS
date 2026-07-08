@@ -12,6 +12,7 @@ import { prisma } from '@/lib/prisma';
 import { getAIConfig, generateAIContent, AIConfig } from '@/lib/ai';
 import { verifyToken } from '@/lib/auth';
 import { waitUntil } from '@vercel/functions';
+import { validateAndFixLinks } from '@/lib/link-validator';
 // Code cleaned up: RSS fetching is no longer used.
 export const maxDuration = 60; // Vercel hobby allows up to 60s for serverless
 export const dynamic = 'force-dynamic'; // Prevent caching for cron jobs
@@ -147,6 +148,25 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'Auto-blogging is disabled in settings' });
     }
 
+    // Cooldown protection (120 seconds) to prevent simultaneous triggers and IP blocks
+    if (settings.lastRunAt && !request.headers.get('x-force-run')) {
+      const elapsedSeconds = (Date.now() - new Date(settings.lastRunAt).getTime()) / 1000;
+      if (elapsedSeconds < 120) {
+        console.log(`[Auto-Blog] Cooldown active. Skipping execution (${elapsedSeconds}s elapsed).`);
+        return NextResponse.json({ success: false, error: `Cooldown active. Please wait ${Math.ceil(120 - elapsedSeconds)} seconds.` });
+      }
+    }
+
+    // Update lastRunAt timestamp to lock the execution
+    try {
+      await prisma.autoBlogSettings.update({
+        where: { id: 'default' },
+        data: { lastRunAt: new Date() }
+      });
+    } catch (e) {
+      console.error('Failed to update lastRunAt settings:', e);
+    }
+
     const siteSettings = await prisma.siteSettings.findUnique({ where: { id: 'default' } });
     let savedKeys: Record<string, string> = {};
     try {
@@ -261,11 +281,20 @@ export async function POST(request: NextRequest) {
       let seedNews = "";
       if (savedKeys.newsdata) {
           try {
+              // General India news
               const ndRes = await fetch(`https://newsdata.io/api/1/news?apikey=${savedKeys.newsdata}&country=in&language=en,hi`);
               const ndJson = await ndRes.json();
               if (ndJson.results) {
                  seedNews = "LIVE NEWS HEADLINES RIGHT NOW (USE THESE TO GENERATE TOPICS):\n" + ndJson.results.map((r: any) => `- ${r.title}`).join('\n');
               }
+              // Education-specific news (university results, admissions, board exams)
+              try {
+                const eduRes = await fetch(`https://newsdata.io/api/1/news?apikey=${savedKeys.newsdata}&country=in&language=en,hi&category=education`);
+                const eduJson = await eduRes.json();
+                if (eduJson.results && eduJson.results.length > 0) {
+                  seedNews += "\n\n📚 LIVE EDUCATION & UNIVERSITY NEWS (HIGH PRIORITY - USE THESE):\n" + eduJson.results.slice(0, 10).map((r: any) => `- ${r.title}`).join('\n');
+                }
+              } catch(e2) { console.error("Education news fetch failed", e2); }
           } catch(e) { console.error(e); }
       }
 
@@ -296,6 +325,9 @@ export async function POST(request: NextRequest) {
       For research, ONLY search and verify topics from India's Premier Official Portals:
       1. Central Recruitment: ssc.gov.in, upsc.gov.in, ibps.in, indianrailways.gov.in, nta.ac.in, pib.gov.in, ncs.gov.in
       2. State Portals: rpsc.rajasthan.gov.in, rssb.rajasthan.gov.in, uppsc.up.nic.in, upsssc.gov.in, bpsc.bih.nic.in, mppsc.mp.gov.in, jssc.jharkhand.gov.in, hssc.gov.in
+      3. Education & University News (MANDATORY): ugc.gov.in, cbse.gov.in, cisce.org, ignou.ac.in, kvsangathan.nic.in, navodaya.gov.in, digilocker.gov.in, ncte.gov.in, aicte-india.org, scholarships.gov.in, employmentnews.gov.in, egazette.gov.in
+      4. ALL Indian State University Result Portals: Track EVERY state university (e.g., MJPRU, CCSU, CSJMU, MGSU, MDSU, RTU, Lucknow University, Patna University, Mumbai University, Pune University, Anna University, Calicut University, GNDU, Kurukshetra University, etc.)
+      5. Board Exam Portals: UP Board (upmsp.edu.in), Rajasthan Board (rajeduboard.rajasthan.gov.in), Bihar Board (biharboardonline.com), MP Board (mpbse.nic.in), CBSE (cbse.gov.in), ICSE (cisce.org)
       DO NOT pick unverified rumors from unknown blogs. Verify that the notice is officially published before selecting the topic!
         🚨 CRITICAL RULE FOR JOBS/EXAMS: NEVER include any job, recruitment, or exam where the 'Last Date to Apply' has ALREADY PASSED before ${getCurrentDateStr()}. If it's expired, DO NOT mention it! 🚨
       Respond ONLY with a valid JSON array of strings. No markdown.
@@ -599,6 +631,13 @@ export async function POST(request: NextRequest) {
     11. HINGLISH SEO: 2-3 Hinglish कीवर्ड्स ("kaise kare", "kab aayega") डालें।
     12. VIRAL LISTICLE FORMAT: जहाँ भी मुमकिन हो (खासकर Technology और Finance में), जानकारियों को "Top 5", "Top 10", या "Best X" वाले पॉइंट-वाइज़ लिस्ट (Listicle) फॉर्मेट में लिखें। यह रीडर्स को बहुत एंगेजिंग लगता है।
     13. NEVER TRUNCATE: पूरा आर्टिकल (Introduction से Conclusion तक) लिखें।
+    14. COPYRIGHT SAFETY (कॉपीराइट सुरक्षा - अनिवार्य):
+        - कभी भी किसी सरकारी अधिसूचना, समाचार एजेंसी, या वेबसाइट से टेक्स्ट को शब्दशः (Verbatim) कॉपी-पेस्ट न करें।
+        - सभी जानकारियों को अपने शब्दों में पुनः लिखें (Rewrite in your own words)।
+        - किसी अखबार या वेबसाइट के पूरे पैराग्राफ को कॉपी न करें।
+        - तथ्यों (Facts) का उपयोग करें, लेकिन विश्लेषण (Analysis) और भाषा (Language) मौलिक (Original) होनी चाहिए।
+        - डेटा का स्रोत बताएं: "सूत्र: SSC आधिकारिक वेबसाइट (ssc.gov.in)"।
+        - कोई भी छवि (Image), लोगो, या ग्राफिक कॉपी न करें।
     ===== END UNIVERSAL RULES =====
 
     3. IF the topic is about General News, Politics, Sports, Health, or any topic NOT covered by Finance/Tech/Education prompts below, you MUST follow this 🔥 NEWS MASTER PROMPT 🔥:
@@ -1000,6 +1039,12 @@ YOUR SEO SKILLS:
          featuredImage = `https://image.pollinations.ai/prompt/${encodeURIComponent(imgPrompt)}?width=1600&height=900&nologo=true`;
       }
     }
+
+    // -------------------------------------------------------------
+    // VALIDATE & FIX ALL LINKS (Official Portal Enforcement)
+    // -------------------------------------------------------------
+    articleHtml = validateAndFixLinks(articleHtml, targetTopic);
+    console.log('✅ Link validation complete for:', targetTopic);
 
     // -------------------------------------------------------------
     // SAVE TO DATABASE

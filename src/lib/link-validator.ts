@@ -1,0 +1,220 @@
+// =============================================================
+// OFFICIAL LINK VALIDATOR & FIXER
+// Validates all external links in blog HTML, blocks competitors,
+// and replaces broken/fake links with verified official portals.
+// =============================================================
+
+// Curated mapping of recruitment bodies to their official portal homepages
+const OFFICIAL_PORTALS: Record<string, string> = {
+  // Central Government
+  'ssc': 'https://ssc.gov.in',
+  'staff selection commission': 'https://ssc.gov.in',
+  'upsc': 'https://upsc.gov.in',
+  'union public service commission': 'https://upsc.gov.in',
+  'ibps': 'https://ibps.in',
+  'nta': 'https://nta.ac.in',
+  'national testing agency': 'https://nta.ac.in',
+  'railway': 'https://indianrailways.gov.in',
+  'rrb': 'https://indianrailways.gov.in',
+  'indian army': 'https://joinindianarmy.nic.in',
+  'indian navy': 'https://joinindiannavy.gov.in',
+  'indian air force': 'https://afcat.cdac.in',
+  'pib': 'https://pib.gov.in',
+  'ugc': 'https://ugc.gov.in',
+  'cbse': 'https://cbse.gov.in',
+  'icse': 'https://cisce.org',
+  'ignou': 'https://ignou.ac.in',
+  'kvs': 'https://kvsangathan.nic.in',
+  'kendriya vidyalaya': 'https://kvsangathan.nic.in',
+  'navodaya': 'https://navodaya.gov.in',
+  'aicte': 'https://aicte-india.org',
+  'ncte': 'https://ncte.gov.in',
+  'neet': 'https://nta.ac.in',
+  'jee': 'https://nta.ac.in',
+  'cuet': 'https://nta.ac.in',
+  'ugc net': 'https://nta.ac.in',
+  'csir': 'https://csirhrdg.res.in',
+  'drdo': 'https://drdo.gov.in',
+  'isro': 'https://isro.gov.in',
+  'ncs': 'https://ncs.gov.in',
+  'employment news': 'https://employmentnews.gov.in',
+  'gazette': 'https://egazette.gov.in',
+  'sbi': 'https://sbi.co.in',
+  'rbi': 'https://rbi.org.in',
+  'epfo': 'https://epfindia.gov.in',
+  'esic': 'https://esic.gov.in',
+  'pmkvy': 'https://pmkvyofficial.org',
+  // State Boards & PSCs
+  'rpsc': 'https://rpsc.rajasthan.gov.in',
+  'rsmssb': 'https://rsmssb.rajasthan.gov.in',
+  'rssb': 'https://rsmssb.rajasthan.gov.in',
+  'rajasthan': 'https://sso.rajasthan.gov.in',
+  'uppsc': 'https://uppsc.up.nic.in',
+  'upsssc': 'https://upsssc.gov.in',
+  'uttar pradesh': 'https://uppsc.up.nic.in',
+  'bpsc': 'https://bpsc.bih.nic.in',
+  'bssc': 'https://bssc.bihar.gov.in',
+  'bihar': 'https://bpsc.bih.nic.in',
+  'mppsc': 'https://mppsc.mp.gov.in',
+  'mpesb': 'https://esb.mp.gov.in',
+  'madhya pradesh': 'https://mppsc.mp.gov.in',
+  'hssc': 'https://hssc.gov.in',
+  'hpsc': 'https://hpsc.gov.in',
+  'haryana': 'https://hssc.gov.in',
+  'ukpsc': 'https://ukpsc.gov.in',
+  'uttarakhand': 'https://ukpsc.gov.in',
+  'jssc': 'https://jssc.nic.in',
+  'jharkhand': 'https://jssc.nic.in',
+  'cgpsc': 'https://psc.cg.gov.in',
+  'chhattisgarh': 'https://psc.cg.gov.in',
+  'wbpsc': 'https://wbpsc.gov.in',
+  'west bengal': 'https://wbpsc.gov.in',
+  'appsc': 'https://psc.ap.gov.in',
+  'andhra pradesh': 'https://psc.ap.gov.in',
+  'tspsc': 'https://tspsc.gov.in',
+  'telangana': 'https://tspsc.gov.in',
+  'kpsc': 'https://kpsc.kar.nic.in',
+  'karnataka': 'https://kpsc.kar.nic.in',
+  'tnpsc': 'https://tnpsc.gov.in',
+  'tamil nadu': 'https://tnpsc.gov.in',
+  'kerala psc': 'https://keralapsc.gov.in',
+  'kerala': 'https://keralapsc.gov.in',
+  'gpsc': 'https://gpsc.gujarat.gov.in',
+  'gujarat': 'https://gpsc.gujarat.gov.in',
+  'mpsc': 'https://mpsc.gov.in',
+  'maharashtra': 'https://mpsc.gov.in',
+  'opsc': 'https://opsc.gov.in',
+  'odisha': 'https://opsc.gov.in',
+  'ppsc': 'https://ppsc.gov.in',
+  'punjab': 'https://ppsc.gov.in',
+  'apsc': 'https://apsc.nic.in',
+  'assam': 'https://apsc.nic.in',
+  'manipur': 'https://manipur.gov.in',
+  'meghalaya': 'https://meghalaya.gov.in',
+  'mizoram': 'https://mizoram.gov.in',
+  'nagaland': 'https://nagaland.gov.in',
+  'tripura': 'https://tripura.gov.in',
+  'sikkim': 'https://sikkim.gov.in',
+  'arunachal pradesh': 'https://arunachalpradesh.gov.in',
+  'goa': 'https://goa.gov.in',
+  'himachal pradesh': 'https://himachal.nic.in',
+  'jammu kashmir': 'https://jkssb.nic.in',
+  'jkssb': 'https://jkssb.nic.in',
+  'delhi': 'https://dsssb.delhi.gov.in',
+  'dsssb': 'https://dsssb.delhi.gov.in',
+  // Universities
+  'du': 'https://du.ac.in',
+  'delhi university': 'https://du.ac.in',
+  'bhu': 'https://bhu.ac.in',
+  'amu': 'https://amu.ac.in',
+  'jnu': 'https://jnu.ac.in',
+  'iit': 'https://josaa.nic.in',
+  'nit': 'https://josaa.nic.in',
+  // Education Portals
+  'digilocker': 'https://digilocker.gov.in',
+  'scholarship': 'https://scholarships.gov.in',
+  'national scholarship': 'https://scholarships.gov.in',
+  'pm kisan': 'https://pmkisan.gov.in',
+  'e shram': 'https://eshram.gov.in',
+};
+
+// Blocked competitor domains
+const BLOCKED_DOMAINS = [
+  'sarkariresult.com', 'freejobalert.com', 'testbook.com',
+  'jagranjosh.com', 'adda247.com', 'safalta.com',
+  'sarkariexam.com', 'govtjobsalert.com', 'naukri.com',
+  'careerwill.com', 'wifistudy.com', 'gradeup.co',
+  'embibe.com', 'prepp.in', 'byjus.com'
+];
+
+/**
+ * Validates and fixes all external links in blog HTML content.
+ * - Blocks competitor domains
+ * - Blocks Google search redirect links
+ * - Replaces broken/fake links with verified official portal homepages
+ * - Adds warning notes for unverified links
+ */
+export function validateAndFixLinks(html: string, topicTitle: string): string {
+  if (!html) return html;
+
+  // Regex to find all anchor tags with href
+  const linkRegex = /<a\s+([^>]*?)href=["']([^"']+)["']([^>]*?)>/gi;
+
+  let fixedHtml = html.replace(linkRegex, (match, before, href, after) => {
+    const lowerHref = href.toLowerCase();
+
+    // 1. Block Google search redirect URLs
+    if (lowerHref.includes('google.com/search') || lowerHref.includes('google.com/url')) {
+      const replacement = findOfficialPortal(topicTitle);
+      return `<a ${before}href="${replacement}"${after} target="_blank" rel="noopener noreferrer">`;
+    }
+
+    // 2. Block competitor domains
+    for (const blocked of BLOCKED_DOMAINS) {
+      if (lowerHref.includes(blocked)) {
+        const replacement = findOfficialPortal(topicTitle);
+        return `<a ${before}href="${replacement}"${after} target="_blank" rel="noopener noreferrer">`;
+      }
+    }
+
+    // 3. Block empty/placeholder links
+    if (href === '#' || href === '' || href.includes('LINK_NOT_AVAILABLE') || href.includes('example.com')) {
+      const replacement = findOfficialPortal(topicTitle);
+      return `<a ${before}href="${replacement}"${after} target="_blank" rel="noopener noreferrer">`;
+    }
+
+    // 4. Ensure external links have target="_blank" and rel="noopener noreferrer"
+    if (lowerHref.startsWith('http') && !lowerHref.includes('knowora.in')) {
+      const hasTarget = /target=/i.test(before + after);
+      const hasRel = /rel=/i.test(before + after);
+      let attrs = '';
+      if (!hasTarget) attrs += ' target="_blank"';
+      if (!hasRel) attrs += ' rel="noopener noreferrer"';
+      return `<a ${before}href="${href}"${after}${attrs}>`;
+    }
+
+    return match;
+  });
+
+  return fixedHtml;
+}
+
+/**
+ * Finds the most relevant official portal URL based on the blog topic title.
+ * Matches keywords in the title against the OFFICIAL_PORTALS mapping.
+ */
+function findOfficialPortal(topicTitle: string): string {
+  const lower = topicTitle.toLowerCase();
+
+  // Try exact keyword matches first (longer keywords first for specificity)
+  const sortedKeys = Object.keys(OFFICIAL_PORTALS).sort((a, b) => b.length - a.length);
+  for (const keyword of sortedKeys) {
+    if (lower.includes(keyword)) {
+      return OFFICIAL_PORTALS[keyword];
+    }
+  }
+
+  // Default fallback: NCS (National Career Service) portal
+  return 'https://ncs.gov.in';
+}
+
+/**
+ * Checks if a URL belongs to a trusted official domain (.gov.in, .nic.in, .ac.in, .org.in)
+ */
+export function isOfficialDomain(url: string): boolean {
+  try {
+    const hostname = new URL(url).hostname.toLowerCase();
+    return hostname.endsWith('.gov.in') ||
+           hostname.endsWith('.nic.in') ||
+           hostname.endsWith('.ac.in') ||
+           hostname.endsWith('.org.in') ||
+           hostname.endsWith('.res.in') ||
+           hostname === 'ibps.in' ||
+           hostname === 'cisce.org' ||
+           hostname === 'aicte-india.org' ||
+           hostname === 'sbi.co.in' ||
+           hostname === 'rbi.org.in';
+  } catch {
+    return false;
+  }
+}

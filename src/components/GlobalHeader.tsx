@@ -26,9 +26,10 @@ export default function GlobalHeader({ siteName, translateActive }: { siteName?:
 
   const navLinks = [
     { name: 'Home', href: '/', path: '/' },
-    { name: 'Technology', href: '/blog?tag=Technology', path: '/blog', tag: 'Technology' },
-    { name: 'Education & Career', href: '/blog?tag=Education+%26+Career', path: '/blog', tag: 'Education & Career' },
-    { name: 'Finance & Earning', href: '/blog?tag=Finance+%26+Earning', path: '/blog', tag: 'Finance & Earning' },
+    { name: 'Jobs', href: '/blog?tag=Job', path: '/blog', tag: 'Job' },
+    { name: 'Admit Cards', href: '/blog?tag=Admit+Card', path: '/blog', tag: 'Admit Card' },
+    { name: 'Results', href: '/blog?tag=Results', path: '/blog', tag: 'Results' },
+    { name: 'Guidelines', href: '/blog?tag=Guidelines', path: '/blog', tag: 'Guidelines' },
     { name: 'About Us', href: '/about', path: '/about' },
   ];
 

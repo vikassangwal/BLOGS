@@ -72,7 +72,8 @@ export default async function HomePage() {
     allPosts, techPosts, eduPosts, financePosts, whatsappLinks, siteSettings,
     latestJobs, admitCards, examResults,
     universityUpdates, govtSchemes, scholarships,
-    techMobile, financeBanking, earningCourses
+    techMobile, financeBanking, earningCourses,
+    closingSoonJobs, liveUpdates
   ] = await Promise.all([
     prisma.blogPost.findMany({ where: { status: 'Published' }, orderBy: { publishedAt: 'desc' }, take: 10, select: { id: true, title: true, slug: true, publishedAt: true, featuredImage: true } }),
     getPostsByTag('Technology'),
@@ -88,7 +89,22 @@ export default async function HomePage() {
     getPostsByTags(['Scholarship', 'National Scholarship', 'Scholarships'], 8),
     getPostsByTags(['Technology', 'Smartphone', 'Tech', 'Mobile', 'Gadget'], 8),
     getPostsByTags(['Finance', 'Banking', 'Bank', 'LIC', 'EPFO', 'Savings'], 8),
-    getPostsByTags(['Earning', 'Online Earning', 'Course', 'Free Course'], 8)
+    getPostsByTags(['Earning', 'Online Earning', 'Course', 'Free Course'], 8),
+    prisma.blogPost.findMany({
+      where: {
+        status: 'Published',
+        expiryDate: { gte: new Date() }
+      },
+      orderBy: { expiryDate: 'asc' },
+      take: 4,
+      select: { id: true, title: true, slug: true, expiryDate: true }
+    }),
+    prisma.blogPost.findMany({
+      where: { status: 'Published' },
+      orderBy: { publishedAt: 'desc' },
+      take: 6,
+      select: { id: true, title: true, slug: true, publishedAt: true, createdAt: true }
+    })
   ]);
 
   let apiKeys: any = {};
@@ -99,6 +115,17 @@ export default async function HomePage() {
   } catch (e) {}
   
   const isChatbotActive = apiKeys.chatbotActive !== false;
+
+  function getRelativeTime(date: Date) {
+    const seconds = Math.floor((new Date().getTime() - new Date(date).getTime()) / 1000);
+    if (seconds < 60) return "just now";
+    const minutes = Math.floor(seconds / 60);
+    if (minutes < 60) return `${minutes}m ago`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours}h ago`;
+    const days = Math.floor(hours / 24);
+    return `${days}d ago`;
+  }
 
   const CategorySection = ({ title, posts, tag }: { title: string, posts: any[], tag: string }) => {
     if (posts.length === 0) return null;
@@ -184,6 +211,108 @@ export default async function HomePage() {
           <Link href="/blog" className="px-5 py-2.5 glass-panel hover:bg-blue-500/10 border border-white/10 hover:border-blue-500/30 rounded-full text-sm font-medium transition-all text-gray-300 hover:text-white">
             ✨ View All
           </Link>
+        </div>
+        {/* Today LIVE Updates Ticker */}
+        {liveUpdates.length > 0 && (
+          <div className="max-w-4xl w-full mx-auto mt-12 px-4 animate-slide-up">
+            <div className="glass-panel border border-red-500/20 rounded-2xl overflow-hidden shadow-[0_4px_30px_rgba(239,68,68,0.05)] bg-white/5 backdrop-blur-md">
+              <div className="bg-red-600/10 border-b border-red-500/10 px-5 py-3 flex items-center gap-3">
+                <span className="relative flex h-3 w-3">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+                </span>
+                <h3 className="text-sm font-bold text-red-400 tracking-wide uppercase flex items-center gap-1.5">
+                  🔴 Today LIVE Updates (आज के मुख्य समाचार)
+                </h3>
+              </div>
+              <div className="p-4 flex flex-col gap-2.5 max-h-[220px] overflow-y-auto scrollbar-thin">
+                {liveUpdates.map((post) => (
+                  <div key={post.id} className="flex items-start justify-between gap-4 border-b border-white/5 pb-2 last:border-0 last:pb-0">
+                    <Link href={`/blog/${post.slug}`} className="text-xs sm:text-sm font-medium text-gray-200 hover:text-red-400 transition-colors line-clamp-1">
+                      {post.title}
+                    </Link>
+                    <span className="text-[10px] text-gray-400 font-semibold bg-white/5 px-2 py-0.5 rounded-full flex-shrink-0 whitespace-nowrap">
+                      ⚡ {getRelativeTime(post.publishedAt || post.createdAt)}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Closing Soon / Deadlines Alert Box */}
+        {closingSoonJobs.length > 0 && (
+          <div className="max-w-6xl w-full mx-auto mt-12 px-4 animate-slide-up">
+            <div className="glass-panel border border-blue-500/10 rounded-2xl overflow-hidden shadow-[0_4px_30px_rgba(59,130,246,0.05)] bg-white/5">
+              <div className="bg-blue-600/20 border-b border-blue-500/20 px-5 py-3.5 flex items-center gap-2">
+                <span className="text-blue-400 text-lg">⏳</span>
+                <h3 className="text-sm font-bold text-blue-300 tracking-wide uppercase">
+                  Closing Soon (अंतिम तिथि नज़दीक है!)
+                </h3>
+              </div>
+              <div className="p-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {closingSoonJobs.map((post) => {
+                  const diff = new Date(post.expiryDate!).getTime() - new Date().getTime();
+                  const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
+                  let daysText = `${days} DAYS LEFT`;
+                  let colorClass = "bg-orange-500/20 text-orange-400 border border-orange-500/20";
+                  if (days <= 2) {
+                    daysText = days <= 0 ? "TODAY LAST DAY" : "1 DAY LEFT";
+                    colorClass = "bg-red-500/20 text-red-400 border border-red-500/20 animate-pulse";
+                  } else if (days > 5) {
+                    colorClass = "bg-emerald-500/20 text-emerald-400 border border-emerald-500/20";
+                  }
+
+                  return (
+                    <Link href={`/blog/${post.slug}`} key={post.id} className="block group">
+                      <div className="glass-panel hover:bg-white/5 transition-all p-4 rounded-xl border border-white/5 flex flex-col h-full justify-between gap-3">
+                        <div className={`text-center py-1.5 px-3 rounded-lg text-xs font-bold ${colorClass}`}>
+                          {daysText}
+                        </div>
+                        <h4 className="text-xs font-semibold text-gray-300 group-hover:text-blue-400 transition-colors line-clamp-2 leading-snug">
+                          {post.title}
+                        </h4>
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Jobs by Education / Filter Button Grid */}
+        <div className="max-w-6xl w-full mx-auto mt-12 px-4 animate-slide-up">
+          <div className="glass-panel border border-blue-500/10 rounded-2xl overflow-hidden shadow-[0_4px_30px_rgba(0,0,0,0.1)] bg-white/5 backdrop-blur-md">
+            <div className="bg-blue-600/30 border-b border-blue-500/20 px-6 py-4 text-center">
+              <h3 className="text-base font-extrabold text-white uppercase tracking-wider">
+                🎓 Jobs by Education (योग्यता अनुसार सरकारी नौकरियां)
+              </h3>
+            </div>
+            <div className="p-6 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3.5">
+              {[
+                { label: "8TH Pass", query: "8th" },
+                { label: "10TH Pass", query: "10th" },
+                { label: "12TH Pass", query: "12th" },
+                { label: "ITI Pass", query: "iti" },
+                { label: "Diploma Pass", query: "diploma" },
+                { label: "B.Tech/B.E", query: "btech" },
+                { label: "B.Com", query: "bcom" },
+                { label: "Graduate", query: "graduate" },
+                { label: "Post Graduate", query: "post graduate" },
+                { label: "Any Graduate", query: "graduate" }
+              ].map((item, idx) => (
+                <Link
+                  href={`/blog?search=${encodeURIComponent(item.query)}`}
+                  key={idx}
+                  className="px-4 py-3 glass-panel text-center hover:bg-blue-500/10 border border-white/5 hover:border-blue-500/30 rounded-xl text-xs font-bold transition-all text-gray-300 hover:text-white hover:-translate-y-0.5 shadow-sm"
+                >
+                  🔵 {item.label}
+                </Link>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
 

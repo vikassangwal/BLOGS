@@ -67,13 +67,18 @@ async function getPostsByTags(tags: string[], limit: number = 8) {
 }
 
 export default async function HomePage() {
+  const now = new Date();
+  const sevenDaysAgo = new Date();
+  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
   // Fetch all categories in parallel on the server
   const [
     allPosts, techPosts, eduPosts, financePosts, whatsappLinks, siteSettings,
     latestJobs, admitCards, examResults,
     universityUpdates, govtSchemes, scholarships,
     techMobile, financeBanking, earningCourses,
-    closingSoonJobs, liveUpdates
+    closingSoonJobs, liveUpdates,
+    activeJobsCount, recentResultsCount, recentAdmitCardsCount, activeSchemesCount
   ] = await Promise.all([
     prisma.blogPost.findMany({ where: { status: 'Published' }, orderBy: { publishedAt: 'desc' }, take: 10, select: { id: true, title: true, slug: true, publishedAt: true, featuredImage: true } }),
     getPostsByTag('Technology'),
@@ -93,7 +98,7 @@ export default async function HomePage() {
     prisma.blogPost.findMany({
       where: {
         status: 'Published',
-        expiryDate: { gte: new Date() }
+        expiryDate: { gte: now }
       },
       orderBy: { expiryDate: 'asc' },
       take: 4,
@@ -104,6 +109,36 @@ export default async function HomePage() {
       orderBy: { publishedAt: 'desc' },
       take: 6,
       select: { id: true, title: true, slug: true, publishedAt: true, createdAt: true }
+    }),
+    prisma.blogPost.count({
+      where: {
+        status: 'Published',
+        tags: { some: { tag: { name: { in: ['Job', 'Vacancy', 'Career'] } } } },
+        OR: [
+          { expiryDate: { gte: now } },
+          { expiryDate: null }
+        ]
+      }
+    }),
+    prisma.blogPost.count({
+      where: {
+        status: 'Published',
+        tags: { some: { tag: { name: { in: ['Results', 'Result', 'Answer Key'] } } } },
+        publishedAt: { gte: sevenDaysAgo }
+      }
+    }),
+    prisma.blogPost.count({
+      where: {
+        status: 'Published',
+        tags: { some: { tag: { name: 'Admit Card' } } },
+        publishedAt: { gte: sevenDaysAgo }
+      }
+    }),
+    prisma.blogPost.count({
+      where: {
+        status: 'Published',
+        tags: { some: { tag: { name: { in: ['Scheme', 'Yojana', 'Government Scheme'] } } } }
+      }
     })
   ]);
 
@@ -168,50 +203,97 @@ export default async function HomePage() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[calc(100vh-140px)] px-4 py-10">
+    <div className="flex flex-col items-center justify-center px-3 sm:px-4 pt-4 pb-10">
       {/* Hero Section */}
-      <div className="max-w-4xl mx-auto text-center animate-slide-up mt-10">
-        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-panel text-sm text-blue-400 mb-8 border-blue-500/20 shadow-[0_0_20px_rgba(59,130,246,0.15)]">
-          <span className="relative flex h-2 w-2">
+      <div className="max-w-4xl mx-auto text-center animate-slide-up mt-2 sm:mt-6">
+        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full glass-panel text-xs text-blue-400 mb-4 border-blue-500/20 shadow-[0_0_20px_rgba(59,130,246,0.1)]">
+          <span className="relative flex h-2.5 w-2.5">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-blue-500"></span>
           </span>
           AI-Powered Content Generation is Live
         </div>
         
-        <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight mb-8 leading-tight">
-          Next-Generation <br className="hidden md:block" />
+        <h1 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight mb-3 leading-tight text-white">
+          Next-Generation <br className="hidden sm:block" />
           <span className="premium-gradient-text">Blogging Platform</span>
         </h1>
         
-        <p className="text-lg md:text-xl text-gray-400 mb-12 max-w-2xl mx-auto font-light leading-relaxed">
+        <p className="text-xs sm:text-sm text-gray-400 mb-5 max-w-xl mx-auto font-light leading-relaxed px-4">
           Discover expertly curated and AI-assisted insights in Technology, Education & Career, and Finance & Earning. High-quality knowledge for the modern world.
         </p>
         
-        <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
-          <Link href="/blog" className="w-full sm:w-auto px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-full transition-all hover:scale-105 shadow-[0_0_30px_rgba(37,99,235,0.4)]">
+        <div className="flex gap-4 justify-center items-center">
+          <Link href="/blog" className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm font-bold rounded-full transition-all hover:scale-105 shadow-[0_0_20px_rgba(37,99,235,0.3)]">
             Read Our Articles
           </Link>
         </div>
 
         {/* Quick Category Links */}
-        <div className="mt-10 flex flex-wrap justify-center gap-3">
-          <Link href="/blog?tag=Technology" className="px-5 py-2.5 glass-panel hover:bg-blue-500/10 border border-white/10 hover:border-blue-500/30 rounded-full text-sm font-medium transition-all text-gray-300 hover:text-white">
+        <div className="mt-5 flex flex-wrap justify-center gap-2.5">
+          <Link href="/blog?tag=Technology" className="px-4 py-2 glass-panel hover:bg-blue-500/10 border border-white/5 hover:border-blue-500/30 rounded-full text-xs font-semibold transition-all text-gray-300 hover:text-white">
             💻 Technology
           </Link>
-          <Link href="/blog?tag=Education%20%26%20Career" className="px-5 py-2.5 glass-panel hover:bg-blue-500/10 border border-white/10 hover:border-blue-500/30 rounded-full text-sm font-medium transition-all text-gray-300 hover:text-white">
+          <Link href="/blog?tag=Education%20%26%20Career" className="px-4 py-2 glass-panel hover:bg-blue-500/10 border border-white/5 hover:border-blue-500/30 rounded-full text-xs font-semibold transition-all text-gray-300 hover:text-white">
             🎓 Education & Career
           </Link>
-          <Link href="/blog?tag=Finance%20%26%20Earning" className="px-5 py-2.5 glass-panel hover:bg-blue-500/10 border border-white/10 hover:border-blue-500/30 rounded-full text-sm font-medium transition-all text-gray-300 hover:text-white">
+          <Link href="/blog?tag=Finance%20%26%20Earning" className="px-4 py-2 glass-panel hover:bg-blue-500/10 border border-white/5 hover:border-blue-500/30 rounded-full text-xs font-semibold transition-all text-gray-300 hover:text-white">
             💰 Finance & Earning
           </Link>
-          <Link href="/blog?tag=News" className="px-5 py-2.5 glass-panel hover:bg-blue-500/10 border border-white/10 hover:border-blue-500/30 rounded-full text-sm font-medium transition-all text-gray-300 hover:text-white">
+          <Link href="/blog?tag=News" className="px-4 py-2 glass-panel hover:bg-blue-500/10 border border-white/5 hover:border-blue-500/30 rounded-full text-xs font-semibold transition-all text-gray-300 hover:text-white">
             📰 News
           </Link>
-          <Link href="/blog" className="px-5 py-2.5 glass-panel hover:bg-blue-500/10 border border-white/10 hover:border-blue-500/30 rounded-full text-sm font-medium transition-all text-gray-300 hover:text-white">
+          <Link href="/blog" className="px-4 py-2 glass-panel hover:bg-blue-500/10 border border-white/5 hover:border-blue-500/30 rounded-full text-xs font-semibold transition-all text-gray-300 hover:text-white">
             ✨ View All
           </Link>
         </div>
+      </div>
+
+      {/* 🚀 Dashboard Squares (डैशबोर्ड बॉक्स) */}
+      <div className="max-w-6xl w-full mx-auto mt-8 px-4 animate-slide-up">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {/* Square 1: Active Jobs */}
+          <Link href="/blog?tag=Job" className="block group">
+            <div className="glass-panel border border-emerald-500/10 hover:border-emerald-500/30 p-4 rounded-2xl text-center bg-white/5 transition-all hover:-translate-y-1 shadow-[0_4px_30px_rgba(16,185,129,0.05)]">
+              <div className="text-2xl mb-1">🔥</div>
+              <div className="text-xl sm:text-2xl font-black text-emerald-400">{activeJobsCount}</div>
+              <div className="text-[10px] sm:text-xs text-gray-300 font-semibold mt-1">सक्रिय भर्ती</div>
+              <div className="text-[8px] text-gray-500 mt-0.5">Active Jobs</div>
+            </div>
+          </Link>
+          
+          {/* Square 2: Recent Results */}
+          <Link href="/blog?tag=Results" className="block group">
+            <div className="glass-panel border border-amber-500/10 hover:border-amber-500/30 p-4 rounded-2xl text-center bg-white/5 transition-all hover:-translate-y-1 shadow-[0_4px_30px_rgba(245,158,11,0.05)]">
+              <div className="text-2xl mb-1">🏆</div>
+              <div className="text-xl sm:text-2xl font-black text-amber-400">{recentResultsCount}</div>
+              <div className="text-[10px] sm:text-xs text-gray-300 font-semibold mt-1">परीक्षा परिणाम (7d)</div>
+              <div className="text-[8px] text-gray-500 mt-0.5">Exam Results</div>
+            </div>
+          </Link>
+
+          {/* Square 3: Admit Cards */}
+          <Link href="/blog?tag=Admit%20Card" className="block group">
+            <div className="glass-panel border border-blue-500/10 hover:border-blue-500/30 p-4 rounded-2xl text-center bg-white/5 transition-all hover:-translate-y-1 shadow-[0_4px_30px_rgba(59,130,246,0.05)]">
+              <div className="text-2xl mb-1">🎟️</div>
+              <div className="text-xl sm:text-2xl font-black text-blue-400">{recentAdmitCardsCount}</div>
+              <div className="text-[10px] sm:text-xs text-gray-300 font-semibold mt-1">प्रवेश पत्र (7d)</div>
+              <div className="text-[8px] text-gray-500 mt-0.5">Admit Cards</div>
+            </div>
+          </Link>
+
+          {/* Square 4: Govt Schemes */}
+          <Link href="/blog?tag=Scheme" className="block group">
+            <div className="glass-panel border border-purple-500/10 hover:border-purple-500/30 p-4 rounded-2xl text-center bg-white/5 transition-all hover:-translate-y-1 shadow-[0_4px_30px_rgba(168,85,247,0.05)]">
+              <div className="text-2xl mb-1">📜</div>
+              <div className="text-xl sm:text-2xl font-black text-purple-400">{activeSchemesCount}</div>
+              <div className="text-[10px] sm:text-xs text-gray-300 font-semibold mt-1">सरकारी योजनाएं</div>
+              <div className="text-[8px] text-gray-500 mt-0.5">Govt Schemes</div>
+            </div>
+          </Link>
+        </div>
+      </div>
+
         {/* Today LIVE Updates Ticker */}
         {liveUpdates.length > 0 && (
           <div className="max-w-4xl w-full mx-auto mt-12 px-4 animate-slide-up">
@@ -314,7 +396,6 @@ export default async function HomePage() {
             </div>
           </div>
         </div>
-      </div>
 
       {/* Sarkari Job Central Grid (सरकारी जॉब ग्रिड) */}
       <div className="max-w-6xl w-full mx-auto mt-20 px-4">

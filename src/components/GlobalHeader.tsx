@@ -218,20 +218,20 @@ export default function GlobalHeader({ siteName, translateActive }: { siteName?:
           <nav className="flex flex-col p-4 gap-4 font-semibold text-sm max-h-[75vh] overflow-y-auto">
             {/* Standard Nav Links */}
             <div className="flex flex-col gap-2">
-              <a 
-                href="/" 
-                onClick={() => setIsMobileMenuOpen(false)} 
-                className="flex items-center gap-2 p-2 hover:bg-white/5 rounded-lg transition-colors text-white"
-              >
-                🏠 Home (मुख्य पृष्ठ)
-              </a>
-              <a 
-                href="/about" 
-                onClick={() => setIsMobileMenuOpen(false)} 
-                className="flex items-center gap-2 p-2 hover:bg-white/5 rounded-lg transition-colors text-white"
-              >
-                ℹ️ About Us (हमारे बारे में)
-              </a>
+              {navLinks.map((link) => (
+                <a 
+                  key={link.name}
+                  href={link.href} 
+                  onClick={() => setIsMobileMenuOpen(false)} 
+                  className="flex items-center gap-2 p-2 hover:bg-white/5 rounded-lg transition-colors text-white"
+                >
+                  {link.name === 'Home' ? '🏠 Home' : 
+                   link.name === 'Technology' ? '💻 Technology' :
+                   link.name === 'Education & Career' ? '🎓 Education & Career' :
+                   link.name === 'Finance & Earning' ? '💰 Finance & Earning' :
+                   link.name === 'About Us' ? 'ℹ️ About Us' : link.name}
+                </a>
+              ))}
             </div>
 
             <hr className="border-white/10" />

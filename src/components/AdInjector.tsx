@@ -50,12 +50,35 @@ export default function AdInjector({ htmlContent }: { htmlContent: string }) {
     }
   }, [htmlContent, ads]);
 
+  // Pre-process HTML: wrap all tables in responsive wrappers
+  const processedHtml = htmlContent.replace(
+    /<table/g, 
+    '<div class="table-responsive-wrapper"><table'
+  ).replace(
+    /<\/table>/g, 
+    '</table></div>'
+  );
+
+  // Also wrap any dynamically inserted tables after ads injection
+  useEffect(() => {
+    if (!containerRef.current) return;
+    const tables = containerRef.current.querySelectorAll('table');
+    tables.forEach((table) => {
+      if (table.parentElement && !table.parentElement.classList.contains('table-responsive-wrapper')) {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'table-responsive-wrapper';
+        table.parentElement.insertBefore(wrapper, table);
+        wrapper.appendChild(table);
+      }
+    });
+  }, [htmlContent, ads]);
+
   return (
     <div 
       ref={containerRef}
-      className="prose prose-invert max-w-none" 
+      className="prose prose-invert max-w-none blog-content" 
       style={{ lineHeight: '1.8', fontSize: '1.1rem', color: 'var(--color-text-secondary)' }}
-      dangerouslySetInnerHTML={{ __html: htmlContent }} 
+      dangerouslySetInnerHTML={{ __html: processedHtml }} 
     />
   );
 }

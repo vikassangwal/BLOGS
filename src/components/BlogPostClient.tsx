@@ -510,13 +510,13 @@ export default function BlogPostClient({ post, ads, relatedPosts, whatsappLinks 
         {relatedPosts.length > 0 && (
           <div style={{ marginTop: '4rem', borderTop: '1px solid var(--color-border)', paddingTop: '3rem' }}>
             <h3 style={{ fontSize: '1.8rem', fontWeight: 800, color: 'var(--color-text-primary)', marginBottom: '2rem' }}>Related Articles</h3>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '2rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(300px, 100%), 1fr))', gap: '2rem' }}>
               {relatedPosts.map((rp: any) => (
                 <a href={`/blog/${rp.slug}`} key={rp.id} style={{ textDecoration: 'none', color: 'inherit', display: 'flex', flexDirection: 'column', background: 'rgba(255, 255, 255, 0.03)', borderRadius: '16px', overflow: 'hidden', border: '1px solid var(--color-border)', transition: 'all 0.3s ease' }} className="minimal-card">
                   <div style={{ width: '100%', height: '180px', background: rp.featuredImage ? `url(${rp.featuredImage}) center/cover` : 'linear-gradient(135deg, #1e1e2f, #2d2b42)' }} />
                   <div style={{ padding: '1.5rem', flex: 1, display: 'flex', flexDirection: 'column' }}>
                     <h4 style={{ fontSize: '1.2rem', fontWeight: 700, margin: '0 0 0.5rem 0', color: 'var(--color-text-primary)', lineHeight: 1.4 }}>{rp.title}</h4>
-                    <p style={{ fontSize: '0.9rem', color: 'var(--color-text-secondary)', margin: '0 0 1rem 0', flex: 1, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{rp.excerpt || rp.content.replace(/<[^>]+>/g, '').substring(0, 100) + '...'}</p>
+                    <p style={{ fontSize: '0.9rem', color: 'var(--color-text-secondary)', margin: '0 0 1rem 0', flex: 1, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{rp.excerpt || 'Read this article...'}</p>
                     <span style={{ color: 'var(--color-accent)', fontWeight: 600, fontSize: '0.9rem' }}>Read Article →</span>
                   </div>
                 </a>
@@ -530,8 +530,8 @@ export default function BlogPostClient({ post, ads, relatedPosts, whatsappLinks 
       <BlogChatbot postId={post.id} postTitle={post.title} postTags={post.tags} whatsappLinks={whatsappLinks} />
 
       <style>{`
-        .blog-content h2 { fontSize: 2rem; fontWeight: 700; margin: 2.5rem 0 1rem; color: var(--color-text-primary); letter-spacing: -0.5px; }
-        .blog-content h3 { fontSize: 1.5rem; fontWeight: 600; margin: 2rem 0 1rem; color: var(--color-text-primary); }
+        .blog-content h2 { font-size: 2rem; font-weight: 700; margin: 2.5rem 0 1rem; color: var(--color-text-primary); letter-spacing: -0.5px; }
+        .blog-content h3 { font-size: 1.5rem; font-weight: 600; margin: 2rem 0 1rem; color: var(--color-text-primary); }
         .blog-content p { margin-bottom: 1.5rem; line-height: 1.8; color: var(--color-text-primary) !important; background: transparent !important; }
         .blog-content ul { margin: 0 0 1.5rem 2rem; list-style-type: disc; line-height: 1.8; color: var(--color-text-primary) !important; }
         .blog-content li { margin-bottom: 0.5rem; }
@@ -545,6 +545,12 @@ export default function BlogPostClient({ post, ads, relatedPosts, whatsappLinks 
         .blog-content th { background-color: rgba(255,255,255,0.05) !important; font-weight: 700; color: var(--color-text-primary) !important; }
         .blog-content tr:last-of-type td { border-bottom: none; }
         .blog-content tr:hover td { background-color: rgba(255,255,255,0.02) !important; }
+        @media (max-width: 768px) {
+          .blog-content h2 { font-size: 1.5rem; }
+          .blog-content h3 { font-size: 1.25rem; }
+          .blog-content table { font-size: 0.85rem; }
+          .blog-content th, .blog-content td { padding: 10px 12px; }
+        }
       `}</style>
     </div>
   );

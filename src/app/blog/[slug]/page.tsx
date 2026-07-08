@@ -88,7 +88,7 @@ export default async function BlogPostPage({ params }: Props) {
       where: { status: 'Published', slug: { not: slug } },
       orderBy: { publishedAt: 'desc' },
       take: 3,
-      select: { id: true, title: true, slug: true, excerpt: true, content: true, featuredImage: true }
+      select: { id: true, title: true, slug: true, excerpt: true, featuredImage: true }
     }),
     prisma.siteSettings.findUnique({ where: { id: 'default' } }),
     prisma.socialLink.findMany({ where: { platform: 'whatsapp', isActive: true } })

@@ -167,8 +167,8 @@ export async function GET(request: Request) {
       totalPages: Math.ceil(total / limit)
     });
     
-    // Cache for 60 seconds on CDN (Edge), stale-while-revalidate for 1 hour
-    response.headers.set('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=3600');
+    // Cache for 60 seconds on CDN (Edge), stale-while-revalidate for 5 min
+    response.headers.set('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300');
     return response;
   } catch (error) {
     console.error('Error fetching posts:', error);

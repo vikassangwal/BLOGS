@@ -76,8 +76,8 @@ export async function GET(request: Request, context: { params: Promise<{ slug: s
     };
 
     const response = NextResponse.json(formattedPost);
-    // Cache for 15 minutes on CDN (Edge), stale-while-revalidate for 1 hour
-    response.headers.set('Cache-Control', 'public, s-maxage=900, stale-while-revalidate=3600');
+    // Cache for 15 minutes on CDN (Edge), stale-while-revalidate for 5 min
+    response.headers.set('Cache-Control', 'public, s-maxage=900, stale-while-revalidate=300');
     return response;
   } catch (error) {
     console.error('Error fetching post:', error);

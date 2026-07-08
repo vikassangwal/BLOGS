@@ -7,6 +7,7 @@ const sidebarItems = [
   { name: 'Dashboard', path: '/admin', icon: '📊' },
   { name: 'Blog Management', path: '/admin/blog', icon: '📝' },
   { name: 'AI Auto-Blogging', path: '/admin/auto-blog', icon: '🤖' },
+  { name: 'Job Alerts Feed', path: '/admin/job-alerts', icon: '📡' },
   { name: 'AI Tools (Magic)', path: '/admin/ai-tools', icon: '🛠️' },
   { name: 'Captured Leads', path: '/admin/leads', icon: '🎯' },
   { name: 'Social Links', path: '/admin/social-links', icon: '🔗' },

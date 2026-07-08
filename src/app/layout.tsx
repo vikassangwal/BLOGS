@@ -91,8 +91,8 @@ export default async function RootLayout({
       <body className="antialiased min-h-screen flex flex-col relative transition-colors duration-300">
         {process.env.NEXT_PUBLIC_GA_ID && (
           <>
-            <Script strategy="afterInteractive" src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GA_ID}`} />
-            <Script id="google-analytics" strategy="afterInteractive">
+            <Script strategy="lazyOnload" src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GA_ID}`} />
+            <Script id="google-analytics" strategy="lazyOnload">
               {`
                 window.dataLayer = window.dataLayer || [];
                 function gtag(){dataLayer.push(arguments);}
@@ -121,27 +121,30 @@ export default async function RootLayout({
 
         <GlobalFooter siteName={siteName} />
 
-        <Script id="google-translate-init" strategy="lazyOnload">
-          {`
-            window.googleTranslateElementInit = function() {
-              new window.google.translate.TranslateElement({
-                pageLanguage: 'en',
-                autoDisplay: false,
-                layout: window.google.translate.TranslateElement.InlineLayout.SIMPLE
-              }, 'google_translate_element');
-            };
-          `}
-        </Script>
-        <Script
-          src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"
-          strategy="lazyOnload"
-        />
-        <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
+        {isTranslateActive && (
+          <>
+            <Script id="google-translate-init" strategy="lazyOnload">
+              {`
+                window.googleTranslateElementInit = function() {
+                  new window.google.translate.TranslateElement({
+                    pageLanguage: 'en',
+                    autoDisplay: false,
+                    layout: window.google.translate.TranslateElement.InlineLayout.SIMPLE
+                  }, 'google_translate_element');
+                };
+              `}
+            </Script>
+            <Script
+              src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"
+              strategy="lazyOnload"
+            />
+          </>
+        )}
 
         {/* OneSignal SDK */}
         {onesignalAppId && (
           <>
-            <Script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" strategy="afterInteractive" />
+            <Script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" strategy="lazyOnload" />
             <Script id="onesignal-init" strategy="lazyOnload">
               {`
                 window.OneSignalDeferred = window.OneSignalDeferred || [];

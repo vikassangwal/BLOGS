@@ -626,11 +626,12 @@ export async function POST(request: NextRequest) {
     6. TABLES FOR DATA: कोई भी आंकड़ा (तारीख, फीस, सैलरी, स्पेसिफिकेशन) हो तो HTML <table> बनाकर दें।
     7. BOLD IMPORTANT INFO: मुख्य शब्दों को <strong>Bold</strong> करें।
     8. MOBILE-FIRST: कोई भी पैराग्राफ 3-4 लाइनों से बड़ा नहीं होना चाहिए।
-    9. HTML FORMAT ONLY: कंटेंट सीधे पब्लिश करने योग्य HTML (<h2>, <p>, <table>, <ul>) में होगा। Markdown (##, **) का उपयोग ना करें।
+    9. HTML FORMAT ONLY: कंटेंट सीधे पब्लिश करने योग्य HTML (<h2>, <p>, <table>, <ul>, <ol>, <li>) में होगा। Markdown (##, **) का उपयोग ना करें।
     10. OFFICIAL HOME PAGE LINKS ONLY: बाहरी लिंक के लिए केवल मुख्य वेबसाइट का होमपेज (जैसे https://ssc.gov.in) दें। अगर आपको पता है कि डायरेक्ट लिंक अभी वेबसाइट पर नहीं आया है, तो साफ़ शब्दों में लिखें: "⚠️ *नोट: अभी डायरेक्ट अप्लाई लिंक या पीडीएफ वेबसाइट पर एक्टिव नहीं हुआ है, कृपया ऑफिशियल वेबसाइट चेक करते रहें।*" कभी भी खुद से फेक लिंक ना बनाएँ।
     11. HINGLISH SEO: 2-3 Hinglish कीवर्ड्स ("kaise kare", "kab aayega") डालें।
     12. VIRAL LISTICLE FORMAT: जहाँ भी मुमकिन हो (खासकर Technology और Finance में), जानकारियों को "Top 5", "Top 10", या "Best X" वाले पॉइंट-वाइज़ लिस्ट (Listicle) फॉर्मेट में लिखें। यह रीडर्स को बहुत एंगेजिंग लगता है।
     13. NEVER TRUNCATE: पूरा आर्टिकल (Introduction से Conclusion तक) लिखें।
+    15. STEP-BY-STEP NUMBERING (चरण-दर-चरण निर्देश): "आवेदन कैसे करें (How to Apply)" या कोई भी प्रक्रिया (Process/Steps) दर्शाने के लिए हमेशा 1, 2, 3 नंबरों वाले HTML Ordered List (<ol> और <li>) का उपयोग करें। बिना नंबरों वाले पैराग्राफ या सादे बुलेट पॉइंट (ul) का उपयोग न करें।
     14. COPYRIGHT SAFETY (कॉपीराइट सुरक्षा - अनिवार्य):
         - कभी भी किसी सरकारी अधिसूचना, समाचार एजेंसी, या वेबसाइट से टेक्स्ट को शब्दशः (Verbatim) कॉपी-पेस्ट न करें।
         - सभी जानकारियों को अपने शब्दों में पुनः लिखें (Rewrite in your own words)।
@@ -1047,6 +1048,55 @@ YOUR SEO SKILLS:
     console.log('✅ Link validation complete for:', targetTopic);
 
     // -------------------------------------------------------------
+    // AUTOMATIC SUB-TAG DETECTION FOR HOME GRID COLUMNS
+    // -------------------------------------------------------------
+    const detectedTagsSet = new Set<string>();
+    detectedTagsSet.add(pendingKeyword?.niche || selectedCategory); // Add primary niche first
+
+    const lowerTopic = targetTopic.toLowerCase();
+    if (lowerTopic.includes('job') || lowerTopic.includes('recruitment') || lowerTopic.includes('bharti') || lowerTopic.includes('vacancy') || lowerTopic.includes('naukri')) {
+      detectedTagsSet.add('Job');
+      detectedTagsSet.add('Vacancy');
+      detectedTagsSet.add('Career');
+    }
+    if (lowerTopic.includes('admit') || lowerTopic.includes('admit card') || lowerTopic.includes(' प्रवेश पत्र')) {
+      detectedTagsSet.add('Admit Card');
+    }
+    if (lowerTopic.includes('result') || lowerTopic.includes('परिणाम') || lowerTopic.includes('answer key') || lowerTopic.includes('उत्तर कुंजी') || lowerTopic.includes('syllabus') || lowerTopic.includes('cut off') || lowerTopic.includes('cutoff')) {
+      detectedTagsSet.add('Results');
+    }
+    if (lowerTopic.includes('university') || lowerTopic.includes('ignou') || lowerTopic.includes('college') || lowerTopic.includes('admission') || lowerTopic.includes('counselling') || lowerTopic.includes('counseling') || lowerTopic.includes('admissions') || lowerTopic.includes('merit list') || lowerTopic.includes('timetable') || lowerTopic.includes('time table') || lowerTopic.includes('university results')) {
+      detectedTagsSet.add('University');
+    }
+    if (lowerTopic.includes('scheme') || lowerTopic.includes('yojana') || lowerTopic.includes('योजना') || lowerTopic.includes('pm kisan') || lowerTopic.includes('e-shram') || lowerTopic.includes('shram')) {
+      detectedTagsSet.add('Scheme');
+    }
+    if (lowerTopic.includes('scholarship') || lowerTopic.includes('छात्रवृत्ति')) {
+      detectedTagsSet.add('Scholarship');
+    }
+    if (lowerTopic.includes('tech') || lowerTopic.includes('phone') || lowerTopic.includes('mobile') || lowerTopic.includes('gadget') || lowerTopic.includes('launch') || lowerTopic.includes('recharge') || lowerTopic.includes('outage') || lowerTopic.includes('app')) {
+      detectedTagsSet.add('Technology');
+    }
+    if (lowerTopic.includes('finance') || lowerTopic.includes('bank') || lowerTopic.includes('banking') || lowerTopic.includes('lic') || lowerTopic.includes('epfo') || lowerTopic.includes('savings') || lowerTopic.includes('interest rate') || lowerTopic.includes('gold rate')) {
+      detectedTagsSet.add('Finance');
+    }
+    if (lowerTopic.includes('earning') || lowerTopic.includes('earn') || lowerTopic.includes('money') || lowerTopic.includes('course') || lowerTopic.includes('courses') || lowerTopic.includes('free course') || lowerTopic.includes('online earning')) {
+      detectedTagsSet.add('Earning');
+    }
+
+    const tagsToCreate = Array.from(detectedTagsSet).map(tagName => ({
+      tag: {
+        connectOrCreate: {
+          where: { name: tagName },
+          create: {
+            name: tagName,
+            slug: tagName.toLowerCase().replace(/[^a-z0-9]+/g, '-')
+          }
+        }
+      }
+    }));
+
+    // -------------------------------------------------------------
     // SAVE TO DATABASE
     // -------------------------------------------------------------
     const finalSlug = seoData.slug + '-' + Date.now().toString().slice(-4);
@@ -1066,7 +1116,7 @@ YOUR SEO SKILLS:
         seoDescription: seoData.seoDescription,
         seoKeywords: seoData.seoKeywords,
         tags: {
-          create: [{ tag: { connectOrCreate: { where: { name: pendingKeyword?.niche || selectedCategory }, create: { name: pendingKeyword?.niche || selectedCategory, slug: (pendingKeyword?.niche || selectedCategory).toLowerCase().replace(/[^a-z0-9]+/g, '-') } } } }]
+          create: tagsToCreate
         }
       }
     });

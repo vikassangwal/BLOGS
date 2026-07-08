@@ -280,45 +280,46 @@ export default async function HomePage() {
   return (
     <div className="flex flex-col items-center justify-center px-3 sm:px-4 pt-4 pb-10">
       {/* Hero Section */}
-      <div className="max-w-4xl mx-auto text-center animate-slide-up mt-1 sm:mt-4">
-        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full glass-panel text-[10px] sm:text-xs text-blue-400 mb-2 border-blue-500/10 shadow-[0_0_15px_rgba(59,130,246,0.05)]">
-          <span className="relative flex h-1.5 w-1.5">
+      <div className="max-w-4xl mx-auto text-center animate-slide-up mt-2 sm:mt-6">
+        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full glass-panel text-xs text-blue-400 mb-4 border-blue-500/20 shadow-[0_0_20px_rgba(59,130,246,0.1)]">
+          <span className="relative flex h-2.5 w-2.5">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-blue-500"></span>
+            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-blue-500"></span>
           </span>
-          Real-Time Updates Dashboard
+          AI-Powered Content Generation is Live
         </div>
         
-        <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight mb-2 leading-tight text-white">
-          Stay Updated with <span className="premium-gradient-text">Knowora Portal</span>
+        <h1 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight mb-3 leading-tight text-white">
+          Next-Generation <br className="hidden sm:block" />
+          <span className="premium-gradient-text">Blogging Platform</span>
         </h1>
         
-        <p className="text-[11px] sm:text-xs text-gray-400 mb-3.5 max-w-lg mx-auto leading-relaxed px-4">
-          Instant job alerts, admit cards, exam results, admission guidelines, and public schemes updates.
+        <p className="text-xs sm:text-sm text-gray-400 mb-5 max-w-xl mx-auto font-light leading-relaxed px-4">
+          Discover expertly curated and AI-assisted insights in Technology, Education & Career, and Finance & Earning. High-quality knowledge for the modern world.
         </p>
         
-        <div className="flex gap-3 justify-center items-center">
-          <Link href="/blog" className="px-5 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-[11px] sm:text-xs font-bold rounded-full transition-all hover:scale-105 shadow-[0_4px_15px_rgba(37,99,235,0.2)]">
-            Browse All Notifications
+        <div className="flex gap-4 justify-center items-center">
+          <Link href="/blog" className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm font-bold rounded-full transition-all hover:scale-105 shadow-[0_0_20px_rgba(37,99,235,0.3)]">
+            Read Our Articles
           </Link>
         </div>
 
         {/* Quick Category Links */}
-        <div className="mt-4 flex flex-wrap justify-center gap-1.5 px-4">
-          <Link href="/blog?tag=Job" className="px-3 py-1.5 glass-panel hover:bg-emerald-500/10 border border-white/5 hover:border-emerald-500/20 rounded-full text-[10px] font-semibold transition-all text-gray-300 hover:text-white">
-            💼 Job Alerts
+        <div className="mt-5 flex flex-wrap justify-center gap-2.5">
+          <Link href="/blog?tag=Technology" className="px-4 py-2 glass-panel hover:bg-blue-500/10 border border-white/5 hover:border-blue-500/30 rounded-full text-xs font-semibold transition-all text-gray-300 hover:text-white">
+            💻 Technology
           </Link>
-          <Link href="/blog?tag=Admit%20Card" className="px-3 py-1.5 glass-panel hover:bg-blue-500/10 border border-white/5 hover:border-blue-500/20 rounded-full text-[10px] font-semibold transition-all text-gray-300 hover:text-white">
-            🎟️ Admit Cards
+          <Link href="/blog?tag=Education%20%26%20Career" className="px-4 py-2 glass-panel hover:bg-blue-500/10 border border-white/5 hover:border-blue-500/30 rounded-full text-xs font-semibold transition-all text-gray-300 hover:text-white">
+            🎓 Education & Career
           </Link>
-          <Link href="/blog?tag=Results" className="px-3 py-1.5 glass-panel hover:bg-purple-500/10 border border-white/5 hover:border-purple-500/20 rounded-full text-[10px] font-semibold transition-all text-gray-300 hover:text-white">
-            🏆 Exam Results
+          <Link href="/blog?tag=Finance%20%26%20Earning" className="px-4 py-2 glass-panel hover:bg-blue-500/10 border border-white/5 hover:border-blue-500/30 rounded-full text-xs font-semibold transition-all text-gray-300 hover:text-white">
+            💰 Finance & Earning
           </Link>
-          <Link href="/blog?tag=Guidelines" className="px-3 py-1.5 glass-panel hover:bg-cyan-500/10 border border-white/5 hover:border-cyan-500/20 rounded-full text-[10px] font-semibold transition-all text-gray-300 hover:text-white">
-            📖 Guidelines
+          <Link href="/blog?tag=News" className="px-4 py-2 glass-panel hover:bg-blue-500/10 border border-white/5 hover:border-blue-500/30 rounded-full text-xs font-semibold transition-all text-gray-300 hover:text-white">
+            📰 News
           </Link>
-          <Link href="/blog?tag=Scheme" className="px-3 py-1.5 glass-panel hover:bg-orange-500/10 border border-white/5 hover:border-orange-500/20 rounded-full text-[10px] font-semibold transition-all text-gray-300 hover:text-white">
-            🎁 Schemes
+          <Link href="/blog" className="px-4 py-2 glass-panel hover:bg-blue-500/10 border border-white/5 hover:border-blue-500/30 rounded-full text-xs font-semibold transition-all text-gray-300 hover:text-white">
+            ✨ View All
           </Link>
         </div>
       </div>

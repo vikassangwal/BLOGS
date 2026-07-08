@@ -26,10 +26,9 @@ export default function GlobalHeader({ siteName, translateActive }: { siteName?:
 
   const navLinks = [
     { name: 'Home', href: '/', path: '/' },
-    { name: 'Jobs', href: '/blog?tag=Job', path: '/blog', tag: 'Job' },
-    { name: 'Admit Cards', href: '/blog?tag=Admit+Card', path: '/blog', tag: 'Admit Card' },
-    { name: 'Results', href: '/blog?tag=Results', path: '/blog', tag: 'Results' },
-    { name: 'Guidelines', href: '/blog?tag=Guidelines', path: '/blog', tag: 'Guidelines' },
+    { name: 'Technology', href: '/blog?tag=Technology', path: '/blog', tag: 'Technology' },
+    { name: 'Education & Career', href: '/blog?tag=Education+%26+Career', path: '/blog', tag: 'Education & Career' },
+    { name: 'Finance & Earning', href: '/blog?tag=Finance+%26+Earning', path: '/blog', tag: 'Finance & Earning' },
     { name: 'About Us', href: '/about', path: '/about' },
   ];
 
@@ -179,11 +178,11 @@ export default function GlobalHeader({ siteName, translateActive }: { siteName?:
           {/* Theme Toggle */}
           <ThemeToggle />
 
-          {/* Hamburger Menu Toggle (Mobile Only) */}
+          {/* Hamburger Menu Toggle */}
           <button 
             type="button"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="md:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+            className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
             aria-label="Toggle Menu"
           >
             {isMobileMenuOpen ? (
@@ -204,10 +203,10 @@ export default function GlobalHeader({ siteName, translateActive }: { siteName?:
         </div>
       </div>
 
-      {/* Mobile Navigation Dropdown Panel */}
+      {/* Navigation Dropdown Panel */}
       {isMobileMenuOpen && (
         <div 
-          className="md:hidden absolute left-0 right-0 border-b shadow-lg w-full" 
+          className="absolute left-0 right-0 border-b shadow-lg w-full" 
           style={{ 
             top: '100%', 
             background: 'var(--color-bg-secondary)', 

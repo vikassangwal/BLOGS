@@ -107,6 +107,26 @@ export async function GET(request: NextRequest) {
         name: 'PIB Press Releases',
         url: 'https://news.google.com/rss/search?q=recruitment+OR+vacancy+site:pib.gov.in&hl=en-IN&gl=IN&ceid=IN:en',
         limit: 8
+      },
+      {
+        name: 'E-Gazette India',
+        url: 'https://news.google.com/rss/search?q=notification+OR+recruitment+OR+vacancy+site:egazette.gov.in&hl=en-IN&gl=IN&ceid=IN:en',
+        limit: 8
+      },
+      {
+        name: 'Board Exams (CBSE/ICSE)',
+        url: 'https://news.google.com/rss/search?q=exam+OR+date+sheet+OR+admit+card+OR+result+(site:cbse.gov.in+OR+site:cisce.org)&hl=en-IN&gl=IN&ceid=IN:en',
+        limit: 6
+      },
+      {
+        name: 'University Updates (DU/IGNOU)',
+        url: 'https://news.google.com/rss/search?q=admission+OR+results+OR+exam+form+OR+datesheet+(site:du.ac.in+OR+site:ignou.ac.in)&hl=en-IN&gl=IN&ceid=IN:en',
+        limit: 6
+      },
+      {
+        name: 'Admissions & Entrance (NTA)',
+        url: 'https://news.google.com/rss/search?q=counselling+OR+admissions+OR+results+OR+admit+card+site:nta.ac.in&hl=en-IN&gl=IN&ceid=IN:en',
+        limit: 6
       }
     ];
 
@@ -137,18 +157,16 @@ export async function GET(request: NextRequest) {
     }
 
     // Sort or filter if needed, de-duplicate by URL or title prefix
+    // Sort or filter if needed, de-duplicate by URL
     const uniqueAlerts: ScrapedAlert[] = [];
     const seenUrls = new Set<string>();
-    const seenTitles = new Set<string>();
 
     for (const alert of alerts) {
       // Clean redirect urls or extract from Google News if possible
       const cleanUrl = alert.sourceUrl.split('?')[0];
-      const titlePrefix = alert.title.substring(0, 30).toLowerCase();
 
-      if (!seenUrls.has(cleanUrl) && !seenTitles.has(titlePrefix)) {
+      if (!seenUrls.has(cleanUrl)) {
         seenUrls.add(cleanUrl);
-        seenTitles.add(titlePrefix);
         uniqueAlerts.push(alert);
       }
     }

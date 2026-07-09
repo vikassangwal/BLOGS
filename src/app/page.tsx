@@ -3,6 +3,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { prisma } from '@/lib/prisma';
 import BlogChatbot from '@/components/BlogChatbot';
+import SocialJoinStrip from '@/components/SocialJoinStrip';
 export const revalidate = 60; // Revalidate the page every 60 seconds for performance
 
 async function getPostsByTag(tag: string) {
@@ -490,8 +491,11 @@ export default async function HomePage() {
         </div>
 
       {/* Sarkari Job Central Grid (सरकारी जॉब ग्रिड) */}
-      <div className="max-w-6xl w-full mx-auto mt-20 px-4">
-        <div className="text-center mb-10">
+      <div className="max-w-6xl w-full mx-auto mt-16 px-4">
+        {/* Social Join Option above Grid */}
+        <SocialJoinStrip title="सरकारी भर्ती ग्रुप्स से जुड़ें (Join Job Groups):" />
+
+        <div className="text-center mb-10 mt-8">
           <h2 className="text-3xl md:text-4xl font-extrabold text-white mb-3">
             🎯 Job & Info Portal Grid (सरकारी जॉब एवं जानकारी ग्रिड)
           </h2>

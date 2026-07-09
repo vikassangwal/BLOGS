@@ -5,6 +5,23 @@ import BlogPostClient from '@/components/BlogPostClient';
 
 export const revalidate = 600; // Cache for 10 minutes
 
+export async function generateStaticParams() {
+  try {
+    const posts = await prisma.blogPost.findMany({
+      where: { status: 'Published' },
+      orderBy: { publishedAt: 'desc' },
+      take: 20,
+      select: { slug: true }
+    });
+    return posts.map((post) => ({
+      slug: post.slug,
+    }));
+  } catch (e) {
+    console.error("Error in generateStaticParams:", e);
+    return [];
+  }
+}
+
 type Props = {
   params: Promise<{ slug: string }>;
 };

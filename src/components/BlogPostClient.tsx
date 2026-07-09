@@ -6,6 +6,7 @@ import SmartBanners from '@/components/SmartBanners';
 import BlogChatbot from '@/components/BlogChatbot';
 import AdInjector from '@/components/AdInjector';
 import AdBanner from '@/components/AdBanner';
+import SocialJoinStrip from '@/components/SocialJoinStrip';
 
 interface BlogPostClientProps {
   post: any;
@@ -307,6 +308,10 @@ export default function BlogPostClient({ post, ads, relatedPosts, whatsappLinks 
                 <span style={{ background: 'rgba(147, 51, 234, 0.1)', color: '#c084fc', padding: '0.2rem 0.6rem', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 600, border: '1px solid rgba(147, 51, 234, 0.2)' }}>✨ AI Generated</span>
               </>
             )}
+          </div>
+          {/* Social Join Option below Title */}
+          <div className="mt-6 max-w-xl mx-auto">
+            <SocialJoinStrip title="लेटेस्ट अपडेट्स के लिए हमसे जुड़ें (Join Groups):" />
           </div>
         </header>
 

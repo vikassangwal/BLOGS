@@ -16,6 +16,42 @@ export default function JobAlertsDashboard() {
   const [queuingIndex, setQueuingIndex] = useState<number | null>(null);
   const [statusMessage, setStatusMessage] = useState('');
 
+  // Manual Add Form State
+  const [manualTitle, setManualTitle] = useState('');
+  const [manualUrl, setManualUrl] = useState('');
+  const [manualSource, setManualSource] = useState('Manual Entry');
+  const [showManualForm, setShowManualForm] = useState(false);
+
+  const handleManualAdd = (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setStatusMessage('');
+    if (!manualTitle.trim() || !manualUrl.trim()) {
+      setError('Please provide both a Title/Topic and a Source URL.');
+      return;
+    }
+    
+    // Validate URL format simply
+    if (!manualUrl.toLowerCase().startsWith('http://') && !manualUrl.toLowerCase().startsWith('https://')) {
+      setError('Please enter a valid URL starting with http:// or https://');
+      return;
+    }
+
+    const newAlert: ScrapedAlert = {
+      title: manualTitle.trim(),
+      sourceUrl: manualUrl.trim(),
+      pubDate: new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }),
+      source: manualSource.trim() || 'Manual Entry'
+    };
+
+    setAlerts([newAlert, ...alerts]);
+    setManualTitle('');
+    setManualUrl('');
+    setManualSource('Manual Entry');
+    setShowManualForm(false);
+    setStatusMessage(`🎉 Added "${newAlert.title}" manually. You can now generate an AI post on it!`);
+  };
+
   const fetchAlerts = async () => {
     setLoading(true);
     setError('');
@@ -103,26 +139,114 @@ export default function JobAlertsDashboard() {
             Monitor real-time official alerts from UPSC, Employment News, and PIB to generate posts instantly.
           </p>
         </div>
-        <button 
-          onClick={fetchAlerts} 
-          disabled={loading}
-          style={{
-            background: 'linear-gradient(135deg, #0066cc, #004999)',
-            color: '#fff',
-            border: 'none',
-            padding: '0.8rem 1.5rem',
-            borderRadius: '8px',
-            fontWeight: 600,
-            cursor: loading ? 'not-allowed' : 'pointer',
-            opacity: loading ? 0.7 : 1,
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem'
-          }}
-        >
-          {loading ? '⏳ Refreshing...' : '🔄 Sync Latest Feed'}
-        </button>
+        <div style={{ display: 'flex', gap: '0.75rem' }}>
+          <button 
+            onClick={() => setShowManualForm(!showManualForm)}
+            style={{
+              background: showManualForm ? 'rgba(239, 68, 68, 0.1)' : 'rgba(255,255,255,0.05)',
+              color: showManualForm ? '#f87171' : 'var(--color-text-primary)',
+              border: '1px solid var(--color-border)',
+              padding: '0.8rem 1.5rem',
+              borderRadius: '8px',
+              fontWeight: 600,
+              cursor: 'pointer'
+            }}
+          >
+            {showManualForm ? '✖ Close Form' : '➕ Add Manual Alert'}
+          </button>
+          <button 
+            onClick={fetchAlerts} 
+            disabled={loading}
+            style={{
+              background: 'linear-gradient(135deg, #0066cc, #004999)',
+              color: '#fff',
+              border: 'none',
+              padding: '0.8rem 1.5rem',
+              borderRadius: '8px',
+              fontWeight: 600,
+              cursor: loading ? 'not-allowed' : 'pointer',
+              opacity: loading ? 0.7 : 1,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem'
+            }}
+          >
+            {loading ? '⏳ Refreshing...' : '🔄 Sync Latest Feed'}
+          </button>
+        </div>
       </div>
+
+      {/* Manual Alert Add Form */}
+      {showManualForm && (
+        <form onSubmit={handleManualAdd} style={{
+          background: 'rgba(255, 255, 255, 0.02)',
+          border: '1px solid var(--color-border)',
+          borderRadius: '16px',
+          padding: '1.5rem',
+          marginBottom: '2.5rem',
+          boxShadow: '0 4px 30px rgba(0,0,0,0.15)'
+        }}>
+          <h3 style={{ margin: '0 0 1.25rem 0', fontSize: '1.2rem', fontWeight: 700 }}>➕ Add New Job Alert Manually (मैन्युअल जॉब अलर्ट जोड़ें)</h3>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.25rem' }}>
+            <div>
+              <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--color-text-secondary)', marginBottom: '0.5rem', fontWeight: 600 }}>
+                Job Topic / Alert Title (e.g. UPSC Direct Recruitment 2026: 500+ Posts)
+              </label>
+              <input 
+                type="text" 
+                placeholder="Enter alert title / keyword..." 
+                value={manualTitle}
+                onChange={(e) => setManualTitle(e.target.value)}
+                style={{
+                  width: '100%',
+                  background: 'rgba(255,255,255,0.05)',
+                  border: '1px solid var(--color-border)',
+                  borderRadius: '8px',
+                  padding: '0.75rem',
+                  color: '#fff',
+                  fontSize: '0.9rem'
+                }}
+              />
+            </div>
+            <div>
+              <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--color-text-secondary)', marginBottom: '0.5rem', fontWeight: 600 }}>
+                Official Alert Source URL (e.g. https://upsc.gov.in/notifications)
+              </label>
+              <input 
+                type="text" 
+                placeholder="https://..." 
+                value={manualUrl}
+                onChange={(e) => setManualUrl(e.target.value)}
+                style={{
+                  width: '100%',
+                  background: 'rgba(255,255,255,0.05)',
+                  border: '1px solid var(--color-border)',
+                  borderRadius: '8px',
+                  padding: '0.75rem',
+                  color: '#fff',
+                  fontSize: '0.9rem'
+                }}
+              />
+            </div>
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem' }}>
+            <button 
+              type="submit"
+              style={{
+                background: 'linear-gradient(135deg, #10b981, #059669)',
+                color: '#fff',
+                border: 'none',
+                padding: '0.75rem 1.5rem',
+                borderRadius: '8px',
+                fontWeight: 600,
+                cursor: 'pointer'
+              }}
+            >
+              🚀 Add to Alert Feed
+            </button>
+          </div>
+        </form>
+      )}
 
       {/* Messages */}
       {statusMessage && (

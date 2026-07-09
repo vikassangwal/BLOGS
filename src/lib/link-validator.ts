@@ -127,40 +127,83 @@ const BLOCKED_DOMAINS = [
   'embibe.com', 'prepp.in', 'byjus.com'
 ];
 
+// Curated mapping of recruitment bodies to their official apply portals
+const PORTAL_APPLY: Record<string, string> = {
+  'ssc': 'https://ssc.gov.in/candidate-portal/login',
+  'upsc': 'https://upsconline.nic.in',
+  'ibps': 'https://ibps.in',
+  'nta': 'https://nta.ac.in',
+  'ncs': 'https://ncs.gov.in',
+  'rpsc': 'https://rpsc.rajasthan.gov.in',
+  'rsmssb': 'https://rsmssb.rajasthan.gov.in',
+  'uppsc': 'https://uppsc.up.nic.in',
+  'upsssc': 'https://upsssc.gov.in',
+  'bpsc': 'https://bpsc.bih.nic.in',
+  'ignou': 'https://ignou.ac.in',
+  'scholarship': 'https://scholarships.gov.in'
+};
+
+// Curated mapping of recruitment bodies to their official notifications listing pages
+const PORTAL_NOTIFICATIONS: Record<string, string> = {
+  'ssc': 'https://ssc.gov.in/candidate-portal/notices',
+  'upsc': 'https://upsc.gov.in/examinations/Active-Examinations',
+  'ibps': 'https://ibps.in',
+  'nta': 'https://nta.ac.in/NoticeBoard',
+  'cbse': 'https://cbse.gov.in/newtab/latest.html',
+  'ignou': 'https://ignou.ac.in/ignou/bulletinboard/news',
+  'rpsc': 'https://rpsc.rajasthan.gov.in/advertisements',
+  'rsmssb': 'https://rsmssb.rajasthan.gov.in/page?menuName=ApBuDetail&id=103',
+  'uppsc': 'https://uppsc.up.nic.in/Candidate_Registration.aspx',
+  'upsssc': 'https://upsssc.gov.in/AllNotifications.aspx',
+  'bpsc': 'https://bpsc.bih.nic.in',
+  'scholarship': 'https://scholarships.gov.in'
+};
+
 /**
  * Validates and fixes all external links in blog HTML content.
  * - Blocks competitor domains
  * - Blocks Google search redirect links
- * - Replaces broken/fake links with verified official portal homepages
+ * - Replaces broken/fake links with verified official portal homepages or specific apply/notification pages
  * - Adds warning notes for unverified links
  */
 export function validateAndFixLinks(html: string, topicTitle: string): string {
   if (!html) return html;
 
-  // Regex to find all anchor tags with href
-  const linkRegex = /<a\s+([^>]*?)href=["']([^"']+)["']([^>]*?)>/gi;
+  // Regex to find all anchor tags with href and text content
+  const linkRegex = /<a\s+([^>]*?)href=["']([^"']+)["']([^>]*?)>([\s\S]*?)<\/a>/gi;
 
-  let fixedHtml = html.replace(linkRegex, (match, before, href, after) => {
+  let fixedHtml = html.replace(linkRegex, (match, before, href, after, text) => {
     const lowerHref = href.toLowerCase();
+    const linkText = text.toLowerCase();
+
+    const isApplyLink = linkText.includes('apply') || linkText.includes('आवेदन') || linkText.includes('रजिस्ट्रेशन') || linkText.includes('registration') || linkText.includes('अप्लाई');
+    const isNotifLink = linkText.includes('notific') || linkText.includes('विज्ञापन') || linkText.includes('अधिसूचना') || linkText.includes('pdf') || linkText.includes('डाउनलोड') || linkText.includes('download');
+
+    // Helper to find the appropriate replacement link
+    const getReplacement = () => {
+      if (isApplyLink) return findOfficialApplyPortal(topicTitle);
+      if (isNotifLink) return findOfficialNotificationPortal(topicTitle);
+      return findOfficialPortal(topicTitle);
+    };
 
     // 1. Block Google search redirect URLs
     if (lowerHref.includes('google.com/search') || lowerHref.includes('google.com/url')) {
-      const replacement = findOfficialPortal(topicTitle);
-      return `<a ${before}href="${replacement}"${after} target="_blank" rel="noopener noreferrer">`;
+      const replacement = getReplacement();
+      return `<a ${before}href="${replacement}"${after} target="_blank" rel="noopener noreferrer">${text}</a>`;
     }
 
     // 2. Block competitor domains
     for (const blocked of BLOCKED_DOMAINS) {
       if (lowerHref.includes(blocked)) {
-        const replacement = findOfficialPortal(topicTitle);
-        return `<a ${before}href="${replacement}"${after} target="_blank" rel="noopener noreferrer">`;
+        const replacement = getReplacement();
+        return `<a ${before}href="${replacement}"${after} target="_blank" rel="noopener noreferrer">${text}</a>`;
       }
     }
 
     // 3. Block empty/placeholder links
     if (href === '#' || href === '' || href.includes('LINK_NOT_AVAILABLE') || href.includes('example.com')) {
-      const replacement = findOfficialPortal(topicTitle);
-      return `<a ${before}href="${replacement}"${after} target="_blank" rel="noopener noreferrer">`;
+      const replacement = getReplacement();
+      return `<a ${before}href="${replacement}"${after} target="_blank" rel="noopener noreferrer">${text}</a>`;
     }
 
     // 4. Ensure external links have target="_blank" and rel="noopener noreferrer"
@@ -170,7 +213,7 @@ export function validateAndFixLinks(html: string, topicTitle: string): string {
       let attrs = '';
       if (!hasTarget) attrs += ' target="_blank"';
       if (!hasRel) attrs += ' rel="noopener noreferrer"';
-      return `<a ${before}href="${href}"${after}${attrs}>`;
+      return `<a ${before}href="${href}"${after}${attrs}>${text}</a>`;
     }
 
     return match;
@@ -181,20 +224,49 @@ export function validateAndFixLinks(html: string, topicTitle: string): string {
 
 /**
  * Finds the most relevant official portal URL based on the blog topic title.
- * Matches keywords in the title against the OFFICIAL_PORTALS mapping.
  */
 function findOfficialPortal(topicTitle: string): string {
   const lower = topicTitle.toLowerCase();
-
-  // Try exact keyword matches first (longer keywords first for specificity)
   const sortedKeys = Object.keys(OFFICIAL_PORTALS).sort((a, b) => b.length - a.length);
   for (const keyword of sortedKeys) {
     if (lower.includes(keyword)) {
       return OFFICIAL_PORTALS[keyword];
     }
   }
+  return 'https://ncs.gov.in';
+}
 
-  // Default fallback: NCS (National Career Service) portal
+/**
+ * Finds the most relevant official candidate login / apply page based on the blog topic.
+ */
+function findOfficialApplyPortal(topicTitle: string): string {
+  const lower = topicTitle.toLowerCase();
+  const sortedKeys = Object.keys(PORTAL_APPLY).sort((a, b) => b.length - a.length);
+  for (const keyword of sortedKeys) {
+    if (lower.includes(keyword)) {
+      return PORTAL_APPLY[keyword];
+    }
+  }
+  // Try fallback to general portal homepage
+  const portalHome = findOfficialPortal(topicTitle);
+  if (portalHome !== 'https://ncs.gov.in') return portalHome;
+  return 'https://ncs.gov.in';
+}
+
+/**
+ * Finds the most relevant official notifications / vacancy bulletin listing page.
+ */
+function findOfficialNotificationPortal(topicTitle: string): string {
+  const lower = topicTitle.toLowerCase();
+  const sortedKeys = Object.keys(PORTAL_NOTIFICATIONS).sort((a, b) => b.length - a.length);
+  for (const keyword of sortedKeys) {
+    if (lower.includes(keyword)) {
+      return PORTAL_NOTIFICATIONS[keyword];
+    }
+  }
+  // Try fallback to general portal homepage
+  const portalHome = findOfficialPortal(topicTitle);
+  if (portalHome !== 'https://ncs.gov.in') return portalHome;
   return 'https://ncs.gov.in';
 }
 

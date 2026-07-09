@@ -435,15 +435,17 @@ export async function POST(request: NextRequest) {
       } catch(e){}
     }
     if (geminiKey && geminiKey.length > 10) {
-      researcherConfig.fallback = { ...researcherConfig.primary }; // Keep OpenRouter as fallback
-      researcherConfig.primary = { provider: 'gemini', apiKey: geminiKey, model: 'gemini-1.5-flash' };
+      researcherConfig.configs.unshift({ provider: 'gemini', apiKey: geminiKey, model: 'gemini-1.5-flash' });
     }
 
     const writerConfig = buildAgentConfigs('writer', 'openrouter', wModel || 'openai/gpt-4o-mini', 8000);
     const seoConfig = buildAgentConfigs('seo', 'openrouter', sModel || 'openai/gpt-4o-mini', 500);
 
     // Verify at least one agent has a valid API key
-    if (!researcherConfig.primary.apiKey && !writerConfig.primary.apiKey && !seoConfig.primary.apiKey) {
+    const hasResearcherKey = researcherConfig.configs.length > 0 && researcherConfig.configs[0].apiKey;
+    const hasWriterKey = writerConfig.configs.length > 0 && writerConfig.configs[0].apiKey;
+    const hasSeoKey = seoConfig.configs.length > 0 && seoConfig.configs[0].apiKey;
+    if (!hasResearcherKey && !hasWriterKey && !hasSeoKey) {
       return NextResponse.json({ success: false, error: 'AI is not configured. Please add at least one API key in Settings > AI Configuration.' });
     }
 

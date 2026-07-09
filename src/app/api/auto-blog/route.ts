@@ -363,7 +363,9 @@ export async function POST(request: NextRequest) {
       Verify topics from India's Premier Official Portals: ssc.gov.in, upsc.gov.in, ibps.in, nta.ac.in, cbse.gov.in, ignou.ac.in, scholarships.gov.in, employmentnews.gov.in. DO NOT pick unverified rumors.
       
       Respond ONLY with a valid JSON array of exactly 15 strings. No markdown.
-      Example format: ["Topic 1", "Topic 2", "Topic 3", ...]`;
+      Example format: ["Topic 1", "Topic 2", "Topic 3", ...]
+      
+      CRITICAL INSTRUCTION: If you do not have live internet access, you MUST STILL generate the JSON array using your existing knowledge of what typically happens in this month. Do NOT refuse to answer. Do NOT apologize. ONLY output the JSON array.`;
 
       let rModel = settings.researcherModel || '';
       const researcherConfigForTopic = buildAgentConfigs('researcher', 'openrouter', rModel || 'google/gemini-2.5-flash', 1500);
@@ -372,7 +374,7 @@ export async function POST(request: NextRequest) {
         const topicRaw = await generateContentWithFallback(researcherConfigForTopic, "You output strict JSON arrays of 15 strings.", prompt);
         const firstBracket = topicRaw.indexOf('[');
         const lastBracket = topicRaw.lastIndexOf(']');
-        if (firstBracket === -1 || lastBracket === -1) throw new Error("No JSON array found in AI output");
+        if (firstBracket === -1 || lastBracket === -1) throw new Error("No JSON array found in AI output. AI Output: " + topicRaw);
         const cleanTopicJson = topicRaw.substring(firstBracket, lastBracket + 1);
         const generatedTopics = JSON.parse(cleanTopicJson);
         

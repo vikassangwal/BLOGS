@@ -6,6 +6,19 @@ function getCurrentYearNum() {
   return new Date().getFullYear();
 }
 
+async function fetchWithTimeout(url: string, options: any = {}, timeoutMs = 3000) {
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const response = await fetch(url, { ...options, signal: controller.signal });
+    clearTimeout(id);
+    return response;
+  } catch (error) {
+    clearTimeout(id);
+    throw error;
+  }
+}
+
 import { NextRequest, NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
 import { prisma } from '@/lib/prisma';
@@ -113,8 +126,7 @@ export async function POST(request: NextRequest) {
 
     // Background Dispatch Wrapper to prevent Vercel 504 Gateway Timeout
     const isBgRun = request.headers.get('x-bg-run') === 'true' || new URL(request.url).searchParams.get('bg-run') === 'true';
-    const isForceRun = request.headers.get('x-force-run') === 'true' || new URL(request.url).searchParams.get('force-run') === 'true';
-    if (!isBgRun && !isForceRun) {
+    if (!isBgRun) {
       const targetUrl = new URL(request.url);
       targetUrl.searchParams.set('bg-run', 'true');
       
@@ -139,7 +151,7 @@ export async function POST(request: NextRequest) {
 
       return NextResponse.json({ 
         success: true, 
-        message: "Auto-blog generation successfully triggered in the background. Check logs tab in 1-2 minutes." 
+        message: "Auto-blog generation successfully triggered in the background. Please wait 1-2 minutes and refresh the page to see updates." 
       }, { status: 202 });
     }
 
@@ -283,14 +295,14 @@ export async function POST(request: NextRequest) {
       if (savedKeys.newsdata) {
           try {
               // General India news
-              const ndRes = await fetch(`https://newsdata.io/api/1/news?apikey=${savedKeys.newsdata}&country=in&language=en,hi`);
+              const ndRes = await fetchWithTimeout(`https://newsdata.io/api/1/news?apikey=${savedKeys.newsdata}&country=in&language=en,hi`, {}, 3000);
               const ndJson = await ndRes.json();
               if (ndJson.results) {
                  seedNews = "LIVE NEWS HEADLINES RIGHT NOW (USE THESE TO GENERATE TOPICS):\n" + ndJson.results.map((r: any) => `- ${r.title}`).join('\n');
               }
               // Education-specific news (university results, admissions, board exams)
               try {
-                const eduRes = await fetch(`https://newsdata.io/api/1/news?apikey=${savedKeys.newsdata}&country=in&language=en,hi&category=education`);
+                const eduRes = await fetchWithTimeout(`https://newsdata.io/api/1/news?apikey=${savedKeys.newsdata}&country=in&language=en,hi&category=education`, {}, 3000);
                 const eduJson = await eduRes.json();
                 if (eduJson.results && eduJson.results.length > 0) {
                   seedNews += "\n\n📚 LIVE EDUCATION & UNIVERSITY NEWS (HIGH PRIORITY - USE THESE):\n" + eduJson.results.slice(0, 10).map((r: any) => `- ${r.title}`).join('\n');
@@ -446,7 +458,7 @@ export async function POST(request: NextRequest) {
     let liveNewsContext = '';
     if (savedKeys.newsdata) {
       try {
-        const newsRes = await fetch(`https://newsdata.io/api/1/news?apikey=${savedKeys.newsdata}&q=${encodeURIComponent(targetTopic.split(' ')[0] || 'india')}&language=en,hi`);
+        const newsRes = await fetchWithTimeout(`https://newsdata.io/api/1/news?apikey=${savedKeys.newsdata}&q=${encodeURIComponent(targetTopic.split(' ')[0] || 'india')}&language=en,hi`, {}, 4000);
         const newsJson = await newsRes.json();
         if (newsJson.results && newsJson.results.length > 0) {
           liveNewsContext = "LIVE NEWS DATA (Use this for factual accuracy):\n" + 

@@ -126,7 +126,7 @@ export default function AutoBlogAdmin() {
       if (data.status === 'empty') {
         alert(data.message || 'No pending keywords found');
       } else if (data.success) {
-        alert('Auto-blog generated successfully!');
+        alert(data.message || 'Auto-blog generated successfully!');
         fetchData();
       } else {
         if (data.error && data.error.includes('AI detected fake')) {

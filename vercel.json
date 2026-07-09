@@ -4,15 +4,15 @@
   "crons": [
     {
       "path": "/api/cron/auto-blog",
-      "schedule": "*/30 * * * *"
-    },
-    {
-      "path": "/api/cron/researcher",
       "schedule": "0 0 * * *"
     },
     {
+      "path": "/api/cron/researcher",
+      "schedule": "0 1 * * *"
+    },
+    {
       "path": "/api/cron/syndicator",
-      "schedule": "0 */4 * * *"
+      "schedule": "0 2 * * *"
     }
   ]
 }

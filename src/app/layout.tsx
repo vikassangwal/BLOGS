@@ -1,5 +1,5 @@
 import { Suspense } from 'react';
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import Script from 'next/script';
 import NextTopLoader from 'nextjs-toploader';
 import './globals.css';
@@ -7,6 +7,13 @@ import GlobalHeader from '@/components/GlobalHeader';
 import GlobalFooter from '@/components/GlobalFooter';
 
 import { prisma } from '@/lib/prisma';
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1.0,
+  maximumScale: 5.0,
+  userScalable: true,
+};
 
 export async function generateMetadata(): Promise<Metadata> {
   let settings = null;

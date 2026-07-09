@@ -49,12 +49,12 @@ export default function SocialJoinStrip({ title = "हमसे जुड़ें 
   };
 
   return (
-    <div className="w-full py-3 px-4 rounded-2xl border border-white/5 bg-white/2 backdrop-blur-md overflow-hidden select-none my-4 shadow-sm">
-      <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-        <span className="font-extrabold text-xs text-gray-300 flex items-center gap-1 shrink-0">
+    <div className="w-full py-1.5 px-3 rounded-xl border border-white/5 bg-white/5 backdrop-blur-md select-none my-2 shadow-sm">
+      <div className="flex flex-row items-center justify-between gap-3 overflow-hidden">
+        <span className="font-extrabold text-[10px] sm:text-xs text-gray-300 flex items-center gap-1 shrink-0">
           📢 {title}
         </span>
-        <div className="flex flex-wrap items-center justify-center gap-2">
+        <div className="flex items-center gap-1.5 overflow-x-auto whitespace-nowrap scroll-smooth py-0.5" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
           {links.map((link) => {
             const config = getPlatformStyle(link.platform);
             return (
@@ -63,7 +63,7 @@ export default function SocialJoinStrip({ title = "हमसे जुड़ें 
                 href={link.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className={`inline-flex items-center gap-1.5 px-3 py-1 text-xs font-bold rounded-full border transition-all hover:scale-105 shrink-0 ${config.classes}`}
+                className={`inline-flex items-center gap-1 px-2.5 py-0.5 text-[10px] sm:text-xs font-bold rounded-full border transition-all hover:scale-105 shrink-0 ${config.classes}`}
               >
                 <span>{config.icon}</span>
                 <span>{link.label || link.platform}</span>
@@ -72,6 +72,11 @@ export default function SocialJoinStrip({ title = "हमसे जुड़ें 
           })}
         </div>
       </div>
+      <style jsx>{`
+        div::-webkit-scrollbar {
+          display: none;
+        }
+      `}</style>
     </div>
   );
 }

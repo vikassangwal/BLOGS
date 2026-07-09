@@ -13,9 +13,10 @@ interface BlogPostClientProps {
   ads: any[];
   relatedPosts: any[];
   whatsappLinks?: any[];
+  commentsEnabled?: boolean;
 }
 
-export default function BlogPostClient({ post, ads, relatedPosts, whatsappLinks }: BlogPostClientProps) {
+export default function BlogPostClient({ post, ads, relatedPosts, whatsappLinks, commentsEnabled = true }: BlogPostClientProps) {
   const [isUnlocked, setIsUnlocked] = useState(false);
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -25,6 +26,55 @@ export default function BlogPostClient({ post, ads, relatedPosts, whatsappLinks 
 
   const [activeTranslation, setActiveTranslation] = useState<any>(null);
   const [imageSrc, setImageSrc] = useState(post.featuredImage);
+
+  // Comments State
+  const [comments, setComments] = useState<any[]>([]);
+  const [commentName, setCommentName] = useState('');
+  const [commentText, setCommentText] = useState('');
+  const [isSubmittingComment, setIsSubmittingComment] = useState(false);
+  const [commentMessage, setCommentMessage] = useState('');
+  const [commentError, setCommentError] = useState('');
+
+  useEffect(() => {
+    if (commentsEnabled && post?.slug) {
+      fetch(`/api/blog/${post.slug}/comments`)
+        .then(res => res.json())
+        .then(data => {
+          if (Array.isArray(data)) setComments(data);
+        })
+        .catch(err => console.error('Failed to load comments:', err));
+    }
+  }, [post?.slug, commentsEnabled]);
+
+  const handleCommentSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setCommentError('');
+    setCommentMessage('');
+    if (!commentName.trim() || !commentText.trim()) {
+      setCommentError('Both Name and Comment are required.');
+      return;
+    }
+    setIsSubmittingComment(true);
+    try {
+      const res = await fetch(`/api/blog/${post.slug}/comments`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ author: commentName, content: commentText })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setComments([data.comment, ...comments]);
+        setCommentText('');
+        setCommentMessage('🎉 Comment posted successfully!');
+      } else {
+        setCommentError(data.error || 'Failed to post comment.');
+      }
+    } catch (err: any) {
+      setCommentError('An error occurred. Please try again.');
+    } finally {
+      setIsSubmittingComment(false);
+    }
+  };
 
   useEffect(() => {
     if (post.featuredImage && post.featuredImage.includes('source.unsplash.com')) {
@@ -505,6 +555,91 @@ export default function BlogPostClient({ post, ads, relatedPosts, whatsappLinks 
         <div style={{ marginTop: '4rem' }}>
           <LeadCaptureForm postId={post.id} />
         </div>
+
+        {/* Dynamic Comments System */}
+        {commentsEnabled && (
+          <div style={{ marginTop: '4rem', borderTop: '1px solid var(--color-border)', paddingTop: '3rem' }}>
+            <h3 style={{ fontSize: '1.8rem', fontWeight: 800, color: 'var(--color-text-primary)', marginBottom: '1.5rem' }}>
+              💬 Comments & Discussion (टिप्पणियां)
+            </h3>
+
+            {/* Comment Messages */}
+            {commentMessage && (
+              <div style={{ background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.2)', color: '#34d399', padding: '1rem', borderRadius: '12px', marginBottom: '1.5rem', fontSize: '0.9rem', fontWeight: 600 }}>
+                {commentMessage}
+              </div>
+            )}
+            {commentError && (
+              <div style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.2)', color: '#f87171', padding: '1rem', borderRadius: '12px', marginBottom: '1.5rem', fontSize: '0.9rem', fontWeight: 600 }}>
+                {commentError}
+              </div>
+            )}
+
+            {/* Add Comment Form */}
+            <form onSubmit={handleCommentSubmit} style={{ background: 'rgba(255, 255, 255, 0.02)', border: '1px solid var(--color-border)', borderRadius: '16px', padding: '1.5rem', marginBottom: '2.5rem' }}>
+              <h4 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '1rem', color: 'var(--color-text-primary)' }}>Write a Comment (अपनी टिप्पणी लिखें)</h4>
+              <div style={{ marginBottom: '1rem' }}>
+                <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--color-text-secondary)', marginBottom: '0.5rem', fontWeight: 600 }}>Name (आपका नाम)</label>
+                <input 
+                  type="text" 
+                  placeholder="Enter your name..." 
+                  value={commentName} 
+                  onChange={(e) => setCommentName(e.target.value)} 
+                  style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--color-border)', fontSize: '0.9rem' }} 
+                  required
+                />
+              </div>
+              <div style={{ marginBottom: '1.25rem' }}>
+                <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--color-text-secondary)', marginBottom: '0.5rem', fontWeight: 600 }}>Comment (आपकी टिप्पणी)</label>
+                <textarea 
+                  placeholder="Write your comment here..." 
+                  rows={4} 
+                  value={commentText} 
+                  onChange={(e) => setCommentText(e.target.value)} 
+                  style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--color-border)', fontSize: '0.9rem', resize: 'vertical' }} 
+                  required
+                />
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                <button 
+                  type="submit" 
+                  disabled={isSubmittingComment}
+                  className="btn-primary" 
+                  style={{ background: 'linear-gradient(135deg, var(--color-accent), #2563eb)', border: 'none', fontWeight: 700, padding: '0.6rem 1.5rem', height: 'auto', minHeight: 'auto' }}
+                >
+                  {isSubmittingComment ? 'Posting...' : '🚀 Post Comment'}
+                </button>
+              </div>
+            </form>
+
+            {/* List of Comments */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+              {comments.length === 0 ? (
+                <div style={{ textAlign: 'center', color: 'var(--color-text-secondary)', padding: '2rem 0', background: 'rgba(255,255,255,0.01)', borderRadius: '12px', border: '1px dashed var(--color-border)' }}>
+                  💬 No comments yet. Be the first to start the discussion!
+                </div>
+              ) : (
+                comments.map((comment) => (
+                  <div key={comment.id} style={{ background: 'rgba(255, 255, 255, 0.01)', border: '1px solid var(--color-border)', borderRadius: '16px', padding: '1.25rem', display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>
+                    <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'linear-gradient(135deg, var(--color-accent), #c084fc)', display: 'flex', alignItems: 'center', justifyCenter: 'center', fontSize: '1.1rem', color: '#fff', fontWeight: 'bold', flexShrink: 0, justifyContent: 'center' }}>
+                      {comment.author.substring(0, 1).toUpperCase()}
+                    </div>
+                    <div>
+                      <div style={{ display: 'flex', gap: '0.5rem', itemsCenter: 'center', marginBottom: '0.25rem', flexWrap: 'wrap' }}>
+                        <span style={{ fontWeight: 700, fontSize: '0.95rem', color: 'var(--color-text-primary)' }}>{comment.author}</span>
+                        <span style={{ color: 'var(--color-text-secondary)', fontSize: '0.8rem' }}>•</span>
+                        <span style={{ color: 'var(--color-text-secondary)', fontSize: '0.8rem' }}>{new Date(comment.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
+                      </div>
+                      <p style={{ fontSize: '0.95rem', color: 'var(--color-text-secondary)', margin: 0, lineHeight: 1.5 }}>
+                        {comment.content}
+                      </p>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Footer Ad */}
         {footerAd && (

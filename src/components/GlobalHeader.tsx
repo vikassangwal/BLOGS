@@ -73,12 +73,12 @@ export default function GlobalHeader({ siteName, translateActive }: { siteName?:
     <header className="sticky top-0 z-50 glass-panel w-full" style={{ borderBottom: '1px solid var(--color-border)', position: 'relative' }}>
       <div className="container mx-auto px-4 md:px-6 h-16 md:h-20 flex items-center justify-between">
         {/* Left: Logo */}
-        <a href="/" className="flex items-center" style={{ zIndex: 60, position: 'relative', height: '48px', width: '180px' }}>
+        <a href="/" className="flex items-center h-12 w-44 md:h-14 md:w-56" style={{ zIndex: 60, position: 'relative' }}>
           <Image src="/logo.png" alt={siteName || 'Knowora'} fill style={{ objectFit: 'contain', objectPosition: 'left' }} priority />
         </a>
 
-        {/* Center: Desktop Navigation Links (Hidden on Mobile) */}
-        <nav className="hidden md:flex gap-6 items-center font-semibold text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+        {/* Center: Desktop Navigation Links (Hidden on Mobile/Tablet) */}
+        <nav className="hidden lg:flex gap-4 xl:gap-6 items-center font-bold text-xs lg:text-sm" style={{ color: 'var(--color-text-secondary)' }}>
           {navLinks.map((link) => {
             const active = isActive(link.path, link.tag);
             return (
@@ -349,6 +349,15 @@ export default function GlobalHeader({ siteName, translateActive }: { siteName?:
                 } else if (platform.includes('instagram')) {
                   icon = '📸';
                   styleClass = 'bg-pink-500/10 text-pink-400 border-pink-500/20 hover:bg-pink-500/20';
+                } else if (platform.includes('youtube')) {
+                  icon = '🎥';
+                  styleClass = 'bg-red-500/10 text-red-400 border-red-500/20 hover:bg-red-500/20';
+                } else if (platform.includes('facebook')) {
+                  icon = '📘';
+                  styleClass = 'bg-blue-500/10 text-blue-400 border-blue-500/20 hover:bg-blue-500/20';
+                } else if (platform.includes('twitter') || platform === 'x') {
+                  icon = '🐦';
+                  styleClass = 'bg-gray-500/10 text-gray-300 border-gray-500/20 hover:bg-gray-500/20';
                 }
 
                 return (

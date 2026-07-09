@@ -222,7 +222,8 @@ export default async function BlogPostPage({ params }: Props) {
         post={post} 
         ads={ads} 
         relatedPosts={relatedPostsRaw} 
-        whatsappLinks={whatsappLinks} 
+        whatsappLinks={whatsappLinks}
+        commentsEnabled={siteSettings?.commentsEnabled !== false}
       />
     </>
   );

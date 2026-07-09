@@ -21,8 +21,8 @@ export async function GET(request: Request, context: { params: Promise<{ slug: s
     const rawContent = post.content || '';
     const textOnly = rawContent.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
     
-    // Split into sentences (rudimentary split by standard punctuation)
-    const sentences = textOnly.match(/[^.!?]+[.!?]+/g) || [];
+    // Split into sentences (supporting English punctuation and Hindi Purna Viram "।")
+    const sentences = textOnly.split(/[.!?।\n]+/).map(s => s.trim()).filter(s => s.length > 10);
     
     // Create chunks of text for slides (approx 2 sentences per slide)
     const slidesData = [];

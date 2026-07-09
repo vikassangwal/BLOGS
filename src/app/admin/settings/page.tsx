@@ -122,6 +122,20 @@ export default function SettingsAdmin() {
               <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>Admin Email</label>
               <input type="email" value={settings.adminEmail || ''} onChange={e => setSettings({ ...settings, adminEmail: e.target.value })} style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--color-border)' }} />
             </div>
+            <div style={{ background: 'rgba(255, 255, 255, 0.02)', padding: '1rem', borderRadius: '10px', border: '1px solid var(--color-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.5rem' }}>
+              <div>
+                <h4 style={{ margin: '0 0 0.3rem', fontSize: '0.95rem', fontWeight: 700 }}>💬 Blog Comments (ब्लॉग पर टिप्पणियां)</h4>
+                <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>Enable dynamic comments section below every blog post.</p>
+              </div>
+              <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+                <input 
+                  type="checkbox" 
+                  checked={settings.commentsEnabled !== false} 
+                  onChange={e => setSettings({ ...settings, commentsEnabled: e.target.checked })} 
+                  style={{ transform: 'scale(1.5)' }} 
+                />
+              </label>
+            </div>
             <hr style={{ border: 'none', borderTop: '1px solid var(--color-border)', margin: '1rem 0' }} />
             <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 700 }}>Global SEO</h3>
             <div>

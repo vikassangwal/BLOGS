@@ -48,6 +48,7 @@ export async function PUT(request: NextRequest) {
       aiModel: body.aiModel,
       seoTitle: body.seoTitle,
       seoDescription: body.seoDescription,
+      commentsEnabled: typeof body.commentsEnabled === 'boolean' ? body.commentsEnabled : true,
     };
 
     if (body.aiApiKey && body.aiApiKey !== '********') {

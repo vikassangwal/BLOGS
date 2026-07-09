@@ -139,15 +139,11 @@ function BlogListContent() {
     return () => clearTimeout(timer);
   }, [search]);
 
-  const MAIN_CATEGORIES = ['Job', 'Admit Card', 'Results', 'Guidelines', 'Scheme', 'Scholarship', 'University'];
+  const MAIN_CATEGORIES = ['Education & Career', 'Technology', 'Finance & Earning'];
   const getContextTags = (category: string) => {
-    if (category === 'Job') return ['Vacancy', 'Upcoming', 'Latest Jobs', 'Sarkari Naukri', 'Private Jobs'];
-    if (category === 'Admit Card') return ['Latest Admit Cards', 'Hall Ticket', 'Exam Date'];
-    if (category === 'Results') return ['Answer Key', 'Syllabus', 'Cut Off', 'Merit List'];
-    if (category === 'Guidelines') return ['Rules & Rights', 'Notification', 'Instructions'];
-    if (category === 'Scheme') return ['PM Kisan', 'Sarkari Yojana', 'State Schemes', 'Central Schemes'];
-    if (category === 'Scholarship') return ['National Scholarship', 'State Scholarship', 'Fellowship'];
-    if (category === 'University') return ['IGNOU', 'College Admissions', 'Exam Forms', 'Time Table'];
+    if (category === 'Technology') return ['News', 'AI', 'Software', 'Gadgets', 'Mobiles', 'Telecom', 'Gaming'];
+    if (category === 'Finance & Earning') return ['News', 'Crypto', 'Stock Market', 'Business', 'Investment', 'Personal Finance', 'Banking', 'Schemes'];
+    if (category === 'Education & Career') return ['News', 'Vacancy', 'Study', 'Career', 'Results', 'Admit Card', 'Syllabus', 'Scholarship', 'Admissions', 'Answer Key'];
     return MAIN_CATEGORIES;
   };
 

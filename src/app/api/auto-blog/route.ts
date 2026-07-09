@@ -113,7 +113,8 @@ export async function POST(request: NextRequest) {
 
     // Background Dispatch Wrapper to prevent Vercel 504 Gateway Timeout
     const isBgRun = request.headers.get('x-bg-run') === 'true' || new URL(request.url).searchParams.get('bg-run') === 'true';
-    if (!isBgRun) {
+    const isForceRun = request.headers.get('x-force-run') === 'true' || new URL(request.url).searchParams.get('force-run') === 'true';
+    if (!isBgRun && !isForceRun) {
       const targetUrl = new URL(request.url);
       targetUrl.searchParams.set('bg-run', 'true');
       
@@ -316,68 +317,38 @@ export async function POST(request: NextRequest) {
       }
 
       const currentDate = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-      const step1Prompt = `You are a Trending News & Job Alert researcher for India. 
+      const prompt = `You are a Trending News & Job Alert researcher for India. 
       TODAY'S DATE IS: ${getCurrentDateStr()}.
       ${seedNews}
       ${recentlyPublishedStr}
-      GENERATE A MASSIVE LIST OF 120 KEYWORDS.
-      This is Step 1 (Brainstorming). Generate a wide variety of Government Job Vacancies (from the LAST 72 HOURS), Exam Notifications, Admit Cards, Answer Keys, Results, Expected Cut-off Marks (संभावित कट-ऑफ / Safe Score) for recently held exams, Answer Key releases, Result announcements, Counselling/Merit Lists, Timetables/Syllabus, Free Laptop/Coaching Schemes, Internships, Rojgar Mela/Apprenticeships, Army/Defense Rallies, Entrance Exams (NEET/JEE/CUET/TET), Top MNC Off-Campus Drives, Free Online Courses (Google/TCS), Skill Development (PMKVY), Scholarships, University Admissions/Results, IGNOU/Open University Updates, KVS/Navodaya Admissions, Nursing/Medical Courses, Bank/PSU Jobs (IBPS/SBI), School/College News, Career Courses (e.g. Best courses after 12th), Board Exam Updates, Technology (Telecom/5G plans, Smartphone/Gadget launches, App updates/Outages, AI Tools, EV Scooters, Gaming updates, Cyber Scams, Tech How-To), and Finance/Earning (PM Kisan, EPF, Online Earning, Bank Rules, IPOs, Gold Rates, LIC/Post Office). 
-      Include topics from ALL 28 Indian States and 8 Union Territories. 
+      
+      Generate a list of EXACTLY 41 highly specific, real, and currently trending topics/keywords in India. 
+      Follow this strict distribution rule (37 + 2 + 2):
+      - 37 Education & Career topics:
+        🚨 1st PRIORITY (HIGHEST) 🚨: Focus on new announcements from the LAST 72 HOURS! Include real Government Job Vacancies, Exam Notifications, Admit Cards, Results, Expected Cut-off Marks (संभावित कट-ऑफ / Safe Score for recently conducted exams), Answer Key releases, Exam Calendar, Exam Date/Timetable, Syllabus Change, Counselling/Merit List, State Scholarship Schemes, Internships, Rojgar Mela/Apprenticeships, Army/Defense Rallies, Entrance Exams (NEET/JEE/CUET/TET), Bank/PSU Jobs (IBPS/SBI), or University/School Board updates.
+        🚨 STRICT RULE: Every topic must have active open applications and solid deadlines. Never guess dates or write an article based on guesses! If a deadline is not announced, write "Coming Soon" (जल्द आ रहा है) instead of guessing.
+        🚨 CRITICAL RULE: NEVER include any job/recruitment where the 'Last Date to Apply' has already passed before ${getCurrentDateStr()}.
+        👉 2nd PRIORITY (FALLBACK) 👉: If there are not enough new government job updates, fill the slots with contractual recruitments, private sector jobs (TCS off-campus, bank openings), ongoing applications with active deadlines, or career guides (e.g. "Best courses after 12th").
+        🚨 NO COMBO/GENERIC JOBS RULE: Every job topic MUST be for ONE SPECIFIC department and ONE SPECIFIC post (e.g. 'RPSC Programmer Recruitment ${currentYear}'). NEVER combine multiple departments or unrelated posts into a single topic.
+      - 2 Technology topics: Telecom plans/5G updates, Smartphone/Gadget launches, WhatsApp/Instagram updates, AI Tools, EV Scooter launches, BGMI/Gaming, or Cyber Scam Alerts.
+      - 2 Finance & Earning topics: RBI Rules, E-Shram/PM Kisan updates, Online Earning Apps/Work from home, EPF withdrawal, Zero Balance Accounts, IPOs, Gold Rates, or Post Office/LIC Schemes.
       
       🚨 TOP TRUSTED INDIA SOURCES RULE 🚨: 
-      For research, ONLY search and verify topics from India's Premier Official Portals:
-      1. Central Recruitment: ssc.gov.in, upsc.gov.in, ibps.in, indianrailways.gov.in, nta.ac.in, pib.gov.in, ncs.gov.in
-      2. State Portals: rpsc.rajasthan.gov.in, rssb.rajasthan.gov.in, uppsc.up.nic.in, upsssc.gov.in, bpsc.bih.nic.in, mppsc.mp.gov.in, jssc.jharkhand.gov.in, hssc.gov.in
-      3. Education & University News (MANDATORY): ugc.gov.in, cbse.gov.in, cisce.org, ignou.ac.in, kvsangathan.nic.in, navodaya.gov.in, digilocker.gov.in, ncte.gov.in, aicte-india.org, scholarships.gov.in, employmentnews.gov.in, egazette.gov.in
-      4. ALL Indian State University Result Portals: Track EVERY state university (e.g., MJPRU, CCSU, CSJMU, MGSU, MDSU, RTU, Lucknow University, Patna University, Mumbai University, Pune University, Anna University, Calicut University, GNDU, Kurukshetra University, etc.)
-      5. Board Exam Portals: UP Board (upmsp.edu.in), Rajasthan Board (rajeduboard.rajasthan.gov.in), Bihar Board (biharboardonline.com), MP Board (mpbse.nic.in), CBSE (cbse.gov.in), ICSE (cisce.org)
-      DO NOT pick unverified rumors from unknown blogs. Verify that the notice is officially published before selecting the topic!
-        🚨 CRITICAL RULE FOR JOBS/EXAMS: NEVER include any job, recruitment, or exam where the 'Last Date to Apply' has ALREADY PASSED before ${getCurrentDateStr()}. If it's expired, DO NOT mention it! 🚨
-      Respond ONLY with a valid JSON array of strings. No markdown.
-      Example format: ["Topic 1", "Topic 2", "Topic 3"]`;
+      Verify topics from India's Premier Official Portals: ssc.gov.in, upsc.gov.in, ibps.in, nta.ac.in, cbse.gov.in, ignou.ac.in, scholarships.gov.in, employmentnews.gov.in. DO NOT pick unverified rumors.
+      
+      Respond ONLY with a valid JSON array of exactly 41 strings. No markdown.
+      Example format: ["Topic 1", "Topic 2", "Topic 3", ...]`;
 
       let rModel = settings.researcherModel || '';
       const researcherConfigForTopic = buildAgentConfigs('researcher', 'openrouter', rModel || 'google/gemini-2.5-flash', 1500);
       
       try {
-        // STEP 1: Generate 120 Keywords
-        const step1Raw = await generateContentWithFallback(researcherConfigForTopic, "You output strict JSON arrays.", step1Prompt);
-        const firstBracket1 = step1Raw.indexOf('[');
-        const lastBracket1 = step1Raw.lastIndexOf(']');
-        const rawKeywordsList = (firstBracket1 !== -1 && lastBracket1 !== -1) ? step1Raw.substring(firstBracket1, lastBracket1 + 1) : "[]";
-        
-        // STEP 2: Filter down to exactly 41 strictly verified keywords
-        const step2Prompt = `You are a STRICT FACT-CHECKER AND EDITOR. 
-        TODAY'S DATE IS: ${getCurrentDateStr()}.
-        ${recentlyPublishedStr}
-        Here is a raw list of brainstormed topics:
-        ${rawKeywordsList}
-        
-        Your job is to filter this list and select EXACTLY 41 highly specific, real, and currently trending topics. DO NOT select the exact same topics from the ALREADY PUBLISHED list, UNLESS it is a brand new phase (e.g., Admit Card) OR a completely new year/cycle (e.g., NEET ${currentYear} vs NEET ${currentYear - 1}).
-        Follow the 37+2+2 rule exactly:
-        - Include EXACTLY 37 Education & Career topics. 
-          🚨 1st PRIORITY (HIGHEST) 🚨: ANYTHING NEW! You MUST NOT miss ANY new Government Job, Exam Notification, Admit Card, Result, Answer Key, Expected Cut-off Marks (संभावित कट-ऑफ / Safe Score for recently conducted exams), Answer Key releases, Result announcements, Exam Calendar, Exam Date/Timetable, Syllabus Change, Counselling/Merit List, Any Official Notice, State Scholarship, Free Laptop/Coaching Scheme (Yojana), Internships, Rojgar Mela/Apprenticeship, Army/Defense Rally, Entrance Exam/TET, Top MNC Off-Campus Drive, Free Online Courses, Skill Development (PMKVY), KVS/Navodaya Admission, IGNOU/Open University Update, Nursing Course, Bank/PSU Job, or School/University Admission/Forms/Result released in the LAST 7 DAYS. These are highly searched topics in India, so include them at the very top of your list!
-          👉 2nd PRIORITY (FALLBACK) 👉: If (and ONLY if) there are not enough new government job updates today, you MUST search and fill the slot with:
-          1. Active Contractual Recruitment (संविदा भर्ती - Savidha Job) currently open (e.g., NHM contractual nurses, contractual teachers, computer operators, bus conductors).
-          2. Trusted Private Sector Jobs (प्राइवेट जॉब) currently open (e.g., TCS off-campus, top private bank vacancies, or localized industry openings).
-          3. Older ongoing applications with active deadlines.
-          4. State Scholarship Schemes or Career Course roadmaps (e.g., "Best courses after 12th").
-          5. High-quality guides for OMR sheets, syllabus, or previous results.
-          🚨 STRICT RULE: Every topic must have active open applications and solid proof. NEVER guess dates or write an article based on guesses! If a deadline is not announced, write "Coming Soon" (जल्द आ रहा है) instead of guessing a month.
-          ⚠️ NO FORCED STATE QUOTAS: You do NOT need to write a post for every state every day. Only select topics where a real, official notification, exam date, admit card, answer key, result, or cutoff has been released in the last 7 days. If a state has no new official updates, do NOT force a post for that state. Only write about real official notifications!
-          🚨 ANTI-FAKE NEWS & EXPIRY RULE 🚨: DO NOT invent exams, schemes, or results that don't exist. Keep real ongoing/upcoming exams. NEVER select a job/recruitment where the "Last Date to Apply" has already passed before today (${getCurrentDateStr()}). Writing about expired applications is completely useless and strictly forbidden!
-        - Include 2 Technology topics. MUST BE REAL AND RELEASED IN THE LAST 7 DAYS. 🚨 TECH 1ST PRIORITY: New Telecom Recharge/5G Plans (Jio/Airtel/BSNL), Major Smartphone/Gadget Launches, WhatsApp/Instagram Updates or Outages, AI Tools (ChatGPT/Gemini), E-challan/Aadhaar/PAN Online Tech Tips, EV Scooter Launches, BGMI/Gaming Updates, or Cyber Security/Scam Alerts.
-        - Include 2 Finance & Earning topics. MUST BE REAL AND RELEASED IN THE LAST 7 DAYS. 🚨 FINANCE 1ST PRIORITY: RBI Rules, E-Shram/PM Kisan updates, Online Earning Apps/Work from home, EPF withdrawal, Zero Balance Accounts, IPOs, Gold Rates, or Post Office/LIC Schemes.
-        Ensure the topics are highly specific (NOT generic like 'Education news in Bihar').
-           🚨 NO COMBO/GENERIC JOBS RULE: Every job topic MUST be for ONE SPECIFIC department and ONE SPECIFIC post (e.g. 'RPSC Programmer Recruitment ${currentYear}' or 'Goa Police Constable Vacancy ${currentYear}'). NEVER combine multiple departments (like HSSC and HPSC together) or multiple unrelated posts into a single topic. If a state has no real active government job notification right now, do NOT create a fake/generic combination job notification; instead, generate a real scholarship scheme, a university admission alert, or a career guide for that state (e.g. 'Haryana Board Scholarship Scheme ${currentYear}' or 'Top Engineering Colleges in Haryana ${currentYear}').
-        Respond ONLY with a valid JSON array of exactly 41 strings. No markdown.`;
-
-        const topicRaw = await generateContentWithFallback(researcherConfigForTopic, "You output strict JSON arrays.", step2Prompt);
+        const topicRaw = await generateContentWithFallback(researcherConfigForTopic, "You output strict JSON arrays of 41 strings.", prompt);
         const firstBracket = topicRaw.indexOf('[');
         const lastBracket = topicRaw.lastIndexOf(']');
-        if (firstBracket === -1 || lastBracket === -1) throw new Error("No JSON array found");
+        if (firstBracket === -1 || lastBracket === -1) throw new Error("No JSON array found in AI output");
         const cleanTopicJson = topicRaw.substring(firstBracket, lastBracket + 1);
-        const generatedTopics: string[] = JSON.parse(cleanTopicJson);
+        const generatedTopics = JSON.parse(cleanTopicJson);
         
         if (Array.isArray(generatedTopics) && generatedTopics.length > 0) {
           const shuffledTopics = generatedTopics.sort(() => Math.random() - 0.5);

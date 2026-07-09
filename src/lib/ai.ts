@@ -325,7 +325,7 @@ async function fetchWithRetry(url: string, options: any, maxRetries = 5): Promis
       clearTimeout(timeout);
 
       if (res.status === 429) {
-        if (attempt >= maxRetries - 1) return res;
+        if (process.env.VERCEL === '1' || attempt >= maxRetries - 1) return res;
         // Wait 15s for first rate limit, and 30s for subsequent retries to completely clear Google's 1-minute rate limit window!
         const waitTime = (attempt === 0) ? 15000 : 30000;
         console.warn(`[AI Rate Limit] Got 429 from API. Waiting ${waitTime / 1000} seconds before retry ${attempt + 1}/${maxRetries}...`);

@@ -309,9 +309,9 @@ export async function POST(request: NextRequest) {
               return null;
             }
           })(),
-          // Recent posts DB query (Parallelized with news fetches to save 6-8s)
+          // Recent posts DB query (Limit to last 30 posts to avoid full-table scans and save 6-8s)
           prisma.blogPost.findMany({
-            where: { createdAt: { gte: twentyEightDaysAgo } },
+            take: 30,
             orderBy: { createdAt: 'desc' },
             select: { title: true }
           }).catch(() => [])

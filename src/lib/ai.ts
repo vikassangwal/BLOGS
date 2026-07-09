@@ -44,19 +44,22 @@ const PROVIDER_REGISTRY: Record<string, ProviderProfile> = {
     name: 'Google Gemini',
     baseUrl: 'https://generativelanguage.googleapis.com/v1beta/models/{MODEL}:generateContent?key={KEY}',
     authHeader: () => ({ 'Content-Type': 'application/json' }),
-    buildBody: (model, sys, user, max) => ({
-      contents: [{ parts: [{ text: `${sys}\n\n${user}` }] }],
-      generationConfig: { maxOutputTokens: max, temperature: 0.7 },
-      tools: [
-        { googleSearch: {} }
-      ],
-      safetySettings: [
-        { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_NONE' },
-        { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_NONE' },
-        { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_NONE' },
-        { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_NONE' },
-      ]
-    }),
+    buildBody: (model, sys, user, max, enableSearch) => {
+      const body: any = {
+        contents: [{ parts: [{ text: `${sys}\n\n${user}` }] }],
+        generationConfig: { maxOutputTokens: max, temperature: 0.7 },
+        safetySettings: [
+          { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_NONE' },
+          { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_NONE' },
+          { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_NONE' },
+          { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_NONE' },
+        ]
+      };
+      if (enableSearch) {
+        body.tools = [{ googleSearch: {} }];
+      }
+      return body;
+    },
     extractContent: (data) => {
       if (data.candidates?.[0]?.finishReason === 'SAFETY') {
         throw new Error('Gemini: Content blocked by safety filters.');
@@ -390,7 +393,8 @@ export async function generateAIContent(
   configOrConfigs: AIConfig | AIConfig[],
   systemPrompt: string,
   userPrompt: string,
-  maxTokens: number = 2000
+  maxTokens: number = 2000,
+  enableSearch: boolean = false
 ): Promise<string> {
 
   const configs = Array.isArray(configOrConfigs) ? configOrConfigs : [configOrConfigs];
@@ -448,7 +452,7 @@ export async function generateAIContent(
 
     // Build request
     const headers = profile.authHeader(config.apiKey.trim());
-    const body = profile.buildBody(model, systemPrompt, userPrompt, maxTokens);
+    const body = profile.buildBody(model, systemPrompt, userPrompt, maxTokens, enableSearch);
 
     try {
       // Execute with retry
@@ -520,10 +524,23 @@ function getDefaultModel(provider: string): string {
 }
 
 function sanitizeGeminiModel(model: string): string {
-  const clean = model.toLowerCase().trim();
-  if (!clean) return 'gemini-1.5-flash';
-  // Let the user type exactly what model they want (e.g. gemini-1.5-flash, gemini-2.0-flash-exp)
-  // Just ensure it has gemini- prefix
+  let clean = model.toLowerCase().trim();
+  if (!clean) return 'gemini-2.5-flash';
+  
+  // Strip 'google/' prefix if present
+  if (clean.startsWith('google/')) {
+    clean = clean.replace('google/', '');
+  }
+  // Strip ':free' or other suffix if present
+  if (clean.includes(':')) {
+    clean = clean.split(':')[0];
+  }
+  
+  // Map deprecated/expired experimental models to stable production versions
+  if (clean.includes('2.0-flash-exp')) {
+    clean = 'gemini-2.5-flash';
+  }
+  
   if (!clean.startsWith('gemini-')) return `gemini-${clean}`;
   return clean;
 }

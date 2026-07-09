@@ -234,11 +234,11 @@ export async function POST(request: NextRequest) {
       return { configs, maxTokens };
     }
 
-    async function generateContentWithFallback(configObj: { configs: AIConfig[]; maxTokens: number }, sysPrompt: string, userPrompt: string) {
+    async function generateContentWithFallback(configObj: { configs: AIConfig[]; maxTokens: number }, sysPrompt: string, userPrompt: string, enableSearch = false) {
       if (!configObj.configs || configObj.configs.length === 0) {
         throw new Error("No AI API Keys found in Admin Settings. Please enter your Gemini API Key in Admin Panel > Settings.");
       }
-      return await generateAIContent(configObj.configs, sysPrompt, userPrompt, configObj.maxTokens);
+      return await generateAIContent(configObj.configs, sysPrompt, userPrompt, configObj.maxTokens, enableSearch);
     }
 
 

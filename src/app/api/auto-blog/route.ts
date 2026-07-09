@@ -156,7 +156,11 @@ export async function POST(request: NextRequest) {
     }
 
     // 1. GET SETTINGS
-    const settings = await prisma.autoBlogSettings.findUnique({ where: { id: 'default' } });
+    const [settings, siteSettings] = await Promise.all([
+      prisma.autoBlogSettings.findUnique({ where: { id: 'default' } }),
+      prisma.siteSettings.findUnique({ where: { id: 'default' } })
+    ]);
+
     if (!settings || (!settings.isActive && !request.headers.get('x-force-run') && !isCronCall)) {
       return NextResponse.json({ success: false, error: 'Auto-blogging is disabled in settings' });
     }
@@ -170,17 +174,11 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Update lastRunAt timestamp to lock the execution
-    try {
-      await prisma.autoBlogSettings.update({
-        where: { id: 'default' },
-        data: { lastRunAt: new Date() }
-      });
-    } catch (e) {
-      console.error('Failed to update lastRunAt settings:', e);
-    }
-
-    const siteSettings = await prisma.siteSettings.findUnique({ where: { id: 'default' } });
+    // Update lastRunAt timestamp in background (no await) to save 2-3 seconds of sequential DB latency
+    prisma.autoBlogSettings.update({
+      where: { id: 'default' },
+      data: { lastRunAt: new Date() }
+    }).catch(e => console.error('Failed to update lastRunAt settings:', e));
     let savedKeys: Record<string, string> = {};
     try {
       if (siteSettings?.aiApiKey?.startsWith('{')) {
@@ -292,13 +290,36 @@ export async function POST(request: NextRequest) {
       // -------------------------------------------------------------
 
       let seedNews = "";
-      if (savedKeys.newsdata) {
-        try {
-          const [ndRes, eduRes] = await Promise.all([
-            fetchWithTimeout(`https://newsdata.io/api/1/news?apikey=${savedKeys.newsdata}&country=in&language=en,hi`, {}, 2500).catch(() => null),
-            fetchWithTimeout(`https://newsdata.io/api/1/news?apikey=${savedKeys.newsdata}&country=in&language=en,hi&category=education`, {}, 2500).catch(() => null)
-          ]);
-          
+      let recentlyPublishedStr = '';
+      
+      const twentyEightDaysAgo = new Date(Date.now() - 28 * 24 * 60 * 60 * 1000);
+      
+      try {
+        const [newsResList, recentPosts] = await Promise.all([
+          // News API parallel fetch
+          (async () => {
+            if (!savedKeys.newsdata) return null;
+            try {
+              return await Promise.all([
+                fetchWithTimeout(`https://newsdata.io/api/1/news?apikey=${savedKeys.newsdata}&country=in&language=en,hi`, {}, 2500).catch(() => null),
+                fetchWithTimeout(`https://newsdata.io/api/1/news?apikey=${savedKeys.newsdata}&country=in&language=en,hi&category=education`, {}, 2500).catch(() => null)
+              ]);
+            } catch (e) {
+              console.error("News API calls failed:", e);
+              return null;
+            }
+          })(),
+          // Recent posts DB query (Parallelized with news fetches to save 6-8s)
+          prisma.blogPost.findMany({
+            where: { createdAt: { gte: twentyEightDaysAgo } },
+            orderBy: { createdAt: 'desc' },
+            select: { title: true }
+          }).catch(() => [])
+        ]);
+
+        // Process news results
+        if (newsResList) {
+          const [ndRes, eduRes] = newsResList;
           if (ndRes && ndRes.ok) {
             const ndJson = await ndRes.json();
             if (ndJson.results) {
@@ -311,26 +332,14 @@ export async function POST(request: NextRequest) {
               seedNews += "\n\n📚 LIVE EDUCATION & UNIVERSITY NEWS (HIGH PRIORITY - USE THESE):\n" + eduJson.results.slice(0, 10).map((r: any) => `- ${r.title}`).join('\n');
             }
           }
-        } catch (e) {
-          console.error("News fetches failed", e);
         }
-      }
 
-      let recentlyPublishedStr = '';
-      try {
-        const twentyEightDaysAgo = new Date(Date.now() - 28 * 24 * 60 * 60 * 1000);
-        const recentPosts = await prisma.blogPost.findMany({
-          where: {
-            createdAt: { gte: twentyEightDaysAgo }
-          },
-          orderBy: { createdAt: 'desc' },
-          select: { title: true }
-        });
-        if (recentPosts.length > 0) {
+        // Process recent posts
+        if (recentPosts && recentPosts.length > 0) {
           recentlyPublishedStr = `🚨 ALREADY PUBLISHED TOPICS IN THE LAST 28 DAYS: (Do NOT generate these exact same topics again. EXCEPTIONS WHERE YOU MUST GENERATE A NEW TOPIC: 1) A brand new phase like Admit Card/Result for an old notification. 2) A NEW YEAR/CYCLE (e.g. if we published 'NEET ${currentYear - 1}' before, then 'NEET ${currentYear}' is a BRAND NEW topic and NOT a duplicate). 3) A new price cut for an old gadget.):\n` + recentPosts.map(p => `- ${p.title}`).join('\n');
         }
       } catch (e) {
-        console.error('Failed to fetch recent posts', e);
+        console.error("Parallel news data / posts fetch failed:", e);
       }
 
       const currentDate = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });

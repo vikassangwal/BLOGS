@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Knowora.in Viral Ad Video Mockup</title>
+  <style>
+    :root {
+      --primary: #2563eb;
+      --accent: #10b981;
+      --bg: #09090b;
+      --panel: rgba(255, 255, 255, 0.03);
+      --border: rgba(255, 255, 255, 0.08);
+      --text: #f4f4f5;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background-color: #030303;
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      overflow: hidden;
+      padding: 20px;
+    }
+
+    .ad-container {
+      width: 360px;
+      height: 640px; /* 9:16 Mobile Aspect Ratio */
+      background: var(--bg);
+      border: 8px solid #18181b;
+      border-radius: 40px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 30px rgba(37, 99, 235, 0.15);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Top Camera Notch Mockup */
+    .notch {
+      width: 110px;
+      height: 25px;
+      background: #18181b;
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      border-bottom-left-radius: 15px;
+      border-bottom-right-radius: 15px;
+      z-index: 100;
+    }
+
+    /* Screen Slide States */
+    .slide {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 30px;
+      text-align: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.8s ease-in-out, transform 0.8s ease-in-out;
+      transform: scale(0.95);
+      background: radial-gradient(circle at top, rgba(37, 99, 235, 0.08) 0%, transparent 70%);
+    }
+
+    .slide.active {
+      opacity: 1;
+      pointer-events: auto;
+      transform: scale(1);
+    }
+
+    /* Typography & UI Elements */
+    .badge {
+      background: rgba(37, 99, 235, 0.15);
+      color: #60a5fa;
+      border: 1px solid rgba(37, 99, 235, 0.3);
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 20px;
+    }
+
+    h1 {
+      font-size: 26px;
+      font-weight: 800;
+      line-height: 1.2;
+      margin-bottom: 15px;
+      background: linear-gradient(135deg, #fff 30%, #a1a1aa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    h1 span {
+      background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    p {
+      font-size: 14px;
+      color: #a1a1aa;
+      line-height: 1.6;
+      margin-bottom: 25px;
+    }
+
+    /* Card Box Mockups */
+    .card {
+      width: 100%;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 15px;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-align: left;
+      animation: float 3s ease-in-out infinite alternate;
+    }
+
+    @keyframes float {
+      from { transform: translateY(0px); }
+      to { transform: translateY(-5px); }
+    }
+
+    .icon-box {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+
+    .btn-action {
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
+      width: 100%;
+      text-decoration: none;
+      display: block;
+    }
+
+    /* Progress bar */
+    .progress-bar {
+      position: absolute;
+      bottom: 20px;
+      left: 30px;
+      right: 30px;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #2563eb, #8b5cf6);
+      transition: width 0.1s linear;
+    }
+
+    /* Controls Overlay */
+    .controls {
+      margin-top: 20px;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .btn-ctrl {
+      background: #18181b;
+      color: #fff;
+      border: 1px solid #27272a;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-ctrl:hover {
+      background: #27272a;
+    }
+
+    .playing-indicator {
+      display: none;
+      color: var(--accent);
+      font-weight: 700;
+      font-size: 13px;
+      animation: pulse 1s infinite alternate;
+    }
+
+    @keyframes pulse {
+      from { opacity: 0.6; }
+      to { opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Mobile screen emulator -->
+  <div class="ad-container" id="screen">
+    <div class="notch"></div>
+
+    <!-- SLIDE 1: HOOK (0 - 5 seconds) -->
+    <div class="slide active" id="slide-1" style="background: radial-gradient(circle at top, rgba(239, 68, 68, 0.15) 0%, transparent 70%);">
+      <div class="badge" style="background: rgba(239, 68, 68, 0.15); color: #f87171; border-color: rgba(239, 68, 68, 0.3);">FAKE LINKS & ADS?</div>
+      <h1 style="color: #fca5a5;">क्या आप भी फेक जॉब लिंक्स से <span>परेशान हैं?</span></h1>
+      
+      <div class="card" style="border-color: rgba(239, 68, 68, 0.2);">
+        <div class="icon-box" style="background: rgba(239, 68, 68, 0.2); color: #ef4444;">😡</div>
+        <div>
+          <strong style="color: #fca5a5; font-size: 13px; display: block; margin-bottom: 2px;">Ad Clicked!</strong>
+          <span style="font-size: 11px; color: #a1a1aa;">Redirecting to spam game sites...</span>
+        </div>
+      </div>
+      
+      <p>अन्य साइट्स पर मिलते हैं सिर्फ ढेरों फालतू विज्ञापन और फर्जी लिंक्स!</p>
+    </div>
+
+    <!-- SLIDE 2: INTRODUCING PORTAL (5 - 12 seconds) -->
+    <div class="slide" id="slide-2">
+      <div class="badge">FAST & CLEAN PORTAL</div>
+      <h1>आ गया है <span>Knowora.in</span></h1>
+      <p>नवीनतम सरकारी नौकरी, एडमिट कार्ड और रिज़ल्ट की 100% सही जानकारी, वो भी बिना फालतू ऐड्स के!</p>
+      
+      <div class="card" style="border-color: rgba(16, 185, 129, 0.2); animation-delay: 0.5s;">
+        <div class="icon-box" style="background: rgba(16, 185, 129, 0.2); color: #10b981;">⚡</div>
+        <div>
+          <strong style="color: #34d399; font-size: 13px; display: block; margin-bottom: 2px;">Lightning Fast</strong>
+          <span style="font-size: 11px; color: #a1a1aa;">Pages load under 0.1 seconds!</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 3: DIRECT LINKS (12 - 20 seconds) -->
+    <div class="slide" id="slide-3">
+      <div class="badge" style="background: rgba(16, 185, 129, 0.15); color: #34d399; border-color: rgba(16, 185, 129, 0.3);">100% VERIFIED</div>
+      <h1>सीधे <span>ऑफिशियल लिंक्स</span></h1>
+      
+      <div style="width: 100%; border: 1px dashed rgba(255,255,255,0.1); padding: 15px; border-radius: 12px; margin-bottom: 20px; background: rgba(255,255,255,0.01);">
+        <div style="font-size: 11px; color: #71717a; text-transform: uppercase; margin-bottom: 5px;">Candidate Portal</div>
+        <strong style="color: #60a5fa; font-size: 15px;">👉 Apply Online Direct Link</strong>
+      </div>
+      
+      <p>UPSC, SSC, NTA और बोर्ड परीक्षाओं के बिल्कुल सटीक आधिकारिक लिंक्स एक स्थान पर।</p>
+    </div>
+
+    <!-- SLIDE 4: CALL TO ACTION (20 - 30 seconds) -->
+    <div class="slide" id="slide-4" style="background: radial-gradient(circle at top, rgba(16, 185, 129, 0.1) 0%, transparent 70%);">
+      <div class="badge" style="background: rgba(59, 130, 246, 0.15); color: #60a5fa; border-color: rgba(59, 130, 246, 0.3);">JOIN TODAY</div>
+      <h1>गूगल पर सर्च करें <span>Knowora.in</span></h1>
+      <p>या तुरंत व्हाट्सएप/टेलीग्राम ग्रुप ज्वाइन करें और लेटेस्ट अपडेट्स सीधे अपने फोन पर पाएं!</p>
+      
+      <button class="btn-action">💬 Join WhatsApp Group</button>
+    </div>
+
+    <!-- Progress Indicator Bar -->
+    <div class="progress-bar">
+      <div class="progress-fill" id="progress"></div>
+    </div>
+  </div>
+
+  <!-- Interactive Controls -->
+  <div class="controls">
+    <button class="btn-ctrl" id="playBtn">▶ Play & Speak Ad</button>
+    <button class="btn-ctrl" id="resetBtn">🔄 Reset</button>
+    <span class="playing-indicator" id="indicator">🎙️ Recording Audio...</span>
+  </div>
+
+  <div style="margin-top: 20px; font-size: 12px; color: #71717a; text-align: center; max-width: 400px; line-height: 1.5;">
+    💡 <strong>How to get your video:</strong> Click <strong>"Play & Speak Ad"</strong> to run the automated slides and speak the voiceover in Hindi. Open your phone or PC screen recorder (like OBS, Bandicam, or Mobile Screen Recorder) to record the phone emulator above!
+  </div>
+
+  <script>
+    const slides = [
+      { id: 'slide-1', duration: 6000, voice: "क्या आप भी सरकारी नौकरी का फॉर्म भरते समय फेक लिंक्स और ढेरों विज्ञापन से परेशान हो चुके हैं? अन्य साइट्स पर मिलते हैं सिर्फ ढेरों फालतू विज्ञापन और फर्जी लिंक्स!" },
+      { id: 'slide-2', duration: 7000, voice: "लेकिन अब और नहीं! आ गया है नोवोरा डॉट इन। नवीनतम सरकारी नौकरी, एडमिट कार्ड और रिज़ल्ट की सौ प्रतिशत सही जानकारी, वो भी बिना किसी फालतू ऐड्स के।" },
+      { id: 'slide-3', duration: 8000, voice: "यहाँ हर जॉब के नीचे सीधा आधिकारिक अप्लाई लिंक मिलेगा। यू पी एस सी, एस एस सी, एन टी ए और बोर्ड परीक्षाओं के बिल्कुल सटीक लिंक्स एक स्थान पर।" },
+      { id: 'slide-4', duration: 9000, voice: "तो देर किस बात की? अभी गूगल पर सर्च करें नोवोरा डॉट इन और लेटेस्ट अपडेट्स सीधे अपने फोन पर पाने के लिए हमारा व्हाट्सएप ग्रुप ज्वाइन करें!" }
+    ];
+
+    let currentSlideIdx = 0;
+    let isPlaying = false;
+    let timer = null;
+    let progressInterval = null;
+    let elapsed = 0;
+
+    const playBtn = document.getElementById('playBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const progressFill = document.getElementById('progress');
+    const indicator = document.getElementById('indicator');
+
+    function showSlide(index) {
+      document.querySelectorAll('.slide').forEach(s => s.classList.remove('active'));
+      const target = document.getElementById(slides[index].id);
+      if (target) target.classList.add('active');
+    }
+
+    function speakText(text) {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'hi-IN';
+        utterance.rate = 1.0;
+        window.speechSynthesis.speak(utterance);
+      }
+    }
+
+    function runSlideSequence() {
+      if (currentSlideIdx >= slides.length) {
+        stopAd();
+        return;
+      }
+
+      showSlide(currentSlideIdx);
+      speakText(slides[currentSlideIdx].voice);
+
+      let slideDuration = slides[currentSlideIdx].duration;
+      let start = Date.now();
+      
+      clearInterval(progressInterval);
+      progressInterval = setInterval(() => {
+        let diff = Date.now() - start;
+        let pct = (diff / slideDuration) * 100;
+        if (pct >= 100) pct = 100;
+        progressFill.style.width = pct + '%';
+      }, 100);
+
+      timer = setTimeout(() => {
+        currentSlideIdx++;
+        runSlideSequence();
+      }, slideDuration);
+    }
+
+    function startAd() {
+      isPlaying = true;
+      playBtn.textContent = '⏸ Pause';
+      indicator.style.display = 'inline-block';
+      runSlideSequence();
+    }
+
+    function stopAd() {
+      isPlaying = false;
+      playBtn.textContent = '▶ Play & Speak Ad';
+      indicator.style.display = 'none';
+      clearTimeout(timer);
+      clearInterval(progressInterval);
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
+    }
+
+    playBtn.addEventListener('click', () => {
+      if (isPlaying) {
+        stopAd();
+      } else {
+        startAd();
+      }
+    });
+
+    resetBtn.addEventListener('click', () => {
+      stopAd();
+      currentSlideIdx = 0;
+      progressFill.style.width = '0%';
+      showSlide(0);
+    });
+  </script>
+</body>
+</html>

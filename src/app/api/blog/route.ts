@@ -136,7 +136,32 @@ export async function GET(request: Request) {
     }
 
     if (qualification) {
-      where.AND.push({ tags: { some: { tag: { name: qualification } } } });
+      let qualificationKeywords: string[] = [];
+      if (qualification === '10th Pass') {
+        qualificationKeywords = ['10th', '10वीं', 'matric', 'high school'];
+      } else if (qualification === '12th Pass') {
+        qualificationKeywords = ['12th', '12वीं', 'intermediate', 'higher secondary'];
+      } else if (qualification === 'Graduate') {
+        qualificationKeywords = ['graduate', 'graduation', 'degree', 'b.sc', 'b.a', 'b.com', 'bca', 'bba', 'स्नातक'];
+      } else if (qualification === 'Post Graduate') {
+        qualificationKeywords = ['post graduate', 'postgraduate', 'm.sc', 'm.a', 'm.com', 'mca', 'mba', 'post-graduation', 'परास्नातक'];
+      } else if (qualification === 'B.Tech / BE') {
+        qualificationKeywords = ['b.tech', 'btech', 'b.e', 'btech pass'];
+      } else if (qualification === 'ITI / Diploma') {
+        qualificationKeywords = ['iti', 'diploma', 'polytechnic'];
+      }
+
+      where.AND.push({
+        OR: [
+          { tags: { some: { tag: { name: qualification } } } },
+          ...qualificationKeywords.map(keyword => ({
+            OR: [
+              { title: { contains: keyword, mode: 'insensitive' } },
+              { content: { contains: keyword, mode: 'insensitive' } }
+            ]
+          }))
+        ]
+      });
     }
 
     if (where.AND.length === 0) {

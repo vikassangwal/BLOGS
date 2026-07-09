@@ -1139,6 +1139,33 @@ YOUR SEO SKILLS:
       detectedTagsSet.add('Earning');
     }
 
+    // AUTOMATIC QUALIFICATION TAGGING
+    const lowerContent = articleHtml.toLowerCase();
+    if (lowerTopic.includes('10th') || lowerTopic.includes('10वीं') || lowerTopic.includes('matric') || lowerTopic.includes('high school') ||
+        lowerContent.includes('10th pass') || lowerContent.includes('10वीं पास') || lowerContent.includes('मैट्रिक')) {
+      detectedTagsSet.add('10th Pass');
+    }
+    if (lowerTopic.includes('12th') || lowerTopic.includes('12वीं') || lowerTopic.includes('intermediate') || lowerTopic.includes('higher secondary') ||
+        lowerContent.includes('12th pass') || lowerContent.includes('12वीं पास') || lowerContent.includes('इंटरमीडिएट')) {
+      detectedTagsSet.add('12th Pass');
+    }
+    if (lowerTopic.includes('iti') || lowerTopic.includes('diploma') || lowerTopic.includes('polytechnic') ||
+        lowerContent.includes('iti pass') || lowerContent.includes('डिप्लोमा') || lowerContent.includes('पॉलीटेक्निक')) {
+      detectedTagsSet.add('ITI / Diploma');
+    }
+    if (lowerTopic.includes('b.tech') || lowerTopic.includes('btech') || lowerTopic.includes('b.e') ||
+        lowerContent.includes('b.tech') || lowerContent.includes('btech') || lowerContent.includes('b.e.')) {
+      detectedTagsSet.add('B.Tech / BE');
+    }
+    if (lowerTopic.includes('post graduate') || lowerTopic.includes('postgraduate') || lowerTopic.includes('pg pass') || lowerTopic.includes('mca') || lowerTopic.includes('mba') ||
+        lowerContent.includes('post graduate') || lowerContent.includes('postgraduate') || lowerContent.includes('परास्नातक') || lowerContent.includes('m.tech') || lowerContent.includes('mtech')) {
+      detectedTagsSet.add('Post Graduate');
+    }
+    if (lowerTopic.includes('graduate') || lowerTopic.includes('graduation') || lowerTopic.includes('degree') || lowerTopic.includes('b.sc') || lowerTopic.includes('bsc') || lowerTopic.includes('b.a') || lowerTopic.includes('ba pass') || lowerTopic.includes('b.com') || lowerTopic.includes('bcom') ||
+        lowerContent.includes('graduate') || lowerContent.includes('graduation') || lowerContent.includes('स्नातक') || lowerContent.includes('डिग्री')) {
+      detectedTagsSet.add('Graduate');
+    }
+
     const tagsToCreate = Array.from(detectedTagsSet).map(tagName => ({
       tag: {
         connectOrCreate: {

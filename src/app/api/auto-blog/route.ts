@@ -300,13 +300,16 @@ export async function POST(request: NextRequest) {
 
       let recentlyPublishedStr = '';
       try {
+        const twentyEightDaysAgo = new Date(Date.now() - 28 * 24 * 60 * 60 * 1000);
         const recentPosts = await prisma.blogPost.findMany({
+          where: {
+            createdAt: { gte: twentyEightDaysAgo }
+          },
           orderBy: { createdAt: 'desc' },
-          take: 40,
           select: { title: true }
         });
         if (recentPosts.length > 0) {
-          recentlyPublishedStr = `🚨 ALREADY PUBLISHED TOPICS: (Do NOT generate these exact same topics again. EXCEPTIONS WHERE YOU MUST GENERATE A NEW TOPIC: 1) A brand new phase like Admit Card/Result for an old notification. 2) A NEW YEAR/CYCLE (e.g. if we published 'NEET ${currentYear - 1}' before, then 'NEET ${currentYear}' is a BRAND NEW topic and NOT a duplicate). 3) A new price cut for an old gadget.):\n` + recentPosts.map(p => `- ${p.title}`).join('\n');
+          recentlyPublishedStr = `🚨 ALREADY PUBLISHED TOPICS IN THE LAST 28 DAYS: (Do NOT generate these exact same topics again. EXCEPTIONS WHERE YOU MUST GENERATE A NEW TOPIC: 1) A brand new phase like Admit Card/Result for an old notification. 2) A NEW YEAR/CYCLE (e.g. if we published 'NEET ${currentYear - 1}' before, then 'NEET ${currentYear}' is a BRAND NEW topic and NOT a duplicate). 3) A new price cut for an old gadget.):\n` + recentPosts.map(p => `- ${p.title}`).join('\n');
         }
       } catch (e) {
         console.error('Failed to fetch recent posts', e);
@@ -545,10 +548,12 @@ export async function POST(request: NextRequest) {
        - News: "PM मोदी ने किया बड़ा ऐलान, करोड़ों लोगों की ज़िंदगी बदल जाएगी! (PM Modi Announcement)"
        ALWAYS write the main title first in Hindi (creating eagerness to read), then in brackets English.
     ===== 🚨 UNIVERSAL QUALITY RULES (इनका 100% पालन करना अनिवार्य है) =====
-    1. BANNED AI WORDS (NEVER USE THESE): "In conclusion", "Moreover", "Delve into", "Navigating the complexities", "Let's explore", "Today we will discuss", "Welcome to our blog", "It is important to note", "A testament to", "Tapestry", "Crucial", "Vit     4. NO ESTIMATES/RUMORS WITHOUT OFFICIAL NOTIFICATION (बिना आधिकारिक सूचना के अंदाज़ा लगाना पूर्णतः प्रतिबंधित है): बिना किसी आधिकारिक सूचना, प्रेस रिलीज़ या सरकारी विज्ञापन के अंदाज़े से कोई भी पोस्ट या मनगढ़ंत डेटा (जैसे मनगढ़ंत आवेदन तिथि, काल्पनिक परीक्षा तिथि या पद संख्या) नहीं लिखेंगे। केवल प्रमाणित तथ्यों का उपयोग करेंगे। कट-ऑफ (Cut-off), आगामी परिणाम (Result) या उत्तर कुंजी (Answer Key) के पूर्वानुमानों को छोड़कर बाकी किसी भी जानकारी में अंदाज़ा लगाना प्रतिबंधित है। इसके अलावा, परिणाम या उत्तर कुंजी की आगामी तारीखों की चर्चा करते समय यह 100% सुनिश्चित करेंगे कि परीक्षा पहले आयोजित हो चुकी है या नहीं। यदि परीक्षा अभी तक आयोजित नहीं हुई है, तो परिणाम या उत्तर कुंजी से सम्बंधित कोई भी संभावित पोस्ट नहीं लिखेंगे। 🚨 आज की तारीख ${getCurrentDateStr()} है।tion that was released recently..."
+    1. BANNED AI WORDS (NEVER USE THESE): "In conclusion", "Moreover", "Delve into", "Navigating the complexities", "Let's explore", "Today we will discuss", "Welcome to our blog", "It is important to note", "A testament to", "Tapestry", "Crucial", "Vital", "This article will", "आज के इस आर्टिकल में हम जानेंगे", "तो चलिए शुरू करते हैं", "आप सभी का स्वागत है". If you use ANY of these words, your output will be rejected.
+    2. FEW-SHOT TONE EXAMPLE: Write exactly like a top-tier human journalist (e.g. from NDTV or The Hindu). Start directly with a hook.
+       BAD START: "Today we will tell you about the SSC CGL notification that was released recently..."
        GOOD START (MIMIC THIS): "The wait is finally over for millions of government job aspirants. The Staff Selection Commission (SSC) has officially released the much-anticipated CGL 2026 notification, unlocking thousands of Grade B and C vacancies across central ministries."
     3. COMPLETENESS: आर्टिकल 100% पूरा होना चाहिए। CONCLUSION लिखकर ही खत्म करें।
-    4. ACCURACY & NO EVASIVE ANSWERS (STRICT): जो भी डेटा (Dates, Fees, Links, Exam Dates) दें, वो असली होना चाहिए। अगर एग्जैक्ट डेट नहीं पता है, तो अपनी नॉलेज से एक पक्का अंदाजा/अनुमान (Expected Date/Month) दें, जैसे "(Expected future date after today)। 🚨 चेतावनी: आज की तारीख ${getCurrentDateStr()} है, इसलिए कभी भी बीती हुई तारीख का अंदाज़ा न लगाएं!"। कभी भी "नोटिफिकेशन में देखें", "जल्द घोषित होगी", या "चेक वेबसाइट" जैसे गोल-मोल जवाब हरगिज़ ना लिखें! अगर कुछ नहीं पता तो वह पंक्ति/रो हटा दें।
+    4. NO ESTIMATES/RUMORS WITHOUT OFFICIAL NOTIFICATION (बिना आधिकारिक सूचना के अंदाज़ा लगाना प्रतिबंधित है): बिना किसी आधिकारिक सूचना, प्रेस विज्ञप्ति या विज्ञापन के सामान्य नौकरियों पर अंदाज़े से कोई पोस्ट या मनगढ़ंत डेटा (जैसे काल्पनिक आवेदन तिथि) नहीं लिखेंगे। केवल प्रमाणित तथ्यों का उपयोग करेंगे। अपवाद (Exceptions): OMR Sheets, Answer Keys, संभावित कट-ऑफ (Expected Cut-off), प्रवेश पत्र (Admit Cards), और सरकारी रिजल्ट्स (Results) के लिए आप अंदाज़े वाली या संभावित तारीख (जैसे 'Expected Result Date') लिख सकते हैं, लेकिन यह 100% सुनिश्चित करेंगे कि परीक्षा पहले ही आयोजित की जा चुकी हो। यदि परीक्षा आयोजित नहीं हुई है, तो OMR/Result/Cut-off की कोई भी अंदाज़े वाली पोस्ट लिखना पूर्णतः प्रतिबंधित है। आज की तारीख ${getCurrentDateStr()} है।
     5. NO FILLER CONTENT: "आज के इस आर्टिकल में", "उम्मीद है", "कैसा लगा", "दोस्तों" जैसे शब्द BANNED हैं। सीधे काम की बात लिखें।
     7. STRICT YEAR CONSISTENCY: Today's date is Monday, July 6, 2026. NEVER mix past years into current year (${getCurrentYearNum()}) notifications. Keep years and dates strictly consistent with today.
     8. EXACT QUALIFICATION RULE: DO NOT generalize educational qualifications (e.g., do NOT write 'Graduate in any stream' if the job specifically requires B.Tech, Nursing, or B.Ed). Write the EXACT degree required.

@@ -293,22 +293,27 @@ export async function POST(request: NextRequest) {
 
       let seedNews = "";
       if (savedKeys.newsdata) {
-          try {
-              // General India news
-              const ndRes = await fetchWithTimeout(`https://newsdata.io/api/1/news?apikey=${savedKeys.newsdata}&country=in&language=en,hi`, {}, 3000);
-              const ndJson = await ndRes.json();
-              if (ndJson.results) {
-                 seedNews = "LIVE NEWS HEADLINES RIGHT NOW (USE THESE TO GENERATE TOPICS):\n" + ndJson.results.map((r: any) => `- ${r.title}`).join('\n');
-              }
-              // Education-specific news (university results, admissions, board exams)
-              try {
-                const eduRes = await fetchWithTimeout(`https://newsdata.io/api/1/news?apikey=${savedKeys.newsdata}&country=in&language=en,hi&category=education`, {}, 3000);
-                const eduJson = await eduRes.json();
-                if (eduJson.results && eduJson.results.length > 0) {
-                  seedNews += "\n\n📚 LIVE EDUCATION & UNIVERSITY NEWS (HIGH PRIORITY - USE THESE):\n" + eduJson.results.slice(0, 10).map((r: any) => `- ${r.title}`).join('\n');
-                }
-              } catch(e2) { console.error("Education news fetch failed", e2); }
-          } catch(e) { console.error(e); }
+        try {
+          const [ndRes, eduRes] = await Promise.all([
+            fetchWithTimeout(`https://newsdata.io/api/1/news?apikey=${savedKeys.newsdata}&country=in&language=en,hi`, {}, 2500).catch(() => null),
+            fetchWithTimeout(`https://newsdata.io/api/1/news?apikey=${savedKeys.newsdata}&country=in&language=en,hi&category=education`, {}, 2500).catch(() => null)
+          ]);
+          
+          if (ndRes && ndRes.ok) {
+            const ndJson = await ndRes.json();
+            if (ndJson.results) {
+               seedNews = "LIVE NEWS HEADLINES RIGHT NOW (USE THESE TO GENERATE TOPICS):\n" + ndJson.results.map((r: any) => `- ${r.title}`).join('\n');
+            }
+          }
+          if (eduRes && eduRes.ok) {
+            const eduJson = await eduRes.json();
+            if (eduJson.results && eduJson.results.length > 0) {
+              seedNews += "\n\n📚 LIVE EDUCATION & UNIVERSITY NEWS (HIGH PRIORITY - USE THESE):\n" + eduJson.results.slice(0, 10).map((r: any) => `- ${r.title}`).join('\n');
+            }
+          }
+        } catch (e) {
+          console.error("News fetches failed", e);
+        }
       }
 
       let recentlyPublishedStr = '';
@@ -334,9 +339,9 @@ export async function POST(request: NextRequest) {
       ${seedNews}
       ${recentlyPublishedStr}
       
-      Generate a list of EXACTLY 41 highly specific, real, and currently trending topics/keywords in India. 
-      Follow this strict distribution rule (37 + 2 + 2):
-      - 37 Education & Career topics:
+      Generate a list of EXACTLY 15 highly specific, real, and currently trending topics/keywords in India. 
+      Follow this strict distribution rule (11 + 2 + 2):
+      - 11 Education & Career topics:
         🚨 1st PRIORITY (HIGHEST) 🚨: Focus on new announcements from the LAST 72 HOURS! Include real Government Job Vacancies, Exam Notifications, Admit Cards, Results, Expected Cut-off Marks (संभावित कट-ऑफ / Safe Score for recently conducted exams), Answer Key releases, Exam Calendar, Exam Date/Timetable, Syllabus Change, Counselling/Merit List, State Scholarship Schemes, Internships, Rojgar Mela/Apprenticeships, Army/Defense Rallies, Entrance Exams (NEET/JEE/CUET/TET), Bank/PSU Jobs (IBPS/SBI), or University/School Board updates.
         🚨 STRICT RULE: Every topic must have active open applications and solid deadlines. Never guess dates or write an article based on guesses! If a deadline is not announced, write "Coming Soon" (जल्द आ रहा है) instead of guessing.
         🚨 CRITICAL RULE: NEVER include any job/recruitment where the 'Last Date to Apply' has already passed before ${getCurrentDateStr()}.
@@ -348,14 +353,14 @@ export async function POST(request: NextRequest) {
       🚨 TOP TRUSTED INDIA SOURCES RULE 🚨: 
       Verify topics from India's Premier Official Portals: ssc.gov.in, upsc.gov.in, ibps.in, nta.ac.in, cbse.gov.in, ignou.ac.in, scholarships.gov.in, employmentnews.gov.in. DO NOT pick unverified rumors.
       
-      Respond ONLY with a valid JSON array of exactly 41 strings. No markdown.
+      Respond ONLY with a valid JSON array of exactly 15 strings. No markdown.
       Example format: ["Topic 1", "Topic 2", "Topic 3", ...]`;
 
       let rModel = settings.researcherModel || '';
       const researcherConfigForTopic = buildAgentConfigs('researcher', 'openrouter', rModel || 'google/gemini-2.5-flash', 1500);
       
       try {
-        const topicRaw = await generateContentWithFallback(researcherConfigForTopic, "You output strict JSON arrays of 41 strings.", prompt);
+        const topicRaw = await generateContentWithFallback(researcherConfigForTopic, "You output strict JSON arrays of 15 strings.", prompt);
         const firstBracket = topicRaw.indexOf('[');
         const lastBracket = topicRaw.lastIndexOf(']');
         if (firstBracket === -1 || lastBracket === -1) throw new Error("No JSON array found in AI output");
@@ -388,7 +393,7 @@ export async function POST(request: NextRequest) {
           // Return early to prevent Vercel 60s timeout limit. The next click will generate the actual blog.
           return NextResponse.json({ 
             status: 'empty', 
-            message: '41 Top-Filtered 100% Real Topics Generated successfully! Please click "Run Now" again to write the first blog.' 
+            message: '15 Top-Filtered 100% Real Topics Generated successfully! Please click "Run Now" again to write the first blog.' 
           });
           
         } else {

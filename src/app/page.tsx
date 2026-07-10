@@ -77,8 +77,9 @@ async function getPostsByTagsAndKeywords(tags: string[], keywords: string[] = []
 }
 
 async function getActiveJobs(limit: number = 8) {
+  const now = new Date();
   try {
-    return await prisma.blogPost.findMany({
+    const posts = await prisma.blogPost.findMany({
       where: {
         status: 'Published',
         tags: { some: { tag: { name: { in: ['Job', 'Vacancy', 'Career', 'Education & Career'] } } } },
@@ -91,19 +92,36 @@ async function getActiveJobs(limit: number = 8) {
           { title: { contains: 'Admit Card', mode: 'insensitive' } },
           { title: { contains: 'प्रवेश पत्र' } },
           { title: { contains: 'Answer Key', mode: 'insensitive' } }
+        ],
+        OR: [
+          { expiryDate: { gte: now } },
+          { expiryDate: null }
         ]
       },
       orderBy: { publishedAt: 'desc' },
-      take: limit,
+      take: limit * 3, // Fetch extra to filter in memory
       select: {
         id: true,
         title: true,
         slug: true,
         publishedAt: true,
         createdAt: true,
-        expiryDate: true
+        expiryDate: true,
+        content: true
       }
     });
+
+    // Filter to ensure both Apply and Notification links/text exist
+    const filteredPosts = posts.filter(post => {
+      if (!post.content) return false;
+      const content = post.content.toLowerCase();
+      const hasNotification = content.includes('notification') || content.includes('विज्ञप्ति') || content.includes('अधिसूचना');
+      const hasApply = content.includes('apply') || content.includes('आवेदन');
+      const hasLink = content.includes('<a ');
+      return hasNotification && hasApply && hasLink;
+    });
+
+    return filteredPosts.slice(0, limit).map(({ content, ...rest }) => rest);
   } catch (err) {
     console.error('Failed to fetch active jobs:', err);
     return [];

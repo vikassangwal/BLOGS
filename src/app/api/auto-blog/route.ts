@@ -849,9 +849,12 @@ export async function POST(request: NextRequest) {
         Create an HTML Table for fees. DO NOT WRITE PARAGRAPHS.
         Example Rows: Gen/OBC Fee, SC/ST Fee, Payment Mode.
 
-        <h2 id="details">Vacancy, Age Limit & Salary (पद, आयु सीमा और वेतन)</h2>
-        Create an HTML Table for this section. DO NOT WRITE PARAGRAPHS.
-        CRITICAL: The Overview Table MUST be for ONE single recruitment. DO NOT list 5 different departments or posts in one table. Example Rows: Department Name (एक विभाग), Post Name (पद), Number of Vacancies, Age Limit (आयु सीमा), Educational Qualification, Salary (वेतन).
+        <h2 id="details">पदों की जानकारी (Vacancy Details & Eligibility)</h2>
+        Create a detailed Column-based HTML Table for Vacancy distribution. DO NOT WRITE PARAGRAPHS.
+        - CRITICAL RULE: The table MUST have these columns: 1. पद का नाम (Post Name), 2. रिक्तियों की संख्या (Number of Vacancies), 3. आयु सीमा (Age Limit), 4. शैक्षणिक योग्यता (Qualification).
+        - Create a separate row for EACH post. If there are 5 posts, create 5 rows!
+        - If exact vacancy numbers are missing, write 'To be Announced'. Make sure EVERY post's vacancy count is clearly listed inside this grid.
+        - DO NOT create a two-column property-value list. It MUST be a proper data grid.
 
         <h2 id="selection">Selection Process (चयन प्रक्रिया)</h2>
         Create an HTML Table for this section. DO NOT WRITE PARAGRAPHS.

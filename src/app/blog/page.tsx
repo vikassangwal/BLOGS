@@ -57,12 +57,57 @@ function BlogListContent() {
           return;
         }
 
-        const res = await fetch('https://ipapi.co/json/');
-        const data = await res.json();
+        const findStateMatch = (regionStr: string) => {
+          if (!regionStr) return null;
+          const lowerRegion = regionStr.toLowerCase();
+          return INDIAN_STATES.find(s => {
+            const lowerS = s.toLowerCase();
+            if (lowerS === 'all india' || lowerS === 'central government') return false;
+            return lowerS === lowerRegion || lowerRegion.includes(lowerS) || lowerS.includes(lowerRegion);
+          });
+        };
+
+        let detectedRegion = '';
         
-        if (data.country_code === 'IN' && data.region) {
-          // Check if region matches any state exactly or roughly
-          const stateMatch = INDIAN_STATES.find(s => s.toLowerCase() === data.region.toLowerCase());
+        // Try ipinfo.io first (reliable, rarely blocked)
+        try {
+          const res1 = await fetch('https://ipinfo.io/json');
+          if (res1.ok) {
+            const data1 = await res1.json();
+            if (data1.country === 'IN' && data1.region) {
+              detectedRegion = data1.region;
+            }
+          }
+        } catch (e) {}
+
+        // Fallback to ipapi.co
+        if (!detectedRegion) {
+          try {
+            const res2 = await fetch('https://ipapi.co/json/');
+            if (res2.ok) {
+              const data2 = await res2.json();
+              if (data2.country_code === 'IN' && data2.region) {
+                detectedRegion = data2.region;
+              }
+            }
+          } catch (e) {}
+        }
+        
+        // Fallback to freeipapi
+        if (!detectedRegion) {
+          try {
+            const res3 = await fetch('https://freeipapi.com/api/json');
+            if (res3.ok) {
+              const data3 = await res3.json();
+              if (data3.countryCode === 'IN' && data3.regionName) {
+                detectedRegion = data3.regionName;
+              }
+            }
+          } catch (e) {}
+        }
+
+        if (detectedRegion) {
+          const stateMatch = findStateMatch(detectedRegion);
           if (stateMatch) {
             setSelectedState(stateMatch);
             localStorage.setItem('user_state', stateMatch);

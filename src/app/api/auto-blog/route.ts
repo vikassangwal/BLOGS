@@ -124,43 +124,10 @@ export async function POST(request: NextRequest) {
       if (!user) return NextResponse.json({ success: false, error: 'Unauthorized. Please login as admin.' }, { status: 401 });
     }
 
-    // Background Dispatch Wrapper to prevent Vercel 504 Gateway Timeout
-    const isBgRun = request.headers.get('x-bg-run') === 'true' || new URL(request.url).searchParams.get('bg-run') === 'true';
-    if (!isBgRun) {
-      // Fix for Vercel: Ensure target URL is absolute and uses correct host
-      const host = request.headers.get('host') || 'www.knowora.in';
-      const protocol = request.headers.get('x-forwarded-proto') || 'https';
-      const parsedOriginal = new URL(request.url);
-      const targetUrl = new URL(`${protocol}://${host}${parsedOriginal.pathname}`);
-      parsedOriginal.searchParams.forEach((val, key) => targetUrl.searchParams.set(key, val));
-      targetUrl.searchParams.set('bg-run', 'true');
-      
-      const dispatchHeaders = new Headers();
-      if (authHeader) dispatchHeaders.set('authorization', authHeader);
-      if (request.headers.get('cookie')) dispatchHeaders.set('cookie', request.headers.get('cookie')!);
-      
-      // Inject the cron secret to guarantee the background fetch bypasses cookie auth issues
-      dispatchHeaders.set('x-cron-secret', expectedSecret);
-      if (request.headers.get('x-force-run')) dispatchHeaders.set('x-force-run', request.headers.get('x-force-run')!);
-      dispatchHeaders.set('x-bg-run', 'true');
-
-      console.log("[Auto-Blog] Dispatching background worker execution to:", targetUrl.toString());
-      waitUntil(
-        fetch(targetUrl.toString(), {
-          method: 'POST',
-          headers: dispatchHeaders
-        }).then(r => {
-          console.log(`[Auto-Blog Background worker completed] Status: ${r.status}`);
-        }).catch(err => {
-          console.error("[Auto-Blog Background worker failed to execute]:", err);
-        })
-      );
-
-      return NextResponse.json({ 
-        success: true, 
-        message: "Auto-blog generation successfully triggered in the background. Please wait 1-2 minutes and refresh the page to see updates." 
-      }, { status: 202 });
-    }
+      // Removed Vercel loopback fetch. 
+      // Vercel loop protection blocks self-fetches from the same deployment on the Hobby tier.
+      // Since maxDuration is 60s, we will let this execute synchronously so the UI can wait and receive the exact success/error response.
+      console.log("[Auto-Blog] Starting execution directly...");
 
     // 1. GET SETTINGS
     const [settings, siteSettings] = await Promise.all([
@@ -940,8 +907,7 @@ YOUR SEO SKILLS:
 
       articleHtml = await generateContentWithFallback(writerConfig, writerSystemPrompt, writerPrompt);
       
-      // Wait 2 seconds to prevent OpenRouter Free Tier burst rate limit (429)
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Removed artificial delay to save precious execution time on Vercel Hobby limits
 
       // Clean up markdown wrappers
       articleHtml = articleHtml.replace(/^```html\n?|```$/g, '').trim();

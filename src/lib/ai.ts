@@ -319,13 +319,13 @@ async function fetchWithRetry(url: string, options: any, maxRetries = 5): Promis
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
       const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 60000); // 60s timeout for complex requests
+      const timeout = setTimeout(() => controller.abort(), 45000); // 45s timeout to prevent Vercel 60s limit crashes
 
       const res = await fetch(url, { ...options, signal: controller.signal });
       clearTimeout(timeout);
 
       if (res.status === 429) {
-        if (process.env.VERCEL === '1' || attempt >= maxRetries - 1) return res;
+        if (process.env.VERCEL === '1' || process.env.NEXT_PUBLIC_VERCEL_ENV || attempt >= maxRetries - 1) return res;
         // Wait 15s for first rate limit, and 30s for subsequent retries to completely clear Google's 1-minute rate limit window!
         const waitTime = (attempt === 0) ? 15000 : 30000;
         console.warn(`[AI Rate Limit] Got 429 from API. Waiting ${waitTime / 1000} seconds before retry ${attempt + 1}/${maxRetries}...`);

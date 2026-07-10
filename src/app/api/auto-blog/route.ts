@@ -467,7 +467,6 @@ export async function POST(request: NextRequest) {
     let researchData = '';
     try {
       researchData = await generateContentWithFallback(researcherConfig, "You are a factual research assistant.", researchPrompt);
-      await new Promise(resolve => setTimeout(resolve, 2000));
     } catch (e: any) {
       if (e.message?.includes('429')) throw new Error("API Limit (429): AI की फ्री लिमिट खत्म हो गई है या सर्वर बिज़ी है। कृपया 1 घंटे बाद कोशिश करें या अपना API Key बदलें।");
       researchData = `Topic: ${targetTopic}. Provide a comprehensive overview. ${liveNewsContext}`;

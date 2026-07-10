@@ -173,6 +173,8 @@ const PORTAL_NOTIFICATIONS: Record<string, string> = {
 export function validateAndFixLinks(html: string, topicTitle: string): string {
   if (!html) return html;
 
+  const stripAttrs = (s: string) => s.replace(/\s*target=["'][^"']*["']/gi, '').replace(/\s*rel=["'][^"']*["']/gi, '');
+
   // Regex to find all anchor tags with href and text content
   const linkRegex = /<a\s+([^>]*?)href=["']([^"']+)["']([^>]*?)>([\s\S]*?)<\/a>/gi;
 
@@ -193,21 +195,21 @@ export function validateAndFixLinks(html: string, topicTitle: string): string {
     // 1. Block Google search redirect URLs
     if (lowerHref.includes('google.com/search') || lowerHref.includes('google.com/url')) {
       const replacement = getReplacement();
-      return `<a ${before}href="${replacement}"${after} target="_blank" rel="noopener noreferrer">${text}</a>`;
+      return `<a ${stripAttrs(before)}href="${replacement}"${stripAttrs(after)} target="_blank" rel="noopener noreferrer">${text}</a>`;
     }
 
     // 2. Block competitor domains
     for (const blocked of BLOCKED_DOMAINS) {
       if (lowerHref.includes(blocked)) {
         const replacement = getReplacement();
-        return `<a ${before}href="${replacement}"${after} target="_blank" rel="noopener noreferrer">${text}</a>`;
+        return `<a ${stripAttrs(before)}href="${replacement}"${stripAttrs(after)} target="_blank" rel="noopener noreferrer">${text}</a>`;
       }
     }
 
     // 3. Block empty/placeholder links
     if (href === '#' || href === '' || href.includes('LINK_NOT_AVAILABLE') || href.includes('example.com')) {
       const replacement = getReplacement();
-      return `<a ${before}href="${replacement}"${after} target="_blank" rel="noopener noreferrer">${text}</a>`;
+      return `<a ${stripAttrs(before)}href="${replacement}"${stripAttrs(after)} target="_blank" rel="noopener noreferrer">${text}</a>`;
     }
 
     // 4. Ensure external links have target="_blank" and rel="noopener noreferrer"
@@ -229,14 +231,19 @@ export function validateAndFixLinks(html: string, topicTitle: string): string {
 /**
  * Finds the most relevant official portal URL based on the blog topic title.
  */
-function findOfficialPortal(topicTitle: string): string {
-  const lower = topicTitle.toLowerCase();
-  const sortedKeys = Object.keys(OFFICIAL_PORTALS).sort((a, b) => b.length - a.length);
-  for (const keyword of sortedKeys) {
-    if (lower.includes(keyword)) {
-      return OFFICIAL_PORTALS[keyword];
+function findOfficialPortal(topic: string): string {
+  const tLower = topic.toLowerCase();
+  const keys = Object.keys(OFFICIAL_PORTALS).sort((a, b) => b.length - a.length);
+  for (const key of keys) {
+    if (tLower.includes(key.toLowerCase())) {
+      return OFFICIAL_PORTALS[key];
     }
   }
+  // Category-aware fallback
+  const techKeywords = ['phone', 'launch', 'smartphone', 'gadget', 'app', 'ai', 'gaming', 'tech', 'whatsapp', 'instagram', '5g', 'ev', 'scooter', 'telecom', 'bgmi', 'laptop', 'tablet'];
+  const financeKeywords = ['finance', 'stock', 'budget', 'market', 'bank', 'earn', 'epf', 'ipo', 'gold', 'lic', 'rbi', 'mutual fund', 'insurance', 'loan', 'pm kisan', 'e-shram'];
+  if (techKeywords.some(k => tLower.includes(k))) return '#'; // No official portal for tech topics - keep original link
+  if (financeKeywords.some(k => tLower.includes(k))) return 'https://www.rbi.org.in';
   return 'https://ncs.gov.in';
 }
 

@@ -336,7 +336,7 @@ async function fetchWithRetry(url: string, options: any, maxRetries = 5): Promis
     } catch (error: any) {
       lastError = error;
       if (error.name === 'AbortError') {
-        if (attempt >= maxRetries - 1) throw new Error('AI API request timed out (60s)');
+        if (attempt >= maxRetries - 1) throw new Error('AI API request timed out (45s)');
         continue;
       }
       if (attempt >= maxRetries - 1) throw error;
@@ -469,12 +469,25 @@ export async function generateAIContent(
       const data = await res.json();
       const content = profile.extractContent(data);
 
+      // Check for truncation (hit token limit)
+      const finishReason = data?.choices?.[0]?.finish_reason || data?.candidates?.[0]?.finishReason;
+      if (finishReason === 'length' || finishReason === 'MAX_TOKENS') {
+        console.warn(`[AI] Response was truncated (hit token limit) from ${profile.name}. Output may be incomplete.`);
+      }
+
       if (!content) {
         // Special check for Gemini prompt block
         if (providerName === 'gemini' && data.promptFeedback?.blockReason) {
           throw new Error(`Gemini: Prompt blocked (${data.promptFeedback.blockReason})`);
         }
         throw new Error(`${profile.name} ने खाली response दिया। कृपया दोबारा कोशिश करें।`);
+      }
+
+      // Reject suspiciously short responses (likely error messages, not real content)
+      if (content.length < 100) {
+        console.warn(`[AI] ${profile.name} returned very short response (${content.length} chars). Trying next provider...`);
+        lastError = new Error(`${profile.name} returned insufficient content (${content.length} chars)`);
+        continue;
       }
 
       return content;

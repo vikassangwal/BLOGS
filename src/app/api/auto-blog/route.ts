@@ -104,20 +104,18 @@ async function postToTwitter(bearerToken: string, text: string) {
 
 
 export async function POST(request: NextRequest) {
-  const currentDate = getCurrentDateStr();
-  const currentYear = getCurrentYearNum();
   try {
     const searchParams = new URL(request.url).searchParams;
     const customKeyword = searchParams.get('keyword') || '';
     const customSourceUrl = searchParams.get('sourceUrl') || '';
     // Auth check: only admin can trigger auto-blog (skip for cron calls with x-cron-secret header)
-    const expectedSecret = process.env.CRON_SECRET || 'knowora-cron-2026';
+    const expectedSecret = process.env.CRON_SECRET || '';
     const authHeader = request.headers.get('authorization');
-    const isCronCall = 
+    const isCronCall = expectedSecret && (
       request.headers.get('x-cron-secret') === expectedSecret || 
       authHeader === `Bearer ${expectedSecret}` ||
-      new URL(request.url).searchParams.get('secret') === expectedSecret ||
-      new URL(request.url).searchParams.get('secret') === 'knowora-cron-2026';
+      new URL(request.url).searchParams.get('secret') === expectedSecret
+    );
     if (!isCronCall) {
       const cookieHeader = request.headers.get('cookie') || '';
       const tokenMatch = cookieHeader.match(/automata_auth_token=([^;]+)/);
@@ -374,12 +372,22 @@ export async function POST(request: NextRequest) {
              };
           });
 
-          await prisma.autoBlogKeyword.createMany({ data: queueData });
+          // Deduplicate: filter out keywords that already exist as pending
+           const existingKeywords = await prisma.autoBlogKeyword.findMany({
+             where: { status: 'pending' },
+             select: { keyword: true }
+           });
+           const existingSet = new Set(existingKeywords.map(k => k.keyword.toLowerCase()));
+           const uniqueQueueData = queueData.filter(q => !existingSet.has(q.keyword.toLowerCase()));
+
+           if (uniqueQueueData.length > 0) {
+             await prisma.autoBlogKeyword.createMany({ data: uniqueQueueData });
+           }
 
           // Return early to prevent Vercel 60s timeout limit. The next click will generate the actual blog.
           return NextResponse.json({ 
             status: 'empty', 
-            message: '15 Top-Filtered 100% Real Topics Generated successfully! Please click "Run Now" again to write the first blog.' 
+            message: `${uniqueQueueData.length} Fresh Topics Generated successfully! Please click "Run Now" again to write the first blog.` 
           });
           
         } else {
@@ -389,12 +397,6 @@ export async function POST(request: NextRequest) {
         console.error('AI Topic Generator failed:', e);
         return NextResponse.json({ status: 'empty', message: 'AI Error: ' + (e.message || 'Unknown error') });
       }
-    }
-
-    if (pendingKeyword) {
-      targetTopic = pendingKeyword.keyword;
-      keywordId = pendingKeyword.id;
-      selectedCategory = pendingKeyword.niche || 'News';
     }
 
     let rModel = settings.researcherModel || '';
@@ -429,18 +431,15 @@ export async function POST(request: NextRequest) {
     // Set Language Rules
     const langInstructions = "Write completely in Hindi (Devanagari script), but keep technical words in English.";
 
-    // Fetch recent posts for Auto-Internal Linking
-    let recentPostsHtml = '';
+    // Fetch recent posts ONCE for both internal linking and writer prompt (previously fetched twice)
+    let recentPostsList: { title: string; slug: string }[] = [];
     try {
-      const recentPosts = await prisma.blogPost.findMany({
+      recentPostsList = await prisma.blogPost.findMany({
         where: { status: 'Published' },
         orderBy: { publishedAt: 'desc' },
-        take: 5,
+        take: 15,
         select: { title: true, slug: true }
       });
-      if (recentPosts.length > 0) {
-        recentPostsHtml = recentPosts.map(p => `- <a href="https://www.knowora.in/blog/${p.slug}">${p.title}</a>`).join('\n');
-      }
     } catch (e) {
       console.error('Failed to fetch recent posts for internal linking', e);
     }
@@ -451,7 +450,9 @@ export async function POST(request: NextRequest) {
     let liveNewsContext = '';
     if (savedKeys.newsdata) {
       try {
-        const newsRes = await fetchWithTimeout(`https://newsdata.io/api/1/news?apikey=${savedKeys.newsdata}&q=${encodeURIComponent(targetTopic.split(' ')[0] || 'india')}&language=en,hi`, {}, 4000);
+        // Use first 3 meaningful words for better search relevance (was using only first word)
+        const searchWords = targetTopic.split(' ').filter(w => w.length > 2).slice(0, 3).join(' ') || 'india';
+        const newsRes = await fetchWithTimeout(`https://newsdata.io/api/1/news?apikey=${savedKeys.newsdata}&q=${encodeURIComponent(searchWords)}&language=en,hi`, {}, 3000);
         const newsJson = await newsRes.json();
         if (newsJson.results && newsJson.results.length > 0) {
           liveNewsContext = "LIVE NEWS DATA (Use this for factual accuracy):\n" + 
@@ -485,26 +486,16 @@ export async function POST(request: NextRequest) {
     }
 
     // -------------------------------------------------------------
-    // AUTO INTERNAL LINKING - Fetch Recent Posts
+    // AUTO INTERNAL LINKING - Reuse pre-fetched recent posts (no duplicate DB query)
     // -------------------------------------------------------------
     let internalLinkingStr = '';
-    try {
-      const recentPosts = await prisma.blogPost.findMany({
-        where: { status: 'Published' },
-        orderBy: { publishedAt: 'desc' },
-        take: 15,
-        select: { title: true, slug: true }
-      });
-      if (recentPosts.length > 0) {
-        const links = recentPosts.map(p => `- <a href="https://www.knowora.in/blog/${p.slug}">${p.title}</a>`).join('\n');
-        internalLinkingStr = `
+    if (recentPostsList.length > 0) {
+      const links = recentPostsList.map(p => `- <a href="https://www.knowora.in/blog/${p.slug}">${p.title}</a>`).join('\n');
+      internalLinkingStr = `
       INTERNAL LINKING GUIDELINES:
       You have access to the following existing articles on our website:
 ${links}
       If any of these articles are highly relevant to the context of the content you are writing, MUST organically insert 1-2 hyperlinks to them within your HTML text. Use the exact provided HTML anchor tags.`;
-      }
-    } catch (e) {
-      console.error("Failed to fetch recent posts for internal linking", e);
     }
 
     // -------------------------------------------------------------
@@ -901,6 +892,7 @@ CRITICAL INSTRUCTIONS (PENALTY FOR FAILING):
 4. BOLD ALL NUMBERS: Every single number, date, fee, or salary (e.g., <strong>₹1,000</strong>, <strong>500 Posts</strong>) MUST be wrapped in <strong> tags, EVEN inside tables.
 5. COMPLETE ARTICLE: NEVER stop writing mid-article. You MUST complete from Introduction to Conclusion.
 6. NO FILLERS: NEVER use words like "आज के इस डिजिटल युग में", "दोस्तों", "रोमांचक", "आइए जानते हैं".
+8. NO PLAGIARISM / COPYRIGHT SAFETY: NEVER copy-paste text from any source. ALL content MUST be 100% original and written in your own words. Paraphrase all facts and figures. NEVER reproduce copyrighted text, logos, taglines, or brand slogans verbatim.
 7. HTML ONLY: ALWAYS output clean HTML (<h2>, <p>, <table>, <ul>). NEVER output Markdown.
 
 YOUR SEO SKILLS:
@@ -1016,20 +1008,21 @@ YOUR SEO SKILLS:
     // -------------------------------------------------------------
     // IMAGE GENERATOR (Agent 4)
     // -------------------------------------------------------------
-    let featuredImage = `https://source.unsplash.com/1600x900/?${encodeURIComponent(targetTopic.split(' ')[0] || 'tech')}`;
-    
-    const imgSourceType = settings.imageSource || 'unsplash'; // unsplash, pexels, ai, none
     const imgProvider = savedKeys.imageGenProvider || 'pollinations';
     const imgModel = savedKeys.imageGenModel || 'dall-e-3';
     const imgApiKey = savedKeys.imageGenApi || savedKeys.openai || '';
     const imgPrompt = `High quality professional blog header image representing ${targetTopic}. 8k resolution, cinematic lighting, modern design.`;
+    // Default to Pollinations AI (free, reliable, always works)
+    let featuredImage = `https://image.pollinations.ai/prompt/${encodeURIComponent(imgPrompt)}?width=1600&height=900&nologo=true`;
+    
+    const imgSourceType = settings.imageSource || 'unsplash'; // unsplash, pexels, ai, none
 
     if (imgSourceType === 'none') {
       featuredImage = '';
-    } else if (imgSourceType === 'pexels') {
-      featuredImage = `https://images.pexels.com/photos/random?auto=compress&cs=tinysrgb&w=1600&h=900&fit=crop&query=${encodeURIComponent(targetTopic.split(' ')[0] || 'tech')}`;
-      // Note: A real pexels API call requires auth, but source.unsplash style doesn't exist for pexels officially without API.
-      // If they have an API key later we can use it, for now we fallback to standard placeholder or Unsplash if pexels random doesn't work.
+    } else if (imgSourceType === 'unsplash' || imgSourceType === 'pexels') {
+      // Unsplash Source API is deprecated (2023) and Pexels requires auth.
+      // Both now fallback to Pollinations AI which is free and always works.
+      featuredImage = `https://image.pollinations.ai/prompt/${encodeURIComponent(imgPrompt)}?width=1600&height=900&nologo=true`;
     } else if (imgSourceType === 'ai') {
       if (imgProvider === 'pollinations') {
         featuredImage = `https://image.pollinations.ai/prompt/${encodeURIComponent(imgPrompt)}?width=1600&height=900&nologo=true`;
@@ -1161,154 +1154,145 @@ YOUR SEO SKILLS:
     // -------------------------------------------------------------
     // SAVE TO DATABASE
     // -------------------------------------------------------------
-    const finalSlug = seoData.slug + '-' + Date.now().toString().slice(-4);
+    // Generate slug with 8 random chars for better uniqueness (was 4 digits — collision risk)
+    const slugRandom = Math.random().toString(36).substring(2, 6) + '-' + Date.now().toString().slice(-4);
+    const finalSlug = seoData.slug + '-' + slugRandom;
     
-    const newPost = await prisma.blogPost.create({
-      data: {
-        title: articleTitle, // Use the extracted title from the Writer Agent directly
-        slug: finalSlug,
-        content: articleHtml,
-        excerpt: seoData.seoDescription,
-        featuredImage: featuredImage,
-        status: settings.autoPublish ? 'Published' : 'Draft',
-        publishedAt: settings.autoPublish ? new Date() : null,
-        autoGenerated: true,
-        expiryDate: expiryDate,
-        seoTitle: seoData.seoTitle,
-        seoDescription: seoData.seoDescription,
-        seoKeywords: seoData.seoKeywords,
-        tags: {
-          create: tagsToCreate
+    // Build social caption for broadcasting
+    const socialCaption = `${articleTitle}\n\nRead more: https://www.knowora.in/blog/${finalSlug}`;
+    const socialHashtags = (seoData.seoKeywords || '').split(',').slice(0, 3).map((k: string) => `#${k.trim().replace(/\s+/g, '')}`).join(' ');
+
+    // Use Prisma transaction to prevent partial state corruption
+    // (Previously: if timeout hit between blog save and keyword update, duplicate posts were created)
+    const newPost = await prisma.$transaction(async (tx) => {
+      const post = await tx.blogPost.create({
+        data: {
+          title: articleTitle,
+          slug: finalSlug,
+          content: articleHtml,
+          excerpt: seoData.seoDescription,
+          featuredImage: featuredImage,
+          status: settings.autoPublish ? 'Published' : 'Draft',
+          publishedAt: settings.autoPublish ? new Date() : null,
+          autoGenerated: true,
+          expiryDate: expiryDate,
+          seoTitle: seoData.seoTitle,
+          seoDescription: seoData.seoDescription,
+          seoKeywords: seoData.seoKeywords,
+          socialCaptions: socialCaption,
+          socialHashtags: socialHashtags,
+          tags: {
+            create: tagsToCreate
+          }
         }
-      }
-    });
-
-    if (keywordId) {
-      await prisma.autoBlogKeyword.update({
-        where: { id: keywordId },
-        data: { status: 'used', usedAt: new Date(), postId: newPost.id }
       });
-    }
 
-    await prisma.autoBlogLog.create({
-      data: {
-        keyword: targetTopic,
-        title: newPost.title,
-        status: 'success',
-        postId: newPost.id
+      if (keywordId) {
+        await tx.autoBlogKeyword.update({
+          where: { id: keywordId },
+          data: { status: 'used', usedAt: new Date(), postId: post.id }
+        });
       }
+
+      await tx.autoBlogLog.create({
+        data: {
+          keyword: targetTopic,
+          title: post.title,
+          status: 'success',
+          postId: post.id
+        }
+      });
+
+      return post;
     });
 
     // -------------------------------------------------------------
-    // SOCIAL MEDIA BROADCASTER
+    // BROADCASTING — All post-save work runs in background via waitUntil()
+    // This prevents Vercel 60s timeout from killing social/email/indexing
+    // Previously all this was sequential and often got killed at 60s
     // -------------------------------------------------------------
-    const socialCaption = newPost.socialCaptions || `Check out our latest article: ${newPost.title}\n\nRead more here: https://www.knowora.in/blog/${newPost.slug}\n\n${newPost.socialHashtags || ''}`;
-    
-    // Generate dynamic poster URL for social sharing
+    const broadcastCaption = newPost.socialCaptions || `${newPost.title}\n\nRead more: https://www.knowora.in/blog/${newPost.slug}\n\n${newPost.socialHashtags || ''}`;
     const socialImageUrl = `https://www.knowora.in/api/og?title=${encodeURIComponent(newPost.title)}&bg=${encodeURIComponent(newPost.featuredImage || '')}`;
 
-    // 1. WhatsApp
-    if (savedKeys.whatsappToken && savedKeys.whatsappPhoneId && savedKeys.whatsappGroupId) {
-      await postToWhatsApp(savedKeys.whatsappToken, savedKeys.whatsappPhoneId, savedKeys.whatsappGroupId, socialCaption, socialImageUrl);
-    }
-
-    // 1. Instagram
-    if (savedKeys.instagramToken && savedKeys.instagramAccountId) {
-      await postToInstagram(savedKeys.instagramToken, savedKeys.instagramAccountId, socialImageUrl, socialCaption);
-    }
-
-    // 2.5 Twitter
-    if (savedKeys.twitter) {
-      await postToTwitter(savedKeys.twitter, socialCaption);
-    }
-
-    // 3. Telegram
-    if (savedKeys.telegramToken && savedKeys.telegramChatId) {
+    // Use waitUntil() to run broadcasting in background — HTTP response returns immediately
+    waitUntil((async () => {
       try {
-        const telegramUrl = `https://api.telegram.org/bot${savedKeys.telegramToken}/sendMessage`;
-        await fetch(telegramUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            chat_id: savedKeys.telegramChatId,
-            text: socialCaption,
-            parse_mode: 'HTML'
-          })
-        });
-      } catch (err) {
-        console.error('Telegram broadcast failed:', err);
-      }
-    }
+        // Run ALL social media posts in PARALLEL (was sequential — wasted 10-15s)
+        const socialPromises: Promise<any>[] = [];
 
-    // -------------------------------------------------------------
-    // EMAIL NEWSLETTER (Resend API)
-    // -------------------------------------------------------------
-    if (savedKeys.resend && settings.autoPublish) {
-      try {
-        // Fetch leads
-        const leads = await prisma.lead.findMany({ select: { email: true } });
-        const emails = leads.map((l: any) => l.email).filter(Boolean);
-        
-        if (emails.length > 0) {
-          // Resend allows max 50 emails in bcc per API call for free tier, we slice first 50
-          await fetch('https://api.resend.com/emails', {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${savedKeys.resend}`,
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              from: 'Our Blog <info@knowora.in>',
-              to: 'subscribers@knowora.in', // dummy to
-              bcc: emails.slice(0, 50),
-              subject: `New Post: ${newPost.title}`,
-              html: `
-                <div style="font-family: sans-serif; max-w: 600px; margin: 0 auto;">
-                  <h2>${newPost.title}</h2>
-                  ${newPost.featuredImage ? `<img src="${newPost.featuredImage}" style="width: 100%; border-radius: 8px;" />` : ''}
-                  <p>${newPost.excerpt || ''}</p>
-                  <a href="https://www.knowora.in/blog/${newPost.slug}" style="display: inline-block; padding: 10px 20px; background: #2563eb; color: white; text-decoration: none; border-radius: 5px;">Read Full Article</a>
-                </div>
-              `
-            })
-          });
+        if (savedKeys.whatsappToken && savedKeys.whatsappPhoneId && savedKeys.whatsappGroupId) {
+          socialPromises.push(postToWhatsApp(savedKeys.whatsappToken, savedKeys.whatsappPhoneId, savedKeys.whatsappGroupId, broadcastCaption, socialImageUrl).catch(e => console.error('WhatsApp failed:', e)));
         }
-      } catch (e) {
-        console.error("Newsletter broadcast failed:", e);
-      }
-    }
-
-    // -------------------------------------------------------------
-    // SEO: PING GOOGLE SITEMAP & GOOGLE INDEXING API
-    // -------------------------------------------------------------
-    if (settings.autoPublish) {
-      try {
-        await fetch(`https://www.google.com/ping?sitemap=https://www.knowora.in/sitemap.xml`);
-      } catch (e) {
-        console.error("Google ping failed", e);
-      }
-
-      if (savedKeys.googleIndexingJson) {
-        try {
-          const { submitToGoogleIndexing } = require('@/lib/google-indexing');
-          const postUrl = `https://knowora.in/blog/${newPost.slug}`;
-          console.log("[Auto-Blog] Submitting auto-generated post to Google Indexing API:", postUrl);
-          await submitToGoogleIndexing(postUrl, 'URL_UPDATED', savedKeys.googleIndexingJson);
-        } catch (e) {
-          console.error("[Auto-Blog] Google Indexing API failed:", e);
+        if (savedKeys.instagramToken && savedKeys.instagramAccountId) {
+          socialPromises.push(postToInstagram(savedKeys.instagramToken, savedKeys.instagramAccountId, socialImageUrl, broadcastCaption).catch(e => console.error('Instagram failed:', e)));
         }
+        if (savedKeys.twitter) {
+          socialPromises.push(postToTwitter(savedKeys.twitter, broadcastCaption).catch(e => console.error('Twitter failed:', e)));
+        }
+        if (savedKeys.telegramToken && savedKeys.telegramChatId) {
+          socialPromises.push(
+            fetch(`https://api.telegram.org/bot${savedKeys.telegramToken}/sendMessage`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ chat_id: savedKeys.telegramChatId, text: broadcastCaption, parse_mode: 'HTML' })
+            }).catch(e => console.error('Telegram failed:', e))
+          );
+        }
+
+        // Run all social posts in parallel
+        if (socialPromises.length > 0) {
+          await Promise.allSettled(socialPromises);
+        }
+
+        // Email newsletter
+        if (savedKeys.resend && settings.autoPublish) {
+          try {
+            const leads = await prisma.lead.findMany({ select: { email: true } });
+            const emails = leads.map((l: any) => l.email).filter(Boolean);
+            if (emails.length > 0) {
+              await fetch('https://api.resend.com/emails', {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${savedKeys.resend}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  from: 'Our Blog <info@knowora.in>',
+                  to: 'subscribers@knowora.in',
+                  bcc: emails.slice(0, 50),
+                  subject: `New Post: ${newPost.title}`,
+                  html: `
+                    <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+                      <h2>${newPost.title}</h2>
+                      ${newPost.featuredImage ? `<img src="${newPost.featuredImage}" style="width: 100%; border-radius: 8px;" />` : ''}
+                      <p>${newPost.excerpt || ''}</p>
+                      <a href="https://www.knowora.in/blog/${newPost.slug}" style="display: inline-block; padding: 10px 20px; background: #2563eb; color: white; text-decoration: none; border-radius: 5px;">Read Full Article</a>
+                    </div>
+                  `
+                })
+              });
+            }
+          } catch (e) { console.error('Newsletter failed:', e); }
+        }
+
+        // Google SEO: Sitemap ping + Indexing API
+        if (settings.autoPublish) {
+          try { await fetch(`https://www.google.com/ping?sitemap=https://www.knowora.in/sitemap.xml`); } catch (e) { console.error('Google ping failed:', e); }
+          if (savedKeys.googleIndexingJson) {
+            try {
+              const { submitToGoogleIndexing } = require('@/lib/google-indexing');
+              await submitToGoogleIndexing(`https://knowora.in/blog/${newPost.slug}`, 'URL_UPDATED', savedKeys.googleIndexingJson);
+            } catch (e) { console.error('Google Indexing failed:', e); }
+          }
+        }
+
+        // Revalidate pages
+        try { revalidatePath('/'); revalidatePath('/blog'); } catch (e) { console.warn('Revalidate failed:', e); }
+
+      } catch (broadcastError) {
+        console.error('[Auto-Blog] Broadcasting error (non-fatal):', broadcastError);
       }
-    }
+    })());
 
-    // Revalidate Homepage and Blog index so the new post appears immediately
-    try {
-      revalidatePath('/');
-      revalidatePath('/blog');
-    } catch(e) {
-      console.warn("Revalidate failed", e);
-    }
-
-    return NextResponse.json({ success: true, post: newPost });
+    // Return immediately — broadcasting continues in background via waitUntil()
+    return NextResponse.json({ success: true, post: newPost, message: `Blog "${newPost.title}" published successfully!` });
 
   } catch (error: any) {
     console.error('Auto-blog fatal error:', error);
@@ -1326,17 +1310,17 @@ YOUR SEO SKILLS:
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const expectedSecret = process.env.CRON_SECRET || 'knowora-cron-2026';
+    const expectedSecret = process.env.CRON_SECRET || '';
     const authHeader = request.headers.get('authorization');
     
-    // Check if this is a cron trigger request (from Vercel Cron or manual trigger)
-    const isCron = 
+    // Check if this is a cron trigger request (requires valid CRON_SECRET)
+    const isCron = expectedSecret && (
       searchParams.get('secret') === expectedSecret ||
-      searchParams.get('secret') === 'knowora-cron-2026' ||
-      authHeader === `Bearer ${expectedSecret}`;
+      authHeader === `Bearer ${expectedSecret}`
+    );
 
-      
-    if (isCron || searchParams.get('force-run') === 'true') {
+    // Security: force-run also requires valid cron secret (was bypassing auth entirely)
+    if (isCron) {
       return POST(request);
     }
 

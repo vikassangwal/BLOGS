@@ -1,7 +1,15 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
+export const maxDuration = 60;
+
 export async function GET(req: Request) {
+  const cronSecret = process.env.CRON_SECRET || '';
+  const secret = new URL(req.url).searchParams.get('secret');
+  if (secret !== cronSecret && !req.headers.get('authorization')?.includes(cronSecret)) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   try {
     const settings = await prisma.autoBlogSettings.findUnique({ where: { id: 'default' } });
     

@@ -195,15 +195,24 @@ async function getUpcomingJobs(limit: number = 8) {
 }
 
 async function getAdmitCards(limit: number = 8) {
+  const now = new Date();
   try {
     const posts = await prisma.blogPost.findMany({
       where: {
         status: 'Published',
         OR: [
-          { tags: { some: { tag: { name: { in: ['Admit Card'] } } } } },
-          { title: { contains: 'Admit Card', mode: 'insensitive' } },
-          { title: { contains: 'प्रवेश पत्र' } },
-          { title: { contains: 'Exam City', mode: 'insensitive' } }
+          { expiryDate: { gte: now } },
+          { expiryDate: null }
+        ],
+        AND: [
+          {
+            OR: [
+              { tags: { some: { tag: { name: { in: ['Admit Card'] } } } } },
+              { title: { contains: 'Admit Card', mode: 'insensitive' } },
+              { title: { contains: 'प्रवेश पत्र' } },
+              { title: { contains: 'Exam City', mode: 'insensitive' } }
+            ]
+          }
         ]
       },
       orderBy: { publishedAt: 'desc' },
@@ -237,6 +246,339 @@ async function getAdmitCards(limit: number = 8) {
   }
 }
 
+async function getResultsAndSyllabus(limit: number = 8) {
+  try {
+    const posts = await prisma.blogPost.findMany({
+      where: {
+        status: 'Published',
+        OR: [
+          { tags: { some: { tag: { name: { in: ['Results', 'Result', 'Answer Key', 'Syllabus', 'Cutoff', 'Merit List'] } } } } },
+          { title: { contains: 'Result', mode: 'insensitive' } },
+          { title: { contains: 'परिणाम' } },
+          { title: { contains: 'Answer Key', mode: 'insensitive' } },
+          { title: { contains: 'उत्तर कुंजी' } },
+          { title: { contains: 'Syllabus', mode: 'insensitive' } },
+          { title: { contains: 'सिलेबस' } },
+          { title: { contains: 'Cutoff', mode: 'insensitive' } },
+          { title: { contains: 'कटऑफ' } },
+          { title: { contains: 'Merit List', mode: 'insensitive' } },
+          { title: { contains: 'मेरिट लिस्ट' } }
+        ]
+      },
+      orderBy: { publishedAt: 'desc' },
+      take: limit * 3,
+      select: {
+        id: true,
+        title: true,
+        slug: true,
+        publishedAt: true,
+        createdAt: true,
+        expiryDate: true,
+        content: true
+      }
+    });
+
+    const filteredPosts = posts.filter(post => {
+      if (!post.content) return false;
+      const content = post.content.toLowerCase();
+      
+      const hasLink = content.includes('<a ');
+      // We assume if it has the keyword in title/tag, it's relevant, but we enforce it must have a link to download/check
+      return hasLink;
+    });
+
+    return filteredPosts.slice(0, limit).map(({ content, ...rest }) => rest);
+  } catch (err) {
+    console.error('Failed to fetch results and syllabus:', err);
+    return [];
+  }
+}
+
+async function getUniversityUpdates(limit: number = 8) {
+  try {
+    const posts = await prisma.blogPost.findMany({
+      where: {
+        status: 'Published',
+        OR: [
+          { tags: { some: { tag: { name: { in: ['University', 'IGNOU', 'College', 'Admission', 'Counselling', 'State University'] } } } } },
+          { title: { contains: 'University', mode: 'insensitive' } },
+          { title: { contains: 'विश्वविद्यालय' } },
+          { title: { contains: 'College', mode: 'insensitive' } },
+          { title: { contains: 'Admission', mode: 'insensitive' } },
+          { title: { contains: 'IGNOU', mode: 'insensitive' } }
+        ]
+      },
+      orderBy: { publishedAt: 'desc' },
+      take: limit * 3,
+      select: {
+        id: true, title: true, slug: true, publishedAt: true, createdAt: true, expiryDate: true, content: true
+      }
+    });
+
+    const filteredPosts = posts.filter(post => {
+      if (!post.content) return false;
+      const content = post.content.toLowerCase();
+      
+      const hasOfficial = content.includes('official') || content.includes('आधिकारिक');
+      const hasNotification = content.includes('notification') || content.includes('विज्ञप्ति') || content.includes('अधिसूचना');
+      const hasLink = content.includes('<a ');
+
+      return hasOfficial && hasNotification && hasLink;
+    });
+
+    return filteredPosts.slice(0, limit).map(({ content, ...rest }) => rest);
+  } catch (err) {
+    console.error('Failed to fetch university updates:', err);
+    return [];
+  }
+}
+
+async function getSchemes(limit: number = 8) {
+  try {
+    const posts = await prisma.blogPost.findMany({
+      where: {
+        status: 'Published',
+        OR: [
+          { tags: { some: { tag: { name: { in: ['Scheme', 'Yojana', 'Government Scheme', 'PM Kisan', 'Sarkari Yojana'] } } } } },
+          { title: { contains: 'Scheme', mode: 'insensitive' } },
+          { title: { contains: 'Yojana', mode: 'insensitive' } },
+          { title: { contains: 'योजना' } },
+          { title: { contains: 'PM Kisan', mode: 'insensitive' } },
+          { title: { contains: 'E-Shram', mode: 'insensitive' } }
+        ]
+      },
+      orderBy: { publishedAt: 'desc' },
+      take: limit * 2,
+      select: {
+        id: true, title: true, slug: true, publishedAt: true, createdAt: true, expiryDate: true, content: true
+      }
+    });
+
+    const filteredPosts = posts.filter(post => {
+      if (!post.content) return false;
+      const content = post.content.toLowerCase();
+      
+      const hasOfficial = content.includes('official') || content.includes('आधिकारिक') || content.includes('website');
+      const hasLink = content.includes('<a ');
+
+      return hasOfficial && hasLink;
+    });
+
+    return filteredPosts.slice(0, limit).map(({ content, ...rest }) => rest);
+  } catch (err) {
+    console.error('Failed to fetch schemes:', err);
+    return [];
+  }
+}
+
+async function getScholarships(limit: number = 8) {
+  try {
+    const posts = await prisma.blogPost.findMany({
+      where: {
+        status: 'Published',
+        OR: [
+          { tags: { some: { tag: { name: { in: ['Scholarship', 'National Scholarship', 'Scholarships'] } } } } },
+          { title: { contains: 'Scholarship', mode: 'insensitive' } },
+          { title: { contains: 'छात्रवृत्ति' } }
+        ]
+      },
+      orderBy: { publishedAt: 'desc' },
+      take: limit * 3,
+      select: {
+        id: true, title: true, slug: true, publishedAt: true, createdAt: true, expiryDate: true, content: true
+      }
+    });
+
+    const filteredPosts = posts.filter(post => {
+      if (!post.content) return false;
+      const content = post.content.toLowerCase();
+      
+      const hasOfficial = content.includes('official') || content.includes('आधिकारिक') || content.includes('website');
+      const hasNotification = content.includes('notification') || content.includes('विज्ञप्ति') || content.includes('अधिसूचना');
+      const hasLink = content.includes('<a ');
+
+      return hasOfficial && hasNotification && hasLink;
+    });
+
+    return filteredPosts.slice(0, limit).map(({ content, ...rest }) => rest);
+  } catch (err) {
+    console.error('Failed to fetch scholarships:', err);
+    return [];
+  }
+}
+
+async function getTechNews(limit: number = 8) {
+  try {
+    const posts = await prisma.blogPost.findMany({
+      where: {
+        status: 'Published',
+        OR: [
+          { tags: { some: { tag: { name: { in: ['Technology', 'Smartphone', 'Tech', 'Mobile', 'Gadget'] } } } } },
+          { title: { contains: 'Technology', mode: 'insensitive' } },
+          { title: { contains: 'Tech', mode: 'insensitive' } },
+          { title: { contains: 'Mobile', mode: 'insensitive' } },
+          { title: { contains: 'Smartphone', mode: 'insensitive' } },
+          { title: { contains: 'लॉन्च' } },
+          { title: { contains: '5G' } }
+        ],
+        NOT: [
+          { tags: { some: { tag: { name: { in: ['Job', 'Vacancy', 'Scheme', 'Scholarship', 'Admit Card', 'Result', 'University', 'Finance', 'Banking', 'Earning'] } } } } },
+          { title: { contains: 'Job', mode: 'insensitive' } },
+          { title: { contains: 'Vacancy', mode: 'insensitive' } },
+          { title: { contains: 'भर्ती' } },
+          { title: { contains: 'Admit Card', mode: 'insensitive' } },
+          { title: { contains: 'Scheme', mode: 'insensitive' } },
+          { title: { contains: 'योजना' } }
+        ]
+      },
+      orderBy: { publishedAt: 'desc' },
+      take: limit,
+      select: {
+        id: true, title: true, slug: true, publishedAt: true, createdAt: true, expiryDate: true
+      }
+    });
+
+async function getFinanceNews(limit: number = 8) {
+  try {
+    const posts = await prisma.blogPost.findMany({
+      where: {
+        status: 'Published',
+        OR: [
+          { tags: { some: { tag: { name: { in: ['Finance', 'Banking', 'Bank', 'LIC', 'EPFO', 'Savings'] } } } } },
+          { title: { contains: 'Finance', mode: 'insensitive' } },
+          { title: { contains: 'Bank', mode: 'insensitive' } },
+          { title: { contains: 'LIC', mode: 'insensitive' } },
+          { title: { contains: 'EPFO', mode: 'insensitive' } },
+          { title: { contains: 'Budget', mode: 'insensitive' } },
+          { title: { contains: 'बजट' } },
+          { title: { contains: 'सोना' } },
+          { title: { contains: 'Gold', mode: 'insensitive' } },
+          { title: { contains: 'RBI' } }
+        ],
+        NOT: [
+          { tags: { some: { tag: { name: { in: ['Job', 'Vacancy', 'Scheme', 'Scholarship', 'Admit Card', 'Result', 'University', 'Technology', 'Tech', 'Mobile', 'Smartphone', 'Earning', 'Course'] } } } } },
+          { title: { contains: 'Job', mode: 'insensitive' } },
+          { title: { contains: 'भर्ती' } },
+          { title: { contains: 'Scheme', mode: 'insensitive' } },
+          { title: { contains: 'योजना' } }
+        ]
+      },
+      orderBy: { publishedAt: 'desc' },
+      take: limit,
+      select: {
+        id: true, title: true, slug: true, publishedAt: true, createdAt: true, expiryDate: true
+      }
+    });
+    return posts;
+  } catch (err) {
+    console.error('Failed to fetch finance news:', err);
+    return [];
+  }
+}
+
+async function getEarningCourses(limit: number = 8) {
+  try {
+    const posts = await prisma.blogPost.findMany({
+      where: {
+        status: 'Published',
+        OR: [
+          { tags: { some: { tag: { name: { in: ['Earning', 'Online Earning', 'Course', 'Free Course'] } } } } },
+          { title: { contains: 'Earning', mode: 'insensitive' } },
+          { title: { contains: 'Course', mode: 'insensitive' } },
+          { title: { contains: 'कमाई' } },
+          { title: { contains: 'Skill', mode: 'insensitive' } }
+        ],
+        NOT: [
+          { tags: { some: { tag: { name: { in: ['Job', 'Vacancy', 'Scheme', 'Scholarship', 'Admit Card', 'Result', 'University', 'Technology', 'Finance', 'Bank'] } } } } },
+          { title: { contains: 'Job', mode: 'insensitive' } },
+          { title: { contains: 'भर्ती' } },
+          { title: { contains: 'Scheme', mode: 'insensitive' } },
+          { title: { contains: 'योजना' } }
+        ]
+      },
+      orderBy: { publishedAt: 'desc' },
+      take: limit,
+      select: {
+        id: true, title: true, slug: true, publishedAt: true, createdAt: true, expiryDate: true
+      }
+    });
+    return posts;
+  } catch (err) {
+    console.error('Failed to fetch earning courses:', err);
+    return [];
+  }
+}
+
+async function getSchoolNews(limit: number = 8) {
+  try {
+    const posts = await prisma.blogPost.findMany({
+      where: {
+        status: 'Published',
+        OR: [
+          { tags: { some: { tag: { name: { in: ['School', 'Board Exam', 'CBSE', 'State Board'] } } } } },
+          { title: { contains: 'School', mode: 'insensitive' } },
+          { title: { contains: 'स्कूल' } },
+          { title: { contains: 'Board', mode: 'insensitive' } },
+          { title: { contains: 'बोर्ड' } },
+          { title: { contains: 'Class 10', mode: 'insensitive' } },
+          { title: { contains: 'Class 12', mode: 'insensitive' } }
+        ],
+        NOT: [
+          { tags: { some: { tag: { name: { in: ['Job', 'Vacancy', 'Scheme', 'Scholarship', 'University', 'Finance', 'Earning'] } } } } }
+        ]
+      },
+      orderBy: { publishedAt: 'desc' },
+      take: limit * 2,
+      select: { id: true, title: true, slug: true, publishedAt: true, createdAt: true, expiryDate: true, content: true }
+    });
+    
+    const filtered = posts.filter(post => {
+      if (!post.content) return false;
+      const c = post.content.toLowerCase();
+      const hasOfficial = c.includes('official') || c.includes('आधिकारिक');
+      const hasLink = c.includes('<a ');
+      return hasOfficial && hasLink;
+    });
+    return filtered.slice(0, limit).map(({content, ...rest}) => rest);
+  } catch(e) { return []; }
+}
+
+async function getOtherNews(limit: number = 8) {
+  const sevenDaysAgo = new Date();
+  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+  try {
+    const posts = await prisma.blogPost.findMany({
+      where: {
+        status: 'Published',
+        publishedAt: { gte: sevenDaysAgo },
+        NOT: [
+          { tags: { some: { tag: { name: { in: [
+            'Job', 'Vacancy', 'Career', 'Education & Career', 'Upcoming', 'Upcoming Job', 'Agami',
+            'Admit Card', 'Results', 'Result', 'Answer Key', 'Syllabus', 'Cutoff', 'Merit List',
+            'Scheme', 'Yojana', 'Government Scheme', 'PM Kisan', 'Sarkari Yojana',
+            'Scholarship', 'National Scholarship', 'Scholarships',
+            'University', 'IGNOU', 'College', 'Admission', 'Counselling', 'State University',
+            'Technology', 'Smartphone', 'Tech', 'Mobile', 'Gadget',
+            'Finance', 'Banking', 'Bank', 'LIC', 'EPFO', 'Savings',
+            'Earning', 'Online Earning', 'Course', 'Free Course',
+            'School', 'Board Exam', 'CBSE', 'State Board'
+          ] } } } } },
+          { title: { contains: 'Job', mode: 'insensitive' } },
+          { title: { contains: 'Admit Card', mode: 'insensitive' } },
+          { title: { contains: 'Result', mode: 'insensitive' } },
+          { title: { contains: 'Scheme', mode: 'insensitive' } },
+          { title: { contains: 'Scholarship', mode: 'insensitive' } },
+          { title: { contains: 'University', mode: 'insensitive' } }
+        ]
+      },
+      orderBy: { publishedAt: 'desc' },
+      take: limit,
+      select: { id: true, title: true, slug: true, publishedAt: true, createdAt: true, expiryDate: true }
+    });
+    return posts;
+  } catch(e) { return []; }
+}
+
 export default async function HomePage() {
   const now = new Date();
   const sevenDaysAgo = new Date();
@@ -247,10 +589,10 @@ export default async function HomePage() {
     allPosts, guidelinesPosts, rulesRightsPosts, whatsappLinks, siteSettings,
     latestJobs, admitCards, examResults,
     universityUpdates, govtSchemes, scholarships,
-    techMobile, financeBanking, earningCourses,
+    techMobile, financeBanking, earningCourses, schoolNews, otherNews,
     closingSoonJobs, liveUpdates,
     activeJobsCount, recentResultsCount, recentAdmitCardsCount, activeSchemesCount,
-    upcomingJobs, upcomingJobsCount
+    upcomingJobs, upcomingJobsCount, otherNewsCount
   ] = await Promise.all([
     prisma.blogPost.findMany({ where: { status: 'Published' }, orderBy: { publishedAt: 'desc' }, take: 10, select: { id: true, title: true, slug: true, publishedAt: true, featuredImage: true } }),
     getPostsByTag('Guidelines'),
@@ -259,13 +601,15 @@ export default async function HomePage() {
     prisma.siteSettings.findUnique({ where: { id: 'default' } }),
     getActiveJobs(8),
     getAdmitCards(8),
-    getPostsByTagsAndKeywords(['Results', 'Result', 'Answer Key', 'Syllabus'], ['Result', 'परिणाम', 'Answer Key', 'उत्तर कुंजी', 'Syllabus', 'सिलेबस'], 8),
-    getPostsByTagsAndKeywords(['University', 'IGNOU', 'College', 'Admission', 'Counselling', 'State University'], ['University', 'विश्वविद्यालय', 'College', 'Admission', 'IGNOU'], 8),
-    getPostsByTagsAndKeywords(['Scheme', 'Yojana', 'Government Scheme', 'PM Kisan', 'Sarkari Yojana'], ['Scheme', 'Yojana', 'योजना', 'PM Kisan', 'E-Shram'], 8),
-    getPostsByTagsAndKeywords(['Scholarship', 'National Scholarship', 'Scholarships'], ['Scholarship', 'छात्रवृत्ति'], 8),
-    getPostsByTagsAndKeywords(['Technology', 'Smartphone', 'Tech', 'Mobile', 'Gadget'], ['Technology', 'Tech', 'Mobile', 'Smartphone', 'लॉन्च', '5G'], 8),
-    getPostsByTagsAndKeywords(['Finance', 'Banking', 'Bank', 'LIC', 'EPFO', 'Savings'], ['Finance', 'Bank', 'LIC', 'EPFO', 'Budget', 'बजट', 'Gold', 'सोना', 'Market', 'RBI'], 8),
-    getPostsByTagsAndKeywords(['Earning', 'Online Earning', 'Course', 'Free Course'], ['Earning', 'Course', 'कमाई', 'Skill'], 8),
+    getResultsAndSyllabus(8),
+    getUniversityUpdates(8),
+    getSchemes(8),
+    getScholarships(8),
+    getTechNews(8),
+    getFinanceNews(8),
+    getEarningCourses(8),
+    getSchoolNews(8),
+    getOtherNews(8),
     prisma.blogPost.findMany({
       where: {
         status: 'Published',
@@ -281,69 +625,13 @@ export default async function HomePage() {
       take: 6,
       select: { id: true, title: true, slug: true, publishedAt: true, createdAt: true }
     }),
-    prisma.blogPost.count({
-      where: {
-        status: 'Published',
-        tags: { some: { tag: { name: { in: ['Job', 'Vacancy', 'Career', 'Education & Career'] } } } },
-        NOT: [
-          { tags: { some: { tag: { name: { in: ['Upcoming', 'Upcoming Job', 'Agami'] } } } } },
-          { title: { contains: 'संभावित' } },
-          { title: { contains: 'Upcoming' } },
-          { title: { contains: 'Result', mode: 'insensitive' } },
-          { title: { contains: 'परिणाम' } },
-          { title: { contains: 'Admit Card', mode: 'insensitive' } },
-          { title: { contains: 'प्रवेश पत्र' } },
-          { title: { contains: 'Answer Key', mode: 'insensitive' } }
-        ],
-        OR: [
-          { expiryDate: { gte: now } },
-          { expiryDate: null }
-        ]
-      }
-    }),
-    prisma.blogPost.count({
-      where: {
-        status: 'Published',
-        OR: [
-          { tags: { some: { tag: { name: { in: ['Results', 'Result', 'Answer Key'] } } } } },
-          { AND: [{ tags: { some: { tag: { name: 'Education & Career' } } } }, { OR: [{ title: { contains: 'Result', mode: 'insensitive' } }, { title: { contains: 'परिणाम' } }, { title: { contains: 'Answer Key', mode: 'insensitive' } }] }] }
-        ],
-        publishedAt: { gte: sevenDaysAgo }
-      }
-    }),
-    prisma.blogPost.count({
-      where: {
-        status: 'Published',
-        OR: [
-          { tags: { some: { tag: { name: 'Admit Card' } } } },
-          { AND: [{ tags: { some: { tag: { name: 'Education & Career' } } } }, { OR: [{ title: { contains: 'Admit Card', mode: 'insensitive' } }, { title: { contains: 'प्रवेश पत्र' } }] }] }
-        ],
-        publishedAt: { gte: sevenDaysAgo }
-      }
-    }),
-    prisma.blogPost.count({
-      where: {
-        status: 'Published',
-        OR: [
-          { tags: { some: { tag: { name: { in: ['Scheme', 'Yojana', 'Government Scheme'] } } } } },
-          { AND: [{ tags: { some: { tag: { name: { in: ['News', 'Finance & Earning', 'Education & Career'] } } } } }, { OR: [{ title: { contains: 'Scheme', mode: 'insensitive' } }, { title: { contains: 'Yojana', mode: 'insensitive' } }, { title: { contains: 'योजना' } }, { title: { contains: 'PM Kisan', mode: 'insensitive' } }] }] }
-        ]
-      }
-    }),
+    getActiveJobs(100).then(posts => posts.length),
+    getResultsAndSyllabus(100).then(posts => posts.filter(post => new Date(post.publishedAt) >= sevenDaysAgo).length),
+    getAdmitCards(100).then(posts => posts.filter(post => new Date(post.publishedAt) >= sevenDaysAgo).length),
+    getSchemes(100).then(posts => posts.length),
     getUpcomingJobs(8),
-    prisma.blogPost.count({
-      where: {
-        status: 'Published',
-        tags: { some: { tag: { name: { in: ['Job', 'Vacancy', 'Career', 'Education & Career'] } } } },
-        OR: [
-          { tags: { some: { tag: { name: { in: ['Upcoming', 'Upcoming Job', 'Agami'] } } } } },
-          { title: { contains: 'संभावित' } },
-          { title: { contains: 'Upcoming', mode: 'insensitive' } },
-          { title: { contains: 'Expected', mode: 'insensitive' } },
-          { title: { contains: 'आगामी' } }
-        ]
-      }
-    })
+    getUpcomingJobs(100).then(posts => posts.length),
+    getOtherNews(100).then(posts => posts.length)
   ]);
 
   let apiKeys: any = {};
@@ -455,7 +743,7 @@ export default async function HomePage() {
 
       {/* 🚀 Dashboard Squares (डैशबोर्ड बॉक्स) */}
       <div className="max-w-6xl w-full mx-auto mt-8 px-4 animate-slide-up">
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
           {/* Square 1: Active Jobs */}
           <Link href="/blog?tag=Job" className="block group">
             <div className="glass-panel border border-emerald-500/10 hover:border-emerald-500/30 p-3 sm:p-4 rounded-xl sm:rounded-2xl text-center bg-white/5 transition-all hover:-translate-y-1 shadow-[0_4px_30px_rgba(16,185,129,0.05)]">
@@ -503,6 +791,16 @@ export default async function HomePage() {
               <div className="text-lg sm:text-2xl font-black text-purple-400">{activeSchemesCount}</div>
               <div className="text-[10px] sm:text-xs text-gray-300 font-semibold mt-1">सरकारी योजनाएं</div>
               <div className="text-[8px] text-gray-500 mt-0.5">Govt Schemes</div>
+            </div>
+          </Link>
+
+          {/* Square 6: Other Updates */}
+          <Link href="/blog?tag=News" className="block group">
+            <div className="glass-panel border border-pink-500/10 hover:border-pink-500/30 p-3 sm:p-4 rounded-xl sm:rounded-2xl text-center bg-white/5 transition-all hover:-translate-y-1 shadow-[0_4px_30px_rgba(236,72,153,0.05)]">
+              <div className="text-xl sm:text-2xl mb-1">📌</div>
+              <div className="text-lg sm:text-2xl font-black text-pink-400">{otherNewsCount}</div>
+              <div className="text-[10px] sm:text-xs text-gray-300 font-semibold mt-1">अन्य सूचनाएं (7d)</div>
+              <div className="text-[8px] text-gray-500 mt-0.5">Other Updates</div>
             </div>
           </Link>
         </div>
@@ -1051,6 +1349,90 @@ export default async function HomePage() {
             <div className="bg-white/2 py-2 sm:py-2.5 px-3 sm:px-5 text-center border-t border-white/5">
               <Link href="/blog?tag=Earning" className="text-[10px] sm:text-xs font-semibold text-pink-400 hover:text-pink-300 transition-colors">
                 View Earning →
+              </Link>
+            </div>
+          </div>
+
+          {/* Box 11: School News */}
+          <div className="glass-panel border border-emerald-500/10 hover:border-emerald-500/30 rounded-xl sm:rounded-2xl overflow-hidden shadow-[0_4px_30px_rgba(0,0,0,0.2)] bg-white/5 backdrop-blur-md flex flex-col h-[380px] sm:h-[480px]">
+            <div className="bg-emerald-600/20 border-b border-emerald-500/20 px-3 py-2.5 sm:px-5 sm:py-4 flex items-center justify-between">
+              <h3 className="text-[10px] sm:text-base font-bold text-emerald-400 flex items-center gap-1 sm:gap-2">
+                🏫 स्कूल अपडेट्स (School News)
+              </h3>
+              <span className="relative flex h-1.5 w-1.5 sm:h-2 sm:w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-1.5 w-1.5 sm:h-2 sm:w-2 bg-blue-500"></span>
+              </span>
+            </div>
+            <div className="p-2.5 sm:p-4 flex-grow overflow-y-auto flex flex-col gap-2.5 sm:gap-3.5 scrollbar-thin">
+              {schoolNews.length > 0 ? (
+                schoolNews.map((post) => {
+                  const isNew = post.publishedAt && (new Date().getTime() - new Date(post.publishedAt).getTime()) < 3 * 24 * 60 * 60 * 1000;
+                  return (
+                    <div key={post.id} className="group border-b border-white/5 pb-2 sm:pb-2.5 last:border-0 last:pb-0">
+                      <Link href={`/blog/${post.slug}`} className="text-[10px] sm:text-xs font-semibold text-gray-200 group-hover:text-emerald-400 transition-colors line-clamp-2 leading-snug">
+                        {post.title}
+                        {isNew && (
+                          <span className="ml-1 inline-flex items-center px-1.5 py-0.5 text-[7px] sm:text-[8px] font-bold text-white bg-red-500 rounded animate-pulse whitespace-nowrap">
+                            NEW
+                          </span>
+                        )}
+                      </Link>
+                      <p className="text-[8px] sm:text-[9px] text-gray-400 mt-0.5 sm:mt-1">
+                        📅 Published: {new Date(post.publishedAt || post.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
+                      </p>
+                    </div>
+                  );
+                })
+              ) : (
+                <p className="text-gray-500 text-[10px] sm:text-xs text-center py-10">No recent school news.</p>
+              )}
+            </div>
+            <div className="bg-white/2 py-2 sm:py-2.5 px-3 sm:px-5 text-center border-t border-white/5">
+              <Link href="/blog?tag=School" className="text-[10px] sm:text-xs font-semibold text-emerald-400 hover:text-emerald-300 transition-colors">
+                View School News →
+              </Link>
+            </div>
+          </div>
+
+          {/* Box 12: Other Updates */}
+          <div className="glass-panel border border-gray-500/10 hover:border-gray-500/30 rounded-xl sm:rounded-2xl overflow-hidden shadow-[0_4px_30px_rgba(0,0,0,0.2)] bg-white/5 backdrop-blur-md flex flex-col h-[380px] sm:h-[480px]">
+            <div className="bg-gray-600/20 border-b border-gray-500/20 px-3 py-2.5 sm:px-5 sm:py-4 flex items-center justify-between">
+              <h3 className="text-[10px] sm:text-base font-bold text-gray-300 flex items-center gap-1 sm:gap-2">
+                📌 अन्य सूचनाएं (Other Updates)
+              </h3>
+              <span className="relative flex h-1.5 w-1.5 sm:h-2 sm:w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-gray-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-1.5 w-1.5 sm:h-2 sm:w-2 bg-blue-500"></span>
+              </span>
+            </div>
+            <div className="p-2.5 sm:p-4 flex-grow overflow-y-auto flex flex-col gap-2.5 sm:gap-3.5 scrollbar-thin">
+              {otherNews.length > 0 ? (
+                otherNews.map((post) => {
+                  const isNew = post.publishedAt && (new Date().getTime() - new Date(post.publishedAt).getTime()) < 3 * 24 * 60 * 60 * 1000;
+                  return (
+                    <div key={post.id} className="group border-b border-white/5 pb-2 sm:pb-2.5 last:border-0 last:pb-0">
+                      <Link href={`/blog/${post.slug}`} className="text-[10px] sm:text-xs font-semibold text-gray-200 group-hover:text-gray-100 transition-colors line-clamp-2 leading-snug">
+                        {post.title}
+                        {isNew && (
+                          <span className="ml-1 inline-flex items-center px-1.5 py-0.5 text-[7px] sm:text-[8px] font-bold text-black bg-yellow-400 rounded animate-pulse whitespace-nowrap">
+                            NEW
+                          </span>
+                        )}
+                      </Link>
+                      <p className="text-[8px] sm:text-[9px] text-gray-400 mt-0.5 sm:mt-1">
+                        📅 Published: {new Date(post.publishedAt || post.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
+                      </p>
+                    </div>
+                  );
+                })
+              ) : (
+                <p className="text-gray-500 text-[10px] sm:text-xs text-center py-10">No other recent updates.</p>
+              )}
+            </div>
+            <div className="bg-white/2 py-2 sm:py-2.5 px-3 sm:px-5 text-center border-t border-white/5">
+              <Link href="/blog?tag=News" className="text-[10px] sm:text-xs font-semibold text-gray-300 hover:text-white transition-colors">
+                View All News →
               </Link>
             </div>
           </div>

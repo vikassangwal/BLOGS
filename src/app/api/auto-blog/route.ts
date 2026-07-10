@@ -127,17 +127,24 @@ export async function POST(request: NextRequest) {
     // Background Dispatch Wrapper to prevent Vercel 504 Gateway Timeout
     const isBgRun = request.headers.get('x-bg-run') === 'true' || new URL(request.url).searchParams.get('bg-run') === 'true';
     if (!isBgRun) {
-      const targetUrl = new URL(request.url);
+      // Fix for Vercel: Ensure target URL is absolute and uses correct host
+      const host = request.headers.get('host') || 'www.knowora.in';
+      const protocol = request.headers.get('x-forwarded-proto') || 'https';
+      const parsedOriginal = new URL(request.url);
+      const targetUrl = new URL(`${protocol}://${host}${parsedOriginal.pathname}`);
+      parsedOriginal.searchParams.forEach((val, key) => targetUrl.searchParams.set(key, val));
       targetUrl.searchParams.set('bg-run', 'true');
       
       const dispatchHeaders = new Headers();
       if (authHeader) dispatchHeaders.set('authorization', authHeader);
       if (request.headers.get('cookie')) dispatchHeaders.set('cookie', request.headers.get('cookie')!);
-      if (request.headers.get('x-cron-secret')) dispatchHeaders.set('x-cron-secret', request.headers.get('x-cron-secret')!);
+      
+      // Inject the cron secret to guarantee the background fetch bypasses cookie auth issues
+      dispatchHeaders.set('x-cron-secret', expectedSecret);
       if (request.headers.get('x-force-run')) dispatchHeaders.set('x-force-run', request.headers.get('x-force-run')!);
       dispatchHeaders.set('x-bg-run', 'true');
 
-      console.log("[Auto-Blog] Dispatching background worker execution to avoid Vercel 504 Timeout...");
+      console.log("[Auto-Blog] Dispatching background worker execution to:", targetUrl.toString());
       waitUntil(
         fetch(targetUrl.toString(), {
           method: 'POST',

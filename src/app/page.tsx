@@ -37,19 +37,28 @@ async function getPostsByTag(tag: string) {
   }
 }
 
-async function getPostsByTags(tags: string[], limit: number = 8) {
+async function getPostsByTagsAndKeywords(tags: string[], keywords: string[] = [], limit: number = 8) {
   try {
+    const whereClause: any = {
+      status: 'Published',
+      OR: [
+        { tags: { some: { tag: { name: { in: tags } } } } }
+      ]
+    };
+    if (keywords.length > 0) {
+      const keywordConditions = keywords.map(kw => ({
+        title: { contains: kw, mode: 'insensitive' as const }
+      }));
+      whereClause.OR.push({
+        AND: [
+          { tags: { some: { tag: { name: { in: ['Education & Career', 'News', 'Finance & Earning'] } } } } },
+          { OR: keywordConditions }
+        ]
+      });
+    }
+    
     return await prisma.blogPost.findMany({
-      where: {
-        status: 'Published',
-        tags: {
-          some: {
-            tag: {
-              name: { in: tags }
-            }
-          }
-        }
-      },
+      where: whereClause,
       orderBy: { publishedAt: 'desc' },
       take: limit,
       select: {
@@ -62,7 +71,7 @@ async function getPostsByTags(tags: string[], limit: number = 8) {
       }
     });
   } catch (err) {
-    console.error('Failed to fetch posts for tags:', tags, err);
+    console.error('Failed to fetch posts for tags/keywords:', tags, keywords, err);
     return [];
   }
 }
@@ -72,11 +81,16 @@ async function getActiveJobs(limit: number = 8) {
     return await prisma.blogPost.findMany({
       where: {
         status: 'Published',
-        tags: { some: { tag: { name: { in: ['Job', 'Vacancy', 'Career'] } } } },
+        tags: { some: { tag: { name: { in: ['Job', 'Vacancy', 'Career', 'Education & Career'] } } } },
         NOT: [
           { tags: { some: { tag: { name: { in: ['Upcoming', 'Upcoming Job', 'Agami'] } } } } },
           { title: { contains: 'संभावित' } },
-          { title: { contains: 'Upcoming' } }
+          { title: { contains: 'Upcoming' } },
+          { title: { contains: 'Result', mode: 'insensitive' } },
+          { title: { contains: 'परिणाम' } },
+          { title: { contains: 'Admit Card', mode: 'insensitive' } },
+          { title: { contains: 'प्रवेश पत्र' } },
+          { title: { contains: 'Answer Key', mode: 'insensitive' } }
         ]
       },
       orderBy: { publishedAt: 'desc' },
@@ -101,11 +115,13 @@ async function getUpcomingJobs(limit: number = 8) {
     return await prisma.blogPost.findMany({
       where: {
         status: 'Published',
-        tags: { some: { tag: { name: { in: ['Job', 'Vacancy', 'Career'] } } } },
+        tags: { some: { tag: { name: { in: ['Job', 'Vacancy', 'Career', 'Education & Career'] } } } },
         OR: [
           { tags: { some: { tag: { name: { in: ['Upcoming', 'Upcoming Job', 'Agami'] } } } } },
           { title: { contains: 'संभावित' } },
-          { title: { contains: 'Upcoming' } }
+          { title: { contains: 'Upcoming', mode: 'insensitive' } },
+          { title: { contains: 'Expected', mode: 'insensitive' } },
+          { title: { contains: 'आगामी' } }
         ]
       },
       orderBy: { publishedAt: 'desc' },
@@ -146,14 +162,14 @@ export default async function HomePage() {
     prisma.socialLink.findMany({ where: { platform: 'whatsapp', isActive: true } }),
     prisma.siteSettings.findUnique({ where: { id: 'default' } }),
     getActiveJobs(8),
-    getPostsByTags(['Admit Card'], 8),
-    getPostsByTags(['Results', 'Result', 'Answer Key', 'Syllabus'], 8),
-    getPostsByTags(['University', 'IGNOU', 'College', 'Admission', 'Counselling', 'State University'], 8),
-    getPostsByTags(['Scheme', 'Yojana', 'Government Scheme', 'PM Kisan', 'Sarkari Yojana'], 8),
-    getPostsByTags(['Scholarship', 'National Scholarship', 'Scholarships'], 8),
-    getPostsByTags(['Technology', 'Smartphone', 'Tech', 'Mobile', 'Gadget'], 8),
-    getPostsByTags(['Finance', 'Banking', 'Bank', 'LIC', 'EPFO', 'Savings'], 8),
-    getPostsByTags(['Earning', 'Online Earning', 'Course', 'Free Course'], 8),
+    getPostsByTagsAndKeywords(['Admit Card'], ['Admit Card', 'प्रवेश पत्र'], 8),
+    getPostsByTagsAndKeywords(['Results', 'Result', 'Answer Key', 'Syllabus'], ['Result', 'परिणाम', 'Answer Key', 'उत्तर कुंजी', 'Syllabus', 'सिलेबस'], 8),
+    getPostsByTagsAndKeywords(['University', 'IGNOU', 'College', 'Admission', 'Counselling', 'State University'], ['University', 'विश्वविद्यालय', 'College', 'Admission', 'IGNOU'], 8),
+    getPostsByTagsAndKeywords(['Scheme', 'Yojana', 'Government Scheme', 'PM Kisan', 'Sarkari Yojana'], ['Scheme', 'Yojana', 'योजना', 'PM Kisan', 'E-Shram'], 8),
+    getPostsByTagsAndKeywords(['Scholarship', 'National Scholarship', 'Scholarships'], ['Scholarship', 'छात्रवृत्ति'], 8),
+    getPostsByTagsAndKeywords(['Technology', 'Smartphone', 'Tech', 'Mobile', 'Gadget'], ['Technology', 'Tech', 'Mobile', 'Smartphone', 'लॉन्च', '5G'], 8),
+    getPostsByTagsAndKeywords(['Finance', 'Banking', 'Bank', 'LIC', 'EPFO', 'Savings'], ['Finance', 'Bank', 'LIC', 'EPFO', 'Budget', 'बजट', 'Gold', 'सोना', 'Market', 'RBI'], 8),
+    getPostsByTagsAndKeywords(['Earning', 'Online Earning', 'Course', 'Free Course'], ['Earning', 'Course', 'कमाई', 'Skill'], 8),
     prisma.blogPost.findMany({
       where: {
         status: 'Published',
@@ -172,11 +188,16 @@ export default async function HomePage() {
     prisma.blogPost.count({
       where: {
         status: 'Published',
-        tags: { some: { tag: { name: { in: ['Job', 'Vacancy', 'Career'] } } } },
+        tags: { some: { tag: { name: { in: ['Job', 'Vacancy', 'Career', 'Education & Career'] } } } },
         NOT: [
           { tags: { some: { tag: { name: { in: ['Upcoming', 'Upcoming Job', 'Agami'] } } } } },
           { title: { contains: 'संभावित' } },
-          { title: { contains: 'Upcoming' } }
+          { title: { contains: 'Upcoming' } },
+          { title: { contains: 'Result', mode: 'insensitive' } },
+          { title: { contains: 'परिणाम' } },
+          { title: { contains: 'Admit Card', mode: 'insensitive' } },
+          { title: { contains: 'प्रवेश पत्र' } },
+          { title: { contains: 'Answer Key', mode: 'insensitive' } }
         ],
         OR: [
           { expiryDate: { gte: now } },
@@ -187,32 +208,43 @@ export default async function HomePage() {
     prisma.blogPost.count({
       where: {
         status: 'Published',
-        tags: { some: { tag: { name: { in: ['Results', 'Result', 'Answer Key'] } } } },
+        OR: [
+          { tags: { some: { tag: { name: { in: ['Results', 'Result', 'Answer Key'] } } } } },
+          { AND: [{ tags: { some: { tag: { name: 'Education & Career' } } } }, { OR: [{ title: { contains: 'Result', mode: 'insensitive' } }, { title: { contains: 'परिणाम' } }, { title: { contains: 'Answer Key', mode: 'insensitive' } }] }] }
+        ],
         publishedAt: { gte: sevenDaysAgo }
       }
     }),
     prisma.blogPost.count({
       where: {
         status: 'Published',
-        tags: { some: { tag: { name: 'Admit Card' } } },
+        OR: [
+          { tags: { some: { tag: { name: 'Admit Card' } } } },
+          { AND: [{ tags: { some: { tag: { name: 'Education & Career' } } } }, { OR: [{ title: { contains: 'Admit Card', mode: 'insensitive' } }, { title: { contains: 'प्रवेश पत्र' } }] }] }
+        ],
         publishedAt: { gte: sevenDaysAgo }
       }
     }),
     prisma.blogPost.count({
       where: {
         status: 'Published',
-        tags: { some: { tag: { name: { in: ['Scheme', 'Yojana', 'Government Scheme'] } } } }
+        OR: [
+          { tags: { some: { tag: { name: { in: ['Scheme', 'Yojana', 'Government Scheme'] } } } } },
+          { AND: [{ tags: { some: { tag: { name: { in: ['News', 'Finance & Earning', 'Education & Career'] } } } } }, { OR: [{ title: { contains: 'Scheme', mode: 'insensitive' } }, { title: { contains: 'Yojana', mode: 'insensitive' } }, { title: { contains: 'योजना' } }, { title: { contains: 'PM Kisan', mode: 'insensitive' } }] }] }
+        ]
       }
     }),
     getUpcomingJobs(8),
     prisma.blogPost.count({
       where: {
         status: 'Published',
-        tags: { some: { tag: { name: { in: ['Job', 'Vacancy', 'Career'] } } } },
+        tags: { some: { tag: { name: { in: ['Job', 'Vacancy', 'Career', 'Education & Career'] } } } },
         OR: [
           { tags: { some: { tag: { name: { in: ['Upcoming', 'Upcoming Job', 'Agami'] } } } } },
           { title: { contains: 'संभावित' } },
-          { title: { contains: 'Upcoming' } }
+          { title: { contains: 'Upcoming', mode: 'insensitive' } },
+          { title: { contains: 'Expected', mode: 'insensitive' } },
+          { title: { contains: 'आगामी' } }
         ]
       }
     })

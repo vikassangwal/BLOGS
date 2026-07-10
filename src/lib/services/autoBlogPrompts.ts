@@ -2,9 +2,7 @@ export function getResearchPrompt(targetTopic: string, liveNewsContext: string, 
     return `You are an expert Internet Researcher and SEO Analyst. The user wants to write a blog post about: "${targetTopic}".
     ${liveNewsContext}
     
-    CRITICAL RULE (STRICT): If the topic is a COMPLETELY FAKE exam that does not exist or a totally made-up rumor, you MUST ONLY output the exact word "ABORT_FAKE_NEWS" and nothing else. 
-    HOWEVER, if it is a real Upcoming Exam, an Expected Syllabus, an Ongoing Application, an Expected Result, a State Scholarship, a Board Exam update, an Answer Key, a Counselling/Merit List schedule, a Free Laptop/Coaching Scheme, an Internship, a Rojgar Mela/Apprenticeship, an Army/Defense Rally, an Entrance Exam/TET update, a Top MNC Off-Campus Drive, a Free Online Course, a Skill Development (PMKVY) update, a KVS/Navodaya Admission, an IGNOU/Open University update, a Nursing Course form, a Bank/PSU Job, a Telecom/Tech update, a Finance/Bank/Earning update, or a University Admission/Result, DO NOT ABORT! Provide research for it (mentioning it is expected/upcoming if applicable) so the writer can write an informative guide.
-
+    CRITICAL RULE (STRICT): Only output "ABORT_FAKE_NEWS" if the topic is a malicious or provably false rumor (e.g. "World Ending Tomorrow"). For ANY job, exam, syllabus, result, admit card, scheme, gadget, or finance topic, ASSUME IT IS REAL OR UPCOMING and DO NOT ABORT. Even if you cannot find live news, provide expected/historical research for it (mentioning it is expected/upcoming) so the writer can write an informative guide.
     You MUST extract the FULL NOTIFICATION DETAILS. Provide an exhaustive breakdown of ALL of the following (if available):
     1. FULL SUMMARY: What is the notification/scholarship/result/scheme about? (Department, Post name, Total Vacancies, Scheme benefits, or University name).
     2. IMPORTANT DATES: Application Start Date, Last Date, Fee Payment Last Date, Exam/Rally Date, Counselling Date, or Result Date (if any).

@@ -863,12 +863,12 @@ ${links}
     - For active or available links (like Official Notification PDF, Direct Apply Page, Admit Card download page), try to provide the verified EXACT direct sub-page link / URL (e.g., "https://ssc.gov.in/api/attachment/...pdf" or the specific application login portal page of that conducting department) so the user lands directly on the target page. If you do not have the verified direct page URL, fallback to the direct Official Homepage URL of that specific conducting department (e.g., "https://ssc.gov.in", "https://rpsc.rajasthan.gov.in", "https://rssb.rajasthan.gov.in", "https://upsc.gov.in") so users can click to visit the main page and navigate it directly.
     - NEVER use "#", "[LINK_NOT_AVAILABLE]", or empty href attributes.
     
-    ${recentPostsHtml ? `
+    ${recentPostsList && recentPostsList.length > 0 ? `
     AUTO-INTERNAL LINKING:
     If you mention the following related articles, you MUST add them as a visually distinct NOTE block using this exact HTML format:
     <div class="internal-link-note"><strong>📝 नोट (Note):</strong> <a href="...">Article Title</a> के बारे में और पढ़ें।</div>
     Do NOT just mix them in the normal paragraph text. You MUST use this exact HTML div format. Use the exact <a> tags provided below:
-    ${recentPostsHtml}
+    ${recentPostsList.map(p => `- <a href="https://www.knowora.in/blog/${p.slug}">${p.title}</a>`).join('\n')}
     ` : ''}
 
     ${settings.embedYoutube !== false ? `

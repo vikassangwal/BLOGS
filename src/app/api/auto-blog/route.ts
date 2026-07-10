@@ -357,20 +357,33 @@ export async function POST(request: NextRequest) {
           const queueData = shuffledTopics.map((topic, i) => {
              let niche = 'News';
              const tLower = topic.toLowerCase();
-             if (tLower.includes('job') || tLower.includes('result') || tLower.includes('exam') || tLower.includes('admit') || tLower.includes('notification') || tLower.includes('vacancy') || tLower.includes('recruitment')) {
+             if (tLower.includes('job') || tLower.includes('admit') || tLower.includes('notification') || tLower.includes('vacancy') || tLower.includes('recruitment') || tLower.includes('scholarship') || tLower.includes('counselling') || tLower.includes('apprentice') || tLower.includes('answer key') || tLower.includes('cutoff') || tLower.includes('cut-off')) {
                 niche = 'Education & Career';
              } else if (tLower.includes('tech') || tLower.includes('launch') || tLower.includes('ai') || tLower.includes('phone') || tLower.includes('app')) {
                 niche = 'Technology';
              } else if (tLower.includes('finance') || tLower.includes('stock') || tLower.includes('budget') || tLower.includes('market') || tLower.includes('bank')) {
                 niche = 'Finance & Earning';
              }
+
+             // 🚨 STRICT FILTER: Skip Education & Career topics that are Results, Syllabus, or Earning-related
+             // These are excluded from auto-blogging per user requirement
+             const isExcludedEduTopic = niche === 'Education & Career' && (
+               tLower.includes('result') || tLower.includes('परिणाम') ||
+               tLower.includes('syllabus') || tLower.includes('सिलेबस') ||
+               tLower.includes('earning') || tLower.includes('course') || tLower.includes('कोर्स') || tLower.includes('कमाई')
+             );
+             if (isExcludedEduTopic) {
+               console.log(`[Topic Filter] Skipping excluded topic: "${topic}"`);
+               return null; // Will be filtered out below
+             }
+
              return {
                 keyword: topic,
                 niche: niche,
                 status: 'pending',
                 priority: 5
              };
-          });
+          }).filter(Boolean); // Remove null (excluded) entries
 
           // Deduplicate: filter out keywords that already exist as pending
            const existingKeywords = await prisma.autoBlogKeyword.findMany({
@@ -485,6 +498,30 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'AI detected fake/unreleased news and aborted.' });
     }
 
+    // 🚨 NEW: Block blog writing if no official notification found for Education & Career topics
+    if (researchData.includes("ABORT_NO_NOTIFICATION")) {
+      console.warn(`[Auto-Blog] ABORT: No official notification found for Education topic: "${targetTopic}". Skipping blog creation.`);
+      if (keywordId) {
+        await prisma.autoBlogKeyword.update({ where: { id: keywordId }, data: { status: 'failed' } });
+      }
+      return NextResponse.json({ 
+        success: false, 
+        error: `Blog not written: Official notification not yet released for "${targetTopic}". Blog will be created once official notification is available.` 
+      });
+    }
+
+    // 🚨 NEW: Block excluded topics (Results, Syllabus, Earning & Courses)
+    if (researchData.includes("ABORT_EXCLUDED_TOPIC")) {
+      console.warn(`[Auto-Blog] ABORT: Topic "${targetTopic}" is in excluded category (Results/Syllabus/Earning). Skipping.`);
+      if (keywordId) {
+        await prisma.autoBlogKeyword.update({ where: { id: keywordId }, data: { status: 'failed' } });
+      }
+      return NextResponse.json({ 
+        success: false, 
+        error: `Topic "${targetTopic}" is excluded (Results/Syllabus/Earning are not auto-blogged in Education & Career).` 
+      });
+    }
+
     // -------------------------------------------------------------
     // AUTO INTERNAL LINKING - Reuse pre-fetched recent posts (no duplicate DB query)
     // -------------------------------------------------------------
@@ -548,7 +585,7 @@ ${links}
     - PAY LEVEL & IN-HAND CALCULATOR: 7th CPC का Exact Pay Level (Level 1 से 14) और सम्भावित इन-हैंड सैलरी दोनों दर्शाएं।
     - 5-YEAR CUT-OFF TREND: सम्भव हो तो पिछले वर्षों की श्रेणी-वार कट-ऑफ (UR, OBC, SC, ST, EWS) तालिका ज़रूर शामिल करें।
     - AGE CALCULATION CUT-OFF DATE: आयु सीमा की गणना किस कट-ऑफ तारीख से होगी, इसका स्पष्ट उल्लेख करें।
-    - OTR & SSO MANDATORY STEP: RPSC/SSC जैसी भर्तियों में OTR (One Time Registration) का पहला चरण ज़रूर लिखें।
+    - OTR / SSO REGISTRATION (केवल जहाँ लागू हो): OTR सभी भर्तियों में नहीं होता। केवल इन विभागों में लागू होता है — RPSC → sso.rajasthan.gov.in, RSSB/RSMSSB → sso.rajasthan.gov.in, SSC → ssc.gov.in OTR, UPSSSC → upsssc.gov.in। Railways (RRB/RRC), Banks (IBPS/SBI), Army/Navy/NTA परीक्षाओं, और अन्य PSU भर्तियों में OTR की आवश्यकता नहीं होती — वहाँ OTR का उल्लेख बिल्कुल न करें।
     - INSTANT INDEXING & SCHEMA READY: लेख को स्वच्छ HTML5 में रखें ताकि गूगल बोट 1 मिनट में इंडेक्स करे।
     - ADSENSE SAFETY & NO SPAM: अत्यधिक स्पैम बटन्स न लगाएं। लेख को 100% ज्ञानवर्धक और भरोसेमंद बनाएं।
     - WHATSAPP & TELEGRAM BROADCAST SUMMARY: अंत में 2 पंक्तियों का संक्षिप्त सारांश (Short Summary) व्हाट्सएप शेयर हेतु प्रदान करें।
@@ -572,7 +609,7 @@ ${links}
     11. ADSENSE SAFETY: अत्यधिक स्पैम 'Apply Now' बटन या स्कैम वाले क्लिकबैट शब्दों का प्रयोग न करें।
     12. MOBILE TABLE SCROLL: सभी HTML टेबल को स्वच्छ और मोबाइल-फ्रेंडली ((<div style="overflow-x:auto;">)) बनाएं ताकि मोबाइल पर टेबल कटे नहीं।
     13. PAY MATRIX LEVEL: 7th Pay Commission का Pay Level (Level 1 से 14) और सम्भावित इन-हैंड सैलरी दोनों लिखें।
-    14. OTR MANDATORY: RPSC/SSC जैसी भर्तियों में OTR (One Time Registration) का पहला चरण ज़रूर लिखें।
+    14. OTR (केवल जहाँ लागू हो): OTR/SSO केवल RPSC, RSSB, SSC, UPSSSC जैसे विभागों में होता है। यदि यह भर्ती इन विभागों से है तो OTR का उल्लेख Step 1 में करें। यदि यह Railway, Bank, Army, NTA, PSU की भर्ती है तो OTR का कोई mention नहीं करना है।
     15. SERVER RUSH WARNING: फॉर्म भरने की अंतिम तिथि के दिन सर्वर बिज़ी/क्रैश होने का अलर्ट नोट में दें।
     16. FORM HARCOPY NOTE: आवेदकों को 'Application Form Hardcopy & Fee Receipt' सुरक्षित रखने का नोट लिखें।
     17. REGIONAL LANGUAGES: यदि परीक्षा 13 क्षेत्रीय भाषाओं में उपलब्ध है तो उसका उल्लेख करें।
@@ -583,7 +620,7 @@ ${links}
     - APPRENTICESHIP VS PERMANENT: यदि भर्ती Apprenticeship (शिक्षुता) की है, तो उसे '1 वर्ष का प्रशिक्षण (Apprenticeship)' साफ़-साफ़ लिखें। इसे स्थायी (Permanent) सरकारी नौकरी कभी न लिखें।
     - DEGREE VS DIPLOMA: B.Tech (Degree) और Diploma (Polytechnic) की पात्रता को अलग-अलग रखें। डिप्लोमा धारकों को B.Tech पदों पर पात्र न बताएं जब तक आधिकारिक नोटिस में न हो।
     - CERTIFICATE DATES: OBC-NCL और EWS प्रमाण पत्र के लिए फॉर्म भरने की अंतिम तिथि (Cut-off Date) का विशेष उल्लेख करें।
-    - OTR & SERVICE BOND: यदि राज्य/केंद्र पोर्टल (जैसे OTR / SSO ID) पर रजिस्ट्रेशन अनिवार्य है, तो Step 1 में OTR का उल्लेख करें। बैंक/PSU नौकरी में सर्विस बॉन्ड (यदि लागू हो) की जानकारी दें।
+    - OTR & SERVICE BOND: यदि यह भर्ती RPSC/RSSB/SSC/UPSSSC जैसे विभाग की है जहाँ OTR अनिवार्य है, तभी Step 1 में OTR/SSO ID portal का उल्लेख करें। अन्य सभी विभागों (Railway, IBPS, Army, NTA, PSU) की भर्ती में OTR का mention न करें। बैंक/PSU नौकरी में सर्विस बॉन्ड (यदि लागू हो) की जानकारी दें।
     - NORMALIZATION & MARKS: मल्टी-शिफ्ट कंप्यूटर परीक्षाओं (CBT) में Normalization प्रक्रिया और Tier-1 (Qualifying vs Merit) की स्थिति स्पष्ट करें।
     - ADVT NUMBER: विज्ञापन संख्या (Advt No.) चालू वर्ष (${getCurrentYearNum()}) की ही लिखें, पुरानी कॉपी न करें।
     - AGE & RELAXATION: General category age limit साफ़-साफ़ लिखें (जैसे 18-30 वर्ष)। आरक्षित वर्गों की छूट को अलग से दर्शाएं: OBC (+3 वर्ष), SC/ST (+5 वर्ष)। मिलाकर एक बड़ी उम्र न लिखें।

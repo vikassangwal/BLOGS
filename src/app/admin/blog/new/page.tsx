@@ -1,6 +1,20 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import dynamic from 'next/dynamic';
+import 'react-quill/dist/quill.snow.css';
+
+const ReactQuill = dynamic(() => import('react-quill'), { ssr: false });
+
+const quillModules = {
+  toolbar: [
+    [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+    ['bold', 'italic', 'underline', 'strike', 'blockquote'],
+    [{ 'list': 'ordered' }, { 'list': 'bullet' }, { 'indent': '-1' }, { 'indent': '+1' }],
+    ['link', 'image', 'video'],
+    ['clean']
+  ],
+};
 
 function BlogEditor() {
   const router = useRouter();
@@ -287,13 +301,16 @@ function BlogEditor() {
             `}</style>
             
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
-              <textarea
-                value={formData.content}
-                onChange={e => setFormData({ ...formData, content: e.target.value })}
-                placeholder="Write your HTML content here..."
-                style={{ width: '100%', padding: '1rem', borderRadius: '8px', border: '1px solid var(--color-border)', minHeight: '600px', fontFamily: 'monospace', background: 'rgba(0,0,0,0.3)', color: '#e2e8f0', lineHeight: 1.6 }}
-                required
-              />
+              <div style={{ background: '#fff', color: '#000', borderRadius: '8px', overflow: 'hidden', height: '600px', display: 'flex', flexDirection: 'column' }}>
+                <ReactQuill 
+                  theme="snow" 
+                  value={formData.content} 
+                  onChange={content => setFormData({ ...formData, content })} 
+                  modules={quillModules}
+                  style={{ flex: 1, overflowY: 'auto' }} 
+                  placeholder="Start writing your manual blog post here..."
+                />
+              </div>
               <div 
                 className="blog-content admin-live-preview"
                 style={{ width: '100%', padding: '1rem 2rem', borderRadius: '8px', border: '1px solid var(--color-border)', background: 'var(--color-bg-primary)', minHeight: '600px', maxHeight: '800px', overflowY: 'auto' }}
@@ -554,11 +571,16 @@ function BlogEditor() {
                   </div>
                   <div>
                     <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.5rem', color: 'var(--color-text-primary)' }}>Content (HTML)</label>
-                    <textarea
-                      value={formData.content}
-                      onChange={e => setFormData({ ...formData, content: e.target.value })}
-                      style={{ width: '100%', minHeight: '400px', padding: '1rem', borderRadius: '8px', border: '1px solid var(--color-border)', background: 'rgba(0,0,0,0.3)', color: '#e2e8f0', fontFamily: 'monospace', lineHeight: 1.6 }}
-                    />
+                    <div style={{ background: '#fff', color: '#000', borderRadius: '8px', overflow: 'hidden', height: '400px', display: 'flex', flexDirection: 'column' }}>
+                      <ReactQuill 
+                        theme="snow" 
+                        value={formData.content} 
+                        onChange={content => setFormData({ ...formData, content })} 
+                        modules={quillModules}
+                        style={{ flex: 1, overflowY: 'auto' }} 
+                        placeholder="Start writing..."
+                      />
+                    </div>
                   </div>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                     <div>

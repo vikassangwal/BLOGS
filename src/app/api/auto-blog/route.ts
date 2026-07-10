@@ -506,6 +506,29 @@ export async function POST(request: NextRequest) {
     }
 
     // -------------------------------------------------------------
+    // AUTO INTERNAL LINKING - Fetch Recent Posts
+    // -------------------------------------------------------------
+    let internalLinkingStr = '';
+    try {
+      const recentPosts = await prisma.blogPost.findMany({
+        where: { status: 'Published' },
+        orderBy: { publishedAt: 'desc' },
+        take: 15,
+        select: { title: true, slug: true }
+      });
+      if (recentPosts.length > 0) {
+        const links = recentPosts.map(p => `- <a href="https://www.knowora.in/blog/${p.slug}">${p.title}</a>`).join('\n');
+        internalLinkingStr = `
+      INTERNAL LINKING GUIDELINES:
+      You have access to the following existing articles on our website:
+${links}
+      If any of these articles are highly relevant to the context of the content you are writing, MUST organically insert 1-2 hyperlinks to them within your HTML text. Use the exact provided HTML anchor tags.`;
+      }
+    } catch (e) {
+      console.error("Failed to fetch recent posts for internal linking", e);
+    }
+
+    // -------------------------------------------------------------
     // AGENT 2: THE WRITER
     // -------------------------------------------------------------
     const writerPrompt = `You are a Senior Content Writer and SEO Expert.
@@ -513,6 +536,7 @@ export async function POST(request: NextRequest) {
     
     RESEARCH DATA:
     ${researchData}
+    ${internalLinkingStr}
     
     REQUIREMENTS:
     1. ${langInstructions}

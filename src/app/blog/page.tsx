@@ -258,62 +258,104 @@ function BlogListContent() {
 
         {/* Filters - ONLY SHOW FOR EDUCATION & CAREER */}
         {activeTag === 'Education & Career' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', maxWidth: '400px', margin: '1rem auto 0' }}>
-            {/* State Filter */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(255,255,255,0.03)', padding: '0.5rem 1.2rem', borderRadius: '25px', border: '1px solid var(--color-border)' }}>
-              <span style={{ opacity: 0.7 }}>📍</span>
-              <select 
-                value={selectedState}
-                onChange={(e) => {
-                  setSelectedState(e.target.value);
-                  localStorage.setItem('user_state', e.target.value);
-                  setPage(1);
-                }}
-                style={{
-                  background: 'transparent',
-                  border: 'none',
-                  color: 'var(--color-text-primary)',
-                  width: '100%',
-                  outline: 'none',
-                  fontSize: '0.95rem',
-                  fontWeight: 500,
-                  cursor: 'pointer'
-                }}
-              >
-                {INDIAN_STATES.map(s => (
-                  <option key={s} value={s} style={{ background: '#121212', color: '#fff' }}>
-                    {s === 'All India' ? 'National News (All India)' : s === 'Central Government' ? 'Central News (India)' : `${s} News`}
-                  </option>
-                ))}
-              </select>
+          <div style={{ 
+            display: 'flex', 
+            flexDirection: 'column',
+            gap: '1rem', 
+            maxWidth: '900px', 
+            margin: '2rem auto 0',
+            background: 'rgba(0,0,0,0.2)',
+            padding: '1.5rem',
+            borderRadius: '20px',
+            border: '1px solid var(--color-border)',
+            boxShadow: '0 10px 30px rgba(0,0,0,0.1)'
+          }}>
+            
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
+              <h3 style={{ fontSize: '1.1rem', fontWeight: 700, margin: 0, color: 'var(--color-text-primary)' }}>
+                Advanced Job Filters
+              </h3>
+              
+              {/* State Filter */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(255,255,255,0.05)', padding: '0.5rem 1.2rem', borderRadius: '25px', border: '1px solid var(--color-border)', minWidth: '250px' }}>
+                <span style={{ opacity: 0.7 }}>📍</span>
+                <select 
+                  value={selectedState}
+                  onChange={(e) => {
+                    setSelectedState(e.target.value);
+                    localStorage.setItem('user_state', e.target.value);
+                    setPage(1);
+                  }}
+                  style={{
+                    background: 'transparent',
+                    border: 'none',
+                    color: 'var(--color-text-primary)',
+                    width: '100%',
+                    outline: 'none',
+                    fontSize: '0.95rem',
+                    fontWeight: 500,
+                    cursor: 'pointer',
+                    appearance: 'auto'
+                  }}
+                >
+                  {INDIAN_STATES.map(s => (
+                    <option key={s} value={s} style={{ background: '#121212', color: '#fff' }}>
+                      {s === 'All India' ? 'National News (All India)' : s === 'Central Government' ? 'Central Government' : `${s}`}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
 
-            {/* Qualification Filter */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(255,255,255,0.03)', padding: '0.5rem 1.2rem', borderRadius: '25px', border: '1px solid var(--color-border)' }}>
-              <span style={{ opacity: 0.7 }}>🎓</span>
-              <select 
-                value={selectedQualification}
-                onChange={(e) => {
-                  setSelectedQualification(e.target.value);
-                  setPage(1);
-                }}
-                style={{
-                  background: 'transparent',
-                  border: 'none',
-                  color: 'var(--color-text-primary)',
-                  width: '100%',
-                  outline: 'none',
-                  fontSize: '0.95rem',
-                  fontWeight: 500,
-                  cursor: 'pointer'
-                }}
-              >
+            {/* Qualification Filter as Chips */}
+            <div style={{ marginTop: '0.5rem' }}>
+              <p style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)', marginBottom: '0.8rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                Education Qualification
+              </p>
+              <div style={{
+                display: 'flex', 
+                gap: '0.6rem', 
+                overflowX: 'auto', 
+                paddingBottom: '0.5rem',
+                WebkitOverflowScrolling: 'touch',
+                scrollbarWidth: 'none' // Firefox
+              }}>
+                <style dangerouslySetInnerHTML={{__html: `
+                  div::-webkit-scrollbar { display: none; }
+                `}} />
                 {QUALIFICATIONS.map(q => (
-                  <option key={q} value={q} style={{ background: '#121212', color: '#fff' }}>
-                    {q === 'All Qualifications' ? 'All Qualifications (सभी योग्यताएं)' : `${q} Jobs`}
-                  </option>
+                  <button
+                    key={q}
+                    onClick={() => {
+                      setSelectedQualification(q);
+                      setPage(1);
+                    }}
+                    style={{
+                      flexShrink: 0,
+                      padding: '0.6rem 1.2rem',
+                      borderRadius: '25px',
+                      border: '1px solid',
+                      borderColor: selectedQualification === q ? 'var(--color-accent)' : 'var(--color-border)',
+                      background: selectedQualification === q ? 'var(--color-accent)' : 'rgba(255,255,255,0.03)',
+                      color: selectedQualification === q ? '#fff' : 'var(--color-text-primary)',
+                      cursor: 'pointer',
+                      fontSize: '0.85rem',
+                      fontWeight: 600,
+                      transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                      whiteSpace: 'nowrap',
+                      boxShadow: selectedQualification === q ? '0 4px 12px rgba(59, 130, 246, 0.3)' : 'none'
+                    }}
+                    onMouseEnter={(e) => {
+                      if (selectedQualification !== q) e.currentTarget.style.background = 'rgba(255,255,255,0.08)';
+                    }}
+                    onMouseLeave={(e) => {
+                      if (selectedQualification !== q) e.currentTarget.style.background = 'rgba(255,255,255,0.03)';
+                    }}
+                  >
+                    {q === 'All Qualifications' ? 'All Qualifications' : q}
+                  </button>
                 ))}
-              </select>
+              </div>
             </div>
           </div>
         )}
@@ -382,10 +424,33 @@ function BlogListContent() {
             <div className="dot-bounce" style={{ animationDelay: '0.4s' }}>.</div>
           </div>
         ) : posts.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '4rem', color: 'var(--color-text-secondary)' }}>
-            <span style={{ fontSize: '3rem', display: 'block', marginBottom: '1rem' }}>📭</span>
-            <h3>No articles found</h3>
-            <p>Try adjusting your search or category filters.</p>
+          <div style={{ textAlign: 'center', padding: '4rem', color: 'var(--color-text-secondary)', background: 'rgba(255,255,255,0.02)', borderRadius: '16px', border: '1px solid var(--color-border)' }}>
+            <span style={{ fontSize: '3.5rem', display: 'block', marginBottom: '1rem' }}>📭</span>
+            <h3 style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--color-text-primary)', marginBottom: '0.5rem' }}>
+              {activeTag === 'Education & Career' ? 'No jobs found for this combination' : 'No articles found'}
+            </h3>
+            <p style={{ fontSize: '1rem' }}>Try adjusting your search, state, or qualification filters.</p>
+            <button 
+              onClick={() => {
+                setSearch('');
+                setSelectedState('All India');
+                setSelectedQualification('All Qualifications');
+                setSubTag('');
+                setPage(1);
+              }}
+              style={{
+                marginTop: '1.5rem',
+                padding: '0.6rem 1.5rem',
+                background: 'var(--color-accent)',
+                color: '#fff',
+                border: 'none',
+                borderRadius: '25px',
+                fontWeight: 600,
+                cursor: 'pointer'
+              }}
+            >
+              Clear Filters
+            </button>
           </div>
         ) : (
           <>

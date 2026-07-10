@@ -8,18 +8,42 @@ import LeadCaptureForm from '@/components/LeadCaptureForm';
 function BlogListContent() {
   const searchParams = useSearchParams();
   const initialTag = searchParams ? searchParams.get('tag') || '' : '';
-  
+  const initialSearch = searchParams ? searchParams.get('search') || '' : '';
+  const initialJobType = searchParams ? searchParams.get('jobType') || '' : '';
+
+  // Map search keywords from homepage qualification grid to qualification chips
+  const mapSearchToQualification = (s: string): string => {
+    const lower = s.toLowerCase();
+    if (lower.includes('8th')) return 'All Qualifications';
+    if (lower.includes('10th')) return '10th Pass';
+    if (lower.includes('12th')) return '12th Pass';
+    if (lower.includes('iti')) return 'ITI / Diploma';
+    if (lower.includes('diploma')) return 'ITI / Diploma';
+    if (lower.includes('btech') || lower.includes('b.tech') || lower.includes('bcom') || lower.includes('b.com')) return 'Graduate';
+    if (lower.includes('post graduate')) return 'Post Graduate';
+    if (lower.includes('graduate')) return 'Graduate';
+    return 'All Qualifications';
+  };
+
+  const initialQualification = initialSearch
+    ? mapSearchToQualification(initialSearch)
+    : 'All Qualifications';
+
   const [posts, setPosts] = useState<any[]>([]);
   const [tags, setTags] = useState<string[]>([]);
   const [activeTag, setActiveTag] = useState(initialTag);
   const [subTag, setSubTag] = useState('');
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState(initialSearch);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedState, setSelectedState] = useState('All India');
-  const [selectedQualification, setSelectedQualification] = useState('All Qualifications');
+  const [selectedQualification, setSelectedQualification] = useState(initialQualification);
   const [isStateDetected, setIsStateDetected] = useState(false);
+  // Show filter panel when Education & Career tag OR jobType=active_upcoming (from qualification grid)
+  const [showFilters, setShowFilters] = useState(
+    initialTag === 'Education & Career' || initialJobType === 'active_upcoming'
+  );
 
   const QUALIFICATIONS = [
     'All Qualifications',
@@ -122,13 +146,21 @@ function BlogListContent() {
     detectState();
   }, []);
 
-  // Sync activeTag if URL changes externally
+  // Sync activeTag, search, qualification if URL changes externally
   useEffect(() => {
     if (searchParams) {
       const tag = searchParams.get('tag');
+      const s = searchParams.get('search');
+      const jt = searchParams.get('jobType');
       if (tag !== null && tag !== activeTag) {
         setActiveTag(tag);
+        if (tag === 'Education & Career') setShowFilters(true);
       }
+      if (s !== null && s !== search) {
+        setSearch(s);
+        if (s) setShowFilters(true);
+      }
+      if (jt === 'active_upcoming') setShowFilters(true);
     }
   }, [searchParams]);
 
@@ -148,6 +180,7 @@ function BlogListContent() {
       if (selectedQualification && selectedQualification !== 'All Qualifications') {
         url.searchParams.append('qualification', selectedQualification);
       }
+      // Always pass jobType if in URL OR if coming from qualification grid
       const jobType = searchParams?.get('jobType');
       if (jobType) {
         url.searchParams.append('jobType', jobType);
@@ -256,8 +289,8 @@ function BlogListContent() {
           </span>
         </div>
 
-        {/* Filters - ONLY SHOW FOR EDUCATION & CAREER */}
-        {activeTag === 'Education & Career' && (
+        {/* Filters - SHOW FOR EDUCATION & CAREER or active_upcoming jobType */}
+        {showFilters && (
           <div style={{ 
             display: 'flex', 
             flexDirection: 'column',

@@ -111,14 +111,26 @@ async function getActiveJobs(limit: number = 8) {
       }
     });
 
-    // Filter to ensure both Apply and Notification links/text exist
+    // Filter to ensure both Apply and Notification links/text exist and application has started
     const filteredPosts = posts.filter(post => {
       if (!post.content) return false;
       const content = post.content.toLowerCase();
+      
+      // Must have notification and apply text, plus an HTML link
       const hasNotification = content.includes('notification') || content.includes('विज्ञप्ति') || content.includes('अधिसूचना');
       const hasApply = content.includes('apply') || content.includes('आवेदन');
       const hasLink = content.includes('<a ');
-      return hasNotification && hasApply && hasLink;
+      
+      // Exclude if it mentions the link will be active in the future
+      const isApplyNotStarted = content.includes('link active on') || 
+                                content.includes('will be active') ||
+                                content.includes('जल्द सक्रिय होगा') ||
+                                content.includes('link will activate') ||
+                                content.includes('to be announced') ||
+                                content.includes('coming soon') ||
+                                content.includes('जल्द उपलब्ध');
+
+      return hasNotification && hasApply && hasLink && !isApplyNotStarted;
     });
 
     return filteredPosts.slice(0, limit).map(({ content, ...rest }) => rest);

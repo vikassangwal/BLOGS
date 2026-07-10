@@ -911,7 +911,7 @@ export default async function HomePage() {
                 { label: "Any Graduate", query: "graduate" }
               ].map((item, idx) => (
                 <Link
-                  href={`/blog?search=${encodeURIComponent(item.query)}`}
+                  href={`/blog?search=${encodeURIComponent(item.query)}&jobType=active_upcoming`}
                   key={idx}
                   className="px-4 py-3 glass-panel text-center hover:bg-blue-500/10 border border-white/5 hover:border-blue-500/30 rounded-xl text-xs font-bold transition-all text-gray-300 hover:text-white hover:-translate-y-0.5 shadow-sm"
                 >

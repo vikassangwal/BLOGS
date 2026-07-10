@@ -57,6 +57,7 @@ export async function GET(request: Request) {
     const status = searchParams.get('status') || '';
     const publishedOnly = searchParams.get('published') === 'true';
     const stateFilter = searchParams.get('stateFilter') || '';
+    const jobType = searchParams.get('jobType') || '';
 
     const where: any = { AND: [] };
 
@@ -129,6 +130,29 @@ export async function GET(request: Request) {
 
     if (status && status !== 'All') {
       where.AND.push({ status });
+    }
+
+    if (jobType === 'active_upcoming') {
+      where.AND.push({
+        OR: [
+          { tags: { some: { tag: { name: { in: ['Job', 'Vacancy', 'Career', 'Upcoming Job', 'Agami'] } } } } },
+          { title: { contains: 'Job', mode: 'insensitive' } },
+          { title: { contains: 'Vacancy', mode: 'insensitive' } },
+          { title: { contains: 'भर्ती' } },
+          { title: { contains: 'संभावित' } },
+          { title: { contains: 'Upcoming', mode: 'insensitive' } },
+          { title: { contains: 'आगामी' } }
+        ]
+      });
+      where.AND.push({
+        NOT: [
+          { title: { contains: 'Result', mode: 'insensitive' } },
+          { title: { contains: 'परिणाम' } },
+          { title: { contains: 'Admit Card', mode: 'insensitive' } },
+          { title: { contains: 'प्रवेश पत्र' } },
+          { title: { contains: 'Answer Key', mode: 'insensitive' } }
+        ]
+      });
     }
 
     if (tag) {

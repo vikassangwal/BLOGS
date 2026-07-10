@@ -103,6 +103,10 @@ function BlogListContent() {
       if (selectedQualification && selectedQualification !== 'All Qualifications') {
         url.searchParams.append('qualification', selectedQualification);
       }
+      const jobType = searchParams?.get('jobType');
+      if (jobType) {
+        url.searchParams.append('jobType', jobType);
+      }
 
       const res = await fetch(url.toString());
       const data = await res.json();

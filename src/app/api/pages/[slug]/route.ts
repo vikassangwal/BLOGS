@@ -1,10 +1,11 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
-export async function GET(req: Request, { params }: { params: { slug: string } }) {
+export async function GET(req: Request, { params }: { params: Promise<{ slug: string }> }) {
   try {
+    const { slug } = await params;
     const page = await prisma.staticPage.findUnique({
-      where: { slug: params.slug }
+      where: { slug }
     });
     
     if (!page) {
@@ -17,12 +18,13 @@ export async function GET(req: Request, { params }: { params: { slug: string } }
   }
 }
 
-export async function PUT(req: Request, { params }: { params: { slug: string } }) {
+export async function PUT(req: Request, { params }: { params: Promise<{ slug: string }> }) {
   try {
+    const { slug: oldSlug } = await params;
     const { title, slug, content, isActive } = await req.json();
 
     const updatedPage = await prisma.staticPage.update({
-      where: { slug: params.slug },
+      where: { slug: oldSlug },
       data: {
         title,
         slug, // Update slug if provided, though risky if links depend on it
@@ -37,10 +39,11 @@ export async function PUT(req: Request, { params }: { params: { slug: string } }
   }
 }
 
-export async function DELETE(req: Request, { params }: { params: { slug: string } }) {
+export async function DELETE(req: Request, { params }: { params: Promise<{ slug: string }> }) {
   try {
+    const { slug } = await params;
     await prisma.staticPage.delete({
-      where: { slug: params.slug }
+      where: { slug }
     });
     return NextResponse.json({ success: true });
   } catch (error) {

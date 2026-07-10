@@ -18,7 +18,7 @@ interface ProviderProfile {
   name: string;
   baseUrl: string;
   authHeader: (key: string) => Record<string, string>;
-  buildBody: (model: string, systemPrompt: string, userPrompt: string, maxTokens: number) => any;
+  buildBody: (model: string, systemPrompt: string, userPrompt: string, maxTokens: number, enableSearch?: boolean) => any;
   extractContent: (data: any) => string;
   models: string[];           // Known model prefixes for auto-detection
   keyPatterns: RegExp[];       // API key patterns for auto-detection

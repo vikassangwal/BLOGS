@@ -621,11 +621,11 @@ export default function BlogPostClient({ post, ads, relatedPosts, whatsappLinks,
               ) : (
                 comments.map((comment) => (
                   <div key={comment.id} style={{ background: 'rgba(255, 255, 255, 0.01)', border: '1px solid var(--color-border)', borderRadius: '16px', padding: '1.25rem', display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>
-                    <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'linear-gradient(135deg, var(--color-accent), #c084fc)', display: 'flex', alignItems: 'center', justifyCenter: 'center', fontSize: '1.1rem', color: '#fff', fontWeight: 'bold', flexShrink: 0, justifyContent: 'center' }}>
+                    <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'linear-gradient(135deg, var(--color-accent), #c084fc)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.1rem', color: '#fff', fontWeight: 'bold', flexShrink: 0 }}>
                       {comment.author.substring(0, 1).toUpperCase()}
                     </div>
                     <div>
-                      <div style={{ display: 'flex', gap: '0.5rem', itemsCenter: 'center', marginBottom: '0.25rem', flexWrap: 'wrap' }}>
+                      <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', marginBottom: '0.25rem', flexWrap: 'wrap' }}>
                         <span style={{ fontWeight: 700, fontSize: '0.95rem', color: 'var(--color-text-primary)' }}>{comment.author}</span>
                         <span style={{ color: 'var(--color-text-secondary)', fontSize: '0.8rem' }}>•</span>
                         <span style={{ color: 'var(--color-text-secondary)', fontSize: '0.8rem' }}>{new Date(comment.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</span>

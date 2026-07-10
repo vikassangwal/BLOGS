@@ -57,6 +57,7 @@ model BlogPost {
   translations    Json?     // Stores pre-translated content like { "hi": { "title": "...", "content": "..." } }
   authorId        String?
   author          User?     @relation(fields: [authorId], references: [id])
+  syndicatedToMedium Boolean @default(false)
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 
@@ -237,8 +238,24 @@ model AutoBlogSettings {
   smtpPort        Int?
   smtpUser        String?
   smtpPass        String?
+  
+  // Indexing and advanced agents
+  googleIndexingJson String? @db.Text
+  agent11IsActive    Boolean @default(false)
+  agent12IsActive    Boolean @default(false)
 
   updatedAt       DateTime @updatedAt
+}
+
+// ==========================================
+// NOTIFICATIONS & INDEXING
+// ==========================================
+model Pageview {
+  id        String   @id @default(uuid())
+  url       String
+  ip        String?
+  userAgent String?
+  createdAt DateTime @default(now())
 }
 
 // ==========================================

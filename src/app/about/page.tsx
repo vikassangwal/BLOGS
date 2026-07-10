@@ -1,6 +1,7 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 
 export default function AboutUsPage() {
   const [team, setTeam] = useState<any[]>([]);
@@ -58,7 +59,7 @@ export default function AboutUsPage() {
               <Link href={`/team/${member.id}`} key={member.id} className="premium-card p-6 flex items-center gap-6 group hover:scale-105 transition-transform cursor-pointer">
                 <div className="w-20 h-20 rounded-full bg-blue-600 flex items-center justify-center text-2xl font-bold text-white shrink-0 overflow-hidden">
                   {member.imageUrl ? (
-                    <img src={member.imageUrl} alt={member.name} className="w-full h-full object-cover" />
+                    <Image src={member.imageUrl} alt={member.name} width={80} height={80} className="w-full h-full object-cover" />
                   ) : (
                     member.name.substring(0, 2).toUpperCase()
                   )}

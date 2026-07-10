@@ -149,7 +149,7 @@ export async function POST(request: NextRequest) {
 Today's date is ${currentDate}. 
 Provide a short bulleted list of only NEW facts or developments that have happened recently. If there are no new updates, reply with "NO_NEW_UPDATES".`;
         
-        const newResearch = await generateContentWithFallback(researchConfig, "You are a factual news researcher. Reply only with new facts.", researchPrompt);
+        const newResearch = await generateContentWithFallback(researcherConfig, "You are a factual news researcher. Reply only with new facts.", researchPrompt);
 
         if (newResearch.includes("NO_NEW_UPDATES")) {
           // Just bump the updatedAt timestamp so we don't check it again soon

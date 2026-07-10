@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import 'react-quill/dist/quill.snow.css';
+import Image from 'next/image';
 
 const ReactQuill = dynamic(
   async () => {
@@ -366,7 +367,7 @@ function BlogEditor() {
                   ref={quillRef}
                   theme="snow" 
                   value={formData.content} 
-                  onChange={content => setFormData({ ...formData, content })} 
+                  onChange={(content: string) => setFormData({ ...formData, content })} 
                   modules={memoizedModules}
                   style={{ flex: 1, overflowY: 'auto' }} 
                   placeholder="Start writing your manual blog post here..."
@@ -552,7 +553,9 @@ function BlogEditor() {
               style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--color-border)' }}
             />
             {formData.featuredImage && (
-              <img src={formData.featuredImage} alt="Preview" style={{ width: '100%', marginTop: '1rem', borderRadius: '8px', objectFit: 'cover' }} />
+              <div style={{ width: '100%', marginTop: '1rem', borderRadius: '8px', overflow: 'hidden', position: 'relative', aspectRatio: '16/9' }}>
+                <Image src={formData.featuredImage} fill alt="Preview" style={{ objectFit: 'cover' }} />
+              </div>
             )}
           </div>
 
@@ -637,7 +640,7 @@ function BlogEditor() {
                         ref={quillModalRef}
                         theme="snow" 
                         value={formData.content} 
-                        onChange={content => setFormData({ ...formData, content })} 
+                        onChange={(content: string) => setFormData({ ...formData, content })} 
                         modules={memoizedModules}
                         style={{ flex: 1, overflowY: 'auto' }} 
                         placeholder="Start writing..."
@@ -669,7 +672,11 @@ function BlogEditor() {
                 <>
                   <h1 style={{ fontSize: '2.5rem', fontWeight: 800, marginBottom: '1rem', color: 'var(--color-text-primary)' }}>{formData.title || 'Untitled Post'}</h1>
                   {formData.subtitle && <h2 style={{ fontSize: '1.5rem', color: 'var(--color-text-secondary)', marginBottom: '1.5rem', fontWeight: 400 }}>{formData.subtitle}</h2>}
-                  {formData.featuredImage && <img src={formData.featuredImage} alt="Featured" style={{ width: '100%', borderRadius: '12px', marginBottom: '2rem', maxHeight: '400px', objectFit: 'cover' }} />}
+                  {formData.featuredImage && (
+                    <div style={{ width: '100%', borderRadius: '12px', marginBottom: '2rem', position: 'relative', aspectRatio: '16/9', overflow: 'hidden' }}>
+                      <Image src={formData.featuredImage} fill alt="Featured" style={{ objectFit: 'cover' }} />
+                    </div>
+                  )}
                   <style>{`
                     .admin-preview-content a {
                       color: var(--color-accent);

@@ -13,6 +13,9 @@ export async function POST(request: NextRequest) {
     }
 
     const aiConfig = await getAIConfig();
+    if (!aiConfig) {
+      return NextResponse.json({ error: 'AI Config is missing or invalid. Please check your settings.' }, { status: 500 });
+    }
     
     let prompt = '';
     let systemInstruction = '';

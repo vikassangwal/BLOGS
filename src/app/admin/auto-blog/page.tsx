@@ -110,13 +110,13 @@ export default function AutoBlogAdmin() {
 
   const triggerRun = async () => {
     setIsRunning(true);
+    let data;
     try {
       const res = await fetch('/api/auto-blog', { 
         method: 'POST',
         headers: { 'x-force-run': 'true' }
       });
       
-      let data;
       try {
         data = await res.json();
       } catch (err) {

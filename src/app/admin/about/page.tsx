@@ -1,6 +1,7 @@
 'use client';
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 
 export default function AdminAboutPage() {
   const [about, setAbout] = useState({ heading: '', content: '', mission: '', imageUrl: '' });
@@ -199,8 +200,8 @@ export default function AdminAboutPage() {
               team.map(member => (
                 <div key={member.id} className="flex items-center justify-between p-4 bg-gray-900/50 border border-gray-800 rounded-xl">
                   <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-full bg-gray-800 overflow-hidden flex items-center justify-center font-bold text-xl text-gray-500">
-                      {member.imageUrl ? <img src={member.imageUrl} className="w-full h-full object-cover" /> : member.name.substring(0,1)}
+                    <div className="w-12 h-12 rounded-full bg-gray-800 overflow-hidden flex items-center justify-center font-bold text-xl text-gray-500 relative">
+                      {member.imageUrl ? <Image src={member.imageUrl} fill alt="Member" className="object-cover" /> : member.name.substring(0,1)}
                     </div>
                     <div>
                       <h3 className="font-bold text-white">{member.name}</h3>
@@ -227,8 +228,8 @@ export default function AdminAboutPage() {
             <form onSubmit={handleSaveMember} className="space-y-4">
               
               <div className="flex items-center gap-4 mb-4">
-                <div className="w-20 h-20 rounded-full bg-gray-800 overflow-hidden border border-gray-700 shrink-0">
-                  {memberForm.imageUrl && <img src={memberForm.imageUrl} className="w-full h-full object-cover" />}
+                <div className="w-20 h-20 rounded-full bg-gray-800 overflow-hidden border border-gray-700 shrink-0 relative">
+                  {memberForm.imageUrl && <Image src={memberForm.imageUrl} fill alt="Member" className="object-cover" />}
                 </div>
                 <div>
                   <input type="file" ref={memberFileInputRef} className="hidden" accept="image/*" onChange={(e) => handleFileUpload(e, true)} />

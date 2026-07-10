@@ -263,7 +263,7 @@ export default function JobAlertsDashboard() {
       {/* Table Sourcing Panel */}
       <div style={{ background: 'rgba(255, 255, 255, 0.03)', border: '1px solid var(--color-border)', borderRadius: '16px', overflow: 'hidden', backdropFilter: 'blur(10px)' }}>
         {loading ? (
-          <div style={{ padding: '4rem', textCenter: 'center', color: 'var(--color-text-secondary)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
+          <div style={{ padding: '4rem', textAlign: 'center', color: 'var(--color-text-secondary)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
             <span style={{ fontSize: '2rem', animation: 'spin 1s linear infinite', display: 'inline-block' }}>🌀</span>
             <p>Fetching real-time official recruitment alerts from PIB, UPSC and Employment News...</p>
           </div>
@@ -286,7 +286,7 @@ export default function JobAlertsDashboard() {
               </thead>
               <tbody>
                 {alerts.map((alert, index) => (
-                  <tr key={index} style={{ borderBottom: '1px solid var(--color-border)', hover: { background: 'rgba(255,255,255,0.01)' } }}>
+                  <tr key={index} style={{ borderBottom: '1px solid var(--color-border)' }}>
                     <td style={{ padding: '1rem', verticalAlign: 'middle' }}>
                       <span style={{
                         background: alert.source.includes('Official') ? 'rgba(59, 130, 246, 0.1)' : 'rgba(16, 185, 129, 0.1)',

@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 const sidebarItems = [
   { name: 'Dashboard', path: '/admin', icon: '📊' },
   { name: 'Blog Management', path: '/admin/blog', icon: '📝' },
+  { name: 'Manual Blogging', path: '/admin/blog/new', icon: '✍️' },
   { name: 'AI Auto-Blogging', path: '/admin/auto-blog', icon: '🤖' },
   { name: 'Job Alerts Feed', path: '/admin/job-alerts', icon: '📡' },
   { name: 'AI Tools (Magic)', path: '/admin/ai-tools', icon: '🛠️' },

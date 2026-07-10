@@ -279,7 +279,7 @@ function BlogEditor() {
     <div style={{ maxWidth: '1600px', margin: '0 auto', padding: '0 1rem' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
         <h1 style={{ fontSize: '2rem', fontWeight: 800, margin: 0, color: 'var(--color-text-primary)' }}>
-          {isEdit ? 'Edit Post' : 'Create New Post'}
+          {isEdit ? 'Edit Post' : 'Manual Blogging System'}
         </h1>
         <button onClick={() => router.push('/admin/blog')} className="btn-secondary">Cancel</button>
       </div>

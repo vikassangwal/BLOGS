@@ -4,23 +4,80 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import 'react-quill/dist/quill.snow.css';
 
-const ReactQuill = dynamic(() => import('react-quill'), { ssr: false });
-
-const quillModules = {
-  toolbar: [
-    [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
-    ['bold', 'italic', 'underline', 'strike', 'blockquote'],
-    [{ 'list': 'ordered' }, { 'list': 'bullet' }, { 'indent': '-1' }, { 'indent': '+1' }],
-    ['link', 'image', 'video'],
-    ['clean']
-  ],
-};
+const ReactQuill = dynamic(
+  async () => {
+    const { default: RQ } = await import('react-quill');
+    return function ForwardedQuill(props: any) {
+      return <RQ ref={props.forwardedRef} {...props} />;
+    }
+  },
+  { ssr: false }
+);
 
 function BlogEditor() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const slug = searchParams?.get('slug');
   const isEdit = !!slug;
+
+  const quillRef = React.useRef<any>(null);
+  const quillModalRef = React.useRef<any>(null);
+
+  const uploadToCloudinary = async (base64Str: string): Promise<string | null> => {
+    try {
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ image: base64Str })
+      });
+      const data = await res.json();
+      if (data.success && data.url) {
+        return data.url;
+      }
+      alert('Upload failed (Ensure Cloudinary Keys are in .env): ' + (data.error || 'Unknown error'));
+      return null;
+    } catch (err) {
+      alert('Upload error: ' + String(err));
+      return null;
+    }
+  };
+
+  const imageHandler = React.useCallback(function(this: any) {
+    const input = document.createElement('input');
+    input.setAttribute('type', 'file');
+    input.setAttribute('accept', 'image/*');
+    input.click();
+    input.onchange = async () => {
+      const file = input.files?.[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onloadend = async () => {
+          const url = await uploadToCloudinary(reader.result as string);
+          if (url) {
+            const quill = this.quill; // 'this' is bound to the toolbar in react-quill handlers
+            const range = quill.getSelection(true);
+            quill.insertEmbed(range.index, 'image', url);
+          }
+        };
+        reader.readAsDataURL(file);
+      }
+    };
+  }, []);
+
+  const memoizedModules = React.useMemo(() => ({
+    toolbar: {
+      container: [
+        [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+        ['bold', 'italic', 'underline', 'strike', 'blockquote'],
+        [{ 'list': 'ordered' }, { 'list': 'bullet' }, { 'indent': '-1' }, { 'indent': '+1' }],
+        ['link', 'image', 'video'],
+        ['clean']
+      ],
+      handlers: {
+        image: imageHandler
+      }
+    }
+  }), [imageHandler]);
 
   const [formData, setFormData] = useState({
     title: '',
@@ -198,8 +255,11 @@ function BlogEditor() {
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
-      reader.onloadend = () => {
-        setFormData(prev => ({ ...prev, featuredImage: reader.result as string }));
+      reader.onloadend = async () => {
+        const url = await uploadToCloudinary(reader.result as string);
+        if (url) {
+          setFormData(prev => ({ ...prev, featuredImage: url }));
+        }
       };
       reader.readAsDataURL(file);
     }
@@ -303,10 +363,11 @@ function BlogEditor() {
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
               <div style={{ background: '#fff', color: '#000', borderRadius: '8px', overflow: 'hidden', height: '600px', display: 'flex', flexDirection: 'column' }}>
                 <ReactQuill 
+                  ref={quillRef}
                   theme="snow" 
                   value={formData.content} 
                   onChange={content => setFormData({ ...formData, content })} 
-                  modules={quillModules}
+                  modules={memoizedModules}
                   style={{ flex: 1, overflowY: 'auto' }} 
                   placeholder="Start writing your manual blog post here..."
                 />
@@ -573,10 +634,11 @@ function BlogEditor() {
                     <label style={{ display: 'block', fontWeight: 600, marginBottom: '0.5rem', color: 'var(--color-text-primary)' }}>Content (HTML)</label>
                     <div style={{ background: '#fff', color: '#000', borderRadius: '8px', overflow: 'hidden', height: '400px', display: 'flex', flexDirection: 'column' }}>
                       <ReactQuill 
+                        ref={quillModalRef}
                         theme="snow" 
                         value={formData.content} 
                         onChange={content => setFormData({ ...formData, content })} 
-                        modules={quillModules}
+                        modules={memoizedModules}
                         style={{ flex: 1, overflowY: 'auto' }} 
                         placeholder="Start writing..."
                       />

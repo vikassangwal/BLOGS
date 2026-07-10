@@ -269,6 +269,25 @@ export default function BlogPostClient({ post, ads, relatedPosts, whatsappLinks,
 
   contentHtml = formatHtmlLinks(contentHtml, doubleLinkFormat);
 
+  // --- Automatic Table of Contents (TOC) Generation ---
+  const toc: { id: string, text: string, level: number }[] = [];
+  let headingIndex = 0;
+  contentHtml = contentHtml.replace(/<(h[23])([^>]*)>(.*?)<\/\1>/gi, (match, tag, attrs, innerHTML) => {
+    let idMatch = attrs.match(/id=["']([^"']+)["']/i);
+    let id = idMatch ? idMatch[1] : `section-${headingIndex++}`;
+    
+    const cleanText = innerHTML.replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ').trim();
+    if (cleanText.length > 5) {
+      toc.push({ id, text: cleanText, level: parseInt(tag.charAt(1)) });
+    }
+    
+    if (idMatch) {
+      return match;
+    }
+    return `<${tag} id="${id}"${attrs}>${innerHTML}</${tag}>`;
+  });
+  // ----------------------------------------------------
+
   if (isPremium && !isUnlocked) {
     const charLimit = Math.floor(contentHtml.length * 0.3);
     contentHtml = contentHtml.substring(0, charLimit) + '...';
@@ -448,6 +467,51 @@ export default function BlogPostClient({ post, ads, relatedPosts, whatsappLinks,
         {/* Post Content */}
         <div style={{ position: 'relative' }} className="blog-content">
           <AdBanner dataAdSlot="top-content" />
+
+          {/* Table of Contents (TOC) Box */}
+          {toc.length > 2 && (
+            <div style={{
+              background: 'rgba(255, 255, 255, 0.02)',
+              border: '1px solid var(--color-border)',
+              borderRadius: '16px',
+              padding: '1.5rem',
+              marginBottom: '2.5rem',
+              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
+            }}>
+              <h3 style={{ fontSize: '1.25rem', fontWeight: 800, margin: '0 0 1rem 0', color: 'var(--color-text-primary)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                📑 Table of Contents (विषय सूची)
+              </h3>
+              <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
+                {toc.map(item => (
+                  <li key={item.id} style={{ marginLeft: item.level === 3 ? '1.5rem' : '0' }}>
+                    <a 
+                      href={`#${item.id}`}
+                      style={{ 
+                        color: 'var(--color-text-secondary)', 
+                        textDecoration: 'none', 
+                        transition: 'color 0.2s, transform 0.2s', 
+                        fontSize: item.level === 3 ? '0.9rem' : '1rem',
+                        display: 'inline-block'
+                      }}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        const el = document.getElementById(item.id);
+                        if (el) {
+                          const y = el.getBoundingClientRect().top + window.scrollY - 80;
+                          window.scrollTo({ top: y, behavior: 'smooth' });
+                        }
+                      }}
+                      onMouseEnter={e => { e.currentTarget.style.color = 'var(--color-accent)'; e.currentTarget.style.transform = 'translateX(4px)'; }}
+                      onMouseLeave={e => { e.currentTarget.style.color = 'var(--color-text-secondary)'; e.currentTarget.style.transform = 'translateX(0)'; }}
+                    >
+                      {item.level === 2 ? '🔹' : '◦'} {item.text}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
           <AdInjector htmlContent={contentHtml} />
           <AdBanner dataAdSlot="bottom-content" />
           

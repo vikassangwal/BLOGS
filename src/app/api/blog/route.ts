@@ -132,7 +132,64 @@ export async function GET(request: Request) {
     }
 
     if (tag) {
-      where.AND.push({ tags: { some: { tag: { name: tag } } } });
+      if (tag === 'Technology') {
+        where.AND.push({
+          OR: [
+            { tags: { some: { tag: { name: { in: ['Technology', 'Smartphone', 'Tech', 'Mobile', 'Gadget'] } } } } },
+            { title: { contains: 'Tech', mode: 'insensitive' } },
+            { title: { contains: 'Mobile', mode: 'insensitive' } },
+            { title: { contains: 'Smartphone', mode: 'insensitive' } }
+          ]
+        });
+        where.AND.push({
+          NOT: [
+            { tags: { some: { tag: { name: { in: ['Job', 'Vacancy', 'Scheme', 'Scholarship', 'University', 'Finance', 'Earning', 'School'] } } } } },
+            { title: { contains: 'Job', mode: 'insensitive' } },
+            { title: { contains: 'Result', mode: 'insensitive' } },
+            { title: { contains: 'Scheme', mode: 'insensitive' } },
+            { title: { contains: 'Admit Card', mode: 'insensitive' } }
+          ]
+        });
+      } else if (tag === 'Finance & Earning' || tag === 'Finance') {
+        where.AND.push({
+          OR: [
+            { tags: { some: { tag: { name: { in: ['Finance', 'Banking', 'Bank', 'LIC', 'EPFO', 'Savings', 'Earning', 'Online Earning', 'Course', 'Free Course', 'Scheme', 'Yojana', 'Government Scheme', 'PM Kisan', 'Sarkari Yojana'] } } } } },
+            { title: { contains: 'Finance', mode: 'insensitive' } },
+            { title: { contains: 'Bank', mode: 'insensitive' } },
+            { title: { contains: 'Earning', mode: 'insensitive' } },
+            { title: { contains: 'Scheme', mode: 'insensitive' } },
+            { title: { contains: 'योजना' } }
+          ]
+        });
+        where.AND.push({
+          NOT: [
+            { tags: { some: { tag: { name: { in: ['Job', 'Vacancy', 'Admit Card', 'Result', 'University', 'Technology', 'Tech', 'Mobile', 'School'] } } } } },
+            { title: { contains: 'Job', mode: 'insensitive' } },
+            { title: { contains: 'भर्ती' } },
+            { title: { contains: 'Admit Card', mode: 'insensitive' } },
+            { title: { contains: 'Result', mode: 'insensitive' } }
+          ]
+        });
+      } else if (tag === 'Education & Career' || tag === 'Career') {
+        where.AND.push({
+          OR: [
+            { tags: { some: { tag: { name: { in: ['Job', 'Vacancy', 'Career', 'Education & Career', 'Admit Card', 'Result', 'Syllabus', 'Cutoff', 'Merit List', 'Scholarship', 'University', 'School', 'Board Exam', 'CBSE'] } } } } },
+            { title: { contains: 'Job', mode: 'insensitive' } },
+            { title: { contains: 'Admit Card', mode: 'insensitive' } },
+            { title: { contains: 'Result', mode: 'insensitive' } },
+            { title: { contains: 'Scholarship', mode: 'insensitive' } },
+            { title: { contains: 'University', mode: 'insensitive' } },
+            { title: { contains: 'School', mode: 'insensitive' } }
+          ]
+        });
+        where.AND.push({
+          NOT: [
+            { tags: { some: { tag: { name: { in: ['Finance', 'Banking', 'Bank', 'Technology', 'Tech', 'Mobile', 'Smartphone', 'Earning', 'Online Earning', 'Scheme', 'Yojana'] } } } } }
+          ]
+        });
+      } else {
+        where.AND.push({ tags: { some: { tag: { name: tag } } } });
+      }
     }
 
     if (qualification) {

@@ -437,6 +437,12 @@ async function getTechNews(limit: number = 8) {
         id: true, title: true, slug: true, publishedAt: true, createdAt: true, expiryDate: true
       }
     });
+    return posts;
+  } catch (err) {
+    console.error('Failed to fetch tech news:', err);
+    return [];
+  }
+}
 
 async function getFinanceNews(limit: number = 8) {
   try {
@@ -626,8 +632,8 @@ export default async function HomePage() {
       select: { id: true, title: true, slug: true, publishedAt: true, createdAt: true }
     }),
     getActiveJobs(100).then(posts => posts.length),
-    getResultsAndSyllabus(100).then(posts => posts.filter(post => new Date(post.publishedAt) >= sevenDaysAgo).length),
-    getAdmitCards(100).then(posts => posts.filter(post => new Date(post.publishedAt) >= sevenDaysAgo).length),
+    getResultsAndSyllabus(100).then(posts => posts.filter(post => post.publishedAt && new Date(post.publishedAt) >= sevenDaysAgo).length),
+    getAdmitCards(100).then(posts => posts.filter(post => post.publishedAt && new Date(post.publishedAt) >= sevenDaysAgo).length),
     getSchemes(100).then(posts => posts.length),
     getUpcomingJobs(8),
     getUpcomingJobs(100).then(posts => posts.length),

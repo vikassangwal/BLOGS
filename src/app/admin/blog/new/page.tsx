@@ -6,7 +6,7 @@ import Image from 'next/image';
 
 const ReactQuill = dynamic(
   async () => {
-    const { default: RQ } = await import('react-quill');
+    const { default: RQ } = await import('react-quill-new');
     return function ForwardedQuill(props: any) {
       return <RQ ref={props.forwardedRef} {...props} />;
     }

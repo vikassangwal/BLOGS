@@ -260,29 +260,52 @@ input:focus, textarea:focus, select:focus { outline: 2px solid var(--color-accen
 
 .blog-content table {
   width: 100%;
-  border-collapse: collapse;
-  margin: 2rem 0;
-  border-radius: 8px;
+  border-collapse: separate !important;
+  border-spacing: 0;
+  margin: 2.5rem 0;
+  border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  border: 2px solid var(--color-border) !important;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2), 0 4px 6px -2px rgba(0, 0, 0, 0.1);
 }
 
 .blog-content th,
 .blog-content thead td,
 .blog-content tr:first-child td {
-  background: var(--color-bg-tertiary) !important;
-  color: var(--color-text-primary) !important;
-  font-weight: 700;
+  background: var(--color-accent) !important;
+  color: #ffffff !important;
+  font-weight: 800;
   text-align: left;
-  padding: 1rem;
-  border: 1px solid var(--color-border) !important;
+  padding: 1.25rem 1rem;
+  border-bottom: 2px solid var(--color-border) !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+.blog-content th:last-child,
+.blog-content thead td:last-child,
+.blog-content tr:first-child td:last-child {
+  border-right: none !important;
 }
 
 .blog-content td {
   padding: 1rem;
-  border: 1px solid var(--color-border) !important;
+  border-bottom: 1px solid var(--color-border) !important;
+  border-right: 1px solid var(--color-border) !important;
   background: var(--color-bg-primary) !important;
   color: var(--color-text-primary) !important;
+}
+
+.blog-content td:last-child {
+  border-right: none !important;
+}
+
+.blog-content tbody tr:last-child td {
+  border-bottom: none !important;
+}
+
+/* Zebra Striping for clear grid recognition */
+.blog-content tbody tr:nth-child(even) td {
+  background-color: var(--color-bg-tertiary) !important;
 }
 
 .blog-content ul {

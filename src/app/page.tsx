@@ -142,7 +142,7 @@ async function getActiveJobs(limit: number = 8) {
 
 async function getUpcomingJobs(limit: number = 8) {
   try {
-    return await prisma.blogPost.findMany({
+    const posts = await prisma.blogPost.findMany({
       where: {
         status: 'Published',
         tags: { some: { tag: { name: { in: ['Job', 'Vacancy', 'Career', 'Education & Career'] } } } },
@@ -155,18 +155,84 @@ async function getUpcomingJobs(limit: number = 8) {
         ]
       },
       orderBy: { publishedAt: 'desc' },
-      take: limit,
+      take: limit * 3, // Fetch extra for memory filtering
       select: {
         id: true,
         title: true,
         slug: true,
         publishedAt: true,
         createdAt: true,
-        expiryDate: true
+        expiryDate: true,
+        content: true
       }
     });
+
+    const filteredPosts = posts.filter(post => {
+      if (!post.content) return false;
+      const content = post.content.toLowerCase();
+      
+      const hasNotification = content.includes('notification') || content.includes('विज्ञप्ति') || content.includes('अधिसूचना');
+      const hasLink = content.includes('<a ');
+      const hasApply = content.includes('apply') || content.includes('आवेदन');
+      
+      const isApplyNotStarted = content.includes('link active on') || 
+                                content.includes('will be active') ||
+                                content.includes('जल्द सक्रिय होगा') ||
+                                content.includes('link will activate') ||
+                                content.includes('to be announced') ||
+                                content.includes('coming soon') ||
+                                content.includes('जल्द उपलब्ध');
+
+      // Keep in upcoming if there is a notification link, BUT apply link has not started or is missing
+      return hasNotification && hasLink && (!hasApply || isApplyNotStarted);
+    });
+
+    return filteredPosts.slice(0, limit).map(({ content, ...rest }) => rest);
   } catch (err) {
     console.error('Failed to fetch upcoming jobs:', err);
+    return [];
+  }
+}
+
+async function getAdmitCards(limit: number = 8) {
+  try {
+    const posts = await prisma.blogPost.findMany({
+      where: {
+        status: 'Published',
+        OR: [
+          { tags: { some: { tag: { name: { in: ['Admit Card'] } } } } },
+          { title: { contains: 'Admit Card', mode: 'insensitive' } },
+          { title: { contains: 'प्रवेश पत्र' } },
+          { title: { contains: 'Exam City', mode: 'insensitive' } }
+        ]
+      },
+      orderBy: { publishedAt: 'desc' },
+      take: limit * 3,
+      select: {
+        id: true,
+        title: true,
+        slug: true,
+        publishedAt: true,
+        createdAt: true,
+        expiryDate: true,
+        content: true
+      }
+    });
+
+    const filteredPosts = posts.filter(post => {
+      if (!post.content) return false;
+      const content = post.content.toLowerCase();
+      
+      const hasNotificationOrOfficial = content.includes('notification') || content.includes('विज्ञप्ति') || content.includes('official') || content.includes('आधिकारिक');
+      const hasAdmitCardOrCity = content.includes('admit card') || content.includes('प्रवेश पत्र') || content.includes('exam city') || content.includes('परीक्षा शहर');
+      const hasLink = content.includes('<a ');
+
+      return hasNotificationOrOfficial && hasAdmitCardOrCity && hasLink;
+    });
+
+    return filteredPosts.slice(0, limit).map(({ content, ...rest }) => rest);
+  } catch (err) {
+    console.error('Failed to fetch admit cards:', err);
     return [];
   }
 }
@@ -192,7 +258,7 @@ export default async function HomePage() {
     prisma.socialLink.findMany({ where: { platform: 'whatsapp', isActive: true } }),
     prisma.siteSettings.findUnique({ where: { id: 'default' } }),
     getActiveJobs(8),
-    getPostsByTagsAndKeywords(['Admit Card'], ['Admit Card', 'प्रवेश पत्र'], 8),
+    getAdmitCards(8),
     getPostsByTagsAndKeywords(['Results', 'Result', 'Answer Key', 'Syllabus'], ['Result', 'परिणाम', 'Answer Key', 'उत्तर कुंजी', 'Syllabus', 'सिलेबस'], 8),
     getPostsByTagsAndKeywords(['University', 'IGNOU', 'College', 'Admission', 'Counselling', 'State University'], ['University', 'विश्वविद्यालय', 'College', 'Admission', 'IGNOU'], 8),
     getPostsByTagsAndKeywords(['Scheme', 'Yojana', 'Government Scheme', 'PM Kisan', 'Sarkari Yojana'], ['Scheme', 'Yojana', 'योजना', 'PM Kisan', 'E-Shram'], 8),

@@ -128,7 +128,7 @@ export default function BlogAdmin() {
                 <td style={{ padding: '1rem 1.5rem' }}><StatusBadge status={post.status} /></td>
                 <td style={{ padding: '1rem 1.5rem', color: 'var(--color-text-secondary)', fontSize: '0.9rem' }}>{post.author?.name || 'System'}</td>
                 <td style={{ padding: '1rem 1.5rem', color: 'var(--color-text-secondary)', fontSize: '0.9rem' }}>{post.viewCount}</td>
-                <td style={{ padding: '1rem 1.5rem', color: 'var(--color-text-secondary)', fontSize: '0.9rem' }}>{new Date(post.createdAt).toLocaleDateString()}</td>
+                <td style={{ padding: '1rem 1.5rem', color: 'var(--color-text-secondary)', fontSize: '0.9rem' }}>{post.publishedAt ? new Date(post.publishedAt).toLocaleDateString() : new Date(post.createdAt).toLocaleDateString()}</td>
                 <td style={{ padding: '1rem 1.5rem', textAlign: 'right' }}>
                   <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
                     <Link href={`/admin/blog/edit?slug=${post.slug}`} style={{ padding: '0.4rem 0.8rem', background: 'rgba(255, 255, 255, 0.1)', color: 'var(--color-text-primary)', borderRadius: '6px', textDecoration: 'none', fontSize: '0.8rem', fontWeight: 500 }}>

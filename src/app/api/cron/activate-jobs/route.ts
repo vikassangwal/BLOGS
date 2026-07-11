@@ -108,18 +108,26 @@ If the application process HAS started, reply with EXACTLY: "STARTED" followed b
           
           const bannerHtml = `<div class="bg-green-100 border-l-4 border-green-500 p-4 my-4 rounded-r"><p class="text-green-800 font-bold">✅ Good News: The online application for this recruitment has officially started. Please check the official website for the direct Apply Link.</p></div>`;
           
+          // Find tag IDs to disconnect
+          const tagsToRemove = await prisma.tag.findMany({
+            where: { name: { in: ['Upcoming', 'Upcoming Job', 'Agami'] } },
+            select: { id: true }
+          });
+          const tagIdsToRemove = tagsToRemove.map(t => t.id);
+
+          // Remove those PostTag join records
+          await prisma.postTag.deleteMany({
+            where: {
+              postId: post.id,
+              tagId: { in: tagIdsToRemove }
+            }
+          });
+
           await prisma.blogPost.update({
             where: { id: post.id },
             data: { 
               content: bannerHtml + post.content,
-              title: post.title.replace(/संभावित|Upcoming|Expected|आगामी/gi, '').trim(),
-              tags: {
-                disconnect: [
-                  { name: 'Upcoming' },
-                  { name: 'Upcoming Job' },
-                  { name: 'Agami' }
-                ]
-              }
+              title: post.title.replace(/संभावित|Upcoming|Expected|आगामी/gi, '').trim()
             }
           });
 

@@ -309,7 +309,7 @@ export async function POST(request: NextRequest) {
 
         // Process recent posts
         if (recentPosts && recentPosts.length > 0) {
-          recentlyPublishedStr = `🚨 ALREADY PUBLISHED TOPICS IN THE LAST 28 DAYS: (Do NOT generate these exact same topics again. EXCEPTIONS WHERE YOU MUST GENERATE A NEW TOPIC: 1) A brand new phase like Admit Card/Result for an old notification. 2) A NEW YEAR/CYCLE (e.g. if we published 'NEET ${currentYear - 1}' before, then 'NEET ${currentYear}' is a BRAND NEW topic and NOT a duplicate). 3) A new price cut for an old gadget.):\n` + recentPosts.map(p => `- ${p.title}`).join('\n');
+          recentlyPublishedStr = `🚨 ALREADY PUBLISHED TOPICS IN THE LAST 28 DAYS: (Do NOT generate these exact same topics again. EXCEPTIONS WHERE YOU MUST GENERATE A NEW TOPIC: 1) A brand new phase like Admit Card/Result for an old notification. 2) A NEW YEAR/CYCLE (e.g. if we published 'NEET ${getCurrentYearNum() - 1}' before, then 'NEET ${getCurrentYearNum()}' is a BRAND NEW topic and NOT a duplicate). 3) A new price cut for an old gadget.):\n` + recentPosts.map(p => `- ${p.title}`).join('\n');
         }
       } catch (e) {
         console.error("Parallel news data / posts fetch failed:", e);
@@ -328,7 +328,7 @@ export async function POST(request: NextRequest) {
         🚨 STRICT RULE: Every topic must have active open applications and solid deadlines. Never guess dates or write an article based on guesses! If a deadline is not announced, write "Coming Soon" (जल्द आ रहा है) instead of guessing.
         🚨 CRITICAL RULE: NEVER include any job/recruitment where the 'Last Date to Apply' has already passed before ${getCurrentDateStr()}.
         👉 2nd PRIORITY (FALLBACK) 👉: If there are not enough new government job updates, fill the slots with contractual recruitments, private sector jobs (TCS off-campus, bank openings), ongoing applications with active deadlines, or career guides (e.g. "Best courses after 12th").
-        🚨 NO COMBO/GENERIC JOBS RULE: Every job topic MUST be for ONE SPECIFIC department and ONE SPECIFIC post (e.g. 'RPSC Programmer Recruitment ${currentYear}'). NEVER combine multiple departments or unrelated posts into a single topic.
+        🚨 NO COMBO/GENERIC JOBS RULE: Every job topic MUST be for ONE SPECIFIC department and ONE SPECIFIC post (e.g. 'RPSC Programmer Recruitment ${getCurrentYearNum()}'). NEVER combine multiple departments or unrelated posts into a single topic.
       - 2 Technology topics: Telecom plans/5G updates, Smartphone/Gadget launches, WhatsApp/Instagram updates, AI Tools, EV Scooter launches, BGMI/Gaming, or Cyber Scam Alerts.
       - 2 Finance & Earning topics: RBI Rules, E-Shram/PM Kisan updates, Online Earning Apps/Work from home, EPF withdrawal, Zero Balance Accounts, IPOs, Gold Rates, or Post Office/LIC Schemes.
       
@@ -391,7 +391,7 @@ export async function POST(request: NextRequest) {
              select: { keyword: true }
            });
            const existingSet = new Set(existingKeywords.map(k => k.keyword.toLowerCase()));
-           const uniqueQueueData = queueData.filter(q => !existingSet.has(q.keyword.toLowerCase()));
+          const uniqueQueueData = queueData.filter((q): q is { keyword: any; niche: string; status: string; priority: number } => q !== null && q !== undefined && !existingSet.has(q.keyword.toLowerCase()));
 
            if (uniqueQueueData.length > 0) {
              await prisma.autoBlogKeyword.createMany({ data: uniqueQueueData });

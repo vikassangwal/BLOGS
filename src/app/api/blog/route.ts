@@ -253,7 +253,7 @@ export async function GET(request: Request) {
       prisma.blogPost.findMany({
         where,
         include: { author: { select: { name: true, email: true } }, tags: { include: { tag: true } } },
-        orderBy: { createdAt: 'desc' },
+        orderBy: [{ publishedAt: 'desc' }, { createdAt: 'desc' }],
         skip: (page - 1) * limit,
         take: limit,
       }),

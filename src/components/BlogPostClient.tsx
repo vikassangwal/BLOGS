@@ -272,7 +272,7 @@ export default function BlogPostClient({ post, ads, relatedPosts, whatsappLinks,
   // --- Automatic Table of Contents (TOC) Generation ---
   const toc: { id: string, text: string, level: number }[] = [];
   let headingIndex = 0;
-  contentHtml = contentHtml.replace(/<(h[23])([^>]*)>(.*?)<\/\1>/gi, (match, tag, attrs, innerHTML) => {
+  contentHtml = contentHtml.replace(/<(h[23])([^>]*)>(.*?)<\/\1>/gi, (match: string, tag: string, attrs: string, innerHTML: string) => {
     let idMatch = attrs.match(/id=["']([^"']+)["']/i);
     let id = idMatch ? idMatch[1] : `section-${headingIndex++}`;
     

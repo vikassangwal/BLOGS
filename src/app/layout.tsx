@@ -86,7 +86,7 @@ export default async function RootLayout({
                   "publisher": { "@id": "https://knowora.in/#organization" },
                   "potentialAction": {
                     "@type": "SearchAction",
-                    "target": "https://knowora.in/blog?q={search_term_string}",
+                    "target": "https://knowora.in/blog?search={search_term_string}",
                     "query-input": "required name=search_term_string"
                   }
                 }
@@ -110,12 +110,14 @@ export default async function RootLayout({
           </>
         )}
         
-        {/* Google AdSense Global Script - only load if configured */}
-        <Script 
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js" 
-          crossOrigin="anonymous" 
-          strategy="lazyOnload" 
-        />
+        {/* Google AdSense Global Script - only load if publisher ID is set in env */}
+        {process.env.NEXT_PUBLIC_ADSENSE_ID && (
+          <Script 
+            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${process.env.NEXT_PUBLIC_ADSENSE_ID}`}
+            crossOrigin="anonymous" 
+            strategy="lazyOnload" 
+          />
+        )}
         <NextTopLoader color="var(--color-accent)" showSpinner={false} />
         <div className="bg-mesh"></div>
         <Suspense fallback={<div className="h-20 w-full" />}>

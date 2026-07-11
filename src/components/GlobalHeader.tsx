@@ -243,7 +243,7 @@ export default function GlobalHeader({ siteName, translateActive }: { siteName?:
               </div>
               <div className="grid grid-cols-2 gap-2 text-xs">
                 <a 
-                  href="/blog?tag=Vacancy" 
+                  href="/blog?tag=Education%20%26%20Career&jobType=active_upcoming" 
                   onClick={() => setIsMobileMenuOpen(false)} 
                   className="flex flex-col p-2.5 bg-white/5 border border-emerald-500/10 hover:border-emerald-500/30 rounded-xl transition-all hover:bg-white/10"
                 >
@@ -251,7 +251,7 @@ export default function GlobalHeader({ siteName, translateActive }: { siteName?:
                   <span className="text-[8px] text-gray-400 mt-0.5">Latest Jobs</span>
                 </a>
                 <a 
-                  href="/blog?tag=Upcoming" 
+                  href="/blog?tag=Education%20%26%20Career&jobType=active_upcoming" 
                   onClick={() => setIsMobileMenuOpen(false)} 
                   className="flex flex-col p-2.5 bg-white/5 border border-sky-500/10 hover:border-sky-500/30 rounded-xl transition-all hover:bg-white/10"
                 >
@@ -267,7 +267,7 @@ export default function GlobalHeader({ siteName, translateActive }: { siteName?:
                   <span className="text-[8px] text-gray-400 mt-0.5">Admit Cards</span>
                 </a>
                 <a 
-                  href="/blog?tag=Results" 
+                  href="/blog?tag=Education%20%26%20Career" 
                   onClick={() => setIsMobileMenuOpen(false)} 
                   className="flex flex-col p-2.5 bg-white/5 border border-purple-500/10 hover:border-purple-500/30 rounded-xl transition-all hover:bg-white/10"
                 >
@@ -275,7 +275,7 @@ export default function GlobalHeader({ siteName, translateActive }: { siteName?:
                   <span className="text-[8px] text-gray-400 mt-0.5">Results & Syllabus</span>
                 </a>
                 <a 
-                  href="/blog?tag=University" 
+                  href="/blog?tag=Education%20%26%20Career" 
                   onClick={() => setIsMobileMenuOpen(false)} 
                   className="flex flex-col p-2.5 bg-white/5 border border-cyan-500/10 hover:border-cyan-500/30 rounded-xl transition-all hover:bg-white/10"
                 >
@@ -283,7 +283,7 @@ export default function GlobalHeader({ siteName, translateActive }: { siteName?:
                   <span className="text-[8px] text-gray-400 mt-0.5">University Info</span>
                 </a>
                 <a 
-                  href="/blog?tag=Scheme" 
+                  href="/blog?tag=Finance%20%26%20Earning" 
                   onClick={() => setIsMobileMenuOpen(false)} 
                   className="flex flex-col p-2.5 bg-white/5 border border-orange-500/10 hover:border-orange-500/30 rounded-xl transition-all hover:bg-white/10"
                 >

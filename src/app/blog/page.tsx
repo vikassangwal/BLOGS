@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect, useState, Suspense } from 'react';
+import React, { useEffect, useState, useRef, Suspense } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useSearchParams } from 'next/navigation';
@@ -10,6 +10,8 @@ function BlogListContent() {
   const initialTag = searchParams ? searchParams.get('tag') || '' : '';
   const initialSearch = searchParams ? searchParams.get('search') || '' : '';
   const initialJobType = searchParams ? searchParams.get('jobType') || '' : '';
+  // Direct qualification URL param support (e.g. /blog?qualification=10th%20Pass)
+  const initialQualFromUrl = searchParams ? searchParams.get('qualification') || '' : '';
 
   // Map search keywords from homepage qualification grid to qualification chips
   const mapSearchToQualification = (s: string): string => {
@@ -25,9 +27,12 @@ function BlogListContent() {
     return 'All Qualifications';
   };
 
-  const initialQualification = initialSearch
-    ? mapSearchToQualification(initialSearch)
-    : 'All Qualifications';
+  // Priority: direct ?qualification= param > mapped from ?search= > default
+  const initialQualification = initialQualFromUrl
+    ? initialQualFromUrl
+    : initialSearch
+      ? mapSearchToQualification(initialSearch)
+      : 'All Qualifications';
 
   const [posts, setPosts] = useState<any[]>([]);
   const [tags, setTags] = useState<string[]>([]);
@@ -42,8 +47,10 @@ function BlogListContent() {
   const [isStateDetected, setIsStateDetected] = useState(false);
   // Show filter panel when Education & Career tag OR jobType=active_upcoming (from qualification grid)
   const [showFilters, setShowFilters] = useState(
-    initialTag === 'Education & Career' || initialJobType === 'active_upcoming'
+    initialTag === 'Education & Career' || initialJobType === 'active_upcoming' || !!initialQualFromUrl
   );
+  // Track if the debounce search effect is running for the first time (skip initial fetch, handled by main useEffect)
+  const isFirstSearchRender = useRef(true);
 
   const QUALIFICATIONS = [
     'All Qualifications',
@@ -152,13 +159,23 @@ function BlogListContent() {
       const tag = searchParams.get('tag');
       const s = searchParams.get('search');
       const jt = searchParams.get('jobType');
+      const qual = searchParams.get('qualification');
       if (tag !== null && tag !== activeTag) {
         setActiveTag(tag);
-        if (tag === 'Education & Career') setShowFilters(true);
+        // Only show filters for Education & Career, hide for other main categories
+        if (tag === 'Education & Career') {
+          setShowFilters(true);
+        } else if (tag === 'Technology' || tag === 'Finance & Earning' || tag === 'News') {
+          setShowFilters(false);
+        }
       }
       if (s !== null && s !== search) {
         setSearch(s);
         if (s) setShowFilters(true);
+      }
+      if (qual !== null) {
+        setSelectedQualification(qual || 'All Qualifications');
+        if (qual) setShowFilters(true);
       }
       if (jt === 'active_upcoming') setShowFilters(true);
     }
@@ -212,11 +229,16 @@ function BlogListContent() {
     }
   }, [page, activeTag, isStateDetected, selectedState, selectedQualification]);
 
-  // Debounced search
+  // Debounced search - skip initial mount to avoid double fetch
   useEffect(() => {
+    // Skip the very first render - the main useEffect handles initial fetch
+    if (isFirstSearchRender.current) {
+      isFirstSearchRender.current = false;
+      return;
+    }
     const timer = setTimeout(() => {
       setPage(1);
-      fetchPosts();
+      if (isStateDetected) fetchPosts();
     }, 500);
     return () => clearTimeout(timer);
   }, [search]);
@@ -345,17 +367,21 @@ function BlogListContent() {
               <p style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)', marginBottom: '0.8rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                 Education Qualification
               </p>
-              <div style={{
-                display: 'flex', 
-                gap: '0.6rem', 
-                overflowX: 'auto', 
-                paddingBottom: '0.5rem',
-                WebkitOverflowScrolling: 'touch',
-                scrollbarWidth: 'none' // Firefox
-              }}>
                 <style dangerouslySetInnerHTML={{__html: `
-                  div::-webkit-scrollbar { display: none; }
+                  .qual-chips-row::-webkit-scrollbar { display: none; }
                 `}} />
+                <div
+                  className="qual-chips-row"
+                  style={{
+                    display: 'flex',
+                    gap: '0.6rem',
+                    overflowX: 'auto',
+                    paddingBottom: '0.5rem',
+                    WebkitOverflowScrolling: 'touch',
+                    scrollbarWidth: 'none' as const,
+                    msOverflowStyle: 'none' as const
+                  }}
+                >
                 {QUALIFICATIONS.map(q => (
                   <button
                     key={q}

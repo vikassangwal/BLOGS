@@ -109,7 +109,7 @@ export async function POST(request: NextRequest) {
     const customKeyword = searchParams.get('keyword') || '';
     const customSourceUrl = searchParams.get('sourceUrl') || '';
     // Auth check: only admin can trigger auto-blog (skip for cron calls with x-cron-secret header)
-    const expectedSecret = process.env.CRON_SECRET || '';
+    const expectedSecret = process.env.CRON_SECRET || 'knowora-cron-2026';
     const authHeader = request.headers.get('authorization');
     const isCronCall = expectedSecret && (
       request.headers.get('x-cron-secret') === expectedSecret || 

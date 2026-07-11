@@ -1,3 +1,13 @@
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Terms of Service | Knowora',
+  description: 'Review our terms, intellectual property rules, and content disclaimers before using our platform.',
+  alternates: {
+    canonical: 'https://knowora.in/terms-of-service'
+  }
+};
+
 export default function TermsOfService() {
   return (
     <div className="container mx-auto px-6 py-12" style={{ color: 'var(--color-text-primary)' }}>

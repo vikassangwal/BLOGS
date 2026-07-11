@@ -1,0 +1,44 @@
+'use client';
+import React from 'react';
+import Image from 'next/image';
+
+type Props = {
+  member: {
+    name: string;
+    role: string;
+    bio: string;
+    fullDetails: string;
+    imageUrl?: string | null;
+  };
+};
+
+export default function TeamMemberClient({ member }: Props) {
+  return (
+    <div className="max-w-4xl mx-auto">
+      <div className="glass-panel p-8 md:p-12 rounded-3xl animate-slide-up">
+        <div className="flex flex-col md:flex-row items-center md:items-start gap-8 mb-10">
+          <div className="w-32 h-32 md:w-48 md:h-48 rounded-full bg-blue-600 flex items-center justify-center text-4xl md:text-6xl font-bold text-white shrink-0 overflow-hidden relative shadow-[0_0_30px_rgba(37,99,235,0.4)]">
+            {member.imageUrl ? (
+              <Image src={member.imageUrl} alt={member.name} fill className="object-cover" sizes="(max-width: 768px) 100vw, 50vw" />
+            ) : (
+              member.name.substring(0, 2).toUpperCase()
+            )}
+          </div>
+          <div className="text-center md:text-left">
+            <h1 className="text-4xl md:text-5xl font-extrabold mb-2 text-white">{member.name}</h1>
+            <p className="text-xl text-blue-400 mb-4 font-semibold">{member.role}</p>
+            <p className="text-gray-300 text-lg leading-relaxed">{member.bio}</p>
+          </div>
+        </div>
+        
+        <div className="w-full h-px bg-white/10 mb-10"></div>
+        
+        <h2 className="text-2xl font-bold text-white mb-6">Full Profile</h2>
+        <div 
+          className="text-gray-300 leading-relaxed text-lg whitespace-pre-wrap"
+          dangerouslySetInnerHTML={{ __html: member.fullDetails }}
+        />
+      </div>
+    </div>
+  );
+}

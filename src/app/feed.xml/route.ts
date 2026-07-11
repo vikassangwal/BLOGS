@@ -1,23 +1,30 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   try {
-    const posts = await prisma.blogPost.findMany({
-      where: { status: 'Published' },
-      orderBy: { publishedAt: 'desc' },
-      take: 50,
-      include: { author: true }
-    });
+    const [posts, siteSettings] = await Promise.all([
+      prisma.blogPost.findMany({
+        where: { status: 'Published' },
+        orderBy: { publishedAt: 'desc' },
+        take: 50,
+        include: { author: true }
+      }),
+      prisma.siteSettings.findUnique({ where: { id: 'default' } })
+    ]);
 
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://antigravity.com';
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://knowora.in';
+    const siteName = siteSettings?.siteName || 'Knowora';
+    const siteTagline = siteSettings?.siteTagline || 'Premium Job Alerts, Technology & Finance Insights';
 
     const feedXml = `<?xml version="1.0" encoding="UTF-8" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:media="http://search.yahoo.com/mrss/">
   <channel>
-    <title>Our Blog Blog</title>
+    <title>${siteName} | Feed</title>
     <link>${siteUrl}</link>
-    <description>Latest insights and articles from Our Blog.</description>
+    <description>${siteTagline}</description>
     <atom:link href="${siteUrl}/feed.xml" rel="self" type="application/rss+xml" />
     <language>en-in</language>
     <lastBuildDate>${new Date().toUTCString()}</lastBuildDate>

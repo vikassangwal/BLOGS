@@ -1,3 +1,13 @@
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Privacy Policy | Knowora',
+  description: 'Read our Privacy Policy to understand how we collect, use, and protect your information.',
+  alternates: {
+    canonical: 'https://knowora.in/privacy-policy'
+  }
+};
+
 export default function PrivacyPolicy() {
   return (
     <div className="container mx-auto px-6 py-12" style={{ color: 'var(--color-text-primary)' }}>

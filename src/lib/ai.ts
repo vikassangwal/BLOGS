@@ -586,3 +586,51 @@ export async function testAPIKey(provider: string, apiKey: string, model?: strin
     return { success: false, message: `❌ ${error.message}`, provider };
   }
 }
+
+// ---------------------------------------------------------------------------
+// UTILITY: Robustly parse a string list/JSON array returned by AI
+// ---------------------------------------------------------------------------
+export function parseAIJsonArray(rawText: string): string[] {
+  let cleaned = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
+
+  // Attempt 1: Standard JSON parse of bracketed content
+  const firstBracket = cleaned.indexOf('[');
+  const lastBracket = cleaned.lastIndexOf(']');
+  if (firstBracket !== -1 && lastBracket !== -1) {
+    const bracketed = cleaned.substring(firstBracket, lastBracket + 1);
+    try {
+      const parsed = JSON.parse(bracketed);
+      if (Array.isArray(parsed)) return parsed;
+    } catch (e) {
+      // Attempt 2: If JSON parse fails, convert single quotes to double quotes
+      try {
+        const doubleQuoted = bracketed
+          .replace(/'/g, '"')
+          .replace(/\\"/g, '"');
+        const parsed = JSON.parse(doubleQuoted);
+        if (Array.isArray(parsed)) return parsed;
+      } catch (e2) {
+        // Fall through to regex extraction
+      }
+    }
+  }
+
+  // Attempt 3: Regex extraction of quoted strings
+  const matches: string[] = [];
+  const regex = /(?:"|')([^"'\r\n]+)(?:"|')/g;
+  let match;
+  while ((match = regex.exec(cleaned)) !== null) {
+    const val = match[1].trim();
+    if (val && val.length > 2) {
+      matches.push(val);
+    }
+  }
+  
+  if (matches.length > 0) return matches;
+
+  // Attempt 4: If no quotes, split by commas or newlines
+  const lines = cleaned.split(/[\n,]+/).map(s => s.trim().replace(/^[-*•\d.\s'"]+|['"\s]+$/g, '')).filter(s => s.length > 2);
+  if (lines.length > 0) return lines;
+
+  throw new Error("No JSON array found in AI output. AI Output: " + rawText);
+}

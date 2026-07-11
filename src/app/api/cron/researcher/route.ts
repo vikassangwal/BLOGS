@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { parseAIJsonArray } from '@/lib/ai';
 
 export const maxDuration = 60;
 
@@ -56,11 +57,11 @@ export async function GET(req: Request) {
 
     let keywords = [];
     try {
-      keywords = JSON.parse(keywordsText);
+      keywords = parseAIJsonArray(keywordsText);
     } catch (e) {
        console.error("Failed to parse keywords from AI:", keywordsText);
        return NextResponse.json({ message: 'Failed to parse keywords from AI response.', raw: keywordsText });
-    }
+     }
 
     if (!Array.isArray(keywords)) {
        return NextResponse.json({ message: 'AI did not return an array.' });

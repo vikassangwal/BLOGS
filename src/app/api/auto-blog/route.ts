@@ -22,7 +22,7 @@ async function fetchWithTimeout(url: string, options: any = {}, timeoutMs = 3000
 import { NextRequest, NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
 import { prisma } from '@/lib/prisma';
-import { getAIConfig, generateAIContent, AIConfig } from '@/lib/ai';
+import { getAIConfig, generateAIContent, AIConfig, parseAIJsonArray } from '@/lib/ai';
 import { getResearchPrompt } from '@/lib/services/autoBlogPrompts';
 import { verifyToken } from '@/lib/auth';
 import { waitUntil } from '@vercel/functions';
@@ -342,14 +342,9 @@ export async function POST(request: NextRequest) {
 
       let rModel = settings.researcherModel || '';
       const researcherConfigForTopic = buildAgentConfigs('researcher', 'openrouter', rModel || 'google/gemini-2.5-flash', 1500);
-      
       try {
         const topicRaw = await generateContentWithFallback(researcherConfigForTopic, "You output strict JSON arrays of 15 strings.", prompt);
-        const firstBracket = topicRaw.indexOf('[');
-        const lastBracket = topicRaw.lastIndexOf(']');
-        if (firstBracket === -1 || lastBracket === -1) throw new Error("No JSON array found in AI output. AI Output: " + topicRaw);
-        const cleanTopicJson = topicRaw.substring(firstBracket, lastBracket + 1);
-        const generatedTopics = JSON.parse(cleanTopicJson);
+        const generatedTopics = parseAIJsonArray(topicRaw);
         
         if (Array.isArray(generatedTopics) && generatedTopics.length > 0) {
           const shuffledTopics = generatedTopics.sort(() => Math.random() - 0.5);

@@ -59,6 +59,12 @@ model BlogPost {
   author          User?     @relation(fields: [authorId], references: [id])
   syndicatedToMedium Boolean @default(false)
   gridBox         String?   // manually specified grid box/card on the homepage
+  jobStates       String[]  @default([])
+  qualifications  String[]  @default([])
+  applyStartDate  DateTime?
+  applyLastDate   DateTime?
+  vacancyCount    Int?
+  officialApplyUrl String?
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 

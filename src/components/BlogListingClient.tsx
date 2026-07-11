@@ -67,6 +67,7 @@ export default function BlogListingClient({ uiConfig }: { uiConfig?: any }) {
   const [selectedState, setSelectedState] = useState('All India');
   const [selectedQualification, setSelectedQualification] = useState(initialQualification);
   const [isStateDetected, setIsStateDetected] = useState(false);
+  const [activeOnly, setActiveOnly] = useState(true);
   const [showFilters, setShowFilters] = useState(
     initialTag === 'Education & Career' || initialJobType === 'active_upcoming' || !!initialQualFromUrl
   );
@@ -188,6 +189,8 @@ export default function BlogListingClient({ uiConfig }: { uiConfig?: any }) {
       if (selectedQualification && selectedQualification !== 'All Qualifications') {
         url.searchParams.append('qualification', selectedQualification);
       }
+      url.searchParams.append('activeJobsOnly', activeOnly ? 'true' : 'false');
+      
       const jobType = searchParams?.get('jobType');
       if (jobType) {
         url.searchParams.append('jobType', jobType);
@@ -216,7 +219,7 @@ export default function BlogListingClient({ uiConfig }: { uiConfig?: any }) {
     if (isStateDetected) {
       fetchPosts();
     }
-  }, [page, activeTag, isStateDetected, selectedState, selectedQualification]);
+  }, [page, activeTag, isStateDetected, selectedState, selectedQualification, activeOnly]);
 
   useEffect(() => {
     if (isFirstSearchRender.current) {
@@ -329,6 +332,52 @@ export default function BlogListingClient({ uiConfig }: { uiConfig?: any }) {
           font-weight: 700;
           margin: 0;
           color: var(--color-text-primary);
+        }
+        .active-toggle-wrapper {
+          display: flex;
+          align-items: center;
+        }
+        .active-toggle-label {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          cursor: pointer;
+          user-select: none;
+        }
+        .active-toggle-checkbox {
+          position: absolute;
+          opacity: 0;
+          width: 0;
+          height: 0;
+        }
+        .active-toggle-custom {
+          position: relative;
+          display: inline-block;
+          width: 38px;
+          height: 20px;
+          background-color: rgba(255,255,255,0.06);
+          border-radius: 20px;
+          transition: background-color 0.2s;
+          border: 1px solid var(--color-border);
+        }
+        .active-toggle-custom::before {
+          content: "";
+          position: absolute;
+          height: 14px;
+          width: 14px;
+          left: 2px;
+          bottom: 2px;
+          background-color: var(--color-text-secondary);
+          border-radius: 50%;
+          transition: transform 0.2s, background-color 0.2s;
+        }
+        .active-toggle-checkbox:checked + .active-toggle-custom {
+          background-color: var(--color-accent);
+          border-color: var(--color-accent);
+        }
+        .active-toggle-checkbox:checked + .active-toggle-custom::before {
+          transform: translateX(18px);
+          background-color: #fff;
         }
         .state-select-wrapper {
           display: flex;
@@ -636,6 +685,44 @@ export default function BlogListingClient({ uiConfig }: { uiConfig?: any }) {
             font-size: 0.65rem;
           }
         }
+        .blog-expiry-badge.active {
+          background: rgba(16, 185, 129, 0.08);
+          color: #34d399;
+        }
+        .blog-expiry-badge.expired {
+          background: rgba(239, 68, 68, 0.08);
+          color: #f87171;
+        }
+        .blog-meta-chips {
+          display: flex;
+          gap: 0.35rem;
+          margin-top: 0.35rem;
+          flex-wrap: wrap;
+        }
+        .blog-meta-chip {
+          background: rgba(255,255,255,0.04);
+          border: 1px solid var(--color-border);
+          color: var(--color-text-secondary);
+          padding: 0.15rem 0.5rem;
+          border-radius: 6px;
+          font-size: 0.65rem;
+          font-weight: 600;
+        }
+        .apply-now-btn {
+          margin-left: auto;
+          background: var(--color-accent);
+          color: #fff;
+          padding: 0.35rem 0.75rem;
+          border-radius: 6px;
+          font-size: 0.75rem;
+          font-weight: 700;
+          text-decoration: none;
+          transition: all 0.2s;
+        }
+        .apply-now-btn:hover {
+          opacity: 0.9;
+          transform: scale(1.03);
+        }
       `}} />
 
       {/* Hero Section */}
@@ -679,6 +766,22 @@ export default function BlogListingClient({ uiConfig }: { uiConfig?: any }) {
               <h3 className="filter-title">
                 Advanced Job Filters
               </h3>
+              
+              <div className="active-toggle-wrapper">
+                <label className="active-toggle-label">
+                  <input
+                    type="checkbox"
+                    className="active-toggle-checkbox"
+                    checked={activeOnly}
+                    onChange={(e) => {
+                      setActiveOnly(e.target.checked);
+                      setPage(1);
+                    }}
+                  />
+                  <span className="active-toggle-custom"></span>
+                  <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>Active Jobs Only</span>
+                </label>
+              </div>
               
               {!(uiConfig?.hideStateFilter === true) && (
                 <div className="state-select-wrapper">
@@ -794,45 +897,80 @@ export default function BlogListingClient({ uiConfig }: { uiConfig?: any }) {
         ) : (
           <>
             <div className="blog-list-wrapper">
-              {filteredPosts.map((post: any, idx: number) => (
-                <Link
-                  href={`/blog/${post.slug}`}
-                  key={post.id}
-                  style={{ textDecoration: 'none', color: 'inherit' }}
-                >
-                  <article className="blog-card">
-                    {post.featuredImage && (
-                      <div className="blog-image-wrapper">
-                        <Image src={post.featuredImage} alt={post.title} fill style={{ objectFit: 'cover' }} sizes="(max-width: 768px) 80px, 100px" />
-                      </div>
-                    )}
+              {filteredPosts.map((post: any, idx: number) => {
+                const lastDate = post.applyLastDate ? new Date(post.applyLastDate) : post.expiryDate ? new Date(post.expiryDate) : null;
+                const isExpired = lastDate ? lastDate.getTime() < Date.now() : false;
+                const hasMetadata = (post.qualifications && post.qualifications.length > 0) || (post.jobStates && post.jobStates.length > 0) || post.vacancyCount;
+                
+                return (
+                  <Link
+                    href={`/blog/${post.slug}`}
+                    key={post.id}
+                    style={{ textDecoration: 'none', color: 'inherit' }}
+                  >
+                    <article className="blog-card">
+                      {post.featuredImage && (
+                        <div className="blog-image-wrapper">
+                          <Image src={post.featuredImage} alt={post.title} fill style={{ objectFit: 'cover' }} sizes="(max-width: 768px) 80px, 100px" />
+                        </div>
+                      )}
 
-                    <div className="blog-info-wrapper">
-                      <div className="blog-meta-row">
-                        {post.tags?.[0] && (
-                          <span className="blog-tag-badge">
-                            {post.tags[0]}
-                          </span>
-                        )}
-                        <p className="blog-date-text">
-                          {new Date(post.publishedAt || post.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                      <div className="blog-info-wrapper">
+                        <div className="blog-meta-row">
+                          {post.tags?.[0] && (
+                            <span className="blog-tag-badge">
+                              {post.tags[0]}
+                            </span>
+                          )}
+                          <p className="blog-date-text">
+                            {new Date(post.publishedAt || post.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                          </p>
+                          {lastDate && (
+                            <span className={`blog-expiry-badge ${isExpired ? 'expired' : 'active'}`}>
+                              ⏰ {isExpired ? 'Expired' : 'Last Date'}: {lastDate.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                            </span>
+                          )}
+                          {post.officialApplyUrl && !isExpired && (
+                            <a
+                              href={post.officialApplyUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="apply-now-btn"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                              }}
+                            >
+                              Apply Direct
+                            </a>
+                          )}
+                        </div>
+                        
+                        <h2 className="blog-title">
+                          {post.title}
+                        </h2>
+                        
+                        <p className="blog-excerpt">
+                          {post.excerpt}
                         </p>
-                        {post.expiryDate && (
-                          <span className="blog-expiry-badge">
-                            ⏰ Last Date: {new Date(post.expiryDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
-                          </span>
+                        
+                        {hasMetadata && (
+                          <div className="blog-meta-chips">
+                            {post.jobStates && post.jobStates.map((state: string) => (
+                              <span key={state} className="blog-meta-chip">📍 {state}</span>
+                            ))}
+                            {post.qualifications && post.qualifications.map((qual: string) => (
+                              <span key={qual} className="blog-meta-chip">🎓 {qual}</span>
+                            ))}
+                            {post.vacancyCount && (
+                              <span className="blog-meta-chip">💼 {post.vacancyCount} Posts</span>
+                            )}
+                          </div>
                         )}
                       </div>
-                      <h2 className="blog-title">
-                        {post.title}
-                      </h2>
-                      <p className="blog-excerpt">
-                        {post.excerpt}
-                      </p>
-                    </div>
-                  </article>
-                </Link>
-              ))}
+                    </article>
+                  </Link>
+                );
+              })}
             </div>
 
             {/* Pagination */}

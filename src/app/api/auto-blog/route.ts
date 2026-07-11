@@ -992,7 +992,12 @@ YOUR SEO SKILLS:
     2. seoDescription: Write a compelling meta description in simple Hindi that makes users CLICK. Under 155 chars. Include primary keyword.
     3. seoKeywords: List 6-8 comma-separated keywords mixing Hindi, English, and Hinglish (e.g. "SSC CGL 2026, SSC CGL notification, SSC CGL kab aayega, एसएससी सीजीएल 2026").
     4. slug: Short, keyword-rich English-only URL slug (e.g. "ssc-cgl-2026-notification"). No random numbers.
-    5. expiryDate: ONLY for job/recruitment posts with a specific last date. Otherwise null.
+    5. qualifications: Extract the required educational qualifications as a JSON array of strings. Choose ONLY from these options: ["10th", "12th", "Graduate", "Post Graduate", "ITI", "Diploma", "B.Tech/BE", "Nursing", "B.Ed", "Other"]. If multiple apply, list all of them. If none apply or it's not a job post, return [].
+    6. jobStates: Extract the relevant Indian states for the job as a JSON array of strings. Choose ONLY from: ["Central", "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh", "Goa", "Gujarat", "Haryana", "Himachal Pradesh", "Jharkhand", "Karnataka", "Kerala", "Madhya Pradesh", "Maharashtra", "Manipur", "Meghalaya", "Mizoram", "Nagaland", "Odisha", "Punjab", "Rajasthan", "Sikkim", "Tamil Nadu", "Telangana", "Tripura", "Uttar Pradesh", "Uttarakhand", "West Bengal", "Delhi", "Jammu and Kashmir", "Ladakh"]. For Central Govt/All-India jobs (SSC, UPSC, Railways, Army, Navy, Airforce, etc.), return ["Central"]. If none apply, return [].
+    7. applyStartDate: Extract the start date for application in ISO format (YYYY-MM-DDTHH:mm:ss.sssZ). Return null if not mentioned or not a job post.
+    8. applyLastDate: Extract the last date/deadline to apply in ISO format (YYYY-MM-DDTHH:mm:ss.sssZ). Return null if not mentioned or not a job post.
+    9. vacancyCount: Extract total number of vacancies/posts as an integer. Return null if not mentioned or not a job post.
+    10. officialApplyUrl: Extract the official apply portal/website URL. Return null if not mentioned or not a job post.
     
     Respond ONLY with a valid JSON object, no markdown:
     {
@@ -1000,17 +1005,28 @@ YOUR SEO SKILLS:
       "seoDescription": "...",
       "seoKeywords": "...",
       "slug": "...",
-      "expiryDate": "YYYY-MM-DDTHH:mm:ss.sssZ or null"
+      "qualifications": ["12th", "Graduate"],
+      "jobStates": ["Rajasthan"],
+      "applyStartDate": "YYYY-MM-DDTHH:mm:ss.sssZ or null",
+      "applyLastDate": "YYYY-MM-DDTHH:mm:ss.sssZ or null",
+      "vacancyCount": 500,
+      "officialApplyUrl": "https://..."
     }
     
     ARTICLE HTML:
-    ${articleHtml.substring(0, 2000)}...`;
+    ${articleHtml}`;
 
     let seoData = {
       seoTitle: targetTopic,
       seoDescription: "An in-depth look at " + targetTopic,
       seoKeywords: targetTopic.toLowerCase().split(' ').join(', '),
-      slug: targetTopic.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') + '-' + Date.now().toString().slice(-4)
+      slug: targetTopic.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') + '-' + Date.now().toString().slice(-4),
+      qualifications: [] as string[],
+      jobStates: [] as string[],
+      applyStartDate: null as Date | null,
+      applyLastDate: null as Date | null,
+      vacancyCount: null as number | null,
+      officialApplyUrl: null as string | null
     };
 
     let expiryDate = null;
@@ -1018,10 +1034,40 @@ YOUR SEO SKILLS:
       const seoResultRaw = await generateContentWithFallback(seoConfig, "You are an SEO metadata generator that outputs only strict JSON.", seoPrompt);
       const cleanJsonStr = seoResultRaw.replace(/^```json\n?|```$/g, '').trim();
       const parsedSeo = JSON.parse(cleanJsonStr);
-      if (parsedSeo.seoTitle) seoData = { ...seoData, ...parsedSeo };
-      if (parsedSeo.expiryDate) {
-        const parsedDate = new Date(parsedSeo.expiryDate);
-        if (!isNaN(parsedDate.getTime())) expiryDate = parsedDate;
+      if (parsedSeo.seoTitle) {
+        seoData.seoTitle = parsedSeo.seoTitle;
+        seoData.seoDescription = parsedSeo.seoDescription || seoData.seoDescription;
+        seoData.seoKeywords = parsedSeo.seoKeywords || seoData.seoKeywords;
+        seoData.slug = parsedSeo.slug || seoData.slug;
+        
+        if (Array.isArray(parsedSeo.qualifications)) seoData.qualifications = parsedSeo.qualifications;
+        if (Array.isArray(parsedSeo.jobStates)) seoData.jobStates = parsedSeo.jobStates;
+        
+        if (parsedSeo.applyStartDate) {
+          const sDate = new Date(parsedSeo.applyStartDate);
+          if (!isNaN(sDate.getTime())) seoData.applyStartDate = sDate;
+        }
+        
+        if (parsedSeo.applyLastDate) {
+          const lDate = new Date(parsedSeo.applyLastDate);
+          if (!isNaN(lDate.getTime())) {
+            seoData.applyLastDate = lDate;
+            expiryDate = lDate; // Synchronize with legacy expiryDate
+          }
+        } else if (parsedSeo.expiryDate) {
+          const lDate = new Date(parsedSeo.expiryDate);
+          if (!isNaN(lDate.getTime())) {
+            seoData.applyLastDate = lDate;
+            expiryDate = lDate;
+          }
+        }
+        
+        if (parsedSeo.vacancyCount !== undefined) {
+          const val = parseInt(parsedSeo.vacancyCount);
+          if (!isNaN(val)) seoData.vacancyCount = val;
+        }
+        
+        if (parsedSeo.officialApplyUrl) seoData.officialApplyUrl = String(parsedSeo.officialApplyUrl);
       }
     } catch(e) {
       console.warn("SEO Agent JSON parsing failed, using fallback.", e);
@@ -1208,6 +1254,12 @@ YOUR SEO SKILLS:
           publishedAt: settings.autoPublish ? new Date() : null,
           autoGenerated: true,
           expiryDate: expiryDate,
+          jobStates: seoData.jobStates,
+          qualifications: seoData.qualifications,
+          applyStartDate: seoData.applyStartDate,
+          applyLastDate: seoData.applyLastDate,
+          vacancyCount: seoData.vacancyCount,
+          officialApplyUrl: seoData.officialApplyUrl,
           seoTitle: seoData.seoTitle,
           seoDescription: seoData.seoDescription,
           seoKeywords: seoData.seoKeywords,

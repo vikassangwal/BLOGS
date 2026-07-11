@@ -58,6 +58,7 @@ export async function GET(request: Request) {
     const publishedOnly = searchParams.get('published') === 'true';
     const stateFilter = searchParams.get('stateFilter') || '';
     const jobType = searchParams.get('jobType') || '';
+    const activeJobsOnly = searchParams.get('activeJobsOnly') !== 'false';
 
     const where: any = { AND: [] };
 
@@ -70,10 +71,12 @@ export async function GET(request: Request) {
       });
     }
     
-    if (stateFilter) {
+    if (stateFilter && stateFilter !== 'All India') {
       if (stateFilter === 'Central Government' || stateFilter === 'Central News') {
         where.AND.push({
           OR: [
+            { jobStates: { has: 'Central' } },
+            // legacy keywords
             { title: { contains: 'UPSC', mode: 'insensitive' } },
             { title: { contains: 'SSC', mode: 'insensitive' } },
             { title: { contains: 'Railway', mode: 'insensitive' } },
@@ -94,9 +97,11 @@ export async function GET(request: Request) {
       } else {
         where.AND.push({
           OR: [
+            { jobStates: { has: stateFilter } },
+            { jobStates: { has: 'Central' } },
+            // legacy keywords
             { title: { contains: stateFilter, mode: 'insensitive' } },
             { content: { contains: stateFilter, mode: 'insensitive' } },
-            // Specific central job identifiers that apply nationwide (Title only to prevent false positives)
             { title: { contains: 'UPSC', mode: 'insensitive' } },
             { title: { contains: 'SSC', mode: 'insensitive' } },
             { title: { contains: 'Railway', mode: 'insensitive' } },
@@ -118,12 +123,14 @@ export async function GET(request: Request) {
     }
 
     if (publishedOnly) {
-      where.AND.push({
-        OR: [
-          { expiryDate: null },
-          { expiryDate: { gte: new Date() } }
-        ]
-      });
+      if (activeJobsOnly) {
+        where.AND.push({
+          OR: [
+            { expiryDate: null },
+            { expiryDate: { gte: new Date() } }
+          ]
+        });
+      }
       where.AND.push({ status: 'Published' });
       where.AND.push({ publishedAt: { lte: new Date() } });
     }
@@ -351,7 +358,22 @@ export async function GET(request: Request) {
       }
     }
 
-    if (qualification) {
+    if (qualification && qualification !== 'All Qualifications') {
+      let searchValues: string[] = [qualification];
+      if (qualification === '10th Pass') {
+        searchValues = ['10th', '10th Pass'];
+      } else if (qualification === '12th Pass') {
+        searchValues = ['12th', '12th Pass'];
+      } else if (qualification === 'Graduate') {
+        searchValues = ['Graduate'];
+      } else if (qualification === 'Post Graduate') {
+        searchValues = ['Post Graduate'];
+      } else if (qualification === 'B.Tech / BE') {
+        searchValues = ['B.Tech/BE', 'B.Tech / BE'];
+      } else if (qualification === 'ITI / Diploma') {
+        searchValues = ['ITI', 'Diploma', 'ITI / Diploma'];
+      }
+
       let qualificationKeywords: string[] = [];
       if (qualification === '10th Pass') {
         qualificationKeywords = ['10th', '10वीं', 'matric', 'high school'];
@@ -369,7 +391,8 @@ export async function GET(request: Request) {
 
       where.AND.push({
         OR: [
-          { tags: { some: { tag: { name: qualification } } } },
+          { qualifications: { hasSome: searchValues } },
+          { tags: { some: { tag: { name: { in: searchValues } } } } },
           ...qualificationKeywords.map(keyword => ({
             OR: [
               { title: { contains: keyword, mode: 'insensitive' } },

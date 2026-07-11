@@ -394,7 +394,8 @@ export async function generateAIContent(
   systemPrompt: string,
   userPrompt: string,
   maxTokens: number = 2000,
-  enableSearch: boolean = false
+  enableSearch: boolean = false,
+  minResponseLength: number = 100
 ): Promise<string> {
 
   const configs = Array.isArray(configOrConfigs) ? configOrConfigs : [configOrConfigs];
@@ -484,7 +485,7 @@ export async function generateAIContent(
       }
 
       // Reject suspiciously short responses (likely error messages, not real content)
-      if (content.length < 100) {
+      if (content.length < minResponseLength) {
         console.warn(`[AI] ${profile.name} returned very short response (${content.length} chars). Trying next provider...`);
         lastError = new Error(`${profile.name} returned insufficient content (${content.length} chars)`);
         continue;
@@ -579,7 +580,7 @@ export async function testAPIKey(provider: string, apiKey: string, model?: strin
       apiKey,
       model: model || getDefaultModel(provider),
     };
-    const result = await generateAIContent(config, 'You are a test.', 'Say "API working" in exactly 2 words.', 20);
+    const result = await generateAIContent(config, 'You are a test.', 'Say "API working" in exactly 2 words.', 20, false, 1);
     return { success: true, message: `✅ ${provider} API working! Response: "${result.substring(0, 50)}"`, provider };
   } catch (error: any) {
     return { success: false, message: `❌ ${error.message}`, provider };

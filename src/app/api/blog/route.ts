@@ -132,38 +132,103 @@ export async function GET(request: Request) {
       where.AND.push({ status });
     }
 
-    if (jobType === 'active_upcoming' || jobType === 'active' || jobType === 'upcoming') {
-      where.AND.push({
-        OR: [
-          { tags: { some: { tag: { name: { in: ['Job', 'Vacancy', 'Career', 'Upcoming Job', 'Agami'] } } } } },
-          { title: { contains: 'Job', mode: 'insensitive' } },
-          { title: { contains: 'Vacancy', mode: 'insensitive' } },
-          { title: { contains: 'भर्ती' } },
-          { title: { contains: 'संभावित' } },
-          { title: { contains: 'Upcoming', mode: 'insensitive' } },
-          { title: { contains: 'आगामी' } }
-        ]
-      });
-      where.AND.push({
-        NOT: [
-          { title: { contains: 'Result', mode: 'insensitive' } },
-          { title: { contains: 'परिणाम' } },
-          { title: { contains: 'Admit Card', mode: 'insensitive' } },
-          { title: { contains: 'प्रवेश पत्र' } },
-          { title: { contains: 'Answer Key', mode: 'insensitive' } },
-          { title: { contains: 'उत्तर कुंजी' } },
-          { title: { contains: 'एक नज़र में' } },
-          { title: { contains: 'Key Highlights' } },
-          { title: { contains: 'Highlights', mode: 'insensitive' } },
-          { title: { contains: 'Question Paper', mode: 'insensitive' } },
-          { title: { contains: 'प्रश्न पत्र' } },
-          { title: { contains: 'Syllabus', mode: 'insensitive' } },
-          { title: { contains: 'सिलेबस' } },
-          { title: { contains: 'Admission', mode: 'insensitive' } },
-          { title: { contains: 'दाखिला' } },
-          { title: { contains: 'प्रवेश' } }
-        ]
-      });
+    if (jobType) {
+      if (jobType === 'active_upcoming' || jobType === 'active' || jobType === 'upcoming') {
+        where.AND.push({
+          OR: [
+            { tags: { some: { tag: { name: { in: ['Job', 'Vacancy', 'Career', 'Upcoming Job', 'Agami'] } } } } },
+            { title: { contains: 'Job', mode: 'insensitive' } },
+            { title: { contains: 'Vacancy', mode: 'insensitive' } },
+            { title: { contains: 'भर्ती' } },
+            { title: { contains: 'संभावित' } },
+            { title: { contains: 'Upcoming', mode: 'insensitive' } },
+            { title: { contains: 'आगामी' } }
+          ]
+        });
+        where.AND.push({
+          NOT: [
+            { title: { contains: 'Result', mode: 'insensitive' } },
+            { title: { contains: 'परिणाम' } },
+            { title: { contains: 'Admit Card', mode: 'insensitive' } },
+            { title: { contains: 'प्रवेश पत्र' } },
+            { title: { contains: 'Answer Key', mode: 'insensitive' } },
+            { title: { contains: 'उत्तर कुंजी' } },
+            { title: { contains: 'एक नज़र में' } },
+            { title: { contains: 'Key Highlights' } },
+            { title: { contains: 'Highlights', mode: 'insensitive' } },
+            { title: { contains: 'Question Paper', mode: 'insensitive' } },
+            { title: { contains: 'प्रश्न पत्र' } },
+            { title: { contains: 'Syllabus', mode: 'insensitive' } },
+            { title: { contains: 'सिलेबस' } },
+            { title: { contains: 'Admission', mode: 'insensitive' } },
+            { title: { contains: 'दाखिला' } },
+            { title: { contains: 'प्रवेश' } }
+          ]
+        });
+      } else if (jobType === 'result') {
+        where.AND.push({
+          OR: [
+            { tags: { some: { tag: { name: { in: ['Results', 'Result', 'Answer Key', 'Syllabus', 'Cutoff', 'Merit List'] } } } } },
+            { title: { contains: 'Result', mode: 'insensitive' } },
+            { title: { contains: 'परिणाम' } },
+            { title: { contains: 'Answer Key', mode: 'insensitive' } },
+            { title: { contains: 'उत्तर कुंजी' } },
+            { title: { contains: 'Syllabus', mode: 'insensitive' } },
+            { title: { contains: 'सिलेबस' } },
+            { title: { contains: 'Cutoff', mode: 'insensitive' } },
+            { title: { contains: 'कटऑफ' } },
+            { title: { contains: 'Merit List', mode: 'insensitive' } },
+            { title: { contains: 'मेरिट लिस्ट' } }
+          ]
+        });
+      } else if (jobType === 'admit_card') {
+        where.AND.push({
+          OR: [
+            { tags: { some: { tag: { name: { in: ['Admit Card'] } } } } },
+            { title: { contains: 'Admit Card', mode: 'insensitive' } },
+            { title: { contains: 'प्रवेश पत्र' } },
+            { title: { contains: 'Exam City', mode: 'insensitive' } }
+          ]
+        });
+      } else if (jobType === 'scheme') {
+        where.AND.push({
+          OR: [
+            { tags: { some: { tag: { name: { in: ['Scheme', 'Yojana', 'Government Scheme', 'PM Kisan', 'Sarkari Yojana'] } } } } },
+            { title: { contains: 'Scheme', mode: 'insensitive' } },
+            { title: { contains: 'Yojana', mode: 'insensitive' } },
+            { title: { contains: 'योजना' } },
+            { title: { contains: 'PM Kisan', mode: 'insensitive' } },
+            { title: { contains: 'E-Shram', mode: 'insensitive' } }
+          ]
+        });
+      } else if (jobType === 'news') {
+        const sevenDaysAgo = new Date();
+        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+        where.AND.push({
+          publishedAt: { gte: sevenDaysAgo }
+        });
+        where.AND.push({
+          NOT: [
+            { tags: { some: { tag: { name: { in: [
+              'Job', 'Vacancy', 'Career', 'Education & Career', 'Upcoming', 'Upcoming Job', 'Agami',
+              'Admit Card', 'Results', 'Result', 'Answer Key', 'Syllabus', 'Cutoff', 'Merit List',
+              'Scheme', 'Yojana', 'Government Scheme', 'PM Kisan', 'Sarkari Yojana',
+              'Scholarship', 'National Scholarship', 'Scholarships',
+              'University', 'IGNOU', 'College', 'Admission', 'Counselling', 'State University',
+              'Technology', 'Smartphone', 'Tech', 'Mobile', 'Gadget',
+              'Finance', 'Banking', 'Bank', 'LIC', 'EPFO', 'Savings',
+              'Earning', 'Online Earning', 'Course', 'Free Course',
+              'School', 'Board Exam', 'CBSE', 'State Board'
+            ] } } } } },
+            { title: { contains: 'Job', mode: 'insensitive' } },
+            { title: { contains: 'Admit Card', mode: 'insensitive' } },
+            { title: { contains: 'Result', mode: 'insensitive' } },
+            { title: { contains: 'Scheme', mode: 'insensitive' } },
+            { title: { contains: 'Scholarship', mode: 'insensitive' } },
+            { title: { contains: 'University', mode: 'insensitive' } }
+          ]
+        });
+      }
     }
 
     if (tag) {
@@ -262,9 +327,9 @@ export async function GET(request: Request) {
 
     let posts: any[] = [];
     let total = 0;
-    const isFilteringActiveOrUpcoming = jobType === 'active' || jobType === 'upcoming' || jobType === 'active_upcoming';
+    const isCustomFilteringRequired = ['active', 'upcoming', 'active_upcoming', 'result', 'admit_card', 'scheme'].includes(jobType || '');
 
-    if (isFilteringActiveOrUpcoming) {
+    if (isCustomFilteringRequired) {
       // Fetch all matches to perform post-query memory filtering safely (for precise pagination)
       const allPosts = await prisma.blogPost.findMany({
         where,
@@ -277,28 +342,43 @@ export async function GET(request: Request) {
         if (!post.content) return false;
         const content = post.content.toLowerCase();
         
-        const hasNotification = content.includes('notification') || content.includes('विज्ञप्ति') || content.includes('अधिसूचना');
-        const hasApply = content.includes('apply') || content.includes('आवेदन');
-        const hasLink = content.includes('<a ');
-        
-        const isApplyNotStarted = content.includes('link active on') || 
-                                  content.includes('will be active') ||
-                                  content.includes('जल्द सक्रिय होगा') ||
-                                  content.includes('link will activate') ||
-                                  content.includes('to be announced') ||
-                                  content.includes('coming soon') ||
-                                  content.includes('जल्द उपलब्ध');
+        if (jobType === 'active' || jobType === 'upcoming' || jobType === 'active_upcoming') {
+          const hasNotification = content.includes('notification') || content.includes('विज्ञप्ति') || content.includes('अधिसूचना');
+          const hasApply = content.includes('apply') || content.includes('आवेदन');
+          const hasLink = content.includes('<a ');
+          
+          const isApplyNotStarted = content.includes('link active on') || 
+                                    content.includes('will be active') ||
+                                    content.includes('जल्द सक्रिय होगा') ||
+                                    content.includes('link will activate') ||
+                                    content.includes('to be announced') ||
+                                    content.includes('coming soon') ||
+                                    content.includes('जल्द उपलब्ध');
 
-        if (jobType === 'active') {
-          return hasNotification && hasApply && hasLink && !isApplyNotStarted;
-        } else if (jobType === 'upcoming') {
-          return hasNotification && hasLink && (!hasApply || isApplyNotStarted);
-        } else {
-          // active_upcoming matches either
-          const isActive = hasNotification && hasApply && hasLink && !isApplyNotStarted;
-          const isUpcoming = hasNotification && hasLink && (!hasApply || isApplyNotStarted);
-          return isActive || isUpcoming;
+          if (jobType === 'active') {
+            return hasNotification && hasApply && hasLink && !isApplyNotStarted;
+          } else if (jobType === 'upcoming') {
+            return hasNotification && hasLink && (!hasApply || isApplyNotStarted);
+          } else {
+            // active_upcoming matches either
+            const isActive = hasNotification && hasApply && hasLink && !isApplyNotStarted;
+            const isUpcoming = hasNotification && hasLink && (!hasApply || isApplyNotStarted);
+            return isActive || isUpcoming;
+          }
+        } else if (jobType === 'result') {
+          const hasLink = content.includes('<a ');
+          return hasLink;
+        } else if (jobType === 'admit_card') {
+          const hasNotificationOrOfficial = content.includes('notification') || content.includes('विज्ञप्ति') || content.includes('official') || content.includes('आधिकारिक');
+          const hasAdmitCardOrCity = content.includes('admit card') || content.includes('प्रवेश पत्र') || content.includes('exam city') || content.includes('परीक्षा शहर');
+          const hasLink = content.includes('<a ');
+          return hasNotificationOrOfficial && hasAdmitCardOrCity && hasLink;
+        } else if (jobType === 'scheme') {
+          const hasOfficial = content.includes('official') || content.includes('आधिकारिक') || content.includes('website');
+          const hasLink = content.includes('<a ');
+          return hasOfficial && hasLink;
         }
+        return true;
       });
 
       total = filteredPosts.length;

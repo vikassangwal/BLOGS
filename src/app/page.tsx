@@ -790,7 +790,7 @@ export default async function HomePage() {
           </Link>
           
           {/* Square 3: Recent Results */}
-          <Link href="/blog?tag=Education%20%26%20Career" className="block group">
+          <Link href="/blog?tag=Education%20%26%20Career&jobType=result" className="block group">
             <div className="glass-panel border border-amber-500/10 hover:border-amber-500/30 p-3 sm:p-4 rounded-xl sm:rounded-2xl text-center bg-white/5 transition-all hover:-translate-y-1 shadow-[0_4px_30px_rgba(245,158,11,0.05)]">
               <div className="text-xl sm:text-2xl mb-1">🏆</div>
               <div className="text-lg sm:text-2xl font-black text-amber-400">{recentResultsCount}</div>
@@ -800,7 +800,7 @@ export default async function HomePage() {
           </Link>
 
           {/* Square 4: Admit Cards */}
-          <Link href="/blog?tag=Education%20%26%20Career" className="block group">
+          <Link href="/blog?tag=Education%20%26%20Career&jobType=admit_card" className="block group">
             <div className="glass-panel border border-blue-500/10 hover:border-blue-500/30 p-3 sm:p-4 rounded-xl sm:rounded-2xl text-center bg-white/5 transition-all hover:-translate-y-1 shadow-[0_4px_30px_rgba(59,130,246,0.05)]">
               <div className="text-xl sm:text-2xl mb-1">🎟️</div>
               <div className="text-lg sm:text-2xl font-black text-blue-400">{recentAdmitCardsCount}</div>
@@ -810,7 +810,7 @@ export default async function HomePage() {
           </Link>
 
           {/* Square 5: Govt Schemes */}
-          <Link href="/blog?tag=Finance%20%26%20Earning" className="block group">
+          <Link href="/blog?tag=Finance%20%26%20Earning&jobType=scheme" className="block group">
             <div className="glass-panel border border-purple-500/10 hover:border-purple-500/30 p-3 sm:p-4 rounded-xl sm:rounded-2xl text-center bg-white/5 transition-all hover:-translate-y-1 shadow-[0_4px_30px_rgba(168,85,247,0.05)]">
               <div className="text-xl sm:text-2xl mb-1">📜</div>
               <div className="text-lg sm:text-2xl font-black text-purple-400">{activeSchemesCount}</div>
@@ -820,7 +820,7 @@ export default async function HomePage() {
           </Link>
 
           {/* Square 6: Other Updates */}
-          <Link href="/blog?tag=News" className="block group">
+          <Link href="/blog?tag=News&jobType=news" className="block group">
             <div className="glass-panel border border-pink-500/10 hover:border-pink-500/30 p-3 sm:p-4 rounded-xl sm:rounded-2xl text-center bg-white/5 transition-all hover:-translate-y-1 shadow-[0_4px_30px_rgba(236,72,153,0.05)]">
               <div className="text-xl sm:text-2xl mb-1">📌</div>
               <div className="text-lg sm:text-2xl font-black text-pink-400">{otherNewsCount}</div>

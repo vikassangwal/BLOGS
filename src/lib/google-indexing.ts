@@ -140,3 +140,76 @@ export async function submitToGoogleIndexing(
     return { success: false, message: error.message || 'Unknown error occurred during indexing submission.' };
   }
 }
+
+/**
+ * Checks the Google indexing status of a URL using URL Inspection API
+ */
+export async function checkGoogleIndexingStatus(
+  url: string,
+  siteUrl: string,
+  credentialsBase64OrJson: string
+): Promise<{ success: boolean; isIndexed: boolean; detail?: string }> {
+  try {
+    const trimmed = credentialsBase64OrJson.trim();
+    let jsonStr = trimmed;
+    if (!trimmed.startsWith('{')) {
+      jsonStr = Buffer.from(trimmed, 'base64').toString('utf8');
+    }
+    const creds = JSON.parse(jsonStr);
+    if (!creds.private_key || !creds.client_email) {
+      return { success: false, isIndexed: false, detail: 'Invalid credentials key/email' };
+    }
+
+    const tokenUri = creds.token_uri || 'https://oauth2.googleapis.com/token';
+    const privateKey = await jose.importPKCS8(creds.private_key, 'RS256');
+    const jwt = await new jose.SignJWT({
+      scope: 'https://www.googleapis.com/auth/webmasters.readonly'
+    })
+      .setProtectedHeader({ alg: 'RS256' })
+      .setIssuedAt()
+      .setIssuer(creds.client_email)
+      .setSubject(creds.client_email)
+      .setAudience(tokenUri)
+      .setExpirationTime('1h')
+      .sign(privateKey);
+
+    const tokenRes = await fetch(tokenUri, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+        assertion: jwt
+      })
+    });
+    if (!tokenRes.ok) {
+      return { success: false, isIndexed: false, detail: 'OAuth request failed' };
+    }
+    const tokenData = await tokenRes.json();
+    const token = tokenData.access_token;
+
+    const inspectRes = await fetch('https://searchconsole.googleapis.com/v1/urlInspection/index:inspect', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        inspectionUrl: url,
+        siteUrl: siteUrl
+      })
+    });
+
+    if (!inspectRes.ok) {
+      const err = await inspectRes.text();
+      return { success: false, isIndexed: false, detail: `API error ${inspectRes.status}: ${err}` };
+    }
+
+    const inspectData = await inspectRes.json();
+    const verdict = inspectData.inspectionResult?.indexStatusResult?.verdict;
+    const isIndexed = verdict === 'PASS';
+    return { success: true, isIndexed, detail: verdict || 'UNKNOWN' };
+  } catch (err: any) {
+    console.error('[Google Indexing] Check status error:', err);
+    return { success: false, isIndexed: false, detail: err.message || 'Error occurred' };
+  }
+}

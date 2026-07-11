@@ -1521,11 +1521,30 @@ YOUR SEO SKILLS:
         }
         if (savedKeys.telegramToken && savedKeys.telegramChatId) {
           socialPromises.push(
-            fetch(`https://api.telegram.org/bot${savedKeys.telegramToken}/sendMessage`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ chat_id: savedKeys.telegramChatId, text: broadcastCaption, parse_mode: 'HTML' })
-            }).catch(e => console.error('Telegram failed:', e))
+            (async () => {
+              try {
+                const res = await fetch(`https://api.telegram.org/bot${savedKeys.telegramToken}/sendPhoto`, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    chat_id: savedKeys.telegramChatId,
+                    photo: socialImageUrl,
+                    caption: broadcastCaption,
+                    parse_mode: 'HTML'
+                  })
+                });
+                if (!res.ok) {
+                  // Fallback to text message
+                  await fetch(`https://api.telegram.org/bot${savedKeys.telegramToken}/sendMessage`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ chat_id: savedKeys.telegramChatId, text: broadcastCaption, parse_mode: 'HTML' })
+                  });
+                }
+              } catch (e) {
+                console.error('Telegram failed:', e);
+              }
+            })()
           );
 
           // Alert on fallback links
@@ -1588,6 +1607,31 @@ YOUR SEO SKILLS:
               const { submitToGoogleIndexing } = require('@/lib/google-indexing');
               await submitToGoogleIndexing(`https://knowora.in/blog/${newPost.slug}`, 'URL_UPDATED', savedKeys.googleIndexingJson);
             } catch (e) { console.error('Google Indexing failed:', e); }
+          }
+
+          // OneSignal Push Notification
+          const oneAppId = savedKeys.onesignalAppId || settings?.onesignalAppId;
+          const oneApiKey = savedKeys.onesignalApiKey || settings?.onesignalApiKey;
+          if (oneAppId && oneApiKey) {
+            try {
+              await fetch('https://onesignal.com/api/v1/notifications', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Basic ${oneApiKey}`
+                },
+                body: JSON.stringify({
+                  app_id: oneAppId,
+                  included_segments: ['Subscribers'],
+                  headings: { en: newPost.title },
+                  contents: { en: newPost.excerpt || 'Read the latest updates now!' },
+                  url: `https://www.knowora.in/blog/${newPost.slug}`,
+                  chrome_web_image: newPost.featuredImage || undefined,
+                  big_picture: newPost.featuredImage || undefined
+                })
+              });
+              console.log('[Auto-Blog] Sent OneSignal push notification for:', newPost.slug);
+            } catch (e) { console.error('OneSignal push notification failed:', e); }
           }
         }
 

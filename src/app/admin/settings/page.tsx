@@ -95,6 +95,12 @@ export default function SettingsAdmin() {
         >
           Integrations (Email, Social, Ads)
         </button>
+        <button 
+          onClick={() => setActiveTab('layout')} 
+          style={{ background: 'none', border: 'none', fontSize: '1rem', fontWeight: activeTab === 'layout' ? 700 : 500, color: activeTab === 'layout' ? '#0066cc' : 'var(--color-text-secondary)', cursor: 'pointer' }}
+        >
+          Layout & UI Visibility
+        </button>
       </div>
 
       <form onSubmit={handleSave}>
@@ -472,6 +478,79 @@ export default function SettingsAdmin() {
                 </div>
               </div>
             </div>
+          </div>
+        )}
+
+        {activeTab === 'layout' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', background: 'rgba(255, 255, 255, 0.05)', padding: '2rem', borderRadius: '16px', border: '1px solid var(--color-border)' }}>
+            <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 700 }}>Homepage Layout Visibility</h3>
+            <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.85rem', margin: '-1rem 0 0 0' }}>Toggle visibility of sections on the website homepage.</p>
+            
+            {/* Qualification Box */}
+            <div style={{ background: 'rgba(255,255,255,0.02)', padding: '1rem', borderRadius: '10px', border: '1px solid var(--color-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div>
+                <h4 style={{ margin: '0 0 0.3rem', fontSize: '0.95rem', fontWeight: 700 }}>🎓 Jobs by Education box</h4>
+                <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>Hide/show the qualifications buttons grid on homepage.</p>
+              </div>
+              <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+                <input type="checkbox" checked={apiKeys.hideEduBox === true} onChange={e => setApiKeys({ ...apiKeys, hideEduBox: e.target.checked })} style={{ transform: 'scale(1.5)' }} />
+              </label>
+            </div>
+
+            <hr style={{ border: 'none', borderTop: '1px solid var(--color-border)', margin: '0.5rem 0' }} />
+            
+            <h4 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 700 }}>Hide Grid Boxes (ग्रिड बॉक्स छिपाएं)</h4>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              {[
+                { key: 'hideGridLatestJobs', label: '🔥 Latest Jobs (नवीनतम नौकरियां)' },
+                { key: 'hideGridUpcomingJobs', label: '🚀 Upcoming Jobs (आगामी भर्ती)' },
+                { key: 'hideGridAdmitCards', label: '🎫 Admit Cards (प्रवेश पत्र)' },
+                { key: 'hideGridExamResults', label: '🏆 Exam Results (परीक्षा परिणाम)' },
+                { key: 'hideGridUniversity', label: '🏫 University Updates (विश्वविद्यालय अपडेट)' },
+                { key: 'hideGridGovtSchemes', label: '💼 Govt Schemes (सरकारी योजनाएं)' },
+                { key: 'hideGridScholarships', label: '🎓 Scholarships (छात्रवृत्ति)' },
+                { key: 'hideGridTechNews', label: '📱 Tech News (टेक समाचार)' },
+                { key: 'hideGridFinanceNews', label: '🏦 Finance News (फाइनेंस समाचार)' },
+                { key: 'hideGridEarning', label: '💸 Earning & Courses (कमाई & कोर्सेज)' },
+                { key: 'hideGridSchoolNews', label: '🎒 School News (स्कूल समाचार)' },
+                { key: 'hideGridOtherNews', label: '📌 Other Updates (अन्य सूचनाएं)' },
+              ].map(item => (
+                <div key={item.key} style={{ background: 'rgba(255,255,255,0.02)', padding: '0.8rem 1rem', borderRadius: '10px', border: '1px solid var(--color-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>{item.label}</span>
+                  <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+                    <input type="checkbox" checked={apiKeys[item.key] === true} onChange={e => setApiKeys({ ...apiKeys, [item.key]: e.target.checked })} style={{ transform: 'scale(1.3)' }} />
+                  </label>
+                </div>
+              ))}
+            </div>
+
+            <hr style={{ border: 'none', borderTop: '1px solid var(--color-border)', margin: '0.5rem 0' }} />
+
+            <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 700 }}>Education & Career Page Filters</h3>
+            <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.85rem', margin: '-1rem 0 0 0' }}>Toggle filters on the listing page (/blog).</p>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <div style={{ background: 'rgba(255,255,255,0.02)', padding: '1rem', borderRadius: '10px', border: '1px solid var(--color-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div>
+                  <h4 style={{ margin: '0 0 0.3rem', fontSize: '0.9rem', fontWeight: 700 }}>📍 State Filter Dropdown</h4>
+                  <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>Hide the State selection dropdown.</p>
+                </div>
+                <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+                  <input type="checkbox" checked={apiKeys.hideStateFilter === true} onChange={e => setApiKeys({ ...apiKeys, hideStateFilter: e.target.checked })} style={{ transform: 'scale(1.4)' }} />
+                </label>
+              </div>
+
+              <div style={{ background: 'rgba(255,255,255,0.02)', padding: '1rem', borderRadius: '10px', border: '1px solid var(--color-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div>
+                  <h4 style={{ margin: '0 0 0.3rem', fontSize: '0.9rem', fontWeight: 700 }}>🎓 Qualification Chips</h4>
+                  <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>Hide the Qualification chips selection.</p>
+                </div>
+                <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+                  <input type="checkbox" checked={apiKeys.hideQualFilter === true} onChange={e => setApiKeys({ ...apiKeys, hideQualFilter: e.target.checked })} style={{ transform: 'scale(1.4)' }} />
+                </label>
+              </div>
+            </div>
+
           </div>
         )}
 

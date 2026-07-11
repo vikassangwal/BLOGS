@@ -30,7 +30,7 @@ const QUALIFICATIONS = [
   'ITI / Diploma'
 ];
 
-export default function BlogListingClient() {
+export default function BlogListingClient({ uiConfig }: { uiConfig?: any }) {
   const searchParams = useSearchParams();
   const initialTag = searchParams ? searchParams.get('tag') || '' : '';
   const initialSearch = searchParams ? searchParams.get('search') || '' : '';
@@ -673,52 +673,56 @@ export default function BlogListingClient() {
         </div>
 
         {/* Filters */}
-        {showFilters && (
+        {showFilters && !(uiConfig?.hideStateFilter === true && uiConfig?.hideQualFilter === true) && (
           <div className="filter-panel">
             <div className="filter-header">
               <h3 className="filter-title">
                 Advanced Job Filters
               </h3>
               
-              <div className="state-select-wrapper">
-                <span style={{ opacity: 0.7 }}>📍</span>
-                <select 
-                  className="state-select"
-                  value={selectedState}
-                  onChange={(e) => {
-                    setSelectedState(e.target.value);
-                    localStorage.setItem('user_state', e.target.value);
-                    setPage(1);
-                  }}
-                >
-                  {INDIAN_STATES.map(s => (
-                    <option key={s} value={s} style={{ background: '#121212', color: '#fff' }}>
-                      {s === 'All India' ? 'National News (All India)' : s === 'Central Government' ? 'Central Government' : `${s}`}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            <div style={{ marginTop: '0.25rem' }}>
-              <p className="qual-section-title">
-                Education Qualification
-              </p>
-              <div className="qual-chips-row">
-                {QUALIFICATIONS.map(q => (
-                  <button
-                    key={q}
-                    onClick={() => {
-                      setSelectedQualification(q);
+              {!(uiConfig?.hideStateFilter === true) && (
+                <div className="state-select-wrapper">
+                  <span style={{ opacity: 0.7 }}>📍</span>
+                  <select 
+                    className="state-select"
+                    value={selectedState}
+                    onChange={(e) => {
+                      setSelectedState(e.target.value);
+                      localStorage.setItem('user_state', e.target.value);
                       setPage(1);
                     }}
-                    className={`qual-chip-btn ${selectedQualification === q ? 'active' : ''}`}
                   >
-                    {q === 'All Qualifications' ? 'All Qualifications' : q}
-                  </button>
-                ))}
-              </div>
+                    {INDIAN_STATES.map(s => (
+                      <option key={s} value={s} style={{ background: '#121212', color: '#fff' }}>
+                        {s === 'All India' ? 'National News (All India)' : s === 'Central Government' ? 'Central Government' : `${s}`}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
             </div>
+
+            {!(uiConfig?.hideQualFilter === true) && (
+              <div style={{ marginTop: '0.25rem' }}>
+                <p className="qual-section-title">
+                  Education Qualification
+                </p>
+                <div className="qual-chips-row">
+                  {QUALIFICATIONS.map(q => (
+                    <button
+                      key={q}
+                      onClick={() => {
+                        setSelectedQualification(q);
+                        setPage(1);
+                      }}
+                      className={`qual-chip-btn ${selectedQualification === q ? 'active' : ''}`}
+                    >
+                      {q === 'All Qualifications' ? 'All Qualifications' : q}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
 

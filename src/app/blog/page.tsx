@@ -70,10 +70,18 @@ export async function generateMetadata(
   };
 }
 
-export default function BlogListingPage() {
+export default async function BlogListingPage() {
+  const siteSettings = await prisma.siteSettings.findUnique({ where: { id: 'default' } });
+  let uiConfig: any = {};
+  try {
+    if (siteSettings?.aiApiKey?.startsWith('{')) {
+      uiConfig = JSON.parse(siteSettings.aiApiKey);
+    }
+  } catch (e) {}
+
   return (
     <Suspense fallback={<div style={{ minHeight: '100vh', background: 'var(--color-bg-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><span style={{ color: 'var(--color-text-secondary)' }}>Loading Page...</span></div>}>
-      <BlogListingClient />
+      <BlogListingClient uiConfig={uiConfig} />
     </Suspense>
   );
 }

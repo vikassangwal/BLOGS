@@ -72,11 +72,30 @@ export async function GET(req: Request) {
     for (const kw of keywords) {
       const existing = await prisma.autoBlogKeyword.findFirst({ where: { keyword: kw } });
       if (!existing) {
-        let niche = 'News';
+        let niche = 'Education & Career'; // Default
         const tLower = kw.toLowerCase();
-        if (tLower.includes('job') || tLower.includes('result') || tLower.includes('exam') || tLower.includes('admit') || tLower.includes('notification') || tLower.includes('vacancy') || tLower.includes('recruitment')) { niche = 'Education & Career'; }
-        else if (tLower.includes('tech') || tLower.includes('launch') || tLower.includes('ai') || tLower.includes('phone') || tLower.includes('app')) { niche = 'Technology'; }
-        else if (tLower.includes('finance') || tLower.includes('stock') || tLower.includes('budget') || tLower.includes('market') || tLower.includes('bank') || tLower.includes('earn')) { niche = 'Finance & Earning'; }
+        
+        // Strict matching words for Technology
+        const techKeywords = [
+          'tech', 'launch', 'ai', 'phone', 'app', 'mobile', 'gadget', 'samsung', 'redmi', 'iphone', 'oneplus', 
+          'realme', 'vivo', 'oppo', 'xiaomi', 'motorola', 'scam', 'cyber', '5g', 'telecom', 'jio', 'airtel', 
+          'vi ', 'gaming', 'bgmi', 'pubg', 'scooter', 'ev ', 'ola ev', 'charger', 'update',
+          'मोबाइल', 'फ़ोन', 'फ़ोन', 'लॉन्च', 'फीचर', 'स्कैम', 'धोखाधड़ी', 'स्मार्टफोन', 'तकनीक'
+        ];
+        
+        // Strict matching words for Finance & Earning
+        const financeKeywords = [
+          'finance', 'stock', 'budget', 'market', 'bank', 'earn', 'paisa', 'kisan', 'shram', 'epf', 'pf ', 
+          'ipo', 'gold', 'silver', 'lic', 'post office', 'scheme', 'yojana', 'loan', 'credit', 'pan card', 
+          'tax', 'invest', 'saving', 'mutual fund', 'rupee', 'paytm', 'gpay', 'phonepe',
+          'कमाई', 'पैसे', 'बजट', 'योजना', 'लोन', 'ऋण', 'ब्याज', 'खाता', 'पेंशन', 'सोना', 'चांदी', 'गोल्ड', 'रुपए'
+        ];
+
+        if (techKeywords.some(w => tLower.includes(w))) {
+          niche = 'Technology';
+        } else if (financeKeywords.some(w => tLower.includes(w))) {
+          niche = 'Finance & Earning';
+        }
         
         await prisma.autoBlogKeyword.create({ data: { keyword: kw, niche: niche } });
         added.push(kw);

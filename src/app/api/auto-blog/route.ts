@@ -335,33 +335,34 @@ export async function POST(request: NextRequest) {
       🚨 TOP TRUSTED INDIA SOURCES RULE 🚨: 
       Verify topics from India's Premier Official Portals: ssc.gov.in, upsc.gov.in, ibps.in, nta.ac.in, cbse.gov.in, ignou.ac.in, scholarships.gov.in, employmentnews.gov.in. DO NOT pick unverified rumors.
       
-      Respond ONLY with a valid JSON array of exactly 40 strings. No markdown.
-      Example format: ["Topic 1", "Topic 2", "Topic 3", ...]
+      Respond ONLY with a valid JSON array of exactly 40 objects, where each object has "keyword" (string) and "niche" (string). The "niche" must be exactly one of: "Education & Career", "Technology", or "Finance & Earning".
+      No markdown.
+      Example format:
+      [
+        { "keyword": "RPSC Programmer Recruitment 2026", "niche": "Education & Career" },
+        { "keyword": "Xiaomi Redmi Note 15 Pro India Launch Date", "niche": "Technology" },
+        { "keyword": "EPF Withdrawal Rules Changes 2026", "niche": "Finance & Earning" }
+      ]
       
       CRITICAL INSTRUCTION: If you do not have live internet access, you MUST STILL generate the JSON array using your existing knowledge of what typically happens in this month. Do NOT refuse to answer. Do NOT apologize. ONLY output the JSON array.`;
 
       let rModel = settings.researcherModel || '';
       const researcherConfigForTopic = buildAgentConfigs('researcher', 'openrouter', rModel || 'google/gemini-2.5-flash', 1500);
       try {
-        const topicRaw = await generateContentWithFallback(researcherConfigForTopic, "You output strict JSON arrays of 15 strings.", prompt);
-        const generatedTopics = parseAIJsonArray(topicRaw);
+        const topicRaw = await generateContentWithFallback(researcherConfigForTopic, "You output strict JSON arrays of 40 objects.", prompt);
+        const generatedTopics = parseTopicsFromAI(topicRaw);
         
         if (Array.isArray(generatedTopics) && generatedTopics.length > 0) {
           const shuffledTopics = generatedTopics.sort(() => Math.random() - 0.5);
           
-          const queueData = shuffledTopics.map((topic, i) => {
-             let niche = 'News';
-             const tLower = topic.toLowerCase();
-             if (tLower.includes('job') || tLower.includes('admit') || tLower.includes('notification') || tLower.includes('vacancy') || tLower.includes('recruitment') || tLower.includes('scholarship') || tLower.includes('counselling') || tLower.includes('apprentice') || tLower.includes('answer key') || tLower.includes('cutoff') || tLower.includes('cut-off')) {
-                niche = 'Education & Career';
-             } else if (tLower.includes('tech') || tLower.includes('launch') || tLower.includes('ai') || tLower.includes('phone') || tLower.includes('app')) {
-                niche = 'Technology';
-             } else if (tLower.includes('finance') || tLower.includes('stock') || tLower.includes('budget') || tLower.includes('market') || tLower.includes('bank')) {
-                niche = 'Finance & Earning';
-             }
+          const queueData = shuffledTopics.map((item: any) => {
+             if (!item) return null;
+             const topic = item.keyword;
+             const niche = item.niche;
 
              // 🚨 STRICT FILTER: Skip Education & Career topics that are Results, Syllabus, or Earning-related
              // These are excluded from auto-blogging per user requirement
+             const tLower = topic.toLowerCase();
              const isExcludedEduTopic = niche === 'Education & Career' && (
                tLower.includes('result') || tLower.includes('परिणाम') ||
                tLower.includes('syllabus') || tLower.includes('सिलेबस') ||
@@ -378,7 +379,7 @@ export async function POST(request: NextRequest) {
                 status: 'pending',
                 priority: 5
              };
-          }).filter(Boolean); // Remove null (excluded) entries
+          }).filter((item): item is { keyword: string; niche: string; status: string; priority: number } => item !== null);
 
           // Deduplicate: filter out keywords that already exist as pending
            const existingKeywords = await prisma.autoBlogKeyword.findMany({
@@ -1415,5 +1416,92 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     return NextResponse.json({ error: 'Failed to fetch auto-blog stats' }, { status: 500 });
   }
+}
+
+// ---------------------------------------------------------------------------
+// UTILITY: Robustly parse generated topics JSON array of objects or strings from AI
+// ---------------------------------------------------------------------------
+function parseTopicsFromAI(rawText: string): { keyword: string; niche: string }[] {
+  let cleaned = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
+  const firstBracket = cleaned.indexOf('[');
+  const lastBracket = cleaned.lastIndexOf(']');
+  if (firstBracket !== -1 && lastBracket !== -1) {
+    const bracketed = cleaned.substring(firstBracket, lastBracket + 1);
+    try {
+      const parsed = JSON.parse(bracketed);
+      if (Array.isArray(parsed)) {
+        return parsed.map(item => {
+          if (typeof item === 'string') {
+            return { keyword: item, niche: classifyTopicNiche(item) };
+          } else if (item && typeof item === 'object') {
+            const keyword = item.keyword || item.topic || '';
+            let niche = item.niche || item.category || '';
+            if (!['Education & Career', 'Technology', 'Finance & Earning'].includes(niche)) {
+              niche = classifyTopicNiche(keyword);
+            }
+            return { keyword, niche };
+          }
+          return null;
+        }).filter((item): item is { keyword: string; niche: string } => item !== null && item.keyword.length > 0);
+      }
+    } catch (e) {
+      console.warn("Failed to parse topics JSON, falling back to regex/line-based parser", e);
+    }
+  }
+
+  const items: { keyword: string; niche: string }[] = [];
+  const objRegex = /\{\s*"keyword"\s*:\s*"([^"]+)"\s*,\s*"niche"\s*:\s*"([^"]+)"\s*\}/g;
+  let match;
+  while ((match = objRegex.exec(cleaned)) !== null) {
+    items.push({ keyword: match[1], niche: match[2] });
+  }
+
+  if (items.length > 0) return items;
+
+  const strMatches: string[] = [];
+  const regex = /(?:"|')([^"'\r\n]+)(?:"|')/g;
+  let sMatch;
+  while ((sMatch = regex.exec(cleaned)) !== null) {
+    const val = sMatch[1].trim();
+    if (val && val.length > 2 && !val.includes('{') && !val.includes('}')) {
+      strMatches.push(val);
+    }
+  }
+
+  return strMatches.map(str => ({
+    keyword: str,
+    niche: classifyTopicNiche(str)
+  }));
+}
+
+// ---------------------------------------------------------------------------
+// UTILITY: Classify niche of a topic keyword based on keywords table mapping
+// ---------------------------------------------------------------------------
+function classifyTopicNiche(topic: string): string {
+  const tLower = topic.toLowerCase();
+  
+  // Strict matching words for Technology
+  const techKeywords = [
+    'tech', 'launch', 'ai', 'phone', 'app', 'mobile', 'gadget', 'samsung', 'redmi', 'iphone', 'oneplus', 
+    'realme', 'vivo', 'oppo', 'xiaomi', 'motorola', 'scam', 'cyber', '5g', 'telecom', 'jio', 'airtel', 
+    'vi ', 'gaming', 'bgmi', 'pubg', 'scooter', 'ev ', 'ola ev', 'charger', 'update',
+    'मोबाइल', 'फ़ोन', 'फ़ोन', 'लॉन्च', 'फीचर', 'स्कैम', 'धोखाधड़ी', 'स्मार्टफोन', 'तकनीक'
+  ];
+  
+  // Strict matching words for Finance & Earning
+  const financeKeywords = [
+    'finance', 'stock', 'budget', 'market', 'bank', 'earn', 'paisa', 'kisan', 'shram', 'epf', 'pf ', 
+    'ipo', 'gold', 'silver', 'lic', 'post office', 'scheme', 'yojana', 'loan', 'credit', 'pan card', 
+    'tax', 'invest', 'saving', 'mutual fund', 'rupee', 'paytm', 'gpay', 'phonepe',
+    'कमाई', 'पैसे', 'बजट', 'योजना', 'लोन', 'ऋण', 'ब्याज', 'खाता', 'पेंशन', 'सोना', 'चांदी', 'गोल्ड', 'रुपए'
+  ];
+
+  if (techKeywords.some(w => tLower.includes(w))) {
+    return 'Technology';
+  }
+  if (financeKeywords.some(w => tLower.includes(w))) {
+    return 'Finance & Earning';
+  }
+  return 'Education & Career'; // Default
 }
 

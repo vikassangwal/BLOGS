@@ -543,7 +543,7 @@ export async function POST(request: NextRequest) {
       let webSearchResults = '';
       try {
         const searchWords = targetTopic.split(' ').filter(w => w.length > 2).slice(0, 5).join(' ') || 'india';
-        const ddgUrl = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(searchWords + ' official notification apply link')}`;
+        const ddgUrl = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(searchWords + ' official notification apply link pdf')}`;
         const ddgRes = await fetchWithTimeout(ddgUrl, {
           headers: {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'

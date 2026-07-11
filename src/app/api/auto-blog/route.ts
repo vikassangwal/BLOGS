@@ -267,12 +267,15 @@ export async function POST(request: NextRequest) {
         if (dbKey) geminiKey = dbKey.apiKey;
       } catch(e){}
     }
-    if (geminiKey && geminiKey.length > 10) {
-      researcherConfig.configs.unshift({ provider: 'gemini', apiKey: geminiKey, model: 'gemini-1.5-flash' });
-    }
 
     const writerConfig = buildAgentConfigs('writer', 'openrouter', wModel || 'openai/gpt-4o-mini', 4000);
     const seoConfig = buildAgentConfigs('seo', 'openrouter', sModel || 'openai/gpt-4o-mini', 500);
+
+    if (geminiKey && geminiKey.length > 10) {
+      researcherConfig.configs.unshift({ provider: 'gemini', apiKey: geminiKey, model: 'gemini-2.5-flash' });
+      writerConfig.configs.unshift({ provider: 'gemini', apiKey: geminiKey, model: 'gemini-2.5-flash' });
+      seoConfig.configs.unshift({ provider: 'gemini', apiKey: geminiKey, model: 'gemini-2.5-flash' });
+    }
 
     // Verify at least one agent has a valid API key
     const hasResearcherKey = researcherConfig.configs.length > 0 && researcherConfig.configs[0].apiKey;

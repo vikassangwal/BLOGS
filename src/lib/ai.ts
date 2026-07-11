@@ -319,7 +319,7 @@ async function fetchWithRetry(url: string, options: any, maxRetries = 5): Promis
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
       const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 18000); // 18s timeout to ensure fallback attempts fit under Vercel 60s limit
+      const timeout = setTimeout(() => controller.abort(), 35000); // 35s timeout to ensure fallback attempts fit under Vercel 60s limit
 
       const res = await fetch(url, { ...options, signal: controller.signal });
       clearTimeout(timeout);
@@ -336,7 +336,7 @@ async function fetchWithRetry(url: string, options: any, maxRetries = 5): Promis
     } catch (error: any) {
       lastError = error;
       if (error.name === 'AbortError') {
-        if (attempt >= maxRetries - 1) throw new Error('AI API request timed out (18s)');
+        if (attempt >= maxRetries - 1) throw new Error('AI API request timed out (35s)');
         continue;
       }
       if (attempt >= maxRetries - 1) throw error;
@@ -456,12 +456,13 @@ export async function generateAIContent(
     const body = profile.buildBody(model, systemPrompt, userPrompt, maxTokens, enableSearch);
 
     try {
-      // Execute with retry
+      // Execute with retry: skip retries on Vercel or when multiple fallback configs are available
+      const maxAttempts = (process.env.VERCEL === '1' || process.env.NEXT_PUBLIC_VERCEL_ENV || configs.length > 1) ? 1 : 3;
       const res = await fetchWithRetry(url, {
         method: 'POST',
         headers,
         body: JSON.stringify(body)
-      });
+      }, maxAttempts);
 
       if (!res.ok) {
         throw new Error(await parseErrorResponse(res, profile.name));

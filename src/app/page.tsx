@@ -780,7 +780,7 @@ export default async function HomePage() {
       <div className="max-w-6xl w-full mx-auto mt-8 px-4 animate-slide-up">
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
           {/* Square 1: Active Jobs - links to Education & Career with filter panel open */}
-          <Link href="/blog?tag=Education%20%26%20Career&jobType=active_upcoming" className="block group">
+          <Link href="/blog?tag=Education%20%26%20Career&jobType=active" className="block group">
             <div className="glass-panel border border-emerald-500/10 hover:border-emerald-500/30 p-3 sm:p-4 rounded-xl sm:rounded-2xl text-center bg-white/5 transition-all hover:-translate-y-1 shadow-[0_4px_30px_rgba(16,185,129,0.05)]">
               <div className="text-xl sm:text-2xl mb-1">🔥</div>
               <div className="text-lg sm:text-2xl font-black text-emerald-400">{activeJobsCount}</div>
@@ -790,7 +790,7 @@ export default async function HomePage() {
           </Link>
 
           {/* Square 2: Upcoming Jobs - links with filter panel open */}
-          <Link href="/blog?tag=Education%20%26%20Career&jobType=active_upcoming" className="block group">
+          <Link href="/blog?tag=Education%20%26%20Career&jobType=upcoming" className="block group">
             <div className="glass-panel border border-cyan-500/10 hover:border-cyan-500/30 p-3 sm:p-4 rounded-xl sm:rounded-2xl text-center bg-white/5 transition-all hover:-translate-y-1 shadow-[0_4px_30px_rgba(34,211,238,0.05)]">
               <div className="text-xl sm:text-2xl mb-1">🚀</div>
               <div className="text-lg sm:text-2xl font-black text-cyan-400">{upcomingJobsCount}</div>

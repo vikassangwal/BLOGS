@@ -132,7 +132,7 @@ export async function GET(request: Request) {
       where.AND.push({ status });
     }
 
-    if (jobType === 'active_upcoming') {
+    if (jobType === 'active_upcoming' || jobType === 'active' || jobType === 'upcoming') {
       where.AND.push({
         OR: [
           { tags: { some: { tag: { name: { in: ['Job', 'Vacancy', 'Career', 'Upcoming Job', 'Agami'] } } } } },
@@ -260,16 +260,63 @@ export async function GET(request: Request) {
       delete where.AND;
     }
 
-    const [posts, total] = await Promise.all([
-      prisma.blogPost.findMany({
+    let posts: any[] = [];
+    let total = 0;
+    const isFilteringActiveOrUpcoming = jobType === 'active' || jobType === 'upcoming' || jobType === 'active_upcoming';
+
+    if (isFilteringActiveOrUpcoming) {
+      // Fetch all matches to perform post-query memory filtering safely (for precise pagination)
+      const allPosts = await prisma.blogPost.findMany({
         where,
         include: { author: { select: { name: true, email: true } }, tags: { include: { tag: true } } },
-        orderBy: [{ publishedAt: 'desc' }, { createdAt: 'desc' }],
-        skip: (page - 1) * limit,
-        take: limit,
-      }),
-      prisma.blogPost.count({ where }),
-    ]);
+        orderBy: [{ publishedAt: 'desc' }, { createdAt: 'desc' }]
+      });
+
+      // Filter in-memory by content structure
+      const filteredPosts = allPosts.filter((post: any) => {
+        if (!post.content) return false;
+        const content = post.content.toLowerCase();
+        
+        const hasNotification = content.includes('notification') || content.includes('विज्ञप्ति') || content.includes('अधिसूचना');
+        const hasApply = content.includes('apply') || content.includes('आवेदन');
+        const hasLink = content.includes('<a ');
+        
+        const isApplyNotStarted = content.includes('link active on') || 
+                                  content.includes('will be active') ||
+                                  content.includes('जल्द सक्रिय होगा') ||
+                                  content.includes('link will activate') ||
+                                  content.includes('to be announced') ||
+                                  content.includes('coming soon') ||
+                                  content.includes('जल्द उपलब्ध');
+
+        if (jobType === 'active') {
+          return hasNotification && hasApply && hasLink && !isApplyNotStarted;
+        } else if (jobType === 'upcoming') {
+          return hasNotification && hasLink && (!hasApply || isApplyNotStarted);
+        } else {
+          // active_upcoming matches either
+          const isActive = hasNotification && hasApply && hasLink && !isApplyNotStarted;
+          const isUpcoming = hasNotification && hasLink && (!hasApply || isApplyNotStarted);
+          return isActive || isUpcoming;
+        }
+      });
+
+      total = filteredPosts.length;
+      posts = filteredPosts.slice((page - 1) * limit, page * limit);
+    } else {
+      const [dbPosts, dbTotal] = await Promise.all([
+        prisma.blogPost.findMany({
+          where,
+          include: { author: { select: { name: true, email: true } }, tags: { include: { tag: true } } },
+          orderBy: [{ publishedAt: 'desc' }, { createdAt: 'desc' }],
+          skip: (page - 1) * limit,
+          take: limit,
+        }),
+        prisma.blogPost.count({ where }),
+      ]);
+      posts = dbPosts;
+      total = dbTotal;
+    }
 
     // Format tags array
     const formattedPosts = posts.map((p: any) => ({

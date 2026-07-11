@@ -539,7 +539,43 @@ export async function POST(request: NextRequest) {
         }
       }
 
-      const researchPrompt = getResearchPrompt(targetTopic, liveNewsContext, customSourceUrl, getCurrentDateStr(), getCurrentYearNum());
+      // Live web search using DuckDuckGo to obtain REAL official notification/apply URLs
+      let webSearchResults = '';
+      try {
+        const searchWords = targetTopic.split(' ').filter(w => w.length > 2).slice(0, 5).join(' ') || 'india';
+        const ddgUrl = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(searchWords + ' official notification apply link')}`;
+        const ddgRes = await fetchWithTimeout(ddgUrl, {
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+          }
+        }, 3000);
+        const ddgHtml = await ddgRes.text();
+        const resultsBlock = ddgHtml.split('result__body');
+        const links: string[] = [];
+        let count = 0;
+        for (let i = 1; i < resultsBlock.length && count < 4; i++) {
+          const block = resultsBlock[i];
+          const urlMatch = block.match(/href="[^"]*uddg=([^&"]+)/);
+          const titleMatch = block.match(/class="result__a"[^>]*>([\s\S]*?)<\/a>/);
+          const snippetMatch = block.match(/class="result__snippet"[^>]*>([\s\S]*?)<\/a>/) || block.match(/class="result__snippet"[^>]*>([\s\S]*?)<\/span>/);
+          if (urlMatch) {
+            const realUrl = decodeURIComponent(urlMatch[1].replace(/&amp;/g, '&'));
+            const title = titleMatch ? titleMatch[1].replace(/<[^>]*>/g, '').trim() : '';
+            const snippet = snippetMatch ? snippetMatch[1].replace(/<[^>]*>/g, '').trim() : '';
+            if (realUrl && !realUrl.includes('duckduckgo.com')) {
+              links.push(`- URL: ${realUrl}\n  Title: ${title}\n  Description: ${snippet}`);
+              count++;
+            }
+          }
+        }
+        if (links.length > 0) {
+          webSearchResults = "LIVE WEB SEARCH RESULTS (Use these exact URLs for Official Notification / Official Website / Apply portal - do NOT guess URLs):\n" + links.join('\n\n');
+        }
+      } catch (ddgErr) {
+        console.error("DDG live search extraction failed:", ddgErr);
+      }
+
+      const researchPrompt = getResearchPrompt(targetTopic, liveNewsContext + '\n\n' + webSearchResults, customSourceUrl, getCurrentDateStr(), getCurrentYearNum());
       
       try {
         researchData = await generateContentWithFallback(researcherConfig, "You are a factual research assistant.", researchPrompt);

@@ -82,11 +82,8 @@ async function getActiveJobs(limit: number = 8) {
     const posts = await prisma.blogPost.findMany({
       where: {
         status: 'Published',
-        tags: { some: { tag: { name: { in: ['Job', 'Vacancy', 'Career', 'Education & Career'] } } } },
+        tags: { some: { tag: { name: { in: ['Job', 'Vacancy', 'Career', 'Upcoming Job', 'Agami', 'Education & Career'] } } } },
         NOT: [
-          { tags: { some: { tag: { name: { in: ['Upcoming', 'Upcoming Job', 'Agami'] } } } } },
-          { title: { contains: 'संभावित' } },
-          { title: { contains: 'Upcoming' } },
           { title: { contains: 'Result', mode: 'insensitive' } },
           { title: { contains: 'परिणाम' } },
           { title: { contains: 'Admit Card', mode: 'insensitive' } },
@@ -156,14 +153,7 @@ async function getUpcomingJobs(limit: number = 8) {
     const posts = await prisma.blogPost.findMany({
       where: {
         status: 'Published',
-        tags: { some: { tag: { name: { in: ['Job', 'Vacancy', 'Career', 'Education & Career'] } } } },
-        OR: [
-          { tags: { some: { tag: { name: { in: ['Upcoming', 'Upcoming Job', 'Agami'] } } } } },
-          { title: { contains: 'संभावित' } },
-          { title: { contains: 'Upcoming', mode: 'insensitive' } },
-          { title: { contains: 'Expected', mode: 'insensitive' } },
-          { title: { contains: 'आगामी' } }
-        ],
+        tags: { some: { tag: { name: { in: ['Job', 'Vacancy', 'Career', 'Upcoming Job', 'Agami', 'Education & Career'] } } } },
         NOT: [
           { title: { contains: 'Result', mode: 'insensitive' } },
           { title: { contains: 'परिणाम' } },

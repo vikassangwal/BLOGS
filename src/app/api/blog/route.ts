@@ -190,6 +190,25 @@ export async function GET(request: Request) {
             { title: { contains: 'E-Shram', mode: 'insensitive' } }
           ]
         });
+      } else if (jobType === 'university') {
+        where.AND.push({
+          OR: [
+            { tags: { some: { tag: { name: { in: ['University', 'IGNOU', 'College', 'Admission', 'Counselling', 'State University'] } } } } },
+            { title: { contains: 'University', mode: 'insensitive' } },
+            { title: { contains: 'विश्वविद्यालय' } },
+            { title: { contains: 'College', mode: 'insensitive' } },
+            { title: { contains: 'Admission', mode: 'insensitive' } },
+            { title: { contains: 'IGNOU', mode: 'insensitive' } }
+          ]
+        });
+      } else if (jobType === 'scholarship') {
+        where.AND.push({
+          OR: [
+            { tags: { some: { tag: { name: { in: ['Scholarship', 'National Scholarship', 'Scholarships'] } } } } },
+            { title: { contains: 'Scholarship', mode: 'insensitive' } },
+            { title: { contains: 'छात्रवृत्ति' } }
+          ]
+        });
       } else if (jobType === 'news') {
         const sevenDaysAgo = new Date();
         sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
@@ -322,7 +341,7 @@ export async function GET(request: Request) {
 
     let posts: any[] = [];
     let total = 0;
-    const isCustomFilteringRequired = ['active', 'upcoming', 'active_upcoming', 'result', 'admit_card', 'scheme'].includes(jobType || '');
+    const isCustomFilteringRequired = ['active', 'upcoming', 'active_upcoming', 'result', 'admit_card', 'scheme', 'university', 'scholarship'].includes(jobType || '');
 
     if (isCustomFilteringRequired) {
       // Fetch all matches to perform post-query memory filtering safely (for precise pagination)
@@ -372,6 +391,16 @@ export async function GET(request: Request) {
           const hasOfficial = content.includes('official') || content.includes('आधिकारिक') || content.includes('website');
           const hasLink = content.includes('<a ');
           return hasOfficial && hasLink;
+        } else if (jobType === 'university') {
+          const hasOfficial = content.includes('official') || content.includes('आधिकारिक');
+          const hasNotification = content.includes('notification') || content.includes('विज्ञप्ति') || content.includes('अधिसूचना');
+          const hasLink = content.includes('<a ');
+          return hasOfficial && hasNotification && hasLink;
+        } else if (jobType === 'scholarship') {
+          const hasOfficial = content.includes('official') || content.includes('आधिकारिक') || content.includes('website');
+          const hasNotification = content.includes('notification') || content.includes('विज्ञप्ति') || content.includes('अधिसूचना');
+          const hasLink = content.includes('<a ');
+          return hasOfficial && hasNotification && hasLink;
         }
         return true;
       });

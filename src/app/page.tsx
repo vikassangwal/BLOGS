@@ -994,7 +994,7 @@ export default async function HomePage() {
               )}
             </div>
             <div className="bg-white/2 py-2 sm:py-2.5 px-3 sm:px-5 text-center border-t border-white/5">
-              <Link href="/blog?tag=Vacancy" className="text-[10px] sm:text-xs font-semibold text-emerald-400 hover:text-emerald-300 transition-colors">
+              <Link href="/blog?tag=Education%20%26%20Career&jobType=active" className="text-[10px] sm:text-xs font-semibold text-emerald-400 hover:text-emerald-300 transition-colors">
                 View All Jobs →
               </Link>
             </div>
@@ -1036,7 +1036,7 @@ export default async function HomePage() {
               )}
             </div>
             <div className="bg-white/2 py-2 sm:py-2.5 px-3 sm:px-5 text-center border-t border-white/5">
-              <Link href="/blog?tag=Upcoming" className="text-[10px] sm:text-xs font-semibold text-sky-400 hover:text-sky-300 transition-colors">
+              <Link href="/blog?tag=Education%20%26%20Career&jobType=upcoming" className="text-[10px] sm:text-xs font-semibold text-sky-400 hover:text-sky-300 transition-colors">
                 View All Upcoming →
               </Link>
             </div>
@@ -1078,7 +1078,7 @@ export default async function HomePage() {
               )}
             </div>
             <div className="bg-white/2 py-2 sm:py-2.5 px-3 sm:px-5 text-center border-t border-white/5">
-              <Link href="/blog?tag=Admit%20Card" className="text-[10px] sm:text-xs font-semibold text-blue-400 hover:text-blue-300 transition-colors">
+              <Link href="/blog?tag=Education%20%26%20Career&jobType=admit_card" className="text-[10px] sm:text-xs font-semibold text-blue-400 hover:text-blue-300 transition-colors">
                 View Admit Cards →
               </Link>
             </div>
@@ -1120,7 +1120,7 @@ export default async function HomePage() {
               )}
             </div>
             <div className="bg-white/2 py-2 sm:py-2.5 px-3 sm:px-5 text-center border-t border-white/5">
-              <Link href="/blog?tag=Results" className="text-[10px] sm:text-xs font-semibold text-purple-400 hover:text-purple-300 transition-colors">
+              <Link href="/blog?tag=Education%20%26%20Career&jobType=result" className="text-[10px] sm:text-xs font-semibold text-purple-400 hover:text-purple-300 transition-colors">
                 View All Results →
               </Link>
             </div>
@@ -1162,7 +1162,7 @@ export default async function HomePage() {
               )}
             </div>
             <div className="bg-white/2 py-2 sm:py-2.5 px-3 sm:px-5 text-center border-t border-white/5">
-              <Link href="/blog?tag=University" className="text-[10px] sm:text-xs font-semibold text-cyan-400 hover:text-cyan-300 transition-colors">
+              <Link href="/blog?tag=Education%20%26%20Career&jobType=university" className="text-[10px] sm:text-xs font-semibold text-cyan-400 hover:text-cyan-300 transition-colors">
                 View University →
               </Link>
             </div>
@@ -1204,7 +1204,7 @@ export default async function HomePage() {
               )}
             </div>
             <div className="bg-white/2 py-2 sm:py-2.5 px-3 sm:px-5 text-center border-t border-white/5">
-              <Link href="/blog?tag=Scheme" className="text-[10px] sm:text-xs font-semibold text-orange-400 hover:text-orange-300 transition-colors">
+              <Link href="/blog?tag=Finance%20%26%20Earning&jobType=scheme" className="text-[10px] sm:text-xs font-semibold text-orange-400 hover:text-orange-300 transition-colors">
                 View All Schemes →
               </Link>
             </div>
@@ -1246,7 +1246,7 @@ export default async function HomePage() {
               )}
             </div>
             <div className="bg-white/2 py-2 sm:py-2.5 px-3 sm:px-5 text-center border-t border-white/5">
-              <Link href="/blog?tag=Scholarship" className="text-[10px] sm:text-xs font-semibold text-yellow-400 hover:text-yellow-300 transition-colors">
+              <Link href="/blog?tag=Education%20%26%20Career&jobType=scholarship" className="text-[10px] sm:text-xs font-semibold text-yellow-400 hover:text-yellow-300 transition-colors">
                 View Scholarship →
               </Link>
             </div>
@@ -1456,7 +1456,7 @@ export default async function HomePage() {
               )}
             </div>
             <div className="bg-white/2 py-2 sm:py-2.5 px-3 sm:px-5 text-center border-t border-white/5">
-              <Link href="/blog?tag=News" className="text-[10px] sm:text-xs font-semibold text-gray-300 hover:text-white transition-colors">
+              <Link href="/blog?tag=News&jobType=news" className="text-[10px] sm:text-xs font-semibold text-gray-300 hover:text-white transition-colors">
                 View All News →
               </Link>
             </div>

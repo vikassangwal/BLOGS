@@ -26,7 +26,7 @@ import { getAIConfig, generateAIContent, AIConfig, parseAIJsonArray } from '@/li
 import { getResearchPrompt } from '@/lib/services/autoBlogPrompts';
 import { verifyToken } from '@/lib/auth';
 import { waitUntil } from '@vercel/functions';
-import { validateAndFixLinks } from '@/lib/link-validator';
+import { validateAndFixLinks, cleanTableOfContents } from '@/lib/link-validator';
 // Code cleaned up: RSS fetching is no longer used.
 export const maxDuration = 60; // Vercel hobby allows up to 60s for serverless
 export const dynamic = 'force-dynamic'; // Prevent caching for cron jobs
@@ -1138,11 +1138,9 @@ YOUR SEO SKILLS:
       }
     }
 
-    // -------------------------------------------------------------
-    // VALIDATE & FIX ALL LINKS (Official Portal Enforcement)
-    // -------------------------------------------------------------
     articleHtml = validateAndFixLinks(articleHtml, targetTopic);
-    console.log('✅ Link validation complete for:', targetTopic);
+    articleHtml = cleanTableOfContents(articleHtml, articleTitle);
+    console.log('✅ Link validation & TOC cleaning complete for:', targetTopic);
 
     // -------------------------------------------------------------
     // AUTOMATIC SUB-TAG DETECTION FOR HOME GRID COLUMNS

@@ -301,3 +301,50 @@ export function isOfficialDomain(url: string): boolean {
     return false;
   }
 }
+
+/**
+ * Cleans the Table of Contents in the generated article HTML.
+ * Removes self-referential links (pointing to TOC itself) and redundant links (pointing to the main title).
+ */
+export function cleanTableOfContents(html: string, title: string): string {
+  if (!html) return html;
+
+  // Find all list items (<li>)
+  const liRegex = /<li[^>]*>([\s\S]*?)<\/li>/gi;
+  
+  let cleanedHtml = html.replace(liRegex, (liMatch, liContent) => {
+    // Check if there is an anchor link inside the list item
+    const anchorMatch = liContent.match(/<a\s+[^>]*?href=["']([^"']+)["'][^>]*?>([\s\S]*?)<\/a>/i);
+    if (anchorMatch) {
+      const href = anchorMatch[1];
+      const linkText = anchorMatch[2].replace(/<[^>]+>/g, '').trim();
+      
+      const lowerText = linkText.toLowerCase();
+      const lowerHref = href.toLowerCase();
+      const lowerTitle = title.toLowerCase();
+      
+      // 1. Remove Table of Contents references
+      if (lowerText.includes('table of contents') || 
+          lowerText.includes('विषय सूची') || 
+          lowerText.includes('toc') ||
+          lowerHref === '#table-of-contents' ||
+          lowerHref === '#toc' ||
+          lowerHref === '#') {
+        return ''; // remove this item
+      }
+      
+      // 2. Remove main title references
+      if (lowerTitle.includes(lowerText) || lowerText.includes(lowerTitle)) {
+        if (linkText.length > 20) {
+          return ''; // remove this item
+        }
+      }
+    }
+    return liMatch;
+  });
+
+  // Clean up any empty <ul></ul> or <ol></ol> if we emptied them
+  cleanedHtml = cleanedHtml.replace(/<(ul|ol)[^>]*>\s*<\/\1>/gi, '');
+
+  return cleanedHtml;
+}

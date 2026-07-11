@@ -293,10 +293,7 @@ export default function BlogPostClient({ post, ads, relatedPosts, whatsappLinks,
     contentHtml = contentHtml.substring(0, charLimit) + '...';
   }
 
-  const isJobPost = post.tags?.some((t: any) => {
-    const name = typeof t === 'string' ? t : (t.tag?.name || t.name);
-    return ['Vacancy', 'Career', 'Job', 'Job Digest'].includes(name);
-  });
+  const isJobPost = false; // Disabled at user request to hide Quick Job Facts block
 
   const getApplyLink = (html: string) => {
     const match = html.match(/<a\s+[^>]*href=["'](https?:\/\/[^"']+)["'][^>]*>([\s\S]*?)<\/a>/i);
@@ -468,8 +465,8 @@ export default function BlogPostClient({ post, ads, relatedPosts, whatsappLinks,
         <div style={{ position: 'relative' }} className="blog-content">
           <AdBanner dataAdSlot="top-content" />
 
-          {/* Table of Contents (TOC) Box */}
-          {toc.length > 2 && (
+          {/* Table of Contents (TOC) Box - Disabled at user request */}
+          {false && toc.length > 2 && (
             <div style={{
               background: 'rgba(255, 255, 255, 0.02)',
               border: '1px solid var(--color-border)',

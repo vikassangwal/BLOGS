@@ -574,7 +574,6 @@ ${links}
     - NO EMPTY/BROKEN LINKS: कभी भी "#", "", "[LINK_NOT_AVAILABLE]" या खाली href का प्रयोग न करें।
     - DESCRIPTIVE ANCHOR TEXT: "यहाँ क्लिक करें" की जगह "SSC आधिकारिक वेबसाइट (ssc.gov.in)" जैसा स्पष्ट एंकर टेक्स्ट लिखें।
     - EXTERNAL LINK ATTRIBUTES: सभी बाहरी लिंक्स में अनिवार्य रूप से target="_blank" rel="noopener noreferrer" लगाएं।
-    - TOC JUMP LINK MATCHING: Table of Contents के जांप लिंक्स (#id) की ID नीचे दिए गए H2 टैग्स की ID से 100% मैच होनी चाहिए।
     - OFFICIAL PDF & GAZETTE PARSING: जानकारी केवल आधिकारिक विज्ञापनों (.gov.in / .nic.in) से लें।
     - SELECTION FLOWCHART & PET TABLE: चयन प्रक्रिया (Selection Stages) और शारीरिक दक्षता (PET/PST) की साफ़ अलग तालिका बनाएं।
     - PAY LEVEL & IN-HAND CALCULATOR: 7th CPC का Exact Pay Level (Level 1 से 14) और सम्भावित इन-हैंड सैलरी दोनों दर्शाएं।
@@ -660,9 +659,6 @@ ${links}
           <ul> (4 बुलेट पॉइंट्स में पूरी ख़बर का सार) </ul>
         </div>
         
-        <h2>Table of Contents</h2>
-        Clickable jump links वाला Table of Contents बनाओ।
-
         <h2 id="what-happened">क्या हुआ? (What Happened)</h2>
         ख़बर की पूरी Detail — कब, कहाँ, कैसे, किसने। अगर कोई सरकारी आदेश, संख्या, या डेटा हो तो HTML Table में दो।
         
@@ -709,9 +705,6 @@ ${links}
           </ul>
         </div>
         
-        <h2>Table of Contents</h2>
-        Create a clickable HTML Table of Contents with jump links (e.g. <a href="#what-is">).
-
         <h2 id="what-is">यह क्या है और कैसे काम करता है? (What is it?)</h2>
         Explain the concept easily (e.g. What is Affiliate Marketing / What is this app?).
         
@@ -764,9 +757,6 @@ ${links}
           <ul> (Write 4 highly crisp bullet points: Processor, Battery, Camera, Price. Web Stories ready). </ul>
         </div>
         
-        <h2>Table of Contents</h2>
-        Create a clickable HTML Table of Contents with jump links (e.g. <a href="#design">) to IDs on the <h2> tags below.
-
         <h2 id="design">Display, Camera & Processor (डिस्प्ले, कैमरा और प्रोसेसर)</h2>
         Create a clean HTML Table summarizing the Display, Camera, and Processor. DO NOT USE PARAGRAPHS HERE.
         Example Rows: Display Size, Refresh Rate, Rear Camera, Front Camera, Processor, Antutu Score.
@@ -831,9 +821,6 @@ ${links}
           <ul> (Write 4 highly crisp bullet points summarizing the entire post. Ready for Google Web Stories). </ul>
         </div>
         
-        <h2>Table of Contents</h2>
-        Create a clickable HTML Table of Contents with jump links (e.g. <a href="#quick-info">) linking to IDs on the <h2> tags below.
-
         <h2 id="quick-info">Quick Information (संक्षिप्त विवरण)</h2>
         Create ONE HTML Table combining department name, post name, and total posts.
         | विवरण | जानकारी | (Convert to HTML Table)
@@ -928,7 +915,6 @@ CRITICAL INSTRUCTIONS (PENALTY FOR FAILING):
 7. HTML ONLY: ALWAYS output clean HTML (<h2>, <p>, <table>, <ul>). NEVER output Markdown.
 
 YOUR SEO SKILLS:
-- You create clickable Table of Contents with jump links (<a href="#id">).
 - You provide official homepage links when exact URLs are unknown.
 - Every article ends with a WhatsApp/Telegram share CTA and an engaging comment hook.`;
 

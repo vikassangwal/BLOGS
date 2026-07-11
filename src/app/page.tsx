@@ -441,13 +441,16 @@ async function getTechNews(limit: number = 8) {
           { title: { contains: '5G' } }
         ],
         NOT: [
-          { tags: { some: { tag: { name: { in: ['Job', 'Vacancy', 'Scheme', 'Scholarship', 'Admit Card', 'Result', 'University', 'Finance', 'Banking', 'Earning'] } } } } },
+          { tags: { some: { tag: { name: { in: ['Job', 'Vacancy', 'Scheme', 'Scholarship', 'Admit Card', 'Result', 'University', 'Finance', 'Banking', 'Earning', 'Education & Career', 'Career'] } } } } },
           { title: { contains: 'Job', mode: 'insensitive' } },
           { title: { contains: 'Vacancy', mode: 'insensitive' } },
           { title: { contains: 'भर्ती' } },
           { title: { contains: 'Admit Card', mode: 'insensitive' } },
           { title: { contains: 'Scheme', mode: 'insensitive' } },
-          { title: { contains: 'योजना' } }
+          { title: { contains: 'योजना' } },
+          { title: { contains: 'Recruitment', mode: 'insensitive' } },
+          { title: { contains: 'Naukri', mode: 'insensitive' } },
+          { title: { contains: 'नौकरी' } }
         ]
       },
       orderBy: { publishedAt: 'desc' },
@@ -481,11 +484,16 @@ async function getFinanceNews(limit: number = 8) {
           { title: { contains: 'RBI' } }
         ],
         NOT: [
-          { tags: { some: { tag: { name: { in: ['Job', 'Vacancy', 'Scheme', 'Scholarship', 'Admit Card', 'Result', 'University', 'Technology', 'Tech', 'Mobile', 'Smartphone', 'Earning', 'Course'] } } } } },
+          { tags: { some: { tag: { name: { in: ['Job', 'Vacancy', 'Scheme', 'Scholarship', 'Admit Card', 'Result', 'University', 'Technology', 'Tech', 'Mobile', 'Smartphone', 'Earning', 'Course', 'Education & Career', 'Career'] } } } } },
           { title: { contains: 'Job', mode: 'insensitive' } },
           { title: { contains: 'भर्ती' } },
           { title: { contains: 'Scheme', mode: 'insensitive' } },
-          { title: { contains: 'योजना' } }
+          { title: { contains: 'योजना' } },
+          { title: { contains: 'Admit Card', mode: 'insensitive' } },
+          { title: { contains: 'Result', mode: 'insensitive' } },
+          { title: { contains: 'Recruitment', mode: 'insensitive' } },
+          { title: { contains: 'Naukri', mode: 'insensitive' } },
+          { title: { contains: 'नौकरी' } }
         ]
       },
       orderBy: { publishedAt: 'desc' },
@@ -514,11 +522,16 @@ async function getEarningCourses(limit: number = 8) {
           { title: { contains: 'Skill', mode: 'insensitive' } }
         ],
         NOT: [
-          { tags: { some: { tag: { name: { in: ['Job', 'Vacancy', 'Scheme', 'Scholarship', 'Admit Card', 'Result', 'University', 'Technology', 'Finance', 'Bank'] } } } } },
+          { tags: { some: { tag: { name: { in: ['Job', 'Vacancy', 'Scheme', 'Scholarship', 'Admit Card', 'Result', 'University', 'Technology', 'Finance', 'Bank', 'Education & Career', 'Career'] } } } } },
           { title: { contains: 'Job', mode: 'insensitive' } },
           { title: { contains: 'भर्ती' } },
           { title: { contains: 'Scheme', mode: 'insensitive' } },
-          { title: { contains: 'योजना' } }
+          { title: { contains: 'योजना' } },
+          { title: { contains: 'Admit Card', mode: 'insensitive' } },
+          { title: { contains: 'Result', mode: 'insensitive' } },
+          { title: { contains: 'Recruitment', mode: 'insensitive' } },
+          { title: { contains: 'Naukri', mode: 'insensitive' } },
+          { title: { contains: 'नौकरी' } }
         ]
       },
       orderBy: { publishedAt: 'desc' },
@@ -589,11 +602,49 @@ async function getOtherNews(limit: number = 8) {
             'School', 'Board Exam', 'CBSE', 'State Board'
           ] } } } } },
           { title: { contains: 'Job', mode: 'insensitive' } },
+          { title: { contains: 'Vacancy', mode: 'insensitive' } },
+          { title: { contains: 'भर्ती' } },
+          { title: { contains: 'नौकरी' } },
+          { title: { contains: 'Recruitment', mode: 'insensitive' } },
+          { title: { contains: 'Naukri', mode: 'insensitive' } },
           { title: { contains: 'Admit Card', mode: 'insensitive' } },
+          { title: { contains: 'प्रवेश पत्र' } },
           { title: { contains: 'Result', mode: 'insensitive' } },
+          { title: { contains: 'परिणाम' } },
+          { title: { contains: 'Answer Key', mode: 'insensitive' } },
+          { title: { contains: 'उत्तर कुंजी' } },
+          { title: { contains: 'Syllabus', mode: 'insensitive' } },
+          { title: { contains: 'सिलेबस' } },
+          { title: { contains: 'Admission', mode: 'insensitive' } },
+          { title: { contains: 'प्रवेश' } },
+          { title: { contains: 'दाखिला' } },
           { title: { contains: 'Scheme', mode: 'insensitive' } },
+          { title: { contains: 'योजना' } },
           { title: { contains: 'Scholarship', mode: 'insensitive' } },
-          { title: { contains: 'University', mode: 'insensitive' } }
+          { title: { contains: 'छात्रवृत्ति' } },
+          { title: { contains: 'University', mode: 'insensitive' } },
+          { title: { contains: 'विश्वविद्यालय' } },
+          { title: { contains: 'College', mode: 'insensitive' } },
+          { title: { contains: 'IGNOU', mode: 'insensitive' } },
+          { title: { contains: 'Course', mode: 'insensitive' } },
+          { title: { contains: 'कोर्स' } },
+          { title: { contains: 'Earning', mode: 'insensitive' } },
+          { title: { contains: 'कमाई' } },
+          { title: { contains: 'Finance', mode: 'insensitive' } },
+          { title: { contains: 'Bank', mode: 'insensitive' } },
+          { title: { contains: 'EPFO', mode: 'insensitive' } },
+          { title: { contains: 'Gold', mode: 'insensitive' } },
+          { title: { contains: 'Silver', mode: 'insensitive' } },
+          { title: { contains: 'सोना' } },
+          { title: { contains: 'चांदी' } },
+          { title: { contains: 'दाम' } },
+          { title: { contains: 'भाव' } },
+          { title: { contains: 'Budget', mode: 'insensitive' } },
+          { title: { contains: 'बजट' } },
+          { title: { contains: 'Technology', mode: 'insensitive' } },
+          { title: { contains: 'Tech', mode: 'insensitive' } },
+          { title: { contains: 'Smartphone', mode: 'insensitive' } },
+          { title: { contains: 'Mobile', mode: 'insensitive' } }
         ]
       },
       orderBy: { publishedAt: 'desc' },

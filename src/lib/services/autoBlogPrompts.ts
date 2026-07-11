@@ -94,12 +94,12 @@ This is an Education & Career blog. You MUST verify the following BEFORE providi
       
      🚨 URL PATH TOKENS CLASSIFICATION RULES:
      To correctly identify and sort the live search URLs, inspect the URL string characters and path tokens:
-     - **Apply Online / Registration Link:** Look for URLs containing "apply", "registration", "register", "login", "sso", "otr", "onlineform", "candidate", "recruitment", or "enrollment".
-     - **Download Notification PDF Link:** Look for URLs containing "notification", "advertisement", "notice", "storage/advertisement_item", "uploads", "rules", or "pdf" AND ending in ".pdf".
-     - **Admit Card / Hall Ticket Link:** Look for URLs containing "admitcard", "admit-card", "hallticket", "hall-ticket", "callletter", or "call-letter".
-     - **Syllabus / Exam Pattern Link:** Look for URLs containing "syllabus", "syllabus_item", or "exam-pattern" (usually ending in .pdf).
-     - **Result / Scorecard Link:** Look for URLs containing "result", "cutoff", "cut-off", "meritlist", "scorecard", "marks", or "selected-list".
-     - **Exam Calendar Link:** Look for URLs containing "calendar", "schedule", "exam-schedule", "time-table", or "timetable".
+     - **Apply Online / Registration Link:** Look for URLs containing "apply", "registration", "register", "login", "sso", "otr", "onlineform", "candidate", "recruitment", "enrollment", "application", "candidate-portal", "dashboard", "sign-up", "signup", "sign-in", "signin", "new-registration", "apply-online", "online-application", "post-selection", or "form-submission".
+     - **Download Notification PDF Link:** Look for URLs containing "notification", "advertisement", "notice", "storage/advertisement_item", "uploads", "rules", "advt", "advertisement-detail", "vacancy-circular", "circular", "press-release", "pressnote", "press-note", "public-notice", "detail-advertisement", "bulletin", "information-bulletin", or "pdf" AND ending in ".pdf".
+     - **Admit Card / Hall Ticket Link:** Look for URLs containing "admitcard", "admit-card", "hallticket", "hall-ticket", "callletter", "call-letter", "exam-city", "city-intimation", "admit-card-download", "download-admitcard", "hall-ticket-download", or "login-admitcard".
+     - **Syllabus / Exam Pattern Link:** Look for URLs containing "syllabus", "syllabus_item", "exam-pattern", or "syllabus-pdf" (usually ending in ".pdf").
+     - **Result / Scorecard Link:** Look for URLs containing "result", "cutoff", "cut-off", "meritlist", "scorecard", "marks", "selected-list", "selection-list", "shortlisted-candidates", "merit-list", "declared-result", "result-sheet", "cutoff-marks", "final-answer-key", "answerkey", or "answer-key".
+     - **Exam Calendar Link:** Look for URLs containing "calendar", "schedule", "exam-schedule", "time-table", "timetable", "exam-calendar", "annual-calendar", "tentative-dates", or "exam-schedule".
 
   🚨 FOR TECHNOLOGY & GADGETS: You MUST provide COMPLETE specs! (Processor, RAM/Storage, Camera MP, Battery/Charging, Display size). You MUST provide the exact Price in India and the Launch Date.
   🚨 FOR TELECOM/APPS: Provide exact old vs new recharge prices, validity, or step-by-step guide to use the new App feature.

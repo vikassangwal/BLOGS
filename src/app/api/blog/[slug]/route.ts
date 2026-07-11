@@ -95,7 +95,7 @@ export async function PUT(request: NextRequest, context: { params: Promise<{ slu
     const params = await context.params;
 
     const body = await request.json();
-    const { title, subtitle, slug, content, excerpt, featuredImage, status, seoTitle, seoDescription, seoKeywords, socialCaptions, socialHashtags, scheduledAt, tags = [], doubleLinkFormat } = body;
+    const { title, subtitle, slug, content, excerpt, featuredImage, status, seoTitle, seoDescription, seoKeywords, socialCaptions, socialHashtags, scheduledAt, tags = [], doubleLinkFormat, gridBox } = body;
 
     const existingPost = await prisma.blogPost.findUnique({
       where: { slug: params.slug },
@@ -127,6 +127,7 @@ export async function PUT(request: NextRequest, context: { params: Promise<{ slu
       seoKeywords,
       socialCaptions,
       socialHashtags,
+      gridBox: gridBox === undefined ? undefined : (gridBox || null),
       translations: {
         ...(existingPost.translations as any || {}),
         metadata: {

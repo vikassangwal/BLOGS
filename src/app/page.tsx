@@ -82,28 +82,40 @@ async function getActiveJobs(limit: number = 8) {
     const posts = await prisma.blogPost.findMany({
       where: {
         status: 'Published',
-        tags: { some: { tag: { name: { in: ['Job', 'Vacancy', 'Career', 'Upcoming Job', 'Agami', 'Education & Career'] } } } },
-        NOT: [
-          { title: { contains: 'Result', mode: 'insensitive' } },
-          { title: { contains: 'परिणाम' } },
-          { title: { contains: 'Admit Card', mode: 'insensitive' } },
-          { title: { contains: 'प्रवेश पत्र' } },
-          { title: { contains: 'Answer Key', mode: 'insensitive' } },
-          { title: { contains: 'उत्तर कुंजी' } },
-          { title: { contains: 'एक नज़र में' } },
-          { title: { contains: 'Key Highlights' } },
-          { title: { contains: 'Highlights', mode: 'insensitive' } },
-          { title: { contains: 'Question Paper', mode: 'insensitive' } },
-          { title: { contains: 'प्रश्न पत्र' } },
-          { title: { contains: 'Syllabus', mode: 'insensitive' } },
-          { title: { contains: 'सिलेबस' } },
-          { title: { contains: 'Admission', mode: 'insensitive' } },
-          { title: { contains: 'दाखिला' } },
-          { title: { contains: 'प्रवेश' } }
-        ],
         OR: [
-          { expiryDate: { gte: now } },
-          { expiryDate: null }
+          { gridBox: 'latestJobs' },
+          {
+            AND: [
+              { OR: [ { gridBox: null }, { gridBox: '' } ] },
+              { tags: { some: { tag: { name: { in: ['Job', 'Vacancy', 'Career', 'Upcoming Job', 'Agami', 'Education & Career'] } } } } },
+              {
+                NOT: [
+                  { title: { contains: 'Result', mode: 'insensitive' } },
+                  { title: { contains: 'परिणाम' } },
+                  { title: { contains: 'Admit Card', mode: 'insensitive' } },
+                  { title: { contains: 'प्रवेश पत्र' } },
+                  { title: { contains: 'Answer Key', mode: 'insensitive' } },
+                  { title: { contains: 'उत्तर कुंजी' } },
+                  { title: { contains: 'एक नज़र में' } },
+                  { title: { contains: 'Key Highlights' } },
+                  { title: { contains: 'Highlights', mode: 'insensitive' } },
+                  { title: { contains: 'Question Paper', mode: 'insensitive' } },
+                  { title: { contains: 'प्रश्न पत्र' } },
+                  { title: { contains: 'Syllabus', mode: 'insensitive' } },
+                  { title: { contains: 'सिलेबस' } },
+                  { title: { contains: 'Admission', mode: 'insensitive' } },
+                  { title: { contains: 'दाखिला' } },
+                  { title: { contains: 'प्रवेश' } }
+                ]
+              },
+              {
+                OR: [
+                  { expiryDate: { gte: now } },
+                  { expiryDate: null }
+                ]
+              }
+            ]
+          }
         ]
       },
       orderBy: { publishedAt: 'desc' },
@@ -115,12 +127,14 @@ async function getActiveJobs(limit: number = 8) {
         publishedAt: true,
         createdAt: true,
         expiryDate: true,
-        content: true
+        content: true,
+        gridBox: true
       }
     });
 
     // Filter to ensure both Apply and Notification links/text exist and application has started
     const filteredPosts = posts.filter(post => {
+      if (post.gridBox === 'latestJobs') return true;
       if (!post.content) return false;
       const content = post.content.toLowerCase();
       
@@ -141,7 +155,7 @@ async function getActiveJobs(limit: number = 8) {
       return hasNotification && hasApply && hasLink && !isApplyNotStarted;
     });
 
-    return filteredPosts.slice(0, limit).map(({ content, ...rest }) => rest);
+    return filteredPosts.slice(0, limit).map(({ content, gridBox, ...rest }) => rest);
   } catch (err) {
     console.error('Failed to fetch active jobs:', err);
     return [];
@@ -153,24 +167,34 @@ async function getUpcomingJobs(limit: number = 8) {
     const posts = await prisma.blogPost.findMany({
       where: {
         status: 'Published',
-        tags: { some: { tag: { name: { in: ['Job', 'Vacancy', 'Career', 'Upcoming Job', 'Agami', 'Education & Career'] } } } },
-        NOT: [
-          { title: { contains: 'Result', mode: 'insensitive' } },
-          { title: { contains: 'परिणाम' } },
-          { title: { contains: 'Admit Card', mode: 'insensitive' } },
-          { title: { contains: 'प्रवेश पत्र' } },
-          { title: { contains: 'Answer Key', mode: 'insensitive' } },
-          { title: { contains: 'उत्तर कुंजी' } },
-          { title: { contains: 'एक नज़र में' } },
-          { title: { contains: 'Key Highlights' } },
-          { title: { contains: 'Highlights', mode: 'insensitive' } },
-          { title: { contains: 'Question Paper', mode: 'insensitive' } },
-          { title: { contains: 'प्रश्न पत्र' } },
-          { title: { contains: 'Syllabus', mode: 'insensitive' } },
-          { title: { contains: 'सिलेबस' } },
-          { title: { contains: 'Admission', mode: 'insensitive' } },
-          { title: { contains: 'दाखिला' } },
-          { title: { contains: 'प्रवेश' } }
+        OR: [
+          { gridBox: 'upcomingJobs' },
+          {
+            AND: [
+              { OR: [ { gridBox: null }, { gridBox: '' } ] },
+              { tags: { some: { tag: { name: { in: ['Job', 'Vacancy', 'Career', 'Upcoming Job', 'Agami', 'Education & Career'] } } } } },
+              {
+                NOT: [
+                  { title: { contains: 'Result', mode: 'insensitive' } },
+                  { title: { contains: 'परिणाम' } },
+                  { title: { contains: 'Admit Card', mode: 'insensitive' } },
+                  { title: { contains: 'प्रवेश पत्र' } },
+                  { title: { contains: 'Answer Key', mode: 'insensitive' } },
+                  { title: { contains: 'उत्तर कुंजी' } },
+                  { title: { contains: 'एक नज़र में' } },
+                  { title: { contains: 'Key Highlights' } },
+                  { title: { contains: 'Highlights', mode: 'insensitive' } },
+                  { title: { contains: 'Question Paper', mode: 'insensitive' } },
+                  { title: { contains: 'प्रश्न पत्र' } },
+                  { title: { contains: 'Syllabus', mode: 'insensitive' } },
+                  { title: { contains: 'सिलेबस' } },
+                  { title: { contains: 'Admission', mode: 'insensitive' } },
+                  { title: { contains: 'दाखिला' } },
+                  { title: { contains: 'प्रवेश' } }
+                ]
+              }
+            ]
+          }
         ]
       },
       orderBy: { publishedAt: 'desc' },
@@ -182,11 +206,13 @@ async function getUpcomingJobs(limit: number = 8) {
         publishedAt: true,
         createdAt: true,
         expiryDate: true,
-        content: true
+        content: true,
+        gridBox: true
       }
     });
 
     const filteredPosts = posts.filter(post => {
+      if (post.gridBox === 'upcomingJobs') return true;
       if (!post.content) return false;
       const content = post.content.toLowerCase();
       
@@ -206,7 +232,7 @@ async function getUpcomingJobs(limit: number = 8) {
       return hasNotification && hasLink && (!hasApply || isApplyNotStarted);
     });
 
-    return filteredPosts.slice(0, limit).map(({ content, ...rest }) => rest);
+    return filteredPosts.slice(0, limit).map(({ content, gridBox, ...rest }) => rest);
   } catch (err) {
     console.error('Failed to fetch upcoming jobs:', err);
     return [];
@@ -220,16 +246,24 @@ async function getAdmitCards(limit: number = 8) {
       where: {
         status: 'Published',
         OR: [
-          { expiryDate: { gte: now } },
-          { expiryDate: null }
-        ],
-        AND: [
+          { gridBox: 'admitCards' },
           {
-            OR: [
-              { tags: { some: { tag: { name: { in: ['Admit Card'] } } } } },
-              { title: { contains: 'Admit Card', mode: 'insensitive' } },
-              { title: { contains: 'प्रवेश पत्र' } },
-              { title: { contains: 'Exam City', mode: 'insensitive' } }
+            AND: [
+              { OR: [ { gridBox: null }, { gridBox: '' } ] },
+              {
+                OR: [
+                  { expiryDate: { gte: now } },
+                  { expiryDate: null }
+                ]
+              },
+              {
+                OR: [
+                  { tags: { some: { tag: { name: { in: ['Admit Card'] } } } } },
+                  { title: { contains: 'Admit Card', mode: 'insensitive' } },
+                  { title: { contains: 'प्रवेश पत्र' } },
+                  { title: { contains: 'Exam City', mode: 'insensitive' } }
+                ]
+              }
             ]
           }
         ]
@@ -243,11 +277,13 @@ async function getAdmitCards(limit: number = 8) {
         publishedAt: true,
         createdAt: true,
         expiryDate: true,
-        content: true
+        content: true,
+        gridBox: true
       }
     });
 
     const filteredPosts = posts.filter(post => {
+      if (post.gridBox === 'admitCards') return true;
       if (!post.content) return false;
       const content = post.content.toLowerCase();
       
@@ -258,7 +294,7 @@ async function getAdmitCards(limit: number = 8) {
       return hasNotificationOrOfficial && hasAdmitCardOrCity && hasLink;
     });
 
-    return filteredPosts.slice(0, limit).map(({ content, ...rest }) => rest);
+    return filteredPosts.slice(0, limit).map(({ content, gridBox, ...rest }) => rest);
   } catch (err) {
     console.error('Failed to fetch admit cards:', err);
     return [];
@@ -271,17 +307,27 @@ async function getResultsAndSyllabus(limit: number = 8) {
       where: {
         status: 'Published',
         OR: [
-          { tags: { some: { tag: { name: { in: ['Results', 'Result', 'Answer Key', 'Syllabus', 'Cutoff', 'Merit List'] } } } } },
-          { title: { contains: 'Result', mode: 'insensitive' } },
-          { title: { contains: 'परिणाम' } },
-          { title: { contains: 'Answer Key', mode: 'insensitive' } },
-          { title: { contains: 'उत्तर कुंजी' } },
-          { title: { contains: 'Syllabus', mode: 'insensitive' } },
-          { title: { contains: 'सिलेबस' } },
-          { title: { contains: 'Cutoff', mode: 'insensitive' } },
-          { title: { contains: 'कटऑफ' } },
-          { title: { contains: 'Merit List', mode: 'insensitive' } },
-          { title: { contains: 'मेरिट लिस्ट' } }
+          { gridBox: 'examResults' },
+          {
+            AND: [
+              { OR: [ { gridBox: null }, { gridBox: '' } ] },
+              {
+                OR: [
+                  { tags: { some: { tag: { name: { in: ['Results', 'Result', 'Answer Key', 'Syllabus', 'Cutoff', 'Merit List'] } } } } },
+                  { title: { contains: 'Result', mode: 'insensitive' } },
+                  { title: { contains: 'परिणाम' } },
+                  { title: { contains: 'Answer Key', mode: 'insensitive' } },
+                  { title: { contains: 'उत्तर कुंजी' } },
+                  { title: { contains: 'Syllabus', mode: 'insensitive' } },
+                  { title: { contains: 'सिलेबस' } },
+                  { title: { contains: 'Cutoff', mode: 'insensitive' } },
+                  { title: { contains: 'कटऑफ' } },
+                  { title: { contains: 'Merit List', mode: 'insensitive' } },
+                  { title: { contains: 'मेरिट लिस्ट' } }
+                ]
+              }
+            ]
+          }
         ]
       },
       orderBy: { publishedAt: 'desc' },
@@ -293,11 +339,13 @@ async function getResultsAndSyllabus(limit: number = 8) {
         publishedAt: true,
         createdAt: true,
         expiryDate: true,
-        content: true
+        content: true,
+        gridBox: true
       }
     });
 
     const filteredPosts = posts.filter(post => {
+      if (post.gridBox === 'examResults') return true;
       if (!post.content) return false;
       const content = post.content.toLowerCase();
       
@@ -306,7 +354,7 @@ async function getResultsAndSyllabus(limit: number = 8) {
       return hasLink;
     });
 
-    return filteredPosts.slice(0, limit).map(({ content, ...rest }) => rest);
+    return filteredPosts.slice(0, limit).map(({ content, gridBox, ...rest }) => rest);
   } catch (err) {
     console.error('Failed to fetch results and syllabus:', err);
     return [];
@@ -319,22 +367,33 @@ async function getUniversityUpdates(limit: number = 8) {
       where: {
         status: 'Published',
         OR: [
-          { tags: { some: { tag: { name: { in: ['University', 'IGNOU', 'College', 'Admission', 'Counselling', 'State University'] } } } } },
-          { title: { contains: 'University', mode: 'insensitive' } },
-          { title: { contains: 'विश्वविद्यालय' } },
-          { title: { contains: 'College', mode: 'insensitive' } },
-          { title: { contains: 'Admission', mode: 'insensitive' } },
-          { title: { contains: 'IGNOU', mode: 'insensitive' } }
+          { gridBox: 'university' },
+          {
+            AND: [
+              { OR: [ { gridBox: null }, { gridBox: '' } ] },
+              {
+                OR: [
+                  { tags: { some: { tag: { name: { in: ['University', 'IGNOU', 'College', 'Admission', 'Counselling', 'State University'] } } } } },
+                  { title: { contains: 'University', mode: 'insensitive' } },
+                  { title: { contains: 'विश्वविद्यालय' } },
+                  { title: { contains: 'College', mode: 'insensitive' } },
+                  { title: { contains: 'Admission', mode: 'insensitive' } },
+                  { title: { contains: 'IGNOU', mode: 'insensitive' } }
+                ]
+              }
+            ]
+          }
         ]
       },
       orderBy: { publishedAt: 'desc' },
       take: 200,
       select: {
-        id: true, title: true, slug: true, publishedAt: true, createdAt: true, expiryDate: true, content: true
+        id: true, title: true, slug: true, publishedAt: true, createdAt: true, expiryDate: true, content: true, gridBox: true
       }
     });
 
     const filteredPosts = posts.filter(post => {
+      if (post.gridBox === 'university') return true;
       if (!post.content) return false;
       const content = post.content.toLowerCase();
       
@@ -345,7 +404,7 @@ async function getUniversityUpdates(limit: number = 8) {
       return hasOfficial && hasNotification && hasLink;
     });
 
-    return filteredPosts.slice(0, limit).map(({ content, ...rest }) => rest);
+    return filteredPosts.slice(0, limit).map(({ content, gridBox, ...rest }) => rest);
   } catch (err) {
     console.error('Failed to fetch university updates:', err);
     return [];
@@ -358,22 +417,33 @@ async function getSchemes(limit: number = 8) {
       where: {
         status: 'Published',
         OR: [
-          { tags: { some: { tag: { name: { in: ['Scheme', 'Yojana', 'Government Scheme', 'PM Kisan', 'Sarkari Yojana'] } } } } },
-          { title: { contains: 'Scheme', mode: 'insensitive' } },
-          { title: { contains: 'Yojana', mode: 'insensitive' } },
-          { title: { contains: 'योजना' } },
-          { title: { contains: 'PM Kisan', mode: 'insensitive' } },
-          { title: { contains: 'E-Shram', mode: 'insensitive' } }
+          { gridBox: 'scheme' },
+          {
+            AND: [
+              { OR: [ { gridBox: null }, { gridBox: '' } ] },
+              {
+                OR: [
+                  { tags: { some: { tag: { name: { in: ['Scheme', 'Yojana', 'Government Scheme', 'PM Kisan', 'Sarkari Yojana'] } } } } },
+                  { title: { contains: 'Scheme', mode: 'insensitive' } },
+                  { title: { contains: 'Yojana', mode: 'insensitive' } },
+                  { title: { contains: 'योजना' } },
+                  { title: { contains: 'PM Kisan', mode: 'insensitive' } },
+                  { title: { contains: 'E-Shram', mode: 'insensitive' } }
+                ]
+              }
+            ]
+          }
         ]
       },
       orderBy: { publishedAt: 'desc' },
       take: 200,
       select: {
-        id: true, title: true, slug: true, publishedAt: true, createdAt: true, expiryDate: true, content: true
+        id: true, title: true, slug: true, publishedAt: true, createdAt: true, expiryDate: true, content: true, gridBox: true
       }
     });
 
     const filteredPosts = posts.filter(post => {
+      if (post.gridBox === 'scheme') return true;
       if (!post.content) return false;
       const content = post.content.toLowerCase();
       
@@ -383,7 +453,7 @@ async function getSchemes(limit: number = 8) {
       return hasOfficial && hasLink;
     });
 
-    return filteredPosts.slice(0, limit).map(({ content, ...rest }) => rest);
+    return filteredPosts.slice(0, limit).map(({ content, gridBox, ...rest }) => rest);
   } catch (err) {
     console.error('Failed to fetch schemes:', err);
     return [];
@@ -396,19 +466,30 @@ async function getScholarships(limit: number = 8) {
       where: {
         status: 'Published',
         OR: [
-          { tags: { some: { tag: { name: { in: ['Scholarship', 'National Scholarship', 'Scholarships'] } } } } },
-          { title: { contains: 'Scholarship', mode: 'insensitive' } },
-          { title: { contains: 'छात्रवृत्ति' } }
+          { gridBox: 'scholarship' },
+          {
+            AND: [
+              { OR: [ { gridBox: null }, { gridBox: '' } ] },
+              {
+                OR: [
+                  { tags: { some: { tag: { name: { in: ['Scholarship', 'National Scholarship', 'Scholarships'] } } } } },
+                  { title: { contains: 'Scholarship', mode: 'insensitive' } },
+                  { title: { contains: 'छात्रवृत्ति' } }
+                ]
+              }
+            ]
+          }
         ]
       },
       orderBy: { publishedAt: 'desc' },
       take: 200,
       select: {
-        id: true, title: true, slug: true, publishedAt: true, createdAt: true, expiryDate: true, content: true
+        id: true, title: true, slug: true, publishedAt: true, createdAt: true, expiryDate: true, content: true, gridBox: true
       }
     });
 
     const filteredPosts = posts.filter(post => {
+      if (post.gridBox === 'scholarship') return true;
       if (!post.content) return false;
       const content = post.content.toLowerCase();
       
@@ -419,7 +500,7 @@ async function getScholarships(limit: number = 8) {
       return hasOfficial && hasNotification && hasLink;
     });
 
-    return filteredPosts.slice(0, limit).map(({ content, ...rest }) => rest);
+    return filteredPosts.slice(0, limit).map(({ content, gridBox, ...rest }) => rest);
   } catch (err) {
     console.error('Failed to fetch scholarships:', err);
     return [];
@@ -432,25 +513,37 @@ async function getTechNews(limit: number = 8) {
       where: {
         status: 'Published',
         OR: [
-          { tags: { some: { tag: { name: { in: ['Technology', 'Smartphone', 'Tech', 'Mobile', 'Gadget'] } } } } },
-          { title: { contains: 'Technology', mode: 'insensitive' } },
-          { title: { contains: 'Tech', mode: 'insensitive' } },
-          { title: { contains: 'Mobile', mode: 'insensitive' } },
-          { title: { contains: 'Smartphone', mode: 'insensitive' } },
-          { title: { contains: 'लॉन्च' } },
-          { title: { contains: '5G' } }
-        ],
-        NOT: [
-          { tags: { some: { tag: { name: { in: ['Job', 'Vacancy', 'Scheme', 'Scholarship', 'Admit Card', 'Result', 'University', 'Finance', 'Banking', 'Earning', 'Education & Career', 'Career'] } } } } },
-          { title: { contains: 'Job', mode: 'insensitive' } },
-          { title: { contains: 'Vacancy', mode: 'insensitive' } },
-          { title: { contains: 'भर्ती' } },
-          { title: { contains: 'Admit Card', mode: 'insensitive' } },
-          { title: { contains: 'Scheme', mode: 'insensitive' } },
-          { title: { contains: 'योजना' } },
-          { title: { contains: 'Recruitment', mode: 'insensitive' } },
-          { title: { contains: 'Naukri', mode: 'insensitive' } },
-          { title: { contains: 'नौकरी' } }
+          { gridBox: 'tech' },
+          {
+            AND: [
+              { OR: [ { gridBox: null }, { gridBox: '' } ] },
+              {
+                OR: [
+                  { tags: { some: { tag: { name: { in: ['Technology', 'Smartphone', 'Tech', 'Mobile', 'Gadget'] } } } } },
+                  { title: { contains: 'Technology', mode: 'insensitive' } },
+                  { title: { contains: 'Tech', mode: 'insensitive' } },
+                  { title: { contains: 'Mobile', mode: 'insensitive' } },
+                  { title: { contains: 'Smartphone', mode: 'insensitive' } },
+                  { title: { contains: 'लॉन्च' } },
+                  { title: { contains: '5G' } }
+                ]
+              },
+              {
+                NOT: [
+                  { tags: { some: { tag: { name: { in: ['Job', 'Vacancy', 'Scheme', 'Scholarship', 'Admit Card', 'Result', 'University', 'Finance', 'Banking', 'Earning', 'Education & Career', 'Career'] } } } } },
+                  { title: { contains: 'Job', mode: 'insensitive' } },
+                  { title: { contains: 'Vacancy', mode: 'insensitive' } },
+                  { title: { contains: 'भर्ती' } },
+                  { title: { contains: 'Admit Card', mode: 'insensitive' } },
+                  { title: { contains: 'Scheme', mode: 'insensitive' } },
+                  { title: { contains: 'योजना' } },
+                  { title: { contains: 'Recruitment', mode: 'insensitive' } },
+                  { title: { contains: 'Naukri', mode: 'insensitive' } },
+                  { title: { contains: 'नौकरी' } }
+                ]
+              }
+            ]
+          }
         ]
       },
       orderBy: { publishedAt: 'desc' },
@@ -472,28 +565,40 @@ async function getFinanceNews(limit: number = 8) {
       where: {
         status: 'Published',
         OR: [
-          { tags: { some: { tag: { name: { in: ['Finance', 'Banking', 'Bank', 'LIC', 'EPFO', 'Savings'] } } } } },
-          { title: { contains: 'Finance', mode: 'insensitive' } },
-          { title: { contains: 'Bank', mode: 'insensitive' } },
-          { title: { contains: 'LIC', mode: 'insensitive' } },
-          { title: { contains: 'EPFO', mode: 'insensitive' } },
-          { title: { contains: 'Budget', mode: 'insensitive' } },
-          { title: { contains: 'बजट' } },
-          { title: { contains: 'सोना' } },
-          { title: { contains: 'Gold', mode: 'insensitive' } },
-          { title: { contains: 'RBI' } }
-        ],
-        NOT: [
-          { tags: { some: { tag: { name: { in: ['Job', 'Vacancy', 'Scheme', 'Scholarship', 'Admit Card', 'Result', 'University', 'Technology', 'Tech', 'Mobile', 'Smartphone', 'Earning', 'Course', 'Education & Career', 'Career'] } } } } },
-          { title: { contains: 'Job', mode: 'insensitive' } },
-          { title: { contains: 'भर्ती' } },
-          { title: { contains: 'Scheme', mode: 'insensitive' } },
-          { title: { contains: 'योजना' } },
-          { title: { contains: 'Admit Card', mode: 'insensitive' } },
-          { title: { contains: 'Result', mode: 'insensitive' } },
-          { title: { contains: 'Recruitment', mode: 'insensitive' } },
-          { title: { contains: 'Naukri', mode: 'insensitive' } },
-          { title: { contains: 'नौकरी' } }
+          { gridBox: 'finance' },
+          {
+            AND: [
+              { OR: [ { gridBox: null }, { gridBox: '' } ] },
+              {
+                OR: [
+                  { tags: { some: { tag: { name: { in: ['Finance', 'Banking', 'Bank', 'LIC', 'EPFO', 'Savings'] } } } } },
+                  { title: { contains: 'Finance', mode: 'insensitive' } },
+                  { title: { contains: 'Bank', mode: 'insensitive' } },
+                  { title: { contains: 'LIC', mode: 'insensitive' } },
+                  { title: { contains: 'EPFO', mode: 'insensitive' } },
+                  { title: { contains: 'Budget', mode: 'insensitive' } },
+                  { title: { contains: 'बजट' } },
+                  { title: { contains: 'सोना' } },
+                  { title: { contains: 'Gold', mode: 'insensitive' } },
+                  { title: { contains: 'RBI' } }
+                ]
+              },
+              {
+                NOT: [
+                  { tags: { some: { tag: { name: { in: ['Job', 'Vacancy', 'Scheme', 'Scholarship', 'Admit Card', 'Result', 'University', 'Technology', 'Tech', 'Mobile', 'Smartphone', 'Earning', 'Course', 'Education & Career', 'Career'] } } } } },
+                  { title: { contains: 'Job', mode: 'insensitive' } },
+                  { title: { contains: 'भर्ती' } },
+                  { title: { contains: 'Scheme', mode: 'insensitive' } },
+                  { title: { contains: 'योजना' } },
+                  { title: { contains: 'Admit Card', mode: 'insensitive' } },
+                  { title: { contains: 'Result', mode: 'insensitive' } },
+                  { title: { contains: 'Recruitment', mode: 'insensitive' } },
+                  { title: { contains: 'Naukri', mode: 'insensitive' } },
+                  { title: { contains: 'नौकरी' } }
+                ]
+              }
+            ]
+          }
         ]
       },
       orderBy: { publishedAt: 'desc' },
@@ -515,23 +620,35 @@ async function getEarningCourses(limit: number = 8) {
       where: {
         status: 'Published',
         OR: [
-          { tags: { some: { tag: { name: { in: ['Earning', 'Online Earning', 'Course', 'Free Course'] } } } } },
-          { title: { contains: 'Earning', mode: 'insensitive' } },
-          { title: { contains: 'Course', mode: 'insensitive' } },
-          { title: { contains: 'कमाई' } },
-          { title: { contains: 'Skill', mode: 'insensitive' } }
-        ],
-        NOT: [
-          { tags: { some: { tag: { name: { in: ['Job', 'Vacancy', 'Scheme', 'Scholarship', 'Admit Card', 'Result', 'University', 'Technology', 'Finance', 'Bank', 'Education & Career', 'Career'] } } } } },
-          { title: { contains: 'Job', mode: 'insensitive' } },
-          { title: { contains: 'भर्ती' } },
-          { title: { contains: 'Scheme', mode: 'insensitive' } },
-          { title: { contains: 'योजना' } },
-          { title: { contains: 'Admit Card', mode: 'insensitive' } },
-          { title: { contains: 'Result', mode: 'insensitive' } },
-          { title: { contains: 'Recruitment', mode: 'insensitive' } },
-          { title: { contains: 'Naukri', mode: 'insensitive' } },
-          { title: { contains: 'नौकरी' } }
+          { gridBox: 'earning' },
+          {
+            AND: [
+              { OR: [ { gridBox: null }, { gridBox: '' } ] },
+              {
+                OR: [
+                  { tags: { some: { tag: { name: { in: ['Earning', 'Online Earning', 'Course', 'Free Course'] } } } } },
+                  { title: { contains: 'Earning', mode: 'insensitive' } },
+                  { title: { contains: 'Course', mode: 'insensitive' } },
+                  { title: { contains: 'कमाई' } },
+                  { title: { contains: 'Skill', mode: 'insensitive' } }
+                ]
+              },
+              {
+                NOT: [
+                  { tags: { some: { tag: { name: { in: ['Job', 'Vacancy', 'Scheme', 'Scholarship', 'Admit Card', 'Result', 'University', 'Technology', 'Finance', 'Bank', 'Education & Career', 'Career'] } } } } },
+                  { title: { contains: 'Job', mode: 'insensitive' } },
+                  { title: { contains: 'भर्ती' } },
+                  { title: { contains: 'Scheme', mode: 'insensitive' } },
+                  { title: { contains: 'योजना' } },
+                  { title: { contains: 'Admit Card', mode: 'insensitive' } },
+                  { title: { contains: 'Result', mode: 'insensitive' } },
+                  { title: { contains: 'Recruitment', mode: 'insensitive' } },
+                  { title: { contains: 'Naukri', mode: 'insensitive' } },
+                  { title: { contains: 'नौकरी' } }
+                ]
+              }
+            ]
+          }
         ]
       },
       orderBy: { publishedAt: 'desc' },
@@ -553,31 +670,44 @@ async function getSchoolNews(limit: number = 8) {
       where: {
         status: 'Published',
         OR: [
-          { tags: { some: { tag: { name: { in: ['School', 'Board Exam', 'CBSE', 'State Board'] } } } } },
-          { title: { contains: 'School', mode: 'insensitive' } },
-          { title: { contains: 'स्कूल' } },
-          { title: { contains: 'Board', mode: 'insensitive' } },
-          { title: { contains: 'बोर्ड' } },
-          { title: { contains: 'Class 10', mode: 'insensitive' } },
-          { title: { contains: 'Class 12', mode: 'insensitive' } }
-        ],
-        NOT: [
-          { tags: { some: { tag: { name: { in: ['Job', 'Vacancy', 'Scheme', 'Scholarship', 'University', 'Finance', 'Earning'] } } } } }
+          { gridBox: 'school' },
+          {
+            AND: [
+              { OR: [ { gridBox: null }, { gridBox: '' } ] },
+              {
+                OR: [
+                  { tags: { some: { tag: { name: { in: ['School', 'Board Exam', 'CBSE', 'State Board'] } } } } },
+                  { title: { contains: 'School', mode: 'insensitive' } },
+                  { title: { contains: 'स्कूल' } },
+                  { title: { contains: 'Board', mode: 'insensitive' } },
+                  { title: { contains: 'बोर्ड' } },
+                  { title: { contains: 'Class 10', mode: 'insensitive' } },
+                  { title: { contains: 'Class 12', mode: 'insensitive' } }
+                ]
+              },
+              {
+                NOT: [
+                  { tags: { some: { tag: { name: { in: ['Job', 'Vacancy', 'Scheme', 'Scholarship', 'University', 'Finance', 'Earning'] } } } } }
+                ]
+              }
+            ]
+          }
         ]
       },
       orderBy: { publishedAt: 'desc' },
       take: 200,
-      select: { id: true, title: true, slug: true, publishedAt: true, createdAt: true, expiryDate: true, content: true }
+      select: { id: true, title: true, slug: true, publishedAt: true, createdAt: true, expiryDate: true, content: true, gridBox: true }
     });
     
     const filtered = posts.filter(post => {
+      if (post.gridBox === 'school') return true;
       if (!post.content) return false;
       const c = post.content.toLowerCase();
       const hasOfficial = c.includes('official') || c.includes('आधिकारिक');
       const hasLink = c.includes('<a ');
       return hasOfficial && hasLink;
     });
-    return filtered.slice(0, limit).map(({content, ...rest}) => rest);
+    return filtered.slice(0, limit).map(({content, gridBox, ...rest}) => rest);
   } catch(e) { return []; }
 }
 
@@ -588,63 +718,73 @@ async function getOtherNews(limit: number = 8) {
     const posts = await prisma.blogPost.findMany({
       where: {
         status: 'Published',
-        publishedAt: { gte: sevenDaysAgo },
-        NOT: [
-          { tags: { some: { tag: { name: { in: [
-            'Job', 'Vacancy', 'Career', 'Education & Career', 'Upcoming', 'Upcoming Job', 'Agami',
-            'Admit Card', 'Results', 'Result', 'Answer Key', 'Syllabus', 'Cutoff', 'Merit List',
-            'Scheme', 'Yojana', 'Government Scheme', 'PM Kisan', 'Sarkari Yojana',
-            'Scholarship', 'National Scholarship', 'Scholarships',
-            'University', 'IGNOU', 'College', 'Admission', 'Counselling', 'State University',
-            'Technology', 'Smartphone', 'Tech', 'Mobile', 'Gadget',
-            'Finance', 'Banking', 'Bank', 'LIC', 'EPFO', 'Savings',
-            'Earning', 'Online Earning', 'Course', 'Free Course',
-            'School', 'Board Exam', 'CBSE', 'State Board'
-          ] } } } } },
-          { title: { contains: 'Job', mode: 'insensitive' } },
-          { title: { contains: 'Vacancy', mode: 'insensitive' } },
-          { title: { contains: 'भर्ती' } },
-          { title: { contains: 'नौकरी' } },
-          { title: { contains: 'Recruitment', mode: 'insensitive' } },
-          { title: { contains: 'Naukri', mode: 'insensitive' } },
-          { title: { contains: 'Admit Card', mode: 'insensitive' } },
-          { title: { contains: 'प्रवेश पत्र' } },
-          { title: { contains: 'Result', mode: 'insensitive' } },
-          { title: { contains: 'परिणाम' } },
-          { title: { contains: 'Answer Key', mode: 'insensitive' } },
-          { title: { contains: 'उत्तर कुंजी' } },
-          { title: { contains: 'Syllabus', mode: 'insensitive' } },
-          { title: { contains: 'सिलेबस' } },
-          { title: { contains: 'Admission', mode: 'insensitive' } },
-          { title: { contains: 'प्रवेश' } },
-          { title: { contains: 'दाखिला' } },
-          { title: { contains: 'Scheme', mode: 'insensitive' } },
-          { title: { contains: 'योजना' } },
-          { title: { contains: 'Scholarship', mode: 'insensitive' } },
-          { title: { contains: 'छात्रवृत्ति' } },
-          { title: { contains: 'University', mode: 'insensitive' } },
-          { title: { contains: 'विश्वविद्यालय' } },
-          { title: { contains: 'College', mode: 'insensitive' } },
-          { title: { contains: 'IGNOU', mode: 'insensitive' } },
-          { title: { contains: 'Course', mode: 'insensitive' } },
-          { title: { contains: 'कोर्स' } },
-          { title: { contains: 'Earning', mode: 'insensitive' } },
-          { title: { contains: 'कमाई' } },
-          { title: { contains: 'Finance', mode: 'insensitive' } },
-          { title: { contains: 'Bank', mode: 'insensitive' } },
-          { title: { contains: 'EPFO', mode: 'insensitive' } },
-          { title: { contains: 'Gold', mode: 'insensitive' } },
-          { title: { contains: 'Silver', mode: 'insensitive' } },
-          { title: { contains: 'सोना' } },
-          { title: { contains: 'चांदी' } },
-          { title: { contains: 'दाम' } },
-          { title: { contains: 'भाव' } },
-          { title: { contains: 'Budget', mode: 'insensitive' } },
-          { title: { contains: 'बजट' } },
-          { title: { contains: 'Technology', mode: 'insensitive' } },
-          { title: { contains: 'Tech', mode: 'insensitive' } },
-          { title: { contains: 'Smartphone', mode: 'insensitive' } },
-          { title: { contains: 'Mobile', mode: 'insensitive' } }
+        OR: [
+          { gridBox: 'other' },
+          {
+            AND: [
+              { OR: [ { gridBox: null }, { gridBox: '' } ] },
+              { publishedAt: { gte: sevenDaysAgo } },
+              {
+                NOT: [
+                  { tags: { some: { tag: { name: { in: [
+                    'Job', 'Vacancy', 'Career', 'Education & Career', 'Upcoming', 'Upcoming Job', 'Agami',
+                    'Admit Card', 'Results', 'Result', 'Answer Key', 'Syllabus', 'Cutoff', 'Merit List',
+                    'Scheme', 'Yojana', 'Government Scheme', 'PM Kisan', 'Sarkari Yojana',
+                    'Scholarship', 'National Scholarship', 'Scholarships',
+                    'University', 'IGNOU', 'College', 'Admission', 'Counselling', 'State University',
+                    'Technology', 'Smartphone', 'Tech', 'Mobile', 'Gadget',
+                    'Finance', 'Banking', 'Bank', 'LIC', 'EPFO', 'Savings',
+                    'Earning', 'Online Earning', 'Course', 'Free Course',
+                    'School', 'Board Exam', 'CBSE', 'State Board'
+                  ] } } } } },
+                  { title: { contains: 'Job', mode: 'insensitive' } },
+                  { title: { contains: 'Vacancy', mode: 'insensitive' } },
+                  { title: { contains: 'भर्ती' } },
+                  { title: { contains: 'नौकरी' } },
+                  { title: { contains: 'Recruitment', mode: 'insensitive' } },
+                  { title: { contains: 'Naukri', mode: 'insensitive' } },
+                  { title: { contains: 'Admit Card', mode: 'insensitive' } },
+                  { title: { contains: 'प्रवेश पत्र' } },
+                  { title: { contains: 'Result', mode: 'insensitive' } },
+                  { title: { contains: 'परिणाम' } },
+                  { title: { contains: 'Answer Key', mode: 'insensitive' } },
+                  { title: { contains: 'उत्तर कुंजी' } },
+                  { title: { contains: 'Syllabus', mode: 'insensitive' } },
+                  { title: { contains: 'सिलेबस' } },
+                  { title: { contains: 'Admission', mode: 'insensitive' } },
+                  { title: { contains: 'प्रवेश' } },
+                  { title: { contains: 'दाखिला' } },
+                  { title: { contains: 'Scheme', mode: 'insensitive' } },
+                  { title: { contains: 'योजना' } },
+                  { title: { contains: 'Scholarship', mode: 'insensitive' } },
+                  { title: { contains: 'छात्रवृत्ति' } },
+                  { title: { contains: 'University', mode: 'insensitive' } },
+                  { title: { contains: 'विश्वविद्यालय' } },
+                  { title: { contains: 'College', mode: 'insensitive' } },
+                  { title: { contains: 'IGNOU', mode: 'insensitive' } },
+                  { title: { contains: 'Course', mode: 'insensitive' } },
+                  { title: { contains: 'कोर्स' } },
+                  { title: { contains: 'Earning', mode: 'insensitive' } },
+                  { title: { contains: 'कमाई' } },
+                  { title: { contains: 'Finance', mode: 'insensitive' } },
+                  { title: { contains: 'Bank', mode: 'insensitive' } },
+                  { title: { contains: 'EPFO', mode: 'insensitive' } },
+                  { title: { contains: 'Gold', mode: 'insensitive' } },
+                  { title: { contains: 'Silver', mode: 'insensitive' } },
+                  { title: { contains: 'सोना' } },
+                  { title: { contains: 'चांदी' } },
+                  { title: { contains: 'दाम' } },
+                  { title: { contains: 'भाव' } },
+                  { title: { contains: 'Budget', mode: 'insensitive' } },
+                  { title: { contains: 'बजट' } },
+                  { title: { contains: 'Technology', mode: 'insensitive' } },
+                  { title: { contains: 'Tech', mode: 'insensitive' } },
+                  { title: { contains: 'Smartphone', mode: 'insensitive' } },
+                  { title: { contains: 'Mobile', mode: 'insensitive' } }
+                ]
+              }
+            ]
+          }
         ]
       },
       orderBy: { publishedAt: 'desc' },

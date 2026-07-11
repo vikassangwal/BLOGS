@@ -124,7 +124,8 @@ function BlogEditor() {
     socialCaptions: '',
     socialHashtags: '',
     allowAutoUpdate: true,
-    doubleLinkFormat: false
+    doubleLinkFormat: false,
+    gridBox: ''
   });
 
   // Checkbox states
@@ -162,7 +163,8 @@ function BlogEditor() {
               socialCaptions: data.socialCaptions || '',
               socialHashtags: data.socialHashtags || '',
               allowAutoUpdate: data.allowAutoUpdate !== false,
-              doubleLinkFormat: !!data.translations?.metadata?.doubleLinkFormat
+              doubleLinkFormat: !!data.translations?.metadata?.doubleLinkFormat,
+              gridBox: data.gridBox || ''
             });
 
             // Parse tags back into checkboxes
@@ -568,6 +570,31 @@ function BlogEditor() {
                 📱 Auto-Generate Social Captions
               </button>
             </div>
+          </div>
+
+          {/* Homepage Grid Override Dropdown */}
+          <div style={{ background: 'rgba(255, 255, 255, 0.02)', padding: '1.2rem', borderRadius: '16px', border: '1px solid var(--color-border)' }}>
+            <h3 style={{ margin: '0 0 0.8rem 0', fontSize: '1rem', fontWeight: 700 }}>📌 Homepage Grid Override</h3>
+            <p style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', marginBottom: '1rem' }}>Manually assign this post to a specific homepage box (Overrides tags/keywords).</p>
+            <select
+              value={formData.gridBox || ''}
+              onChange={e => setFormData({ ...formData, gridBox: e.target.value })}
+              style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--color-border)', background: 'rgba(0,0,0,0.2)', color: '#fff', fontSize: '0.9rem' }}
+            >
+              <option value="">⚙️ Auto-Detect (Fallback to Tags)</option>
+              <option value="latestJobs">🔥 Latest Jobs (नवीनतम नौकरियां)</option>
+              <option value="upcomingJobs">🚀 Upcoming Jobs (आगामी भर्ती)</option>
+              <option value="admitCards">🎟️ Admit Cards (प्रवेश पत्र)</option>
+              <option value="examResults">🏆 Exam Results (परीक्षा परिणाम)</option>
+              <option value="university">🏫 University Updates (विश्वविद्यालय)</option>
+              <option value="scheme">💼 Govt Schemes (सरकारी योजनाएं)</option>
+              <option value="scholarship">🎓 Scholarships (छात्रवृत्ति)</option>
+              <option value="tech">📱 Tech News (टेक समाचार)</option>
+              <option value="finance">🏦 Finance News (फाइनेंस समाचार)</option>
+              <option value="earning">💸 Earning & Courses (कमाई & कोर्सेज)</option>
+              <option value="school">🎒 School News (स्कूल समाचार)</option>
+              <option value="other">📌 Other Updates (अन्य सूचनाएं)</option>
+            </select>
           </div>
 
           {/* Grid Category Placements */}

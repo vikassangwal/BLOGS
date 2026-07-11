@@ -616,6 +616,19 @@ export async function POST(request: NextRequest) {
             error: 'Official notification not yet released. Skipping blog creation.'
           }
         });
+        if (savedKeys.telegramToken && savedKeys.telegramChatId) {
+          try {
+            await fetch(`https://api.telegram.org/bot${savedKeys.telegramToken}/sendMessage`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                chat_id: savedKeys.telegramChatId,
+                text: `⚠️ <b>Auto-Blog Skip Alert</b>\n\nTopic: <i>${targetTopic}</i>\nStatus: <b>Skipped (Official Notification PDF not found on live search)</b>`,
+                parse_mode: 'HTML'
+              })
+            });
+          } catch(e){}
+        }
         return;
       }
 
@@ -1499,6 +1512,24 @@ YOUR SEO SKILLS:
               body: JSON.stringify({ chat_id: savedKeys.telegramChatId, text: broadcastCaption, parse_mode: 'HTML' })
             }).catch(e => console.error('Telegram failed:', e))
           );
+
+          // Alert on fallback links
+          const isApplyFallback = !newPost.officialApplyUrl || newPost.officialApplyUrl.split('/').filter(Boolean).length <= 2;
+          const isPdfFallback = !newPost.content || !newPost.content.includes('.pdf');
+          if (isApplyFallback || isPdfFallback) {
+            const warnText = `⚠️ <b>Auto-Blog Link Warning</b>\n\n` +
+                             `Blog: <a href="https://www.knowora.in/blog/${newPost.slug}">${newPost.title}</a>\n\n` +
+                             `- Apply Link: ${isApplyFallback ? '⚠️ Fallback to Homepage/Not Found' : '✅ Active'}\n` +
+                             `- PDF Link: ${isPdfFallback ? '⚠️ Fallback to Homepage/Not Found' : '✅ Direct PDF Found'}\n\n` +
+                             `<i>Please review this post and update the links manually in the admin dashboard if needed.</i>`;
+            socialPromises.push(
+              fetch(`https://api.telegram.org/bot${savedKeys.telegramToken}/sendMessage`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ chat_id: savedKeys.telegramChatId, text: warnText, parse_mode: 'HTML' })
+              }).catch(e => console.error('Telegram link warning failed:', e))
+            );
+          }
         }
 
         // Run all social posts in parallel

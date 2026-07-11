@@ -321,9 +321,9 @@ export async function POST(request: NextRequest) {
       ${seedNews}
       ${recentlyPublishedStr}
       
-      Generate a list of EXACTLY 15 highly specific, real, and currently trending topics/keywords in India. 
-      Follow this strict distribution rule (11 + 2 + 2):
-      - 11 Education & Career topics:
+      Generate a list of EXACTLY 40 highly specific, real, and currently trending topics/keywords in India. 
+      Follow this strict distribution rule (36 + 2 + 2):
+      - 36 Education & Career topics:
         🚨 1st PRIORITY (HIGHEST) 🚨: Focus on new announcements from the LAST 72 HOURS! Include real Government Job Vacancies, Exam Notifications, Admit Cards, Results, Expected Cut-off Marks (संभावित कट-ऑफ / Safe Score for recently conducted exams), Answer Key releases, Exam Calendar, Exam Date/Timetable, Syllabus Change, Counselling/Merit List, State Scholarship Schemes, Internships, Rojgar Mela/Apprenticeships, Army/Defense Rallies, Entrance Exams (NEET/JEE/CUET/TET), Bank/PSU Jobs (IBPS/SBI), or University/School Board updates.
         🚨 STRICT RULE: Every topic must have active open applications and solid deadlines. Never guess dates or write an article based on guesses! If a deadline is not announced, write "Coming Soon" (जल्द आ रहा है) instead of guessing.
         🚨 CRITICAL RULE: NEVER include any job/recruitment where the 'Last Date to Apply' has already passed before ${getCurrentDateStr()}.
@@ -335,7 +335,7 @@ export async function POST(request: NextRequest) {
       🚨 TOP TRUSTED INDIA SOURCES RULE 🚨: 
       Verify topics from India's Premier Official Portals: ssc.gov.in, upsc.gov.in, ibps.in, nta.ac.in, cbse.gov.in, ignou.ac.in, scholarships.gov.in, employmentnews.gov.in. DO NOT pick unverified rumors.
       
-      Respond ONLY with a valid JSON array of exactly 15 strings. No markdown.
+      Respond ONLY with a valid JSON array of exactly 40 strings. No markdown.
       Example format: ["Topic 1", "Topic 2", "Topic 3", ...]
       
       CRITICAL INSTRUCTION: If you do not have live internet access, you MUST STILL generate the JSON array using your existing knowledge of what typically happens in this month. Do NOT refuse to answer. Do NOT apologize. ONLY output the JSON array.`;

@@ -27,79 +27,10 @@ import { getResearchPrompt } from '@/lib/services/autoBlogPrompts';
 import { verifyToken } from '@/lib/auth';
 import { waitUntil } from '@vercel/functions';
 import { validateAndFixLinks, cleanTableOfContents } from '@/lib/link-validator';
+import { postToWhatsApp, postToInstagram, postToTwitter, postToTelegram } from '@/lib/social-sharing';
 // Code cleaned up: RSS fetching is no longer used.
-export const maxDuration = 60; // Vercel hobby allows up to 60s for serverless
-export const dynamic = 'force-dynamic'; // Prevent caching for cron jobs
-
-// -------------------------------------------------------------
-// HELPER: WhatsApp Auto-Poster
-// -------------------------------------------------------------
-async function postToWhatsApp(token: string, phoneId: string, groupId: string, text: string, imageUrl: string) {
-  try {
-    // WhatsApp Cloud API generic message template
-    const res = await fetch(`https://graph.facebook.com/v19.0/${phoneId}/messages`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        messaging_product: 'whatsapp',
-        to: groupId,
-        type: 'image',
-        image: {
-          link: imageUrl,
-          caption: text
-        }
-      })
-    });
-    return res.ok;
-  } catch(e) {
-    console.error('WhatsApp post error:', e);
-    return false;
-  }
-}
-
-// -------------------------------------------------------------
-// HELPER: Instagram Auto-Poster
-// -------------------------------------------------------------
-async function postToInstagram(token: string, accountId: string, imageUrl: string, caption: string) {
-  try {
-    // Step 1: Create media container
-    const containerRes = await fetch(`https://graph.facebook.com/v19.0/${accountId}/media?image_url=${encodeURIComponent(imageUrl)}&caption=${encodeURIComponent(caption)}&access_token=${token}`, { method: 'POST' });
-    const containerData = await containerRes.json();
-    
-    if (containerData.id) {
-      // Step 2: Publish media
-      await fetch(`https://graph.facebook.com/v19.0/${accountId}/media_publish?creation_id=${containerData.id}&access_token=${token}`, { method: 'POST' });
-      return true;
-    }
-    return false;
-  } catch(e) {
-    console.error('Instagram post error:', e);
-    return false;
-  }
-}
-
-// -------------------------------------------------------------
-// HELPER: Twitter Auto-Poster (v2)
-// -------------------------------------------------------------
-async function postToTwitter(bearerToken: string, text: string) {
-  try {
-    const res = await fetch('https://api.twitter.com/2/tweets', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${bearerToken}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ text })
-    });
-    return res.ok;
-  } catch (e) {
-    console.error('Twitter post error:', e);
-    return false;
-  }
-}
+export const maxDuration = 60;
+export const dynamic = 'force-dynamic';
 
 
 
@@ -1443,6 +1374,7 @@ YOUR SEO SKILLS:
             seoKeywords: seoData.seoKeywords,
             socialCaptions: socialCaption,
             socialHashtags: socialHashtags,
+            socialShared: false,
             tags: {
               create: tagsToCreate
             }
@@ -1471,6 +1403,7 @@ YOUR SEO SKILLS:
             seoKeywords: seoData.seoKeywords,
             socialCaptions: socialCaption,
             socialHashtags: socialHashtags,
+            socialShared: false,
             tags: {
               create: tagsToCreate
             }
@@ -1507,47 +1440,12 @@ YOUR SEO SKILLS:
 
       // Run broadcasting inline inside the background execution task
       try {
-        // Run ALL social media posts in PARALLEL (was sequential — wasted 10-15s)
+        // Note: Individual auto-posting is disabled to prevent spam. 
+        // Blog posts are now grouped into 10-post Digests (shared automatically via api/cron/social-digest or manually).
         const socialPromises: Promise<any>[] = [];
 
-        if (savedKeys.whatsappToken && savedKeys.whatsappPhoneId && savedKeys.whatsappGroupId) {
-          socialPromises.push(postToWhatsApp(savedKeys.whatsappToken, savedKeys.whatsappPhoneId, savedKeys.whatsappGroupId, broadcastCaption, socialImageUrl).catch(e => console.error('WhatsApp failed:', e)));
-        }
-        if (savedKeys.instagramToken && savedKeys.instagramAccountId) {
-          socialPromises.push(postToInstagram(savedKeys.instagramToken, savedKeys.instagramAccountId, socialImageUrl, broadcastCaption).catch(e => console.error('Instagram failed:', e)));
-        }
-        if (savedKeys.twitter) {
-          socialPromises.push(postToTwitter(savedKeys.twitter, broadcastCaption).catch(e => console.error('Twitter failed:', e)));
-        }
         if (savedKeys.telegramToken && savedKeys.telegramChatId) {
-          socialPromises.push(
-            (async () => {
-              try {
-                const res = await fetch(`https://api.telegram.org/bot${savedKeys.telegramToken}/sendPhoto`, {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({
-                    chat_id: savedKeys.telegramChatId,
-                    photo: socialImageUrl,
-                    caption: broadcastCaption,
-                    parse_mode: 'HTML'
-                  })
-                });
-                if (!res.ok) {
-                  // Fallback to text message
-                  await fetch(`https://api.telegram.org/bot${savedKeys.telegramToken}/sendMessage`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ chat_id: savedKeys.telegramChatId, text: broadcastCaption, parse_mode: 'HTML' })
-                  });
-                }
-              } catch (e) {
-                console.error('Telegram failed:', e);
-              }
-            })()
-          );
-
-          // Alert on fallback links
+          // Keep the private admin alert for fallback links
           const isApplyFallback = !newPost.officialApplyUrl || newPost.officialApplyUrl.split('/').filter(Boolean).length <= 2;
           const isPdfFallback = !newPost.content || !newPost.content.includes('.pdf');
           if (isApplyFallback || isPdfFallback) {

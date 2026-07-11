@@ -58,6 +58,7 @@ model BlogPost {
   authorId        String?
   author          User?     @relation(fields: [authorId], references: [id])
   syndicatedToMedium Boolean @default(false)
+  socialShared        Boolean  @default(false)
   gridBox         String?   // manually specified grid box/card on the homepage
   jobStates       String[]  @default([])
   qualifications  String[]  @default([])

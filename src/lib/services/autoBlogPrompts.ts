@@ -91,6 +91,15 @@ This is an Education & Career blog. You MUST verify the following BEFORE providi
      - Download Notification PDF: Only from official .gov.in or .nic.in — if not available, write "Official Notification PDF - Check official website"
      - OTR/Registration Portal: If OTR/SSO required, mention the exact portal (sso.rajasthan.gov.in, ssc.gov.in/otr etc.)
      - (WARNING: NEVER provide links from private competitor sites. NEVER guess PDF URLs. If exact link unknown, give department homepage only.)
+      
+     🚨 URL PATH TOKENS CLASSIFICATION RULES:
+     To correctly identify and sort the live search URLs, inspect the URL string characters and path tokens:
+     - **Apply Online / Registration Link:** Look for URLs containing "apply", "registration", "register", "login", "sso", "otr", "onlineform", "candidate", "recruitment", or "enrollment".
+     - **Download Notification PDF Link:** Look for URLs containing "notification", "advertisement", "notice", "storage/advertisement_item", "uploads", "rules", or "pdf" AND ending in ".pdf".
+     - **Admit Card / Hall Ticket Link:** Look for URLs containing "admitcard", "admit-card", "hallticket", "hall-ticket", "callletter", or "call-letter".
+     - **Syllabus / Exam Pattern Link:** Look for URLs containing "syllabus", "syllabus_item", or "exam-pattern" (usually ending in .pdf).
+     - **Result / Scorecard Link:** Look for URLs containing "result", "cutoff", "cut-off", "meritlist", "scorecard", "marks", or "selected-list".
+     - **Exam Calendar Link:** Look for URLs containing "calendar", "schedule", "exam-schedule", "time-table", or "timetable".
 
   🚨 FOR TECHNOLOGY & GADGETS: You MUST provide COMPLETE specs! (Processor, RAM/Storage, Camera MP, Battery/Charging, Display size). You MUST provide the exact Price in India and the Launch Date.
   🚨 FOR TELECOM/APPS: Provide exact old vs new recharge prices, validity, or step-by-step guide to use the new App feature.

@@ -612,29 +612,28 @@ export default async function HomePage() {
   // Fetch all categories in parallel on the server
   const [
     allPosts, guidelinesPosts, rulesRightsPosts, whatsappLinks, siteSettings,
-    latestJobs, admitCards, examResults,
-    universityUpdates, govtSchemes, scholarships,
-    techMobile, financeBanking, earningCourses, schoolNews, otherNews,
+    allActiveJobs, allAdmitCards, allExamResults,
+    universityUpdates, allGovtSchemes, scholarships,
+    techMobile, financeBanking, earningCourses, schoolNews, allOtherNews,
     closingSoonJobs, liveUpdates,
-    activeJobsCount, recentResultsCount, recentAdmitCardsCount, activeSchemesCount,
-    upcomingJobs, upcomingJobsCount, otherNewsCount
+    allUpcomingJobs
   ] = await Promise.all([
     prisma.blogPost.findMany({ where: { status: 'Published' }, orderBy: { publishedAt: 'desc' }, take: 10, select: { id: true, title: true, slug: true, publishedAt: true, featuredImage: true } }),
     getPostsByTag('Guidelines'),
     getPostsByTag('Rules & Rights'),
     prisma.socialLink.findMany({ where: { platform: 'whatsapp', isActive: true } }),
     prisma.siteSettings.findUnique({ where: { id: 'default' } }),
-    getActiveJobs(8),
-    getAdmitCards(8),
-    getResultsAndSyllabus(8),
+    getActiveJobs(150),
+    getAdmitCards(150),
+    getResultsAndSyllabus(150),
     getUniversityUpdates(8),
-    getSchemes(8),
+    getSchemes(150),
     getScholarships(8),
     getTechNews(8),
     getFinanceNews(8),
     getEarningCourses(8),
     getSchoolNews(8),
-    getOtherNews(8),
+    getOtherNews(150),
     prisma.blogPost.findMany({
       where: {
         status: 'Published',
@@ -650,14 +649,24 @@ export default async function HomePage() {
       take: 6,
       select: { id: true, title: true, slug: true, publishedAt: true, createdAt: true }
     }),
-    getActiveJobs(100).then(posts => posts.length),
-    getResultsAndSyllabus(100).then(posts => posts.filter(post => post.publishedAt && new Date(post.publishedAt) >= sevenDaysAgo).length),
-    getAdmitCards(100).then(posts => posts.filter(post => post.publishedAt && new Date(post.publishedAt) >= sevenDaysAgo).length),
-    getSchemes(100).then(posts => posts.length),
-    getUpcomingJobs(8),
-    getUpcomingJobs(100).then(posts => posts.length),
-    getOtherNews(100).then(posts => posts.length)
+    getUpcomingJobs(150)
   ]);
+
+  // Derived lists (up to 8 items)
+  const latestJobs = allActiveJobs.slice(0, 8);
+  const admitCards = allAdmitCards.slice(0, 8);
+  const examResults = allExamResults.slice(0, 8);
+  const govtSchemes = allGovtSchemes.slice(0, 8);
+  const otherNews = allOtherNews.slice(0, 8);
+  const upcomingJobs = allUpcomingJobs.slice(0, 8);
+
+  // Derived counts
+  const activeJobsCount = allActiveJobs.length;
+  const recentResultsCount = allExamResults.filter(post => post.publishedAt && new Date(post.publishedAt) >= sevenDaysAgo).length;
+  const recentAdmitCardsCount = allAdmitCards.filter(post => post.publishedAt && new Date(post.publishedAt) >= sevenDaysAgo).length;
+  const activeSchemesCount = allGovtSchemes.length;
+  const upcomingJobsCount = allUpcomingJobs.length;
+  const otherNewsCount = allOtherNews.length;
 
   let apiKeys: any = {};
   try {

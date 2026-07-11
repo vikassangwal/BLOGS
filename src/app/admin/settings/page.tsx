@@ -295,6 +295,15 @@ export default function SettingsAdmin() {
                 <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>Default Model</label>
                 <input type="text" value={settings.aiModel || ''} onChange={e => setSettings({ ...settings, aiModel: e.target.value })} placeholder="e.g. openai/gpt-4o-mini" style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--color-border)' }} />
               </div>
+              <div style={{ gridColumn: '1 / -1' }}>
+                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>Blog Featured Image Source (फीचर्ड इमेज स्रोत)</label>
+                <select value={settings.imageSource || 'unsplash'} onChange={e => setSettings({ ...settings, imageSource: e.target.value })} style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--color-border)' }}>
+                  <option value="unsplash">Unsplash Free Stock Images (रैंडम स्टॉक इमेजेस)</option>
+                  <option value="ai">AI Image Generation (Pollinations AI - फ्री)</option>
+                  <option value="none">No Image (बिना इमेज के ब्लॉग पोस्ट करें)</option>
+                </select>
+                <p style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', margin: '0.3rem 0 0' }}>ऑटो-ब्लॉगिंग के समय मुख्य थंबनेल इमेज कहाँ से लानी है।</p>
+              </div>
             </div>
 
             <MultiAgentSection apiKeys={apiKeys} setApiKeys={setApiKeys} />
@@ -433,6 +442,32 @@ export default function SettingsAdmin() {
               <h3 style={{ margin: '0 0 1rem 0', fontSize: '1.2rem', fontWeight: 700 }}>Email Newsletter (Resend)</h3>
               <label style={{ display: 'block', marginBottom: '0.25rem', fontWeight: 600, fontSize: '0.9rem' }}>Resend API Key</label>
               <input type="password" value={apiKeys.resend || ''} onChange={e => setApiKeys({ ...apiKeys, resend: e.target.value })} placeholder="re_..." style={{ width: '100%', padding: '0.6rem', borderRadius: '6px', border: '1px solid var(--color-border)' }} />
+            </div>
+
+            <hr style={{ border: 'none', borderTop: '1px solid var(--color-border)' }} />
+
+            <div>
+              <h3 style={{ margin: '0 0 1rem 0', fontSize: '1.2rem', fontWeight: 700 }}>SMTP Mail Server (Alt Email Delivery)</h3>
+              <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+                <div>
+                  <label style={{ display: 'block', marginBottom: '0.25rem', fontWeight: 600, fontSize: '0.9rem' }}>SMTP Host</label>
+                  <input type="text" value={settings.smtpHost || ''} onChange={e => setSettings({ ...settings, smtpHost: e.target.value })} placeholder="smtp.gmail.com" style={{ width: '100%', padding: '0.6rem', borderRadius: '6px', border: '1px solid var(--color-border)' }} />
+                </div>
+                <div>
+                  <label style={{ display: 'block', marginBottom: '0.25rem', fontWeight: 600, fontSize: '0.9rem' }}>SMTP Port</label>
+                  <input type="number" value={settings.smtpPort || ''} onChange={e => setSettings({ ...settings, smtpPort: parseInt(e.target.value) || 587 })} placeholder="587" style={{ width: '100%', padding: '0.6rem', borderRadius: '6px', border: '1px solid var(--color-border)' }} />
+                </div>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <div>
+                  <label style={{ display: 'block', marginBottom: '0.25rem', fontWeight: 600, fontSize: '0.9rem' }}>SMTP User</label>
+                  <input type="text" value={settings.smtpUser || ''} onChange={e => setSettings({ ...settings, smtpUser: e.target.value })} placeholder="your-email@gmail.com" style={{ width: '100%', padding: '0.6rem', borderRadius: '6px', border: '1px solid var(--color-border)' }} />
+                </div>
+                <div>
+                  <label style={{ display: 'block', marginBottom: '0.25rem', fontWeight: 600, fontSize: '0.9rem' }}>SMTP Password</label>
+                  <input type="password" value={settings.smtpPass || ''} onChange={e => setSettings({ ...settings, smtpPass: e.target.value })} placeholder="password" style={{ width: '100%', padding: '0.6rem', borderRadius: '6px', border: '1px solid var(--color-border)' }} />
+                </div>
+              </div>
             </div>
 
             <hr style={{ border: 'none', borderTop: '1px solid var(--color-border)' }} />

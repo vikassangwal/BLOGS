@@ -13,7 +13,11 @@ export async function GET(request: NextRequest) {
   try {
     const user = getUserFromRequest(request);
 
-    const settings = await prisma.siteSettings.findUnique({ where: { id: 'default' } });
+    const [settings, autoBlogSettings] = await Promise.all([
+      prisma.siteSettings.findUnique({ where: { id: 'default' } }),
+      prisma.autoBlogSettings.findUnique({ where: { id: 'default' } })
+    ]);
+    
     if (!settings) return NextResponse.json({});
 
     // Mask API key if not super admin
@@ -21,7 +25,14 @@ export async function GET(request: NextRequest) {
       settings.aiApiKey = settings.aiApiKey ? '********' : '';
     }
 
-    return NextResponse.json(settings);
+    return NextResponse.json({
+      ...settings,
+      imageSource: autoBlogSettings?.imageSource || 'unsplash',
+      smtpHost: autoBlogSettings?.smtpHost || '',
+      smtpPort: autoBlogSettings?.smtpPort || 587,
+      smtpUser: autoBlogSettings?.smtpUser || '',
+      smtpPass: autoBlogSettings?.smtpPass || '',
+    });
   } catch (error) {
     return NextResponse.json({ error: 'Failed to fetch settings' }, { status: 500 });
   }
@@ -43,6 +54,7 @@ export async function PUT(request: NextRequest) {
     const updateData: any = {
       siteName: body.siteName,
       siteTagline: body.siteTagline,
+      defaultLanguage: body.defaultLanguage,
       adminEmail: body.adminEmail,
       aiProvider: body.aiProvider,
       aiModel: body.aiModel,
@@ -60,6 +72,45 @@ export async function PUT(request: NextRequest) {
       update: updateData,
       create: { id: 'default', ...updateData }
     });
+
+    // Extract keys for AutoBlogSettings synchronization
+    let keysObj: any = {};
+    try {
+      if (body.aiApiKey && body.aiApiKey !== '********') {
+        keysObj = JSON.parse(body.aiApiKey);
+      }
+    } catch(e) {}
+
+    const autoBlogData: any = {
+      imageSource: body.imageSource,
+      smtpHost: body.smtpHost,
+      smtpPort: body.smtpPort ? parseInt(body.smtpPort.toString()) : undefined,
+      smtpUser: body.smtpUser,
+      smtpPass: body.smtpPass,
+    };
+
+    if (keysObj.telegramToken) autoBlogData.telegramToken = keysObj.telegramToken;
+    if (keysObj.telegramChatId) autoBlogData.telegramChatId = keysObj.telegramChatId;
+    if (keysObj.whatsappToken) autoBlogData.whatsappToken = keysObj.whatsappToken;
+    if (keysObj.whatsappPhoneId) autoBlogData.whatsappPhoneId = keysObj.whatsappPhoneId;
+    if (keysObj.whatsappGroupId) autoBlogData.whatsappGroupId = keysObj.whatsappGroupId;
+    if (keysObj.instagram) autoBlogData.instagramToken = keysObj.instagram;
+    if (keysObj.instagramAccountId) autoBlogData.instagramAccountId = keysObj.instagramAccountId;
+    if (keysObj.twitter) autoBlogData.twitter = keysObj.twitter;
+    if (keysObj.onesignalAppId) autoBlogData.onesignalAppId = keysObj.onesignalAppId;
+    if (keysObj.onesignalApiKey) autoBlogData.onesignalApiKey = keysObj.onesignalApiKey;
+    if (keysObj.googleIndexingJson) autoBlogData.googleIndexingJson = keysObj.googleIndexingJson;
+
+    // Filter out undefined properties to prevent Prisma update errors
+    Object.keys(autoBlogData).forEach(key => autoBlogData[key] === undefined && delete autoBlogData[key]);
+
+    if (Object.keys(autoBlogData).length > 0) {
+      await prisma.autoBlogSettings.upsert({
+        where: { id: 'default' },
+        update: autoBlogData,
+        create: { id: 'default', ...autoBlogData }
+      });
+    }
 
     // Mask before returning
     settings.aiApiKey = settings.aiApiKey ? '********' : '';

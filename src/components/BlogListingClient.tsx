@@ -246,14 +246,401 @@ export default function BlogListingClient() {
     : posts;
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--color-bg-primary)', color: 'var(--color-text-primary)' }}>
+    <div className="listing-container">
+      <style dangerouslySetInnerHTML={{__html: `
+        .listing-container {
+          min-height: 100vh;
+          background: var(--color-bg-primary);
+          color: var(--color-text-primary);
+        }
+        .hero-section {
+          padding: 4rem 2rem 2.5rem;
+          background: linear-gradient(to bottom, rgba(0,102,204,0.05) 0%, rgba(0,0,0,0) 100%);
+          text-align: center;
+        }
+        .hero-title {
+          font-size: 2.6rem;
+          font-weight: 800;
+          margin-bottom: 0.4rem;
+          letter-spacing: -1.2px;
+          line-height: 1.2;
+        }
+        .hero-description {
+          font-size: 1rem;
+          color: var(--color-text-secondary);
+          max-width: 600px;
+          margin: 0 auto 1.5rem;
+          line-height: 1.5;
+        }
+        .search-container {
+          max-width: 400px;
+          margin: 0 auto;
+          position: relative;
+        }
+        .search-input {
+          width: 100%;
+          padding: 0.65rem 2.8rem 0.65rem 1.2rem;
+          border-radius: 20px;
+          border: 1px solid var(--color-border);
+          background: rgba(255,255,255,0.03);
+          color: var(--color-text-primary);
+          font-size: 0.875rem;
+          outline: none;
+          box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+          transition: all 0.2s ease-in-out;
+        }
+        .search-input:focus {
+          border-color: var(--color-accent);
+          background: rgba(255,255,255,0.05);
+          box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
+        }
+        .search-icon {
+          position: absolute;
+          right: 1.2rem;
+          top: 50%;
+          transform: translateY(-50%);
+          opacity: 0.6;
+          pointer-events: none;
+          font-size: 0.9rem;
+        }
+        .filter-panel {
+          display: flex;
+          flex-direction: column;
+          gap: 0.75rem;
+          max-width: 900px;
+          margin: 1.5rem auto 0;
+          background: rgba(255,255,255,0.02);
+          backdrop-filter: blur(10px);
+          -webkit-backdrop-filter: blur(10px);
+          padding: 1rem;
+          border-radius: 16px;
+          border: 1px solid var(--color-border);
+          box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+        }
+        .filter-header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          flex-wrap: wrap;
+          gap: 0.75rem;
+        }
+        .filter-title {
+          font-size: 1rem;
+          font-weight: 700;
+          margin: 0;
+          color: var(--color-text-primary);
+        }
+        .state-select-wrapper {
+          display: flex;
+          align-items: center;
+          gap: 0.4rem;
+          background: rgba(255,255,255,0.04);
+          padding: 0.4rem 1rem;
+          border-radius: 20px;
+          border: 1px solid var(--color-border);
+          min-width: 220px;
+        }
+        .state-select {
+          background: transparent;
+          border: none;
+          color: var(--color-text-primary);
+          width: 100%;
+          outline: none;
+          font-size: 0.85rem;
+          font-weight: 600;
+          cursor: pointer;
+          appearance: auto;
+        }
+        .qual-section-title {
+          font-size: 0.75rem;
+          color: var(--color-text-secondary);
+          margin: 0.25rem 0 0.5rem 0;
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          text-align: left;
+        }
+        .qual-chips-row {
+          display: flex;
+          gap: 0.5rem;
+          overflow-x: auto;
+          padding-bottom: 0.25rem;
+          scrollbar-width: none;
+          -ms-overflow-style: none;
+        }
+        .qual-chips-row::-webkit-scrollbar {
+          display: none;
+        }
+        .qual-chip-btn {
+          flex-shrink: 0;
+          padding: 0.4rem 0.9rem;
+          border-radius: 15px;
+          border: 1px solid var(--color-border);
+          background: rgba(255,255,255,0.03);
+          color: var(--color-text-primary);
+          cursor: pointer;
+          font-size: 0.8rem;
+          font-weight: 600;
+          transition: all 0.2s ease;
+          white-space: nowrap;
+        }
+        .qual-chip-btn.active {
+          border-color: var(--color-accent);
+          background: var(--color-accent);
+          color: #fff;
+          box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
+        }
+        .qual-chip-btn:hover:not(.active) {
+          background: rgba(255,255,255,0.08);
+          border-color: rgba(255,255,255,0.15);
+        }
+        .tags-container {
+          display: flex;
+          gap: 0.4rem;
+          flex-wrap: wrap;
+          justify-content: center;
+          margin-top: 1.5rem;
+        }
+        .tag-btn {
+          padding: 0.35rem 0.85rem;
+          border-radius: 15px;
+          border: 1px solid var(--color-border);
+          background: transparent;
+          color: var(--color-text-primary);
+          cursor: pointer;
+          font-size: 0.8rem;
+          font-weight: 600;
+          transition: all 0.2s;
+        }
+        .tag-btn.active {
+          border-color: var(--color-accent);
+          background: var(--color-accent);
+          color: #fff;
+          box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
+        }
+        .tag-btn:hover:not(.active) {
+          background: rgba(255,255,255,0.05);
+          border-color: rgba(255,255,255,0.15);
+        }
+        .blog-grid-section {
+          padding: 1.5rem 1rem 3rem;
+          max-width: 900px;
+          margin: 0 auto;
+        }
+        .blog-list-wrapper {
+          display: flex;
+          flex-direction: column;
+          gap: 1rem;
+        }
+        .blog-card {
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+          overflow: hidden;
+          padding: 0.75rem;
+          gap: 0.75rem;
+          background: rgba(255,255,255,0.02);
+          border: 1px solid rgba(255,255,255,0.04);
+          border-radius: 12px;
+          transition: all 0.2s ease-in-out;
+        }
+        .blog-card:hover {
+          background: rgba(255,255,255,0.05);
+          transform: translateY(-2px);
+          box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        .blog-image-wrapper {
+          width: 100px;
+          height: 75px;
+          position: relative;
+          background: #0b0f19;
+          border-radius: 8px;
+          overflow: hidden;
+          flex-shrink: 0;
+        }
+        .blog-info-wrapper {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          min-width: 0;
+          justify-content: center;
+        }
+        .blog-meta-row {
+          display: flex;
+          align-items: center;
+          gap: 0.4rem;
+          margin-bottom: 0.2rem;
+          flex-wrap: wrap;
+        }
+        .blog-tag-badge {
+          background: rgba(59,130,246,0.1);
+          color: #60a5fa;
+          padding: 0.15rem 0.45rem;
+          border-radius: 10px;
+          font-size: 0.65rem;
+          font-weight: 600;
+          white-space: nowrap;
+        }
+        .blog-date-text {
+          font-size: 0.7rem;
+          color: var(--color-text-secondary);
+          margin: 0;
+          white-space: nowrap;
+        }
+        .blog-expiry-badge {
+          background: rgba(239, 68, 68, 0.08);
+          color: #f87171;
+          padding: 0.15rem 0.45rem;
+          border-radius: 10px;
+          font-size: 0.65rem;
+          font-weight: 600;
+          white-space: nowrap;
+          display: inline-flex;
+          align-items: center;
+          gap: 0.15rem;
+        }
+        .blog-title {
+          font-size: 1rem;
+          font-weight: 700;
+          margin: 0 0 0.15rem 0;
+          line-clamp: 2;
+          -webkit-line-clamp: 2;
+          display: -webkit-box;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          line-height: 1.35;
+          color: var(--color-text-primary);
+        }
+        .blog-excerpt {
+          font-size: 0.8rem;
+          color: var(--color-text-secondary);
+          margin: 0;
+          line-clamp: 1;
+          -webkit-line-clamp: 1;
+          display: -webkit-box;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        .pagination-container {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          gap: 0.75rem;
+          margin-top: 2.5rem;
+        }
+        .btn-pagination {
+          padding: 0.4rem 1rem;
+          border-radius: 8px;
+          background: rgba(255,255,255,0.05);
+          color: var(--color-text-primary);
+          border: 1px solid var(--color-border);
+          cursor: pointer;
+          font-size: 0.8rem;
+          font-weight: 600;
+          transition: all 0.2s;
+        }
+        .btn-pagination:disabled {
+          opacity: 0.4;
+          cursor: not-allowed;
+        }
+        .btn-pagination:hover:not(:disabled) {
+          background: rgba(255,255,255,0.1);
+        }
+        @keyframes bounce {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-5px); }
+        }
+        .dot-bounce {
+          display: inline-block;
+          animation: bounce 1.4s infinite ease-in-out both;
+          font-weight: bold;
+        }
+
+        @media (max-width: 768px) {
+          .hero-section {
+            padding: 2rem 1rem 1.5rem;
+          }
+          .hero-title {
+            font-size: 1.8rem;
+          }
+          .hero-description {
+            font-size: 0.85rem;
+            margin-bottom: 1rem;
+          }
+          .filter-panel {
+            padding: 0.75rem;
+            border-radius: 12px;
+          }
+          .filter-header {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 0.5rem;
+          }
+          .filter-title {
+            font-size: 0.9rem;
+            text-align: left;
+          }
+          .state-select-wrapper {
+            min-width: 100%;
+            padding: 0.35rem 0.75rem;
+          }
+          .state-select {
+            font-size: 0.8rem;
+          }
+          .qual-section-title {
+            font-size: 0.7rem;
+            margin-bottom: 0.4rem;
+          }
+          .qual-chip-btn {
+            padding: 0.3rem 0.75rem;
+            font-size: 0.75rem;
+          }
+          .tags-container {
+            margin-top: 1rem;
+            gap: 0.3rem;
+          }
+          .tag-btn {
+            padding: 0.3rem 0.7rem;
+            font-size: 0.75rem;
+          }
+          .blog-grid-section {
+            padding: 1rem 0.5rem 2rem;
+          }
+          .blog-card {
+            padding: 0.6rem;
+            gap: 0.6rem;
+            border-radius: 8px;
+          }
+          .blog-image-wrapper {
+            width: 80px;
+            height: 60px;
+            border-radius: 6px;
+          }
+          .blog-title {
+            font-size: 0.875rem;
+            line-height: 1.3;
+          }
+          .blog-excerpt {
+            font-size: 0.75rem;
+          }
+          .blog-meta-row {
+            gap: 0.3rem;
+          }
+          .blog-tag-badge, .blog-expiry-badge {
+            font-size: 0.6rem;
+            padding: 0.1rem 0.35rem;
+          }
+          .blog-date-text {
+            font-size: 0.65rem;
+          }
+        }
+      `}} />
+
       {/* Hero Section */}
-      <section style={{
-        padding: '6rem 2rem 4rem',
-        background: 'linear-gradient(to bottom, rgba(0,102,204,0.05) 0%, rgba(0,0,0,0) 100%)',
-        textAlign: 'center'
-      }}>
-        <h1 style={{ fontSize: '3rem', fontWeight: 800, marginBottom: '0.5rem', letterSpacing: '-1px' }}>
+      <section className="hero-section">
+        <h1 className="hero-title">
           {activeTag ? (
             <>
               {activeTag} <span style={{ color: 'var(--color-accent)' }}>Articles</span>
@@ -264,7 +651,7 @@ export default function BlogListingClient() {
             </>
           )}
         </h1>
-        <p style={{ fontSize: '1.1rem', color: 'var(--color-text-secondary)', maxWidth: '600px', margin: '0 auto 2rem' }}>
+        <p className="hero-description">
           {activeTag 
             ? `Discover the latest and most trending articles about ${activeTag}.`
             : `Discover the latest articles on AI, automation, business growth, and technology trends.`
@@ -272,70 +659,36 @@ export default function BlogListingClient() {
         </p>
 
         {/* Search Bar */}
-        <div style={{ maxWidth: '400px', margin: '0 auto', position: 'relative' }}>
+        <div className="search-container">
           <input
             type="text"
+            className="search-input"
             placeholder="Search articles..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            style={{
-              width: '100%',
-              padding: '0.8rem 1.2rem',
-              borderRadius: '25px',
-              border: '1px solid var(--color-border)',
-              background: 'rgba(255,255,255,0.03)',
-              color: 'var(--color-text-primary)',
-              fontSize: '0.9rem',
-              outline: 'none',
-              boxShadow: '0 4px 20px rgba(0,0,0,0.05)',
-              transition: 'box-shadow 0.2s, border-color 0.2s'
-            }}
-            onFocus={(e) => e.target.style.borderColor = 'var(--color-accent)'}
-            onBlur={(e) => e.target.style.borderColor = 'var(--color-border)'}
           />
-          <span style={{ position: 'absolute', right: '1.5rem', top: '50%', transform: 'translateY(-50%)', opacity: 0.5 }}>
+          <span className="search-icon">
             🔍
           </span>
         </div>
 
         {/* Filters */}
         {showFilters && (
-          <div style={{ 
-            display: 'flex', 
-            flexDirection: 'column',
-            gap: '1rem', 
-            maxWidth: '900px', 
-            margin: '2rem auto 0',
-            background: 'rgba(0,0,0,0.2)',
-            padding: '1.5rem',
-            borderRadius: '20px',
-            border: '1px solid var(--color-border)',
-            boxShadow: '0 10px 30px rgba(0,0,0,0.1)'
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
-              <h3 style={{ fontSize: '1.1rem', fontWeight: 700, margin: 0, color: 'var(--color-text-primary)' }}>
+          <div className="filter-panel">
+            <div className="filter-header">
+              <h3 className="filter-title">
                 Advanced Job Filters
               </h3>
               
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(255,255,255,0.05)', padding: '0.5rem 1.2rem', borderRadius: '25px', border: '1px solid var(--color-border)', minWidth: '250px' }}>
+              <div className="state-select-wrapper">
                 <span style={{ opacity: 0.7 }}>📍</span>
                 <select 
+                  className="state-select"
                   value={selectedState}
                   onChange={(e) => {
                     setSelectedState(e.target.value);
                     localStorage.setItem('user_state', e.target.value);
                     setPage(1);
-                  }}
-                  style={{
-                    background: 'transparent',
-                    border: 'none',
-                    color: 'var(--color-text-primary)',
-                    width: '100%',
-                    outline: 'none',
-                    fontSize: '0.95rem',
-                    fontWeight: 500,
-                    cursor: 'pointer',
-                    appearance: 'auto'
                   }}
                 >
                   {INDIAN_STATES.map(s => (
@@ -347,25 +700,11 @@ export default function BlogListingClient() {
               </div>
             </div>
 
-            <div style={{ marginTop: '0.5rem' }}>
-              <p style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)', marginBottom: '0.8rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+            <div style={{ marginTop: '0.25rem' }}>
+              <p className="qual-section-title">
                 Education Qualification
               </p>
-              <style dangerouslySetInnerHTML={{__html: `
-                .qual-chips-row::-webkit-scrollbar { display: none; }
-              `}} />
-              <div
-                className="qual-chips-row"
-                style={{
-                  display: 'flex',
-                  gap: '0.6rem',
-                  overflowX: 'auto',
-                  paddingBottom: '0.5rem',
-                  WebkitOverflowScrolling: 'touch',
-                  scrollbarWidth: 'none' as const,
-                  msOverflowStyle: 'none' as const
-                }}
-              >
+              <div className="qual-chips-row">
                 {QUALIFICATIONS.map(q => (
                   <button
                     key={q}
@@ -373,21 +712,7 @@ export default function BlogListingClient() {
                       setSelectedQualification(q);
                       setPage(1);
                     }}
-                    style={{
-                      flexShrink: 0,
-                      padding: '0.6rem 1.2rem',
-                      borderRadius: '25px',
-                      border: '1px solid',
-                      borderColor: selectedQualification === q ? 'var(--color-accent)' : 'var(--color-border)',
-                      background: selectedQualification === q ? 'var(--color-accent)' : 'rgba(255,255,255,0.03)',
-                      color: selectedQualification === q ? '#fff' : 'var(--color-text-primary)',
-                      cursor: 'pointer',
-                      fontSize: '0.85rem',
-                      fontWeight: 600,
-                      transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-                      whiteSpace: 'nowrap',
-                      boxShadow: selectedQualification === q ? '0 4px 12px rgba(59, 130, 246, 0.3)' : 'none'
-                    }}
+                    className={`qual-chip-btn ${selectedQualification === q ? 'active' : ''}`}
                   >
                     {q === 'All Qualifications' ? 'All Qualifications' : q}
                   </button>
@@ -398,22 +723,12 @@ export default function BlogListingClient() {
         )}
 
         {/* Tags */}
-        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', justifyContent: 'center', marginTop: '2rem' }}>
+        <div className="tags-container">
           <button
             onClick={() => {
               setSubTag('');
             }}
-            style={{
-              padding: '0.5rem 1.2rem',
-              borderRadius: '20px',
-              border: '1px solid',
-              borderColor: subTag === '' ? 'var(--color-accent)' : 'var(--color-border)',
-              background: subTag === '' ? 'var(--color-accent)' : 'transparent',
-              color: subTag === '' ? '#fff' : 'var(--color-text-primary)',
-              cursor: 'pointer',
-              fontWeight: 500,
-              transition: 'all 0.2s'
-            }}
+            className={`tag-btn ${subTag === '' ? 'active' : ''}`}
           >
             All {activeTag || 'Articles'}
           </button>
@@ -427,17 +742,7 @@ export default function BlogListingClient() {
                   setSubTag(tag);
                 }
               }}
-              style={{
-                padding: '0.5rem 1.2rem',
-                borderRadius: '20px',
-                border: '1px solid',
-                borderColor: subTag === tag ? 'var(--color-accent)' : 'var(--color-border)',
-                background: subTag === tag ? 'var(--color-accent)' : 'transparent',
-                color: subTag === tag ? '#fff' : 'var(--color-text-primary)',
-                cursor: 'pointer',
-                fontWeight: 500,
-                transition: 'all 0.2s'
-              }}
+              className={`tag-btn ${subTag === tag ? 'active' : ''}`}
             >
               {tag}
             </button>
@@ -446,18 +751,20 @@ export default function BlogListingClient() {
       </section>
 
       {/* Blog Grid */}
-      <section style={{ padding: '2rem 2rem 4rem', maxWidth: '1200px', margin: '0 auto' }}>
+      <section className="blog-grid-section">
         {isLoading ? (
-          <div style={{ textAlign: 'center', padding: '4rem', color: 'var(--color-text-secondary)' }}>
-            <span style={{ fontSize: '1.2rem' }}>Loading posts...</span>
+          <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--color-text-secondary)' }}>
+            <span className="dot-bounce" style={{ animationDelay: '0s' }}>.</span>
+            <span className="dot-bounce" style={{ animationDelay: '0.2s' }}>.</span>
+            <span className="dot-bounce" style={{ animationDelay: '0.4s' }}>.</span>
           </div>
         ) : filteredPosts.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '4rem', color: 'var(--color-text-secondary)', background: 'rgba(255,255,255,0.02)', borderRadius: '16px', border: '1px solid var(--color-border)' }}>
-            <span style={{ fontSize: '3.5rem', display: 'block', marginBottom: '1rem' }}>📭</span>
-            <h3 style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--color-text-primary)', marginBottom: '0.5rem' }}>
+          <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--color-text-secondary)', background: 'rgba(255,255,255,0.01)', borderRadius: '12px', border: '1px solid var(--color-border)' }}>
+            <span style={{ fontSize: '2.5rem', display: 'block', marginBottom: '0.75rem' }}>📭</span>
+            <h3 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--color-text-primary)', marginBottom: '0.4rem' }}>
               No articles found
             </h3>
-            <p style={{ fontSize: '1rem' }}>Try adjusting your search, state, or qualification filters.</p>
+            <p style={{ fontSize: '0.9rem' }}>Try adjusting your search, state, or qualification filters.</p>
             <button 
               onClick={() => {
                 setSearch('');
@@ -467,12 +774,12 @@ export default function BlogListingClient() {
                 setPage(1);
               }}
               style={{
-                marginTop: '1.5rem',
-                padding: '0.6rem 1.5rem',
+                marginTop: '1.25rem',
+                padding: '0.5rem 1.25rem',
                 background: 'var(--color-accent)',
                 color: '#fff',
                 border: 'none',
-                borderRadius: '25px',
+                borderRadius: '20px',
                 fontWeight: 600,
                 cursor: 'pointer'
               }}
@@ -482,65 +789,40 @@ export default function BlogListingClient() {
           </div>
         ) : (
           <>
-            <div style={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '1.5rem'
-            }}>
+            <div className="blog-list-wrapper">
               {filteredPosts.map((post: any, idx: number) => (
                 <Link
                   href={`/blog/${post.slug}`}
                   key={post.id}
                   style={{ textDecoration: 'none', color: 'inherit' }}
                 >
-                  <article className="premium-card flex flex-row items-center overflow-hidden p-3 gap-4 hover:bg-white/5 transition-colors border border-white/5 rounded-xl" style={{
-                    background: 'rgba(255,255,255,0.03)',
-                  }}>
+                  <article className="blog-card">
                     {post.featuredImage && (
-                      <div className="w-24 h-24 sm:w-32 sm:h-24 relative bg-gray-900 overflow-hidden rounded-lg flex-shrink-0">
-                        <Image src={post.featuredImage} alt={post.title} fill style={{ objectFit: 'cover' }} sizes="(max-width: 768px) 96px, 128px" />
+                      <div className="blog-image-wrapper">
+                        <Image src={post.featuredImage} alt={post.title} fill style={{ objectFit: 'cover' }} sizes="(max-width: 768px) 80px, 100px" />
                       </div>
                     )}
 
-                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, justifyContent: 'center' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.3rem', flexWrap: 'wrap' }}>
+                    <div className="blog-info-wrapper">
+                      <div className="blog-meta-row">
                         {post.tags?.[0] && (
-                          <span style={{
-                            background: 'rgba(59,130,246,0.1)',
-                            color: '#60a5fa',
-                            padding: '0.2rem 0.6rem',
-                            borderRadius: '12px',
-                            fontSize: '0.65rem',
-                            fontWeight: 600,
-                            whiteSpace: 'nowrap'
-                          }}>
+                          <span className="blog-tag-badge">
                             {post.tags[0]}
                           </span>
                         )}
-                        <p style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', margin: 0, whiteSpace: 'nowrap' }}>
+                        <p className="blog-date-text">
                           {new Date(post.publishedAt || post.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                         </p>
                         {post.expiryDate && (
-                          <span style={{
-                            background: 'rgba(239, 68, 68, 0.1)',
-                            color: '#f87171',
-                            padding: '0.2rem 0.6rem',
-                            borderRadius: '12px',
-                            fontSize: '0.65rem',
-                            fontWeight: 600,
-                            whiteSpace: 'nowrap',
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '0.2rem'
-                          }}>
+                          <span className="blog-expiry-badge">
                             ⏰ Last Date: {new Date(post.expiryDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
                           </span>
                         )}
                       </div>
-                      <h2 className="text-base sm:text-lg font-bold m-0 mb-1 leading-snug line-clamp-2 text-ellipsis overflow-hidden">
+                      <h2 className="blog-title">
                         {post.title}
                       </h2>
-                      <p className="text-sm text-gray-400 m-0 line-clamp-1 text-ellipsis overflow-hidden">
+                      <p className="blog-excerpt">
                         {post.excerpt}
                       </p>
                     </div>
@@ -551,23 +833,21 @@ export default function BlogListingClient() {
 
             {/* Pagination */}
             {totalPages > 1 && (
-              <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '1rem', marginTop: '4rem' }}>
+              <div className="pagination-container">
                 <button
                   onClick={() => setPage(p => Math.max(1, p - 1))}
                   disabled={page === 1}
-                  className="btn-secondary"
-                  style={{ opacity: page === 1 ? 0.5 : 1, cursor: page === 1 ? 'not-allowed' : 'pointer' }}
+                  className="btn-pagination"
                 >
                   Previous
                 </button>
-                <span style={{ fontWeight: 600, color: 'var(--color-text-secondary)' }}>
+                <span style={{ fontWeight: 600, color: 'var(--color-text-secondary)', fontSize: '0.85rem' }}>
                   Page {page} of {totalPages}
                 </span>
                 <button
                   onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                   disabled={page === totalPages}
-                  className="btn-secondary"
-                  style={{ opacity: page === totalPages ? 0.5 : 1, cursor: page === totalPages ? 'not-allowed' : 'pointer' }}
+                  className="btn-pagination"
                 >
                   Next
                 </button>

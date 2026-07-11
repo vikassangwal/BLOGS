@@ -85,7 +85,8 @@ This is an Education & Career blog. You MUST verify the following BEFORE providi
   5. APPLICATION FEES: Fees for General/OBC and SC/ST/Women.
   6. SELECTION PROCESS: How will candidates be selected? (Written, Physical, Interview) and basic syllabus topics (if job).
   7. SALARY/PAY SCALE: What is the expected salary or pay band? (7th CPC Pay Level if govt job)
-  8. OFFICIAL LINKS & HOW TO APPLY: 
+  8. REQUIRED DOCUMENTS (SHORT LIST): Provide a concise bulleted list in Hindi of all necessary documents needed to apply (e.g., Educational Certificates (10th/12th/Graduation), Identity Proof (Aadhaar/PAN/Voter ID), Caste Certificate (if applicable), Domicile/Residence Certificate (मूल निवास), Passport size photograph, Signature scan, etc.).
+  9. OFFICIAL LINKS & HOW TO APPLY: 
      - Official Website: The EXACT conducting department's official homepage (e.g., rpsc.rajasthan.gov.in, ssc.gov.in)
      - Apply Online Link: ONLY if form is currently active — provide the exact official portal login/apply page
      - Download Notification PDF: Only from official .gov.in or .nic.in — if not available, write "Official Notification PDF - Check official website"

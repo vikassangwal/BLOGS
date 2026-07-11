@@ -91,7 +91,18 @@ async function getActiveJobs(limit: number = 8) {
           { title: { contains: 'परिणाम' } },
           { title: { contains: 'Admit Card', mode: 'insensitive' } },
           { title: { contains: 'प्रवेश पत्र' } },
-          { title: { contains: 'Answer Key', mode: 'insensitive' } }
+          { title: { contains: 'Answer Key', mode: 'insensitive' } },
+          { title: { contains: 'उत्तर कुंजी' } },
+          { title: { contains: 'एक नज़र में' } },
+          { title: { contains: 'Key Highlights' } },
+          { title: { contains: 'Highlights', mode: 'insensitive' } },
+          { title: { contains: 'Question Paper', mode: 'insensitive' } },
+          { title: { contains: 'प्रश्न पत्र' } },
+          { title: { contains: 'Syllabus', mode: 'insensitive' } },
+          { title: { contains: 'सिलेबस' } },
+          { title: { contains: 'Admission', mode: 'insensitive' } },
+          { title: { contains: 'दाखिला' } },
+          { title: { contains: 'प्रवेश' } }
         ],
         OR: [
           { expiryDate: { gte: now } },
@@ -152,6 +163,24 @@ async function getUpcomingJobs(limit: number = 8) {
           { title: { contains: 'Upcoming', mode: 'insensitive' } },
           { title: { contains: 'Expected', mode: 'insensitive' } },
           { title: { contains: 'आगामी' } }
+        ],
+        NOT: [
+          { title: { contains: 'Result', mode: 'insensitive' } },
+          { title: { contains: 'परिणाम' } },
+          { title: { contains: 'Admit Card', mode: 'insensitive' } },
+          { title: { contains: 'प्रवेश पत्र' } },
+          { title: { contains: 'Answer Key', mode: 'insensitive' } },
+          { title: { contains: 'उत्तर कुंजी' } },
+          { title: { contains: 'एक नज़र में' } },
+          { title: { contains: 'Key Highlights' } },
+          { title: { contains: 'Highlights', mode: 'insensitive' } },
+          { title: { contains: 'Question Paper', mode: 'insensitive' } },
+          { title: { contains: 'प्रश्न पत्र' } },
+          { title: { contains: 'Syllabus', mode: 'insensitive' } },
+          { title: { contains: 'सिलेबस' } },
+          { title: { contains: 'Admission', mode: 'insensitive' } },
+          { title: { contains: 'दाखिला' } },
+          { title: { contains: 'प्रवेश' } }
         ]
       },
       orderBy: { publishedAt: 'desc' },

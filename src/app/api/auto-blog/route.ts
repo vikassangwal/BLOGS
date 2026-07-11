@@ -321,21 +321,21 @@ export async function POST(request: NextRequest) {
       ${seedNews}
       ${recentlyPublishedStr}
       
-      Generate a list of EXACTLY 40 highly specific, real, and currently trending topics/keywords in India. 
-      Follow this strict distribution rule (36 + 2 + 2):
-      - 36 Education & Career topics:
+      Generate a list of EXACTLY 20 highly specific, real, and currently trending topics/keywords in India. 
+      Follow this strict distribution rule (18 + 1 + 1):
+      - 18 Education & Career topics:
         🚨 1st PRIORITY (HIGHEST) 🚨: Focus on new announcements from the LAST 72 HOURS! Include real Government Job Vacancies, Exam Notifications, Admit Cards, Results, Expected Cut-off Marks (संभावित कट-ऑफ / Safe Score for recently conducted exams), Answer Key releases, Exam Calendar, Exam Date/Timetable, Syllabus Change, Counselling/Merit List, State Scholarship Schemes, Internships, Rojgar Mela/Apprenticeships, Army/Defense Rallies, Entrance Exams (NEET/JEE/CUET/TET), Bank/PSU Jobs (IBPS/SBI), or University/School Board updates.
         🚨 STRICT RULE: Every topic must have active open applications and solid deadlines. Never guess dates or write an article based on guesses! If a deadline is not announced, write "Coming Soon" (जल्द आ रहा है) instead of guessing.
         🚨 CRITICAL RULE: NEVER include any job/recruitment where the 'Last Date to Apply' has already passed before ${getCurrentDateStr()}.
         👉 2nd PRIORITY (FALLBACK) 👉: If there are not enough new government job updates, fill the slots with contractual recruitments, private sector jobs (TCS off-campus, bank openings), ongoing applications with active deadlines, or career guides (e.g. "Best courses after 12th").
         🚨 NO COMBO/GENERIC JOBS RULE: Every job topic MUST be for ONE SPECIFIC department and ONE SPECIFIC post (e.g. 'RPSC Programmer Recruitment ${getCurrentYearNum()}'). NEVER combine multiple departments or unrelated posts into a single topic.
-      - 2 Technology topics: Telecom plans/5G updates, Smartphone/Gadget launches, WhatsApp/Instagram updates, AI Tools, EV Scooter launches, BGMI/Gaming, or Cyber Scam Alerts.
-      - 2 Finance & Earning topics: RBI Rules, E-Shram/PM Kisan updates, Online Earning Apps/Work from home, EPF withdrawal, Zero Balance Accounts, IPOs, Gold Rates, or Post Office/LIC Schemes.
+      - 1 Technology topics: Telecom plans/5G updates, Smartphone/Gadget launches, WhatsApp/Instagram updates, AI Tools, EV Scooter launches, BGMI/Gaming, or Cyber Scam Alerts.
+      - 1 Finance & Earning topics: RBI Rules, E-Shram/PM Kisan updates, Online Earning Apps/Work from home, EPF withdrawal, Zero Balance Accounts, IPOs, Gold Rates, or Post Office/LIC Schemes.
       
       🚨 TOP TRUSTED INDIA SOURCES RULE 🚨: 
       Verify topics from India's Premier Official Portals: ssc.gov.in, upsc.gov.in, ibps.in, nta.ac.in, cbse.gov.in, ignou.ac.in, scholarships.gov.in, employmentnews.gov.in. DO NOT pick unverified rumors.
       
-      Respond ONLY with a valid JSON array of exactly 40 objects, where each object has "keyword" (string) and "niche" (string). The "niche" must be exactly one of: "Education & Career", "Technology", or "Finance & Earning".
+      Respond ONLY with a valid JSON array of exactly 20 objects, where each object has "keyword" (string) and "niche" (string). The "niche" must be exactly one of: "Education & Career", "Technology", or "Finance & Earning".
       No markdown.
       Example format:
       [
@@ -349,7 +349,7 @@ export async function POST(request: NextRequest) {
       let rModel = settings.researcherModel || '';
       const researcherConfigForTopic = buildAgentConfigs('researcher', 'openrouter', rModel || 'google/gemini-2.5-flash', 1500);
       try {
-        const topicRaw = await generateContentWithFallback(researcherConfigForTopic, "You output strict JSON arrays of 40 objects.", prompt);
+        const topicRaw = await generateContentWithFallback(researcherConfigForTopic, "You output strict JSON arrays of 20 objects.", prompt);
         const generatedTopics = parseTopicsFromAI(topicRaw);
         
         if (Array.isArray(generatedTopics) && generatedTopics.length > 0) {

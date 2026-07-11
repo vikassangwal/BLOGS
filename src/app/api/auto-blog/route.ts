@@ -1393,17 +1393,32 @@ YOUR SEO SKILLS:
     // -------------------------------------------------------------
     // SAVE TO DATABASE
     // -------------------------------------------------------------
-    // Generate slug with 8 random chars for better uniqueness (was 4 digits — collision risk)
-    const slugRandom = Math.random().toString(36).substring(2, 6) + '-' + Date.now().toString().slice(-4);
-    const finalSlug = seoData.slug + '-' + slugRandom;
-    
-    // Build social caption for broadcasting
-    const socialCaption = `${articleTitle}\n\nRead more: https://www.knowora.in/blog/${finalSlug}`;
-    const socialHashtags = (seoData.seoKeywords || '').split(',').slice(0, 3).map((k: string) => `#${k.trim().replace(/\s+/g, '')}`).join(' ');
-
     // Use Prisma transaction to prevent partial state corruption
     // (Previously: if timeout hit between blog save and keyword update, duplicate posts were created)
     const newPost = await prisma.$transaction(async (tx) => {
+      // Generate clean, SEO-friendly unique slug (WordPress style fallback)
+      let finalSlug = seoData.slug.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+      let isUnique = false;
+      let counter = 1;
+      while (!isUnique) {
+        const existing = await tx.blogPost.findFirst({
+          where: { 
+            slug: finalSlug,
+            NOT: isStage2 && researchedKeyword?.postId ? { id: researchedKeyword.postId } : undefined
+          }
+        });
+        if (!existing) {
+          isUnique = true;
+        } else {
+          counter++;
+          finalSlug = `${seoData.slug}-${counter}`;
+        }
+      }
+
+      // Build social caption for broadcasting
+      const socialCaption = `${articleTitle}\n\nRead more: https://www.knowora.in/blog/${finalSlug}`;
+      const socialHashtags = (seoData.seoKeywords || '').split(',').slice(0, 3).map((k: string) => `#${k.trim().replace(/\s+/g, '')}`).join(' ');
+
       let post;
       if (isStage2 && researchedKeyword?.postId) {
         post = await tx.blogPost.update({

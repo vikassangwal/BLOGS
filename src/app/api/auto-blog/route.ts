@@ -189,7 +189,12 @@ export async function POST(request: NextRequest) {
       for (const prov of fallbackProviders) {
         const k = (savedKeys[prov] || '').trim();
         if (k && k.length >= 10 && prov !== primaryProvider) {
-          const m = prov.startsWith('gemini') ? 'gemini-2.0-flash' : prov === 'groq' ? 'llama-3.3-70b-versatile' : prov === 'openai' ? 'gpt-4o-mini' : 'google/gemini-2.5-flash';
+          let m = 'google/gemini-2.5-flash';
+          if (prov === 'gemini') m = 'gemini-2.5-flash';
+          else if (prov === 'gemini2') m = 'gemini-1.5-flash';
+          else if (prov === 'gemini3') m = 'gemini-2.0-flash';
+          else if (prov === 'groq') m = 'llama-3.3-70b-versatile';
+          else if (prov === 'openai') m = 'gpt-4o-mini';
           configs.push({ provider: prov, apiKey: k, model: m });
         }
       }
@@ -285,23 +290,30 @@ export async function POST(request: NextRequest) {
     let sModel = settings.seoModel || '';
 
     const researcherConfig = buildAgentConfigs('researcher', 'openrouter', rModel || 'google/gemini-2.5-flash', 1500);
-    
-    // Feature: Auto-inject Native Gemini for Google Search Grounding if key exists
-    let geminiKey = savedKeys['gemini'];
-    if (!geminiKey) {
-      try {
-        const dbKey = await prisma.apiKey.findFirst({ where: { provider: { in: ['gemini', 'google_ai'] }, isActive: true } });
-        if (dbKey) geminiKey = dbKey.apiKey;
-      } catch(e){}
-    }
-
     const writerConfig = buildAgentConfigs('writer', 'openrouter', wModel || 'openai/gpt-4o-mini', 4000);
     const seoConfig = buildAgentConfigs('seo', 'openrouter', sModel || 'openai/gpt-4o-mini', 500);
+    
+    // Feature: Auto-inject Native Gemini for Google Search Grounding if key exists
+    // Auto-inject all three distinct Gemini models to take advantage of separate rate limits/quotas
+    const geminiInjections = [
+      { name: 'gemini3', model: 'gemini-2.0-flash' },
+      { name: 'gemini2', model: 'gemini-1.5-flash' },
+      { name: 'gemini', model: 'gemini-2.5-flash' }
+    ];
 
-    if (geminiKey && geminiKey.length > 10) {
-      researcherConfig.configs.unshift({ provider: 'gemini', apiKey: geminiKey, model: 'gemini-2.5-flash' });
-      writerConfig.configs.unshift({ provider: 'gemini', apiKey: geminiKey, model: 'gemini-2.5-flash' });
-      seoConfig.configs.unshift({ provider: 'gemini', apiKey: geminiKey, model: 'gemini-2.5-flash' });
+    for (const g of geminiInjections) {
+      let k = (savedKeys[g.name] || '').trim();
+      if (!k && g.name === 'gemini') {
+        try {
+          const dbKey = await prisma.apiKey.findFirst({ where: { provider: { in: ['gemini', 'google_ai'] }, isActive: true } });
+          if (dbKey) k = dbKey.apiKey;
+        } catch(e){}
+      }
+      if (k && k.length > 10) {
+        researcherConfig.configs.unshift({ provider: g.name, apiKey: k, model: g.model });
+        writerConfig.configs.unshift({ provider: g.name, apiKey: k, model: g.model });
+        seoConfig.configs.unshift({ provider: g.name, apiKey: k, model: g.model });
+      }
     }
 
     // Verify at least one agent has a valid API key

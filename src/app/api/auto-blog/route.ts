@@ -253,7 +253,39 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    if (!targetTopic) {
+    let rModel = settings.researcherModel || '';
+    let wModel = settings.writerModel || '';
+    let sModel = settings.seoModel || '';
+
+    const researcherConfig = buildAgentConfigs('researcher', 'openrouter', rModel || 'google/gemini-2.5-flash', 1500);
+    
+    // Feature: Auto-inject Native Gemini for Google Search Grounding if key exists
+    let geminiKey = savedKeys['gemini'];
+    if (!geminiKey) {
+      try {
+        const dbKey = await prisma.apiKey.findFirst({ where: { provider: { in: ['gemini', 'google_ai'] }, isActive: true } });
+        if (dbKey) geminiKey = dbKey.apiKey;
+      } catch(e){}
+    }
+    if (geminiKey && geminiKey.length > 10) {
+      researcherConfig.configs.unshift({ provider: 'gemini', apiKey: geminiKey, model: 'gemini-1.5-flash' });
+    }
+
+    const writerConfig = buildAgentConfigs('writer', 'openrouter', wModel || 'openai/gpt-4o-mini', 8000);
+    const seoConfig = buildAgentConfigs('seo', 'openrouter', sModel || 'openai/gpt-4o-mini', 500);
+
+    // Verify at least one agent has a valid API key
+    const hasResearcherKey = researcherConfig.configs.length > 0 && researcherConfig.configs[0].apiKey;
+    const hasWriterKey = writerConfig.configs.length > 0 && writerConfig.configs[0].apiKey;
+    const hasSeoKey = seoConfig.configs.length > 0 && seoConfig.configs[0].apiKey;
+    if (!hasResearcherKey && !hasWriterKey && !hasSeoKey) {
+      return NextResponse.json({ success: false, error: 'AI is not configured. Please add at least one API key in Settings > AI Configuration.' });
+    }
+
+    // Start background processing via waitUntil to avoid Vercel gateway timeout
+    waitUntil((async () => {
+      try {
+        if (!targetTopic) {
       // ALWAYS generate topics when queue is empty, regardless of isNewsActive setting
       // Since manual run button was pressed, or the cron is active, we should restock the queue.
 
@@ -393,48 +425,38 @@ export async function POST(request: NextRequest) {
              await prisma.autoBlogKeyword.createMany({ data: uniqueQueueData });
            }
 
-          // Return early to prevent Vercel 60s timeout limit. The next click will generate the actual blog.
-          return NextResponse.json({ 
-            status: 'empty', 
-            message: `${uniqueQueueData.length} Fresh Topics Generated successfully! Please click "Run Now" again to write the first blog.` 
+          // Log and complete background processing
+          console.log(`[Auto-Blog] ${uniqueQueueData.length} Fresh Topics Generated successfully!`);
+          await prisma.autoBlogLog.create({
+            data: {
+              keyword: 'Topic Generation',
+              status: 'success',
+              title: `${uniqueQueueData.length} fresh topics queued.`
+            }
           });
-          
+          return;
         } else {
-           return NextResponse.json({ status: 'empty', message: 'AI failed to generate topics array.' });
+          console.error('[Auto-Blog] AI failed to generate topics array.');
+          await prisma.autoBlogLog.create({
+            data: {
+              keyword: 'Topic Generation',
+              status: 'failed',
+              error: 'AI failed to generate topics array.'
+            }
+          });
+          return;
         }
       } catch (e: any) {
         console.error('AI Topic Generator failed:', e);
-        return NextResponse.json({ status: 'empty', message: 'AI Error: ' + (e.message || 'Unknown error') });
+        await prisma.autoBlogLog.create({
+          data: {
+            keyword: 'Topic Generation',
+            status: 'failed',
+            error: 'AI Error: ' + (e.message || 'Unknown error')
+          }
+        });
+        return;
       }
-    }
-
-    let rModel = settings.researcherModel || '';
-    let wModel = settings.writerModel || '';
-    let sModel = settings.seoModel || '';
-
-    const researcherConfig = buildAgentConfigs('researcher', 'openrouter', rModel || 'google/gemini-2.5-flash', 1500);
-    
-    // Feature: Auto-inject Native Gemini for Google Search Grounding if key exists
-    let geminiKey = savedKeys['gemini'];
-    if (!geminiKey) {
-      try {
-        const dbKey = await prisma.apiKey.findFirst({ where: { provider: { in: ['gemini', 'google_ai'] }, isActive: true } });
-        if (dbKey) geminiKey = dbKey.apiKey;
-      } catch(e){}
-    }
-    if (geminiKey && geminiKey.length > 10) {
-      researcherConfig.configs.unshift({ provider: 'gemini', apiKey: geminiKey, model: 'gemini-1.5-flash' });
-    }
-
-    const writerConfig = buildAgentConfigs('writer', 'openrouter', wModel || 'openai/gpt-4o-mini', 8000);
-    const seoConfig = buildAgentConfigs('seo', 'openrouter', sModel || 'openai/gpt-4o-mini', 500);
-
-    // Verify at least one agent has a valid API key
-    const hasResearcherKey = researcherConfig.configs.length > 0 && researcherConfig.configs[0].apiKey;
-    const hasWriterKey = writerConfig.configs.length > 0 && writerConfig.configs[0].apiKey;
-    const hasSeoKey = seoConfig.configs.length > 0 && seoConfig.configs[0].apiKey;
-    if (!hasResearcherKey && !hasWriterKey && !hasSeoKey) {
-      return NextResponse.json({ success: false, error: 'AI is not configured. Please add at least one API key in Settings > AI Configuration.' });
     }
 
     // Set Language Rules
@@ -491,7 +513,14 @@ export async function POST(request: NextRequest) {
       if (keywordId) {
         await prisma.autoBlogKeyword.update({ where: { id: keywordId }, data: { status: 'failed' } });
       }
-      return NextResponse.json({ success: false, error: 'AI detected fake/unreleased news and aborted.' });
+      await prisma.autoBlogLog.create({
+        data: {
+          keyword: targetTopic,
+          status: 'skipped',
+          error: 'AI detected fake/unreleased news and aborted.'
+        }
+      });
+      return;
     }
 
     // 🚨 NEW: Block blog writing if no official notification found for Education & Career topics
@@ -500,10 +529,14 @@ export async function POST(request: NextRequest) {
       if (keywordId) {
         await prisma.autoBlogKeyword.update({ where: { id: keywordId }, data: { status: 'failed' } });
       }
-      return NextResponse.json({ 
-        success: false, 
-        error: `Blog not written: Official notification not yet released for "${targetTopic}". Blog will be created once official notification is available.` 
+      await prisma.autoBlogLog.create({
+        data: {
+          keyword: targetTopic,
+          status: 'skipped',
+          error: 'Official notification not yet released. Skipping blog creation.'
+        }
       });
+      return;
     }
 
     // 🚨 NEW: Block excluded topics (Results, Syllabus, Earning & Courses)
@@ -512,10 +545,14 @@ export async function POST(request: NextRequest) {
       if (keywordId) {
         await prisma.autoBlogKeyword.update({ where: { id: keywordId }, data: { status: 'failed' } });
       }
-      return NextResponse.json({ 
-        success: false, 
-        error: `Topic "${targetTopic}" is excluded (Results/Syllabus/Earning are not auto-blogged in Education & Career).` 
+      await prisma.autoBlogLog.create({
+        data: {
+          keyword: targetTopic,
+          status: 'skipped',
+          error: `Topic "${targetTopic}" is excluded (Results/Syllabus/Earning are not auto-blogged).`
+        }
       });
+      return;
     }
 
     // -------------------------------------------------------------
@@ -1283,8 +1320,7 @@ YOUR SEO SKILLS:
     const broadcastCaption = newPost.socialCaptions || `${newPost.title}\n\nRead more: https://www.knowora.in/blog/${newPost.slug}\n\n${newPost.socialHashtags || ''}`;
     const socialImageUrl = `https://www.knowora.in/api/og?title=${encodeURIComponent(newPost.title)}&bg=${encodeURIComponent(newPost.featuredImage || '')}`;
 
-    // Use waitUntil() to run broadcasting in background — HTTP response returns immediately
-    waitUntil((async () => {
+      // Run broadcasting inline inside the background execution task
       try {
         // Run ALL social media posts in PARALLEL (was sequential — wasted 10-15s)
         const socialPromises: Promise<any>[] = [];
@@ -1354,24 +1390,34 @@ YOUR SEO SKILLS:
 
         // Revalidate pages
         try { revalidatePath('/'); revalidatePath('/blog'); } catch (e) { console.warn('Revalidate failed:', e); }
-
       } catch (broadcastError) {
         console.error('[Auto-Blog] Broadcasting error (non-fatal):', broadcastError);
       }
-    })());
+    } catch (error: any) {
+      console.error('Background auto-blog fatal error:', error);
+      await prisma.autoBlogLog.create({
+        data: {
+          keyword: targetTopic || 'Unknown/Crash',
+          status: 'failed',
+          error: error.message || 'Unknown error'
+        }
+      });
+    }
+  })());
 
-    // Return immediately — broadcasting continues in background via waitUntil()
-    return NextResponse.json({ success: true, post: newPost, message: `Blog "${newPost.title}" published successfully!` });
-
+    if (!targetTopic) {
+      return NextResponse.json({
+        success: true,
+        message: 'Queue is empty. Fresh topics are being generated in the background. Please wait 15 seconds and refresh.'
+      }, { status: 202 });
+    } else {
+      return NextResponse.json({
+        success: true,
+        message: `Auto-blog generation started in the background for "${targetTopic}". It will take 1-2 minutes. Please check the logs tab shortly.`
+      }, { status: 202 });
+    }
   } catch (error: any) {
-    console.error('Auto-blog fatal error:', error);
-    await prisma.autoBlogLog.create({
-      data: {
-        keyword: 'Unknown/Crash',
-        status: 'failed',
-        error: error.message || 'Unknown error'
-      }
-    });
+    console.error('Auto-blog entry fatal error:', error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }

@@ -107,7 +107,7 @@ async function getActiveJobs(limit: number = 8) {
         ]
       },
       orderBy: { publishedAt: 'desc' },
-      take: limit * 3, // Fetch extra to filter in memory
+      take: 200, // Fetch extra to filter in memory
       select: {
         id: true,
         title: true,
@@ -174,7 +174,7 @@ async function getUpcomingJobs(limit: number = 8) {
         ]
       },
       orderBy: { publishedAt: 'desc' },
-      take: limit * 3, // Fetch extra for memory filtering
+      take: 200, // Fetch extra for memory filtering
       select: {
         id: true,
         title: true,
@@ -235,7 +235,7 @@ async function getAdmitCards(limit: number = 8) {
         ]
       },
       orderBy: { publishedAt: 'desc' },
-      take: limit * 3,
+      take: 200,
       select: {
         id: true,
         title: true,
@@ -285,7 +285,7 @@ async function getResultsAndSyllabus(limit: number = 8) {
         ]
       },
       orderBy: { publishedAt: 'desc' },
-      take: limit * 3,
+      take: 200,
       select: {
         id: true,
         title: true,
@@ -328,7 +328,7 @@ async function getUniversityUpdates(limit: number = 8) {
         ]
       },
       orderBy: { publishedAt: 'desc' },
-      take: limit * 3,
+      take: 200,
       select: {
         id: true, title: true, slug: true, publishedAt: true, createdAt: true, expiryDate: true, content: true
       }
@@ -367,7 +367,7 @@ async function getSchemes(limit: number = 8) {
         ]
       },
       orderBy: { publishedAt: 'desc' },
-      take: limit * 2,
+      take: 200,
       select: {
         id: true, title: true, slug: true, publishedAt: true, createdAt: true, expiryDate: true, content: true
       }
@@ -402,7 +402,7 @@ async function getScholarships(limit: number = 8) {
         ]
       },
       orderBy: { publishedAt: 'desc' },
-      take: limit * 3,
+      take: 200,
       select: {
         id: true, title: true, slug: true, publishedAt: true, createdAt: true, expiryDate: true, content: true
       }
@@ -553,7 +553,7 @@ async function getSchoolNews(limit: number = 8) {
         ]
       },
       orderBy: { publishedAt: 'desc' },
-      take: limit * 2,
+      take: 200,
       select: { id: true, title: true, slug: true, publishedAt: true, createdAt: true, expiryDate: true, content: true }
     });
     

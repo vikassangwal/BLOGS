@@ -224,32 +224,59 @@ export async function POST(request: NextRequest) {
       });
     } catch (e) { console.error('Failed to clear old keywords', e); }
 
-    // 3. FETCH KEYWORD
+    // 3. FETCH KEYWORD (Stage-aware)
     let targetTopic = '';
     let keywordId = null;
     let selectedCategory = 'News';
-    let pendingKeyword = null;
+    let isStage2 = false;
+    let researchedKeyword = null;
 
     if (customKeyword) {
-      targetTopic = customKeyword;
-      const tLower = customKeyword.toLowerCase();
-      if (tLower.includes('job') || tLower.includes('result') || tLower.includes('exam') || tLower.includes('admit') || tLower.includes('notification') || tLower.includes('vacancy') || tLower.includes('recruitment') || tLower.includes('syllabus')) {
-        selectedCategory = 'Education & Career';
-      } else if (tLower.includes('tech') || tLower.includes('launch') || tLower.includes('ai') || tLower.includes('phone') || tLower.includes('app')) {
-        selectedCategory = 'Technology';
-      } else if (tLower.includes('finance') || tLower.includes('stock') || tLower.includes('budget') || tLower.includes('market') || tLower.includes('bank') || tLower.includes('earn')) {
-        selectedCategory = 'Finance & Earning';
-      }
+      researchedKeyword = await prisma.autoBlogKeyword.findFirst({
+        where: { keyword: customKeyword, status: 'research_completed' }
+      });
     } else {
-      pendingKeyword = await prisma.autoBlogKeyword.findFirst({
-        where: { status: 'pending' },
+      researchedKeyword = await prisma.autoBlogKeyword.findFirst({
+        where: { status: 'research_completed' },
         orderBy: [{ priority: 'desc' }, { createdAt: 'asc' }]
       });
+    }
+
+    if (researchedKeyword) {
+      targetTopic = researchedKeyword.keyword;
+      keywordId = researchedKeyword.id;
+      selectedCategory = researchedKeyword.niche || 'News';
+      isStage2 = true;
+    } else {
+      let pendingKeyword = null;
+      if (customKeyword) {
+        pendingKeyword = await prisma.autoBlogKeyword.findFirst({
+          where: { keyword: customKeyword, status: 'pending' }
+        });
+        if (!pendingKeyword) {
+          pendingKeyword = await prisma.autoBlogKeyword.create({
+            data: { keyword: customKeyword, status: 'pending', niche: 'News' }
+          });
+        }
+      } else {
+        pendingKeyword = await prisma.autoBlogKeyword.findFirst({
+          where: { status: 'pending' },
+          orderBy: [{ priority: 'desc' }, { createdAt: 'asc' }]
+        });
+      }
 
       if (pendingKeyword) {
         targetTopic = pendingKeyword.keyword;
         keywordId = pendingKeyword.id;
         selectedCategory = pendingKeyword.niche || 'News';
+        const tLower = targetTopic.toLowerCase();
+        if (tLower.includes('job') || tLower.includes('result') || tLower.includes('exam') || tLower.includes('admit') || tLower.includes('notification') || tLower.includes('vacancy') || tLower.includes('recruitment') || tLower.includes('syllabus')) {
+          selectedCategory = 'Education & Career';
+        } else if (tLower.includes('tech') || tLower.includes('launch') || tLower.includes('ai') || tLower.includes('phone') || tLower.includes('app')) {
+          selectedCategory = 'Technology';
+        } else if (tLower.includes('finance') || tLower.includes('stock') || tLower.includes('budget') || tLower.includes('market') || tLower.includes('bank') || tLower.includes('earn')) {
+          selectedCategory = 'Finance & Earning';
+        }
       }
     }
 
@@ -478,84 +505,131 @@ export async function POST(request: NextRequest) {
       console.error('Failed to fetch recent posts for internal linking', e);
     }
 
-    // -------------------------------------------------------------
-    // AGENT 1: THE RESEARCHER & NEWS API
-    // -------------------------------------------------------------
-    let liveNewsContext = '';
-    if (savedKeys.newsdata) {
-      try {
-        // Use first 3 meaningful words for better search relevance (was using only first word)
-        const searchWords = targetTopic.split(' ').filter(w => w.length > 2).slice(0, 3).join(' ') || 'india';
-        const newsRes = await fetchWithTimeout(`https://newsdata.io/api/1/news?apikey=${savedKeys.newsdata}&q=${encodeURIComponent(searchWords)}&language=en,hi`, {}, 3000);
-        const newsJson = await newsRes.json();
-        if (newsJson.results && newsJson.results.length > 0) {
-          liveNewsContext = "LIVE NEWS DATA (Use this for factual accuracy):\n" + 
-            newsJson.results.slice(0, 3).map((n: any) => `- ${n.title}: ${n.description}`).join('\n');
-        }
-      } catch (e) {
-        console.error("News API failed", e);
-      }
-    }
-
-    const researchPrompt = getResearchPrompt(targetTopic, liveNewsContext, customSourceUrl, getCurrentDateStr(), getCurrentYearNum());
-    
     let researchData = '';
-    try {
-      researchData = await generateContentWithFallback(researcherConfig, "You are a factual research assistant.", researchPrompt);
-    } catch (e: any) {
-      if (e.message?.includes('429')) throw new Error("API Limit (429): AI की फ्री लिमिट खत्म हो गई है या सर्वर बिज़ी है। कृपया 1 घंटे बाद कोशिश करें या अपना API Key बदलें।");
-      researchData = `Topic: ${targetTopic}. Provide a comprehensive overview. ${liveNewsContext}`;
-    }
 
-    if (customSourceUrl) {
-      researchData += `\n\n🚨 MANDATORY OFFICIAL APPLY / NOTIFICATION URL: You MUST use the following URL for the application/notification link: ${customSourceUrl}. Do NOT use any other link or guess the official link.`;
-    }
-
-    if (researchData.includes("ABORT_FAKE_NEWS")) {
-      console.warn("AI detected fake/unreleased news for topic:", targetTopic);
-      if (keywordId) {
-        await prisma.autoBlogKeyword.update({ where: { id: keywordId }, data: { status: 'failed' } });
+    if (!isStage2) {
+      // -------------------------------------------------------------
+      // AGENT 1: THE RESEARCHER & NEWS API
+      // -------------------------------------------------------------
+      let liveNewsContext = '';
+      if (savedKeys.newsdata) {
+        try {
+          // Use first 3 meaningful words for better search relevance (was using only first word)
+          const searchWords = targetTopic.split(' ').filter(w => w.length > 2).slice(0, 3).join(' ') || 'india';
+          const newsRes = await fetchWithTimeout(`https://newsdata.io/api/1/news?apikey=${savedKeys.newsdata}&q=${encodeURIComponent(searchWords)}&language=en,hi`, {}, 3000);
+          const newsJson = await newsRes.json();
+          if (newsJson.results && newsJson.results.length > 0) {
+            liveNewsContext = "LIVE NEWS DATA (Use this for factual accuracy):\n" + 
+              newsJson.results.slice(0, 3).map((n: any) => `- ${n.title}: ${n.description}`).join('\n');
+          }
+        } catch (e) {
+          console.error("News API failed", e);
+        }
       }
+
+      const researchPrompt = getResearchPrompt(targetTopic, liveNewsContext, customSourceUrl, getCurrentDateStr(), getCurrentYearNum());
+      
+      try {
+        researchData = await generateContentWithFallback(researcherConfig, "You are a factual research assistant.", researchPrompt);
+      } catch (e: any) {
+        if (e.message?.includes('429')) throw new Error("API Limit (429): AI की फ्री लिमिट खत्म हो गई है या सर्वर बिज़ी है। कृपया 1 घंटे बाद कोशिश करें या अपना API Key बदलें।");
+        researchData = `Topic: ${targetTopic}. Provide a comprehensive overview. ${liveNewsContext}`;
+      }
+
+      if (customSourceUrl) {
+        researchData += `\n\n🚨 MANDATORY OFFICIAL APPLY / NOTIFICATION URL: You MUST use the following URL for the application/notification link: ${customSourceUrl}. Do NOT use any other link or guess the official link.`;
+      }
+
+      if (researchData.includes("ABORT_FAKE_NEWS")) {
+        console.warn("AI detected fake/unreleased news for topic:", targetTopic);
+        if (keywordId) {
+          await prisma.autoBlogKeyword.update({ where: { id: keywordId }, data: { status: 'failed' } });
+        }
+        await prisma.autoBlogLog.create({
+          data: {
+            keyword: targetTopic,
+            status: 'skipped',
+            error: 'AI detected fake/unreleased news and aborted.'
+          }
+        });
+        return;
+      }
+
+      // 🚨 NEW: Block blog writing if no official notification found for Education & Career topics
+      if (researchData.includes("ABORT_NO_NOTIFICATION")) {
+        console.warn(`[Auto-Blog] ABORT: No official notification found for Education topic: "${targetTopic}". Skipping blog creation.`);
+        if (keywordId) {
+          await prisma.autoBlogKeyword.update({ where: { id: keywordId }, data: { status: 'failed' } });
+        }
+        await prisma.autoBlogLog.create({
+          data: {
+            keyword: targetTopic,
+            status: 'skipped',
+            error: 'Official notification not yet released. Skipping blog creation.'
+          }
+        });
+        return;
+      }
+
+      // 🚨 NEW: Block excluded topics (Results, Syllabus, Earning & Courses)
+      if (researchData.includes("ABORT_EXCLUDED_TOPIC")) {
+        console.warn(`[Auto-Blog] ABORT: Topic "${targetTopic}" is in excluded category (Results/Syllabus/Earning). Skipping.`);
+        if (keywordId) {
+          await prisma.autoBlogKeyword.update({ where: { id: keywordId }, data: { status: 'failed' } });
+        }
+        await prisma.autoBlogLog.create({
+          data: {
+            keyword: targetTopic,
+            status: 'skipped',
+            error: `Topic "${targetTopic}" is excluded (Results/Syllabus/Earning are not auto-blogged).`
+          }
+        });
+        return;
+      }
+
+      // Create Draft BlogPost with status 'Researching'
+      const slugRandom = Math.random().toString(36).substring(2, 6) + '-' + Date.now().toString().slice(-4);
+      const tempSlug = `temp-research-${slugRandom}`;
+      const draftPost = await prisma.blogPost.create({
+        data: {
+          title: targetTopic,
+          slug: tempSlug,
+          content: researchData,
+          status: 'Researching',
+          autoGenerated: true
+        }
+      });
+
+      if (keywordId) {
+        await prisma.autoBlogKeyword.update({
+          where: { id: keywordId },
+          data: {
+            status: 'research_completed',
+            postId: draftPost.id,
+            usedAt: new Date()
+          }
+        });
+      }
+
       await prisma.autoBlogLog.create({
         data: {
           keyword: targetTopic,
-          status: 'skipped',
-          error: 'AI detected fake/unreleased news and aborted.'
+          status: 'success',
+          title: `Stage 1 (Research) completed. Saved draft post: ${draftPost.id}`
         }
       });
       return;
-    }
-
-    // 🚨 NEW: Block blog writing if no official notification found for Education & Career topics
-    if (researchData.includes("ABORT_NO_NOTIFICATION")) {
-      console.warn(`[Auto-Blog] ABORT: No official notification found for Education topic: "${targetTopic}". Skipping blog creation.`);
-      if (keywordId) {
-        await prisma.autoBlogKeyword.update({ where: { id: keywordId }, data: { status: 'failed' } });
+    } else {
+      // -------------------------------------------------------------
+      // STAGE 2: FETCH RESEARCH DATA FROM DRAFT
+      // -------------------------------------------------------------
+      const draftPost = await prisma.blogPost.findUnique({
+        where: { id: researchedKeyword?.postId || '' }
+      });
+      if (!draftPost) {
+        throw new Error(`Draft post not found for ID: ${researchedKeyword?.postId}`);
       }
-      await prisma.autoBlogLog.create({
-        data: {
-          keyword: targetTopic,
-          status: 'skipped',
-          error: 'Official notification not yet released. Skipping blog creation.'
-        }
-      });
-      return;
-    }
-
-    // 🚨 NEW: Block excluded topics (Results, Syllabus, Earning & Courses)
-    if (researchData.includes("ABORT_EXCLUDED_TOPIC")) {
-      console.warn(`[Auto-Blog] ABORT: Topic "${targetTopic}" is in excluded category (Results/Syllabus/Earning). Skipping.`);
-      if (keywordId) {
-        await prisma.autoBlogKeyword.update({ where: { id: keywordId }, data: { status: 'failed' } });
-      }
-      await prisma.autoBlogLog.create({
-        data: {
-          keyword: targetTopic,
-          status: 'skipped',
-          error: `Topic "${targetTopic}" is excluded (Results/Syllabus/Earning are not auto-blogged).`
-        }
-      });
-      return;
+      researchData = draftPost.content;
     }
 
     // -------------------------------------------------------------
@@ -1174,7 +1248,7 @@ YOUR SEO SKILLS:
     // AUTOMATIC SUB-TAG DETECTION FOR HOME GRID COLUMNS
     // -------------------------------------------------------------
     const detectedTagsSet = new Set<string>();
-    detectedTagsSet.add(pendingKeyword?.niche || selectedCategory); // Add primary niche first
+    detectedTagsSet.add(selectedCategory); // Add primary niche first
 
     const lowerTopic = targetTopic.toLowerCase();
     if (lowerTopic.includes('job') || lowerTopic.includes('recruitment') || lowerTopic.includes('bharti') || lowerTopic.includes('vacancy') || lowerTopic.includes('naukri')) {
@@ -1269,33 +1343,64 @@ YOUR SEO SKILLS:
     // Use Prisma transaction to prevent partial state corruption
     // (Previously: if timeout hit between blog save and keyword update, duplicate posts were created)
     const newPost = await prisma.$transaction(async (tx) => {
-      const post = await tx.blogPost.create({
-        data: {
-          title: articleTitle,
-          slug: finalSlug,
-          content: articleHtml,
-          excerpt: seoData.seoDescription,
-          featuredImage: featuredImage,
-          status: settings.autoPublish ? 'Published' : 'Draft',
-          publishedAt: settings.autoPublish ? new Date() : null,
-          autoGenerated: true,
-          expiryDate: expiryDate,
-          jobStates: seoData.jobStates,
-          qualifications: seoData.qualifications,
-          applyStartDate: seoData.applyStartDate,
-          applyLastDate: seoData.applyLastDate,
-          vacancyCount: seoData.vacancyCount,
-          officialApplyUrl: seoData.officialApplyUrl,
-          seoTitle: seoData.seoTitle,
-          seoDescription: seoData.seoDescription,
-          seoKeywords: seoData.seoKeywords,
-          socialCaptions: socialCaption,
-          socialHashtags: socialHashtags,
-          tags: {
-            create: tagsToCreate
+      let post;
+      if (isStage2 && researchedKeyword?.postId) {
+        post = await tx.blogPost.update({
+          where: { id: researchedKeyword.postId },
+          data: {
+            title: articleTitle,
+            slug: finalSlug,
+            content: articleHtml,
+            excerpt: seoData.seoDescription,
+            featuredImage: featuredImage,
+            status: settings.autoPublish ? 'Published' : 'Draft',
+            publishedAt: settings.autoPublish ? new Date() : null,
+            expiryDate: expiryDate,
+            jobStates: seoData.jobStates,
+            qualifications: seoData.qualifications,
+            applyStartDate: seoData.applyStartDate,
+            applyLastDate: seoData.applyLastDate,
+            vacancyCount: seoData.vacancyCount,
+            officialApplyUrl: seoData.officialApplyUrl,
+            seoTitle: seoData.seoTitle,
+            seoDescription: seoData.seoDescription,
+            seoKeywords: seoData.seoKeywords,
+            socialCaptions: socialCaption,
+            socialHashtags: socialHashtags,
+            tags: {
+              create: tagsToCreate
+            }
           }
-        }
-      });
+        });
+      } else {
+        post = await tx.blogPost.create({
+          data: {
+            title: articleTitle,
+            slug: finalSlug,
+            content: articleHtml,
+            excerpt: seoData.seoDescription,
+            featuredImage: featuredImage,
+            status: settings.autoPublish ? 'Published' : 'Draft',
+            publishedAt: settings.autoPublish ? new Date() : null,
+            autoGenerated: true,
+            expiryDate: expiryDate,
+            jobStates: seoData.jobStates,
+            qualifications: seoData.qualifications,
+            applyStartDate: seoData.applyStartDate,
+            applyLastDate: seoData.applyLastDate,
+            vacancyCount: seoData.vacancyCount,
+            officialApplyUrl: seoData.officialApplyUrl,
+            seoTitle: seoData.seoTitle,
+            seoDescription: seoData.seoDescription,
+            seoKeywords: seoData.seoKeywords,
+            socialCaptions: socialCaption,
+            socialHashtags: socialHashtags,
+            tags: {
+              create: tagsToCreate
+            }
+          }
+        });
+      }
 
       if (keywordId) {
         await tx.autoBlogKeyword.update({
@@ -1414,10 +1519,15 @@ YOUR SEO SKILLS:
         success: true,
         message: 'Queue is empty. Fresh topics are being generated in the background. Please wait 15 seconds and refresh.'
       }, { status: 202 });
+    } else if (isStage2) {
+      return NextResponse.json({
+        success: true,
+        message: `Stage 2: Blog writing & publishing started in the background for "${targetTopic}". It will take 15-20 seconds. Please check the logs tab shortly.`
+      }, { status: 202 });
     } else {
       return NextResponse.json({
         success: true,
-        message: `Auto-blog generation started in the background for "${targetTopic}". It will take 1-2 minutes. Please check the logs tab shortly.`
+        message: `Stage 1: Research and draft creation started in the background for "${targetTopic}". It will take 10 seconds. Please check the logs tab shortly.`
       }, { status: 202 });
     }
   } catch (error: any) {

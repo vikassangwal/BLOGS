@@ -13,7 +13,7 @@ export async function GET(request: Request, context: { params: Promise<{ slug: s
       return new NextResponse('Story not found', { status: 404 });
     }
 
-    const domain = 'https://knowora.in';
+    const domain = process.env.NEXT_PUBLIC_SITE_URL || 'https://knowora.in';
     const publisherLogo = `${domain}/logo.png`; // Ensure a logo.png exists in public folder
     const posterImage = post.featuredImage || 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=720&h=1280&fit=crop';
     

@@ -37,6 +37,7 @@ export async function POST(request: NextRequest) {
   try {
     // 1. Fetch site settings
     const siteSettings = await prisma.siteSettings.findUnique({ where: { id: 'default' } });
+    const settings = await prisma.autoBlogSettings.findUnique({ where: { id: 'default' } });
     if (!siteSettings) throw new Error("Site settings not found");
 
     let savedKeys: any = {};
@@ -192,6 +193,18 @@ Respond ONLY with the JSON.`;
             content: finalContent
           }
         });
+
+        // Google Indexing API submission for edited post
+        if (settings?.googleIndexingJson) {
+          try {
+            const { submitToGoogleIndexing } = require('@/lib/google-indexing');
+            const postUrl = `https://knowora.in/blog/${uncheckedPost.slug}`;
+            console.log("Submitting edited post to Google Indexing API:", postUrl);
+            await submitToGoogleIndexing(postUrl, 'URL_UPDATED', settings.googleIndexingJson);
+          } catch (e) {
+            console.error("Google Indexing failed for edited post:", e);
+          }
+        }
 
         try {
           revalidatePath(`/blog/${uncheckedPost.slug}`);

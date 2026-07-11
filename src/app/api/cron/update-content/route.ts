@@ -193,16 +193,12 @@ ${oldPost.content}`;
         } catch(e) {}
 
         // Google Indexing API submission for updated post
-        if (siteSettings?.aiApiKey?.startsWith('{')) {
+        if (settings.googleIndexingJson) {
           try {
-            const keys = JSON.parse(siteSettings.aiApiKey);
-            const indexingJson = keys.googleIndexingJson;
-            if (indexingJson) {
-              const { submitToGoogleIndexing } = require('@/lib/google-indexing');
-              const postUrl = `https://knowora.in/blog/${oldPost.slug}`;
-              console.log("Submitting updated post to Google Indexing API:", postUrl);
-              await submitToGoogleIndexing(postUrl, 'URL_UPDATED', indexingJson);
-            }
+            const { submitToGoogleIndexing } = require('@/lib/google-indexing');
+            const postUrl = `https://knowora.in/blog/${oldPost.slug}`;
+            console.log("Submitting updated post to Google Indexing API:", postUrl);
+            await submitToGoogleIndexing(postUrl, 'URL_UPDATED', settings.googleIndexingJson);
           } catch (e) {
             console.error("Google Indexing failed for updated post:", e);
           }

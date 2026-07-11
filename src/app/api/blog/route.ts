@@ -135,17 +135,6 @@ export async function GET(request: Request) {
     if (jobType) {
       if (jobType === 'active_upcoming' || jobType === 'active' || jobType === 'upcoming') {
         where.AND.push({
-          OR: [
-            { tags: { some: { tag: { name: { in: ['Job', 'Vacancy', 'Career', 'Upcoming Job', 'Agami'] } } } } },
-            { title: { contains: 'Job', mode: 'insensitive' } },
-            { title: { contains: 'Vacancy', mode: 'insensitive' } },
-            { title: { contains: 'भर्ती' } },
-            { title: { contains: 'संभावित' } },
-            { title: { contains: 'Upcoming', mode: 'insensitive' } },
-            { title: { contains: 'आगामी' } }
-          ]
-        });
-        where.AND.push({
           NOT: [
             { title: { contains: 'Result', mode: 'insensitive' } },
             { title: { contains: 'परिणाम' } },
@@ -241,15 +230,17 @@ export async function GET(request: Request) {
             { title: { contains: 'Smartphone', mode: 'insensitive' } }
           ]
         });
-        where.AND.push({
-          NOT: [
-            { tags: { some: { tag: { name: { in: ['Job', 'Vacancy', 'Scheme', 'Scholarship', 'University', 'Finance', 'Earning', 'School'] } } } } },
-            { title: { contains: 'Job', mode: 'insensitive' } },
-            { title: { contains: 'Result', mode: 'insensitive' } },
-            { title: { contains: 'Scheme', mode: 'insensitive' } },
-            { title: { contains: 'Admit Card', mode: 'insensitive' } }
-          ]
-        });
+        if (!jobType) {
+          where.AND.push({
+            NOT: [
+              { tags: { some: { tag: { name: { in: ['Job', 'Vacancy', 'Scheme', 'Scholarship', 'University', 'Finance', 'Earning', 'School'] } } } } },
+              { title: { contains: 'Job', mode: 'insensitive' } },
+              { title: { contains: 'Result', mode: 'insensitive' } },
+              { title: { contains: 'Scheme', mode: 'insensitive' } },
+              { title: { contains: 'Admit Card', mode: 'insensitive' } }
+            ]
+          });
+        }
       } else if (tag === 'Finance & Earning' || tag === 'Finance') {
         where.AND.push({
           OR: [
@@ -261,15 +252,17 @@ export async function GET(request: Request) {
             { title: { contains: 'योजना' } }
           ]
         });
-        where.AND.push({
-          NOT: [
-            { tags: { some: { tag: { name: { in: ['Job', 'Vacancy', 'Admit Card', 'Result', 'University', 'Technology', 'Tech', 'Mobile', 'School'] } } } } },
-            { title: { contains: 'Job', mode: 'insensitive' } },
-            { title: { contains: 'भर्ती' } },
-            { title: { contains: 'Admit Card', mode: 'insensitive' } },
-            { title: { contains: 'Result', mode: 'insensitive' } }
-          ]
-        });
+        if (!jobType) {
+          where.AND.push({
+            NOT: [
+              { tags: { some: { tag: { name: { in: ['Job', 'Vacancy', 'Admit Card', 'Result', 'University', 'Technology', 'Tech', 'Mobile', 'School'] } } } } },
+              { title: { contains: 'Job', mode: 'insensitive' } },
+              { title: { contains: 'भर्ती' } },
+              { title: { contains: 'Admit Card', mode: 'insensitive' } },
+              { title: { contains: 'Result', mode: 'insensitive' } }
+            ]
+          });
+        }
       } else if (tag === 'Education & Career' || tag === 'Career') {
         where.AND.push({
           OR: [
@@ -282,11 +275,13 @@ export async function GET(request: Request) {
             { title: { contains: 'School', mode: 'insensitive' } }
           ]
         });
-        where.AND.push({
-          NOT: [
-            { tags: { some: { tag: { name: { in: ['Finance', 'Banking', 'Bank', 'Technology', 'Tech', 'Mobile', 'Smartphone', 'Earning', 'Online Earning', 'Scheme', 'Yojana'] } } } } }
-          ]
-        });
+        if (!jobType) {
+          where.AND.push({
+            NOT: [
+              { tags: { some: { tag: { name: { in: ['Finance', 'Banking', 'Bank', 'Technology', 'Tech', 'Mobile', 'Smartphone', 'Earning', 'Online Earning', 'Scheme', 'Yojana'] } } } } }
+            ]
+          });
+        }
       } else {
         where.AND.push({ tags: { some: { tag: { name: tag } } } });
       }

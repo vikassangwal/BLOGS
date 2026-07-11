@@ -319,7 +319,7 @@ async function fetchWithRetry(url: string, options: any, maxRetries = 5): Promis
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
       const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 45000); // 45s timeout to prevent Vercel 60s limit crashes
+      const timeout = setTimeout(() => controller.abort(), 18000); // 18s timeout to ensure fallback attempts fit under Vercel 60s limit
 
       const res = await fetch(url, { ...options, signal: controller.signal });
       clearTimeout(timeout);
@@ -336,7 +336,7 @@ async function fetchWithRetry(url: string, options: any, maxRetries = 5): Promis
     } catch (error: any) {
       lastError = error;
       if (error.name === 'AbortError') {
-        if (attempt >= maxRetries - 1) throw new Error('AI API request timed out (45s)');
+        if (attempt >= maxRetries - 1) throw new Error('AI API request timed out (18s)');
         continue;
       }
       if (attempt >= maxRetries - 1) throw error;
@@ -522,7 +522,7 @@ export async function generateAIContent(
 function getDefaultModel(provider: string): string {
   const defaults: Record<string, string> = {
     openai: 'gpt-4o-mini',
-    gemini: 'gemini-2.0-flash',
+    gemini: 'gemini-2.5-flash',
     anthropic: 'claude-sonnet-4-20250514',
     deepseek: 'deepseek-chat',
     openrouter: 'google/gemini-2.0-flash-exp:free',
@@ -551,7 +551,7 @@ function sanitizeGeminiModel(model: string): string {
   }
   
   // Map deprecated/expired experimental models to stable production versions
-  if (clean.includes('2.0-flash-exp')) {
+  if (clean.includes('2.0-flash-exp') || clean.includes('2.0-flash')) {
     clean = 'gemini-2.5-flash';
   }
   

@@ -271,7 +271,7 @@ export async function POST(request: NextRequest) {
       researcherConfig.configs.unshift({ provider: 'gemini', apiKey: geminiKey, model: 'gemini-1.5-flash' });
     }
 
-    const writerConfig = buildAgentConfigs('writer', 'openrouter', wModel || 'openai/gpt-4o-mini', 8000);
+    const writerConfig = buildAgentConfigs('writer', 'openrouter', wModel || 'openai/gpt-4o-mini', 4000);
     const seoConfig = buildAgentConfigs('seo', 'openrouter', sModel || 'openai/gpt-4o-mini', 500);
 
     // Verify at least one agent has a valid API key
@@ -845,6 +845,7 @@ ${links}
         - Link Format: जहाँ भी कोई आधिकारिक बाहरी लिंक (वेबसाइट, नोटिफिकेशन आदि) देना हो, वहाँ अनिवार्य रूप से <a href="..." target="_blank" rel="nofollow">👉 Click Here</a> लिखें। 
         - Mobile-First Readability: कोई भी पैराग्राफ 3-4 लाइनों से बड़ा नहीं होना चाहिए। जानकारी को Bullet Points में तोड़ें।
         - Context-Aware Logic: केवल वही हेडिंग्स और लिंक्स दें जो वर्तमान में लागू हों। (उदा: अगर सिर्फ फॉर्म निकले हैं, तो एडमिट कार्ड या रिजल्ट की हेडिंग/लिंक बिल्कुल न दें)।
+        - Omit Irrelevant Sections: If the topic is about Counselling, Admit Card, Answer Key, Result, or Scheme, do NOT write Cut-off, Syllabus, Selection Process, or Application Fee tables. Only include: Introduction, Quick Information, Important Dates, Important Links, How to Apply, and FAQ. This is critical to ensure fast generation (under 58 seconds).
         - Smart Dates: यदि आवेदन या परीक्षा की तिथि घोषित नहीं हुई है, तो केवल "Coming Soon" (जल्द आ रहा है) लिखें या आज की तारीख के बाद वाले भविष्य के महीनों (जैसे: अगस्त-सितंबर 2026) का अंदाज़ा लगाएं। आज की तारीख (${getCurrentDateStr()}) से पहले के किसी भी बीते हुए महीने या तारीख (जैसे मार्च, अप्रैल, मई 2026) को बिल्कुल न लिखें। बीती हुई तारीखें लिखने से जानकारी पुरानी और नकली लगती है।
         - Highlighting: पूरे लेख में सबसे अहम जानकारी (जैसे: वेतन ₹35,000, अंतिम तिथि 25 जुलाई, कुल पद 5,000) को हमेशा <strong>Bold</strong> करें।
         - Hinglish Keywords (Indian SEO): पैराग्राफ और हेडिंग्स के बीच में नेचुरली 2-3 Hinglish कीवर्ड्स (जैसे: "kaise check kare", "kab aayega", "download link") का इस्तेमाल करें।

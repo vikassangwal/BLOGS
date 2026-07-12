@@ -24,6 +24,8 @@ const OFFICIAL_PORTALS: Record<string, string> = {
   'cbse': 'https://cbse.gov.in',
   'icse': 'https://cisce.org',
   'ignou': 'https://ignou.ac.in',
+  'aiims': 'https://aiimsexams.ac.in',
+  'aiimsexams': 'https://aiimsexams.ac.in',
   'kvs': 'https://kvsangathan.nic.in',
   'kendriya vidyalaya': 'https://kvsangathan.nic.in',
   'navodaya': 'https://navodaya.gov.in',
@@ -142,6 +144,7 @@ const PORTAL_APPLY: Record<string, string> = {
   'upsssc': 'https://upsssc.gov.in',
   'bpsc': 'https://bpsc.bih.nic.in',
   'ignou': 'https://ignou.ac.in',
+  'aiims': 'https://aiimsexams.ac.in',
   'scholarship': 'https://scholarships.gov.in'
 };
 
@@ -155,6 +158,7 @@ const PORTAL_NOTIFICATIONS: Record<string, string> = {
   'nta': 'https://nta.ac.in/NoticeBoard',
   'cbse': 'https://cbse.gov.in/newtab/latest.html',
   'ignou': 'https://ignou.ac.in/ignou/bulletinboard/news',
+  'aiims': 'https://aiimsexams.ac.in',
   'rpsc': 'https://rpsc.rajasthan.gov.in/advertisements',
   'rsmssb': 'https://rsmssb.rajasthan.gov.in/page?menuName=ApBuDetail&id=103',
   'uppsc': 'https://uppsc.up.nic.in/Candidate_Registration.aspx',
@@ -224,6 +228,48 @@ export function validateAndFixLinks(html: string, topicTitle: string): string {
 
     return match;
   });
+
+  // Post-process to deduplicate identical links (e.g. when multiple rows point to the exact same homepage URL)
+  try {
+    const linksFound: { href: string; match: string; text: string }[] = [];
+    const tempRegex = /<a\s+([^>]*?)href=["']([^"']+)["']([^>]*?)>([\s\S]*?)<\/a>/gi;
+    let m;
+    while ((m = tempRegex.exec(fixedHtml)) !== null) {
+      linksFound.push({ href: m[2], match: m[0], text: m[4] });
+    }
+
+    const seenUrls = new Set<string>();
+    const duplicateUrls = new Set<string>();
+    for (const lnk of linksFound) {
+      const cleanUrl = lnk.href.trim().replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '');
+      if (seenUrls.has(cleanUrl)) {
+        duplicateUrls.add(cleanUrl);
+      } else {
+        seenUrls.add(cleanUrl);
+      }
+    }
+
+    if (duplicateUrls.size > 0) {
+      const urlFirstOccur = new Set<string>();
+      fixedHtml = fixedHtml.replace(/<a\s+([^>]*?)href=["']([^"']+)["']([^>]*?)>([\s\S]*?)<\/a>/gi, (match, before, href, after, text) => {
+        const cleanUrl = href.trim().replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '');
+        if (duplicateUrls.has(cleanUrl)) {
+          if (!urlFirstOccur.has(cleanUrl)) {
+            urlFirstOccur.add(cleanUrl);
+            return match; // Keep the first link active
+          } else {
+            // Strip the <a> tag and convert to text since it is a duplicate link
+            let cleanText = text.replace(/👉|Click Here|यहाँ क्लिक करें/gi, '').trim();
+            cleanText = cleanText.replace(/^\((.*?)\)$/, '$1').trim();
+            return `<span style="color: var(--color-text-secondary); font-weight: 500; font-size: 0.9rem;">${cleanText || 'ऑफिशियल होमपेज पर उपलब्ध'}</span>`;
+          }
+        }
+        return match;
+      });
+    }
+  } catch (e) {
+    console.error("Link deduplication processing failed:", e);
+  }
 
   return fixedHtml;
 }

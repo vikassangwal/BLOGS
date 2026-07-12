@@ -221,7 +221,7 @@ export async function POST(request: NextRequest) {
     let sModel = settings.seoModel || '';
 
     const researcherConfig = buildAgentConfigs('researcher', 'openrouter', rModel || 'google/gemini-2.5-flash', 1500);
-    const writerConfig = buildAgentConfigs('writer', 'openrouter', wModel || 'openai/gpt-4o-mini', 4000);
+    const writerConfig = buildAgentConfigs('writer', 'openrouter', wModel || 'openai/gpt-4o-mini', 6000);
     const seoConfig = buildAgentConfigs('seo', 'openrouter', sModel || 'openai/gpt-4o-mini', 500);
     
     // Feature: Auto-inject Native Gemini for Google Search Grounding if key exists
@@ -914,7 +914,7 @@ ${links}
         - Link Format: जहाँ भी कोई आधिकारिक बाहरी लिंक (वेबसाइट, नोटिफिकेशन आदि) देना हो, वहाँ अनिवार्य रूप से <a href="..." target="_blank" rel="nofollow">👉 Click Here</a> लिखें। 
         - Mobile-First Readability: कोई भी पैराग्राफ 3-4 लाइनों से बड़ा नहीं होना चाहिए। जानकारी को Bullet Points में तोड़ें।
         - Context-Aware Logic: केवल वही हेडिंग्स और लिंक्स दें जो वर्तमान में लागू हों। (उदा: अगर सिर्फ फॉर्म निकले हैं, तो एडमिट कार्ड या रिजल्ट की हेडिंग/लिंक बिल्कुल न दें)।
-        - Omit Irrelevant Sections: If the topic is about Counselling, Admit Card, Answer Key, Result, or Scheme, do NOT write Cut-off, Syllabus, Selection Process, or Application Fee tables. Only include: Introduction, Quick Information, Important Dates, Important Links, How to Apply, and FAQ. This is critical to ensure fast generation (under 58 seconds).
+        - Omit Irrelevant Sections: If the topic is about Counselling, Admit Card, Answer Key, Result, or Scheme, do NOT write Syllabus or PET tables. Instead, you MUST write a highly detailed, comprehensive post (1200+ words) by adding these specific extra detailed HTML sections: "<h2 id=\"docs\">आवश्यक दस्तावेजों की सूची (Required Documents List)</h2>" (detailed bullet list in Hindi), "<h2 id=\"procedure\">सीट आवंटन के बाद की प्रक्रिया (Post-Allotment Procedure/Reporting Guide)</h2>" (detailed paragraph instructions), and "<h2 id=\"helpline\">सम्पर्क हेल्पलाइन (Official Contact & Support Helpline)</h2>". Never make the article thin or short.
         - Smart Dates: यदि आवेदन या परीक्षा की तिथि घोषित नहीं हुई है, तो केवल "Coming Soon" (जल्द आ रहा है) लिखें या आज की तारीख के बाद वाले भविष्य के महीनों (जैसे: अगस्त-सितंबर 2026) का अंदाज़ा लगाएं। आज की तारीख (${getCurrentDateStr()}) से पहले के किसी भी बीते हुए महीने या तारीख (जैसे मार्च, अप्रैल, मई 2026) को बिल्कुल न लिखें। बीती हुई तारीखें लिखने से जानकारी पुरानी और नकली लगती है।
         - Highlighting: पूरे लेख में सबसे अहम जानकारी (जैसे: वेतन ₹35,000, अंतिम तिथि 25 जुलाई, कुल पद 5,000) को हमेशा <strong>Bold</strong> करें।
         - Hinglish Keywords (Indian SEO): पैराग्राफ और हेडिंग्स के बीच में नेचुरली 2-3 Hinglish कीवर्ड्स (जैसे: "kaise check kare", "kab aayega", "download link") का इस्तेमाल करें।
@@ -971,7 +971,16 @@ ${links}
         Step-by-step process in 3-4 simple points.
         
         <h2 id="faq">FAQ (अक्सर पूछे जाने वाले प्रश्न)</h2>
-        Use <details><summary>[Question]</summary><p>[Answer]</p></details> format. Provide EXACTLY 2 most important FAQs.
+        You MUST provide EXACTLY 2 FAQs in this exact HTML structure with complete, detailed answers inside:
+        <details>
+          <summary><strong>यहाँ पहला प्रश्न लिखें (जैसे, INI CET Round 2 की रिपोर्टिंग की अंतिम तिथि क्या है?)</strong></summary>
+          <p>यहाँ पूरा विस्तृत उत्तर लिखें (जैसे, आवंटित संस्थानों में रिपोर्ट करने की अंतिम तिथि 16 जुलाई 2026 है।)</p>
+        </details>
+        <details>
+          <summary><strong>यहाँ दूसरा प्रश्न लिखें...</strong></summary>
+          <p>यहाँ दूसरा विस्तृत उत्तर लिखें...</p>
+        </details>
+        (CRITICAL: Do NOT just output the questions. You MUST write both the questions and their detailed answers inside the HTML summary and p tags.)
         
         <h2 id="conclusion">Conclusion</h2>
         Write a 100-word motivating conclusion. 

@@ -235,7 +235,27 @@ export default function AutoBlogAdmin() {
               <label htmlFor="isActive" style={{ fontWeight: 600 }}>Enable Auto-Blogging</label>
             </div>
 
-            {/* Frequency and Posts per Run removed as backend is hardcoded to 41-blog daily queue */}
+            <div>
+              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, color: 'var(--color-text-primary)' }}>Blog Generation Frequency (ब्लॉग लिखने का अंतराल)</label>
+              <select
+                value={settings.frequency || '15m'}
+                onChange={e => setSettings({ ...settings, frequency: e.target.value })}
+                style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--color-border)', background: 'rgba(255,255,255,0.05)', color: 'var(--color-text-primary)' }}
+              >
+                <option value="15m">Every 15 Minutes (हर 15 मिनट में)</option>
+                <option value="30m">Every 30 Minutes (हर 30 मिनट में)</option>
+                <option value="1h">Every 1 Hour (हर 1 घंटे में)</option>
+                <option value="2h">Every 2 Hours (हर 2 घंटे में)</option>
+                <option value="4h">Every 4 Hours (हर 4 घंटे में)</option>
+                <option value="6h">Every 6 Hours (हर 6 घंटे में)</option>
+                <option value="12h">Every 12 Hours (हर 12 घंटे में)</option>
+                <option value="daily">Every 24 Hours / Daily (हर 24 घंटे में)</option>
+                <option value="weekly">Every 7 Days / Weekly (हर हफ्ते में)</option>
+              </select>
+              <p style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', marginTop: '0.3rem', lineHeight: '1.4' }}>
+                GitHub Actions 15 मिनट के अंतराल पर बैकग्राउंड रन करेगा, लेकिन नया ब्लॉग तभी जनरेट होगा जब आपके द्वारा चुने गए अंतराल से अधिक समय बीत चुका होगा।
+              </p>
+            </div>
 
             <div>
               <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, color: 'var(--color-text-primary)' }}>Featured Image Source</label>

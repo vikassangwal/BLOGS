@@ -10,6 +10,7 @@ export default function AutoBlogAdmin() {
   const [isSaving, setIsSaving] = useState(false);
   const [isRunning, setIsRunning] = useState(false);
   const [isDigestRunning, setIsDigestRunning] = useState(false);
+  const [runStatus, setRunStatus] = useState('');
 
   const [runnerState, setRunnerState] = useState({
     agent: 'updater', // 'updater' | 'editor'
@@ -110,39 +111,72 @@ export default function AutoBlogAdmin() {
 
   const triggerRun = async () => {
     setIsRunning(true);
-    let data;
+    setRunStatus('Initializing blog generation...');
+    let stage1Data: any = null;
     try {
-      const res = await fetch('/api/auto-blog', { 
+      // Step 1: Research
+      setRunStatus('Stage 1/3: Researching next topic and compiling news resources...');
+      const res1 = await fetch('/api/auto-blog?step=stage1', {
         method: 'POST',
         headers: { 'x-force-run': 'true' }
       });
-      
-      try {
-        data = await res.json();
-      } catch (err) {
-        throw new Error(`Server returned invalid JSON. Status: ${res.status}`);
+      if (!res1.ok) {
+        const errText = await res1.text();
+        throw new Error(errText || 'Stage 1 Research HTTP Error');
+      }
+      stage1Data = await res1.json();
+      if (!stage1Data.success) {
+        throw new Error(stage1Data.error || 'Stage 1 Research failed');
       }
 
-      if (data.status === 'empty') {
-        alert(data.message || 'No pending keywords found');
-      } else if (data.success) {
-        alert(data.message || 'Auto-blog generated successfully!');
-        fetchData();
-      } else {
-        if (data.error && data.error.includes('AI detected fake')) {
-          console.warn('Fake news skipped, trying next keyword...');
-          // Automatically try the next keyword without bothering the user!
-          setTimeout(() => triggerRun(), 1000);
-        } else {
-          alert('Auto-blog failed: ' + data.error);
-        }
+      const { postId, keyword } = stage1Data;
+
+      // Step 2: Write Content
+      setRunStatus(`Stage 2/3: Drafting 1500-word Hindi HTML article for "${keyword}"...`);
+      const res2 = await fetch(`/api/auto-blog?step=stage2&postId=${postId}`, {
+        method: 'POST',
+        headers: { 'x-force-run': 'true' }
+      });
+      if (!res2.ok) {
+        const errText = await res2.text();
+        throw new Error(errText || 'Stage 2 Writing HTTP Error');
       }
+      const stage2Data = await res2.json();
+      if (!stage2Data.success) {
+        throw new Error(stage2Data.error || 'Stage 2 Writing failed');
+      }
+
+      // Step 3: SEO, Clean & Publish
+      setRunStatus(`Stage 3/3: Generating SEO, featured image, and publishing...`);
+      const res3 = await fetch(`/api/auto-blog?step=stage3&postId=${postId}`, {
+        method: 'POST',
+        headers: { 'x-force-run': 'true' }
+      });
+      if (!res3.ok) {
+        const errText = await res3.text();
+        throw new Error(errText || 'Stage 3 Publishing HTTP Error');
+      }
+      const stage3Data = await res3.json();
+      if (!stage3Data.success) {
+        throw new Error(stage3Data.error || 'Stage 3 Publishing failed');
+      }
+
+      setRunStatus('');
+      alert(`🎉 Successfully published blog post: ${stage3Data.slug}`);
+      fetchData();
     } catch (error: any) {
-      alert('Auto-blog trigger failed: ' + (error?.message || error));
+      setRunStatus('');
+      if (error?.message && error.message.includes('AI detected fake')) {
+        console.warn('Fake news skipped, trying next keyword...');
+        setTimeout(() => triggerRun(), 1000);
+      } else {
+        alert('Auto-blog failed: ' + (error?.message || error));
+      }
     } finally {
       // Only reset isRunning if we are NOT automatically retrying
-      if (!(data && data.error && data.error.includes('AI detected fake'))) {
+      if (!(stage1Data && stage1Data.error && stage1Data.error.includes('AI detected fake'))) {
         setIsRunning(false);
+        setRunStatus('');
       }
     }
   };
@@ -199,6 +233,26 @@ export default function AutoBlogAdmin() {
           </button>
         </div>
       </div>
+
+      {runStatus && (
+        <div style={{ background: 'rgba(0, 102, 204, 0.15)', border: '1px solid var(--color-border)', padding: '1rem', borderRadius: '12px', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <div style={{
+            width: '18px',
+            height: '18px',
+            border: '2px solid transparent',
+            borderTopColor: '#0066cc',
+            borderRadius: '50%',
+            animation: 'spin 1s linear infinite'
+          }}></div>
+          <span style={{ fontWeight: 600, color: 'var(--color-text-primary)', fontSize: '0.95rem' }}>{runStatus}</span>
+          <style>{`
+            @keyframes spin {
+              0% { transform: rotate(0deg); }
+              100% { transform: rotate(360deg); }
+            }
+          `}</style>
+        </div>
+      )}
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1.5rem', marginBottom: '2rem' }}>
         <div style={{ background: 'rgba(255, 255, 255, 0.05)', padding: '1.5rem', borderRadius: '16px', border: '1px solid var(--color-border)' }}>

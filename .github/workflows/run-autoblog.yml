@@ -20,7 +20,7 @@ jobs:
           cache: 'npm'
 
       - name: Install Dependencies
-        run: npm ci
+        run: npm install --legacy-peer-deps
 
       - name: Generate Prisma Client
         run: npx prisma generate
@@ -29,16 +29,17 @@ jobs:
 
       - name: Start Next.js Local Server
         run: |
-          npm run dev &
+          npx next dev &
           echo "Waiting for local server to start..."
-          sleep 10
+          sleep 15
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           PORT: 3000
+          TZ: Asia/Kolkata
 
       - name: Trigger Auto-Blog API
         run: |
-          curl -X POST "http://localhost:3000/api/auto-blog?secret=knowora-cron-2026" \
+          curl -i -X POST "http://localhost:3000/api/auto-blog?secret=knowora-cron-2026" \
             -H "x-force-run: true" \
             -H "x-cron-secret: knowora-cron-2026"
         env:

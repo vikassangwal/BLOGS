@@ -121,9 +121,7 @@ export async function POST(request: NextRequest) {
         const k = (savedKeys[prov] || '').trim();
         if (k && k.length >= 10 && prov !== primaryProvider) {
           let m = 'google/gemini-2.5-flash';
-          if (prov === 'gemini') m = 'gemini-2.5-flash';
-          else if (prov === 'gemini2') m = 'gemini-1.5-flash';
-          else if (prov === 'gemini3') m = 'gemini-2.0-flash';
+          if (prov === 'gemini' || prov === 'gemini2' || prov === 'gemini3') m = 'gemini-2.5-flash';
           else if (prov === 'groq') m = 'llama-3.3-70b-versatile';
           else if (prov === 'openai') m = 'gpt-4o-mini';
           configs.push({ provider: prov, apiKey: k, model: m });
@@ -134,7 +132,7 @@ export async function POST(request: NextRequest) {
       if (configs.length === 0) {
         const anyKey = getApiKeyForProvider('gemini');
         if (anyKey) {
-          configs.push({ provider: 'gemini', apiKey: anyKey, model: 'gemini-2.0-flash' });
+          configs.push({ provider: 'gemini', apiKey: anyKey, model: 'gemini-2.5-flash' });
         }
       }
 

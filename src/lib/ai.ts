@@ -551,9 +551,11 @@ function sanitizeGeminiModel(model: string): string {
     clean = clean.split(':')[0];
   }
   
-  // Map deprecated/expired experimental models to stable production versions
-  if (clean.includes('2.0-flash-exp') || clean.includes('2.0-flash')) {
+  // Map deprecated/expired experimental or older models to stable production versions
+  if (clean.includes('1.5-flash') || clean.includes('2.0-flash-exp') || clean.includes('2.0-flash') || clean === 'flash' || clean === 'gemini-flash-latest') {
     clean = 'gemini-2.5-flash';
+  } else if (clean.includes('1.5-pro') || clean.includes('2.0-pro') || clean === 'pro' || clean === 'gemini-pro-latest') {
+    clean = 'gemini-2.5-pro';
   }
   
   if (!clean.startsWith('gemini-')) return `gemini-${clean}`;

@@ -1069,41 +1069,33 @@ export default async function HomePage() {
 
         {/* Closing Soon / Deadlines Alert Box */}
         {closingSoonJobs.length > 0 && (
-          <div className="max-w-6xl w-full mx-auto mt-12 px-4 animate-slide-up">
-            <div className="glass-panel border border-blue-500/10 rounded-2xl overflow-hidden shadow-[0_4px_30px_rgba(59,130,246,0.05)] bg-white/5">
-              <div className="bg-blue-600/20 border-b border-blue-500/20 px-5 py-3.5 flex items-center gap-2">
-                <span className="text-blue-400 text-lg">⏳</span>
-                <h3 className="text-sm font-bold text-blue-300 tracking-wide uppercase">
-                  Closing Soon (अंतिम तिथि नज़दीक है!)
-                </h3>
-              </div>
-              <div className="p-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                {closingSoonJobs.map((post) => {
-                  const diff = new Date(post.expiryDate!).getTime() - new Date().getTime();
-                  const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
-                  let daysText = `${days} DAYS LEFT`;
-                  let colorClass = "bg-orange-500/20 text-orange-400 border border-orange-500/20";
-                  if (days <= 2) {
-                    daysText = days <= 0 ? "TODAY LAST DAY" : "1 DAY LEFT";
-                    colorClass = "bg-red-500/20 text-red-400 border border-red-500/20 animate-pulse";
-                  } else if (days > 5) {
-                    colorClass = "bg-emerald-500/20 text-emerald-400 border border-emerald-500/20";
-                  }
+          <div className="max-w-6xl w-full mx-auto mt-8 px-4 animate-slide-up">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {closingSoonJobs.map((post) => {
+                const diff = new Date(post.expiryDate!).getTime() - new Date().getTime();
+                const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
+                let daysText = `${days} DAYS LEFT`;
+                let colorClass = "bg-orange-500/20 text-orange-400 border border-orange-500/20";
+                if (days <= 2) {
+                  daysText = days <= 0 ? "TODAY LAST DAY" : "1 DAY LEFT";
+                  colorClass = "bg-red-500/20 text-red-400 border border-red-500/20 animate-pulse";
+                } else if (days > 5) {
+                  colorClass = "bg-emerald-500/20 text-emerald-400 border border-emerald-500/20";
+                }
 
-                  return (
-                    <Link href={`/blog/${post.slug}`} key={post.id} className="block group">
-                      <div className="glass-panel hover:bg-white/5 transition-all p-4 rounded-xl border border-white/5 flex flex-col h-full justify-between gap-3">
-                        <div className={`text-center py-1.5 px-3 rounded-lg text-xs font-bold ${colorClass}`}>
-                          {daysText}
-                        </div>
-                        <h4 className="text-xs font-semibold text-gray-300 group-hover:text-blue-400 transition-colors line-clamp-2 leading-snug">
-                          {post.title}
-                        </h4>
+                return (
+                  <Link href={`/blog/${post.slug}`} key={post.id} className="block group">
+                    <div className="glass-panel hover:bg-white/5 transition-all p-4 rounded-xl border border-white/5 flex flex-col h-full justify-between gap-3">
+                      <div className={`text-center py-1.5 px-3 rounded-lg text-xs font-bold ${colorClass}`}>
+                        {daysText}
                       </div>
-                    </Link>
-                  );
-                })}
-              </div>
+                      <h4 className="text-xs font-semibold text-gray-300 group-hover:text-blue-400 transition-colors line-clamp-2 leading-snug">
+                        {post.title}
+                      </h4>
+                    </div>
+                  </Link>
+                );
+              })}
             </div>
           </div>
         )}

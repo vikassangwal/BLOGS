@@ -1,6 +1,14 @@
 {
   "buildCommand": "prisma generate && next build",
   "installCommand": "npm install",
+  "functions": {
+    "src/app/api/auto-blog/route.ts": {
+      "maxDuration": 60
+    },
+    "src/app/api/cron/auto-blog/route.ts": {
+      "maxDuration": 60
+    }
+  },
   "crons": [
     {
       "path": "/api/cron/auto-blog",

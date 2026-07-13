@@ -1,6 +1,15 @@
 import { NextResponse } from 'next/server';
 import crypto from 'crypto';
+import jwt from 'jsonwebtoken';
 import { prisma } from '@/lib/prisma';
+
+function getJwtSecret(): string {
+    const secret = process.env.JWT_SECRET;
+    if (!secret) {
+        throw new Error('JWT_SECRET environment variable is not defined');
+    }
+    return secret;
+}
 
 export async function POST(request: Request) {
     try {
@@ -23,21 +32,34 @@ export async function POST(request: Request) {
             .update(body.toString())
             .digest('hex');
 
-        if (expectedSignature === razorpay_signature) {
-            // Payment is verified
-            // In a real advanced app, we would store this transaction in the DB against the user ID.
-            // For now, we set an HttpOnly cookie to unlock premium content for this session.
+        // Timing-safe comparison to avoid leaking the signature via response timing.
+        const expectedBuf = Buffer.from(expectedSignature, 'utf8');
+        const providedBuf = Buffer.from(String(razorpay_signature || ''), 'utf8');
+        const signatureValid =
+            expectedBuf.length === providedBuf.length &&
+            crypto.timingSafeEqual(expectedBuf, providedBuf);
+
+        if (signatureValid) {
+            // Payment is verified. Issue a SIGNED, tamper-proof premium token
+            // instead of a plain "true" cookie the user could set themselves.
+            const premiumToken = jwt.sign(
+                { premium: true, orderId: razorpay_order_id, postId: postId ?? null },
+                getJwtSecret(),
+                { expiresIn: '30d' }
+            );
+
             const response = NextResponse.json({ success: true, message: 'Payment verified successfully' });
-            
-            // Set cookie for unlocking premium content (in a real app, sign this with JWT)
+
             response.cookies.set({
                 name: 'premium_unlocked',
-                value: 'true',
+                value: premiumToken,
                 httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'lax',
                 path: '/',
                 maxAge: 60 * 60 * 24 * 30 // 30 days
             });
-            
+
             return response;
         } else {
             return NextResponse.json({ error: 'Invalid signature' }, { status: 400 });

@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
     const customKeyword = searchParams.get('keyword') || '';
     const customSourceUrl = searchParams.get('sourceUrl') || '';
     // Auth check: only admin can trigger auto-blog (skip for cron calls with x-cron-secret header)
-    const expectedSecret = process.env.CRON_SECRET || 'knowora-cron-2026';
+    const expectedSecret = process.env.CRON_SECRET;
     const authHeader = request.headers.get('authorization');
     const isCronCall = expectedSecret && (
       request.headers.get('x-cron-secret') === expectedSecret || 
@@ -252,7 +252,9 @@ export async function POST(request: NextRequest) {
     let sModel = settings.seoModel || '';
 
     const researcherConfig = buildAgentConfigs('researcher', 'openrouter', rModel || 'google/gemini-2.5-flash', 1500);
-    const writerConfig = buildAgentConfigs('writer', 'openrouter', wModel || 'openai/gpt-4o-mini', 6000);
+    // 8000 tokens gives the writer enough room to finish long, detailed articles
+    // without hitting the token limit and getting truncated mid-post.
+    const writerConfig = buildAgentConfigs('writer', 'openrouter', wModel || 'openai/gpt-4o-mini', 8000);
     const seoConfig = buildAgentConfigs('seo', 'openrouter', sModel || 'openai/gpt-4o-mini', 500);
     
     // Feature: Auto-inject Native Gemini for Google Search Grounding if key exists
@@ -431,6 +433,12 @@ export async function POST(request: NextRequest) {
               return NextResponse.json({ success: false, error: "API Limit (429): AI की फ्री लिमिट खत्म हो गई है या सर्वर बिज़ी है। कृपया 1 घंटे बाद कोशिश करें।" });
             }
             throw e;
+          }
+
+          // Quality guard: don't overwrite the draft with empty/near-empty content.
+          const writtenText = (articleHtml || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+          if (writtenText.length < 400) {
+            return NextResponse.json({ success: false, error: `AI returned too little content (${writtenText.length} chars). Please try again.` });
           }
 
           // Save the written content
@@ -1399,11 +1407,26 @@ YOUR SEO SKILLS:
 - Every article ends with a WhatsApp/Telegram share CTA and an engaging comment hook.`;
 
       articleHtml = await generateContentWithFallback(writerConfig, writerSystemPrompt, writerPrompt);
-      
+
       // Removed artificial delay to save precious execution time on Vercel Hobby limits
 
       // Clean up markdown wrappers
       articleHtml = articleHtml.replace(/^```html\n?|```$/g, '').trim();
+
+      // Quality guard: reject empty / suspiciously short / truncated articles so we
+      // never publish a broken half-written post. This protects the "long & detailed"
+      // requirement — it only rejects BAD output, it never shortens good output.
+      const plainText = articleHtml.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+      if (plainText.length < 400) {
+        throw new Error(`Writer produced too little content (${plainText.length} chars) for "${targetTopic}". Skipping to avoid publishing an incomplete post.`);
+      }
+      // Detect an article that was cut off mid-sentence (no closing tag near the end
+      // and no sentence-ending punctuation) — a sign the model hit its token limit.
+      const tail = articleHtml.slice(-120);
+      const looksTruncated = !/[.!?।>]\s*$/.test(articleHtml.trim()) && !/<\/(p|div|ul|ol|table|h[1-6]|blockquote)>\s*$/i.test(tail);
+      if (looksTruncated) {
+        throw new Error(`Writer output for "${targetTopic}" appears truncated (ended mid-sentence). Skipping to avoid publishing an incomplete post.`);
+      }
     } catch(error: any) {
       console.error("Writer generation failed", error);
       if (error.message?.includes('429')) throw new Error("API Limit (429): AI की फ्री लिमिट खत्म हो गई है या सर्वर बिज़ी है। कृपया 1 घंटे बाद कोशिश करें या अपना API Key बदलें।");
@@ -1700,12 +1723,20 @@ YOUR SEO SKILLS:
     // (Previously: if timeout hit between blog save and keyword update, duplicate posts were created)
     const newPost = await prisma.$transaction(async (tx) => {
       // Generate clean, SEO-friendly unique slug (WordPress style fallback)
-      let finalSlug = seoData.slug.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+      let baseSlug = (seoData.slug || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+      // Fall back to a slug derived from the title if the SEO slug came back empty.
+      if (!baseSlug) {
+        baseSlug = articleTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+      }
+      if (!baseSlug) {
+        baseSlug = `post-${keywordId || 'auto'}`;
+      }
+      let finalSlug = baseSlug;
       let isUnique = false;
       let counter = 1;
       while (!isUnique) {
         const existing = await tx.blogPost.findFirst({
-          where: { 
+          where: {
             slug: finalSlug,
             NOT: isStage2 && researchedKeyword?.postId ? { id: researchedKeyword.postId } : undefined
           }
@@ -1714,7 +1745,7 @@ YOUR SEO SKILLS:
           isUnique = true;
         } else {
           counter++;
-          finalSlug = `${seoData.slug}-${counter}`;
+          finalSlug = `${baseSlug}-${counter}`;
         }
       }
 

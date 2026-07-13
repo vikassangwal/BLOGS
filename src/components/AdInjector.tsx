@@ -1,5 +1,6 @@
 'use client';
 import React, { useEffect, useState, useRef } from 'react';
+import { sanitizeHtml } from '@/lib/sanitize';
 
 export default function AdInjector({ htmlContent }: { htmlContent: string }) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -50,12 +51,13 @@ export default function AdInjector({ htmlContent }: { htmlContent: string }) {
     }
   }, [htmlContent, ads]);
 
-  // Pre-process HTML: wrap all tables in responsive wrappers
-  const processedHtml = htmlContent.replace(
-    /<table/g, 
+  // Pre-process HTML: sanitize first (blog content is author-supplied → XSS risk),
+  // then wrap all tables in responsive wrappers.
+  const processedHtml = sanitizeHtml(htmlContent).replace(
+    /<table/g,
     '<div class="table-responsive-wrapper"><table'
   ).replace(
-    /<\/table>/g, 
+    /<\/table>/g,
     '</table></div>'
   );
 

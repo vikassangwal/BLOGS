@@ -7,7 +7,7 @@ export const maxDuration = 60; // 60 seconds maximum duration
 export async function GET(request: Request) {
   try {
     const authHeader = request.headers.get('authorization');
-    const expectedSecret = process.env.CRON_SECRET || 'knowora-cron-2026';
+    const expectedSecret = process.env.CRON_SECRET;
     const isCronCall = expectedSecret && (
       request.headers.get('x-cron-secret') === expectedSecret || 
       authHeader === `Bearer ${expectedSecret}` ||

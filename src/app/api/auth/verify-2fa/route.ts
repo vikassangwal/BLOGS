@@ -4,7 +4,13 @@ import { generateToken } from '@/lib/auth';
 import { verifyTOTP } from '@/lib/totp';
 import * as jose from 'jose';
 
-const JWT_SECRET = process.env.JWT_SECRET || '';
+function getJwtSecret(): Uint8Array {
+  const secret = process.env.JWT_SECRET;
+  if (!secret) {
+    throw new Error('JWT_SECRET environment variable is not defined');
+  }
+  return new TextEncoder().encode(secret);
+}
 
 export async function POST(request: Request) {
   try {
@@ -18,7 +24,7 @@ export async function POST(request: Request) {
     // Verify temp token
     let payload;
     try {
-      const secret = new TextEncoder().encode(JWT_SECRET);
+      const secret = getJwtSecret();
       const { payload: decoded } = await jose.jwtVerify(tempToken, secret);
       payload = decoded as { userId: string; email: string; temp: boolean };
       if (!payload.temp) throw new Error('Invalid token type');

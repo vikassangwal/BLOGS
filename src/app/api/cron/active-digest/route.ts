@@ -11,11 +11,11 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const cronSecret = searchParams.get('secret');
-    const expectedSecret = process.env.CRON_SECRET || 'knowora-cron-2026';
+    const expectedSecret = process.env.CRON_SECRET;
     const forceRun = searchParams.get('force') === 'true';
 
     // Verify secret if it's a cron hit
-    if (!forceRun && cronSecret !== expectedSecret && cronSecret !== 'knowora-cron-2026') {
+    if (!forceRun && cronSecret !== expectedSecret) {
       return NextResponse.json({ error: 'Unauthorized cron access' }, { status: 401 });
     }
 

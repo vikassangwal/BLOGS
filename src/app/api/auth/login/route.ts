@@ -1,12 +1,26 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyPassword, generateToken } from '@/lib/auth';
+import { checkRateLimit, getIP } from '@/lib/rate-limit';
 import * as jose from 'jose';
 
-const JWT_SECRET = process.env.JWT_SECRET || '';
+function getJwtSecret(): Uint8Array {
+  const secret = process.env.JWT_SECRET;
+  if (!secret) {
+    throw new Error('JWT_SECRET environment variable is not defined');
+  }
+  return new TextEncoder().encode(secret);
+}
 
 export async function POST(request: Request) {
   try {
+    // Throttle login attempts per IP (10 attempts / 5 minutes).
+    const ip = getIP(request);
+    const rl = checkRateLimit(`login_${ip}`, 10, 5 * 60 * 1000);
+    if (!rl.success) {
+      return NextResponse.json({ error: 'Too many login attempts. Please try again later.' }, { status: 429 });
+    }
+
     const body = await request.json();
     const { email, password } = body;
 
@@ -54,7 +68,7 @@ export async function POST(request: Request) {
     // Check 2FA
     if (user.twoFactorEnabled) {
       // Generate short-lived temporary token for 2FA verification step
-      const secret = new TextEncoder().encode(JWT_SECRET);
+      const secret = getJwtSecret();
       const tempToken = await new jose.SignJWT({ userId: user.id, email: user.email, temp: true })
         .setProtectedHeader({ alg: 'HS256' })
         .setExpirationTime('5m')

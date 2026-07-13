@@ -10,6 +10,7 @@ export async function GET(request: Request) {
     const tokenMatch = cookieHeader.match(/automata_auth_token=([^;]+)/);
     const user = tokenMatch ? verifyToken(tokenMatch[1]) : null;
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    if (user.role !== 'SUPER_ADMIN' && user.role !== 'ADMIN') return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
     const posts = await prisma.blogPost.findMany({
       where: {
@@ -31,6 +32,7 @@ export async function POST(request: Request) {
     const tokenMatch = cookieHeader.match(/automata_auth_token=([^;]+)/);
     const user = tokenMatch ? verifyToken(tokenMatch[1]) : null;
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    if (user.role !== 'SUPER_ADMIN' && user.role !== 'ADMIN') return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
     const body = await request.json();
     const { text, imageUrl, postIds, markAsSharedOnly } = body;

@@ -7,6 +7,7 @@ export async function GET(request: NextRequest) {
     const authToken = request.cookies.get('automata_auth_token')?.value;
     const user = authToken ? verifyToken(authToken) : null;
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    if (user.role !== 'SUPER_ADMIN' && user.role !== 'ADMIN') return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
     const { searchParams } = new URL(request.url);
     const filter = searchParams.get('filter') || 'week'; // mint, hour, week, month, 6mont, year, 2year

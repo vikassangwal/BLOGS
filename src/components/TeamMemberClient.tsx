@@ -1,6 +1,7 @@
 'use client';
 import React from 'react';
 import Image from 'next/image';
+import { sanitizeHtml } from '@/lib/sanitize';
 
 type Props = {
   member: {
@@ -36,7 +37,7 @@ export default function TeamMemberClient({ member }: Props) {
         <h2 className="text-2xl font-bold text-white mb-6">Full Profile</h2>
         <div 
           className="text-gray-300 leading-relaxed text-lg whitespace-pre-wrap"
-          dangerouslySetInnerHTML={{ __html: member.fullDetails }}
+          dangerouslySetInnerHTML={{ __html: sanitizeHtml(member.fullDetails) }}
         />
       </div>
     </div>

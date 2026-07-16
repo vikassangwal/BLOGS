@@ -306,33 +306,52 @@ export async function POST(request: NextRequest) {
             stepTopic = pendingKeyword.keyword;
           }
 
-          console.log(`[Auto-Blog Step 1] Researching topic: ${stepTopic}`);
-          let liveNewsContext = "";
+          console.log(`[Auto-Blog Step 1] Researching topic: ${stepTopic}`);          // Live web search using DuckDuckGo for real official links
+          let liveNewsContext = '';
           try {
             const searchWords = stepTopic.split(' ').filter(w => w.length > 2).slice(0, 5).join(' ') || 'india';
-            const ddgUrl = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(searchWords + ' official notification apply link pdf')}`;
+            const ddgUrl = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(searchWords + ' site:gov.in OR site:nic.in official notification apply')}`;
             const ddgRes = await fetchWithTimeout(ddgUrl, {
               headers: {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+                'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36',
+                'Accept': 'text/html,application/xhtml+xml',
+                'Accept-Language': 'en-US,en;q=0.9,hi;q=0.8'
               }
-            }, 3000);
+            }, 6000);
             const ddgHtml = await ddgRes.text();
-            const resultsBlock = ddgHtml.split('result__body');
+            // Try multiple parsing strategies for DDG HTML
             const links: string[] = [];
             let count = 0;
-            for (let i = 1; i < resultsBlock.length && count < 4; i++) {
+            // Strategy 1: Split by result__body (original)
+            const resultsBlock = ddgHtml.split('result__body');
+            for (let i = 1; i < resultsBlock.length && count < 5; i++) {
               const block = resultsBlock[i];
-              const urlMatch = block.match(/href="[^"]*uddg=([^&"]+)/);
+              const urlMatch = block.match(/href="[^"]*uddg=([^&"]+)/) || block.match(/href="(https?:\/\/[^"]+)"/);
               const titleMatch = block.match(/class="result__a"[^>]*>([\s\S]*?)<\/a>/);
               const snippetMatch = block.match(/class="result__snippet"[^>]*>([\s\S]*?)<\/a>/) || block.match(/class="result__snippet"[^>]*>([\s\S]*?)<\/span>/);
               if (urlMatch) {
-                const realUrl = decodeURIComponent(urlMatch[1].replace(/&amp;/g, '&'));
+                let realUrl = urlMatch[1];
+                try { realUrl = decodeURIComponent(realUrl.replace(/&amp;/g, '&')); } catch(e) {}
                 const title = titleMatch ? titleMatch[1].replace(/<[^>]*>/g, '').trim() : '';
                 const snippet = snippetMatch ? snippetMatch[1].replace(/<[^>]*>/g, '').trim() : '';
-                if (realUrl && !realUrl.includes('duckduckgo.com')) {
+                if (realUrl && !realUrl.includes('duckduckgo.com') && realUrl.startsWith('http')) {
                   links.push(`- URL: ${realUrl}\n  Title: ${title}\n  Description: ${snippet}`);
                   count++;
                 }
+              }
+            }
+            // Strategy 2: If no results from split, try global regex
+            if (links.length === 0) {
+              const globalRegex = /uddg=([^&"]+)/g;
+              let gMatch;
+              while ((gMatch = globalRegex.exec(ddgHtml)) !== null && count < 5) {
+                try {
+                  const url = decodeURIComponent(gMatch[1].replace(/&amp;/g, '&'));
+                  if (url.startsWith('http') && !url.includes('duckduckgo.com')) {
+                    links.push(`- URL: ${url}`);
+                    count++;
+                  }
+                } catch(e) {}
               }
             }
             if (links.length > 0) {
@@ -800,29 +819,47 @@ export async function POST(request: NextRequest) {
       let webSearchResults = '';
       try {
         const searchWords = targetTopic.split(' ').filter(w => w.length > 2).slice(0, 5).join(' ') || 'india';
-        const ddgUrl = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(searchWords + ' official notification apply link pdf')}`;
+        const ddgUrl = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(searchWords + ' site:gov.in OR site:nic.in official notification apply')}`;
         const ddgRes = await fetchWithTimeout(ddgUrl, {
           headers: {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+            'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36',
+            'Accept': 'text/html,application/xhtml+xml',
+            'Accept-Language': 'en-US,en;q=0.9,hi;q=0.8'
           }
-        }, 3000);
+        }, 6000);
         const ddgHtml = await ddgRes.text();
-        const resultsBlock = ddgHtml.split('result__body');
         const links: string[] = [];
         let count = 0;
-        for (let i = 1; i < resultsBlock.length && count < 4; i++) {
+        // Strategy 1: Split by result__body
+        const resultsBlock = ddgHtml.split('result__body');
+        for (let i = 1; i < resultsBlock.length && count < 5; i++) {
           const block = resultsBlock[i];
-          const urlMatch = block.match(/href="[^"]*uddg=([^&"]+)/);
+          const urlMatch = block.match(/href="[^"]*uddg=([^&"]+)/) || block.match(/href="(https?:\/\/[^"]+)"/);
           const titleMatch = block.match(/class="result__a"[^>]*>([\s\S]*?)<\/a>/);
           const snippetMatch = block.match(/class="result__snippet"[^>]*>([\s\S]*?)<\/a>/) || block.match(/class="result__snippet"[^>]*>([\s\S]*?)<\/span>/);
           if (urlMatch) {
-            const realUrl = decodeURIComponent(urlMatch[1].replace(/&amp;/g, '&'));
+            let realUrl = urlMatch[1];
+            try { realUrl = decodeURIComponent(realUrl.replace(/&amp;/g, '&')); } catch(e) {}
             const title = titleMatch ? titleMatch[1].replace(/<[^>]*>/g, '').trim() : '';
             const snippet = snippetMatch ? snippetMatch[1].replace(/<[^>]*>/g, '').trim() : '';
-            if (realUrl && !realUrl.includes('duckduckgo.com')) {
+            if (realUrl && !realUrl.includes('duckduckgo.com') && realUrl.startsWith('http')) {
               links.push(`- URL: ${realUrl}\n  Title: ${title}\n  Description: ${snippet}`);
               count++;
             }
+          }
+        }
+        // Strategy 2: Fallback global regex if no results from split
+        if (links.length === 0) {
+          const globalRegex = /uddg=([^&"]+)/g;
+          let gMatch;
+          while ((gMatch = globalRegex.exec(ddgHtml)) !== null && count < 5) {
+            try {
+              const url = decodeURIComponent(gMatch[1].replace(/&amp;/g, '&'));
+              if (url.startsWith('http') && !url.includes('duckduckgo.com')) {
+                links.push(`- URL: ${url}`);
+                count++;
+              }
+            } catch(e) {}
           }
         }
         if (links.length > 0) {

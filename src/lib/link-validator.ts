@@ -210,8 +210,8 @@ export function validateAndFixLinks(html: string, topicTitle: string): string {
       }
     }
 
-    // 3. Block empty/placeholder links
-    if (href === '#' || href === '' || href.includes('LINK_NOT_AVAILABLE') || href.includes('example.com')) {
+    // 3. Block empty/placeholder links (including emoji-only placeholders)
+    if (href === '#' || href === '' || href.includes('LINK_NOT_AVAILABLE') || href.includes('example.com') || /^[\s👉🔗📎📄➡️✅💡⬇️🌐]+$/.test(href.trim())) {
       const replacement = getReplacement();
       return `<a ${stripAttrs(before)}href="${replacement}"${stripAttrs(after)} target="_blank" rel="noopener noreferrer">${text}</a>`;
     }
@@ -270,6 +270,33 @@ export function validateAndFixLinks(html: string, topicTitle: string): string {
   } catch (e) {
     console.error("Link deduplication processing failed:", e);
   }
+
+  // 5. Fix table cells / <td> that contain only emoji (👉, 🔗) without any <a> link — replace with proper official link
+  fixedHtml = fixedHtml.replace(/<td([^>]*)>\s*([👉🔗📎📄➡️✅💡⬇️🌐\s]+)\s*<\/td>/gi, (match, attrs, emojiContent) => {
+    const officialUrl = findOfficialPortal(topicTitle);
+    if (officialUrl && officialUrl !== '#') {
+      return `<td${attrs}><a href="${officialUrl}" target="_blank" rel="noopener noreferrer">ऑफिशियल वेबसाइट पर देखें</a></td>`;
+    }
+    return `<td${attrs}><span style="color: var(--color-text-secondary);">जल्द उपलब्ध होगा</span></td>`;
+  });
+
+  // 6. Fix standalone emoji links in <p>, <li>, <span> etc. (e.g. <p>👉</p> or <li>👉</li>)
+  fixedHtml = fixedHtml.replace(/<(p|li|span|div)([^>]*)>\s*([👉🔗📎📄➡️✅💡⬇️🌐\s]+)\s*<\/\1>/gi, (match, tag, attrs, emojiContent) => {
+    const officialUrl = findOfficialPortal(topicTitle);
+    if (officialUrl && officialUrl !== '#') {
+      return `<${tag}${attrs}><a href="${officialUrl}" target="_blank" rel="noopener noreferrer">ऑफिशियल वेबसाइट पर जाएं</a></${tag}>`;
+    }
+    return `<${tag}${attrs}><span style="color: var(--color-text-secondary);">जल्द उपलब्ध होगा</span></${tag}>`;
+  });
+
+  // 7. Fix anchor tags where text is only emoji (e.g. <a href="#">👉</a>)
+  fixedHtml = fixedHtml.replace(/<a\s+([^>]*?)href=["']([^"']*)["']([^>]*?)>\s*([👉🔗📎📄➡️✅💡⬇️🌐\s]+)\s*<\/a>/gi, (match, before, href, after, emojiText) => {
+    const officialUrl = findOfficialPortal(topicTitle);
+    if (officialUrl && officialUrl !== '#') {
+      return `<a href="${officialUrl}" target="_blank" rel="noopener noreferrer">ऑफिशियल वेबसाइट पर जाएं</a>`;
+    }
+    return `<span style="color: var(--color-text-secondary);">जल्द उपलब्ध होगा</span>`;
+  });
 
   return fixedHtml;
 }

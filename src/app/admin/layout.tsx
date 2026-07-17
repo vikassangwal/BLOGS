@@ -29,39 +29,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [siteName, setSiteName] = useState('Our Blog');
 
   useEffect(() => {
-    // Fetch current user
-    fetch('/api/auth/login', { method: 'GET' }).catch(() => {});
-    
     // Fetch settings for Site Name
-    fetch('/api/settings').then(r => r.json()).then(data => {
+    fetch('/api/settings/public').then(r => r.json()).then(data => {
       if (data && data.siteName) setSiteName(data.siteName);
     }).catch(() => {});
-    
-    // Connect to Server-Sent Events stream
-    let eventSource: EventSource;
-    try {
-      eventSource = new EventSource('/api/alerts/stream');
-      eventSource.onmessage = (event) => {
-        try {
-          const data = JSON.parse(event.data);
-          if (data.type === 'new-lead') {
-            setToast({
-              message: `🎯 New Lead: ${data.data.name} just contacted you!`,
-              visible: true,
-            });
-            setTimeout(() => {
-              setToast((prev) => (prev ? { ...prev, visible: false } : null));
-            }, 5000);
-          }
-        } catch (err) {
-          console.error('Failed to parse SSE data', err);
-        }
-      };
-    } catch {}
-
-    return () => {
-      if (eventSource!) eventSource.close();
-    };
   }, []);
 
   const handleLogout = () => {
@@ -81,7 +52,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             top: '20px',
             right: '20px',
             background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
-            color: 'rgba(255, 255, 255, 0.05)',
+            color: 'rgba(255, 255, 255, 0.95)',
             padding: '1rem 1.5rem',
             borderRadius: '16px',
             boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
@@ -178,7 +149,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              color: 'rgba(255, 255, 255, 0.05)',
+              color: 'rgba(255, 255, 255, 0.95)',
               fontWeight: 800,
               fontSize: '1rem',
               flexShrink: 0,
@@ -254,7 +225,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                color: 'rgba(255, 255, 255, 0.05)',
+                color: '#ffffff',
                 fontSize: '0.8rem',
                 fontWeight: 700,
                 flexShrink: 0,

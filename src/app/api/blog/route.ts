@@ -1,49 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyToken } from '@/lib/auth';
-
-// -------------------------------------------------------------
-// HELPER: WhatsApp Auto-Poster
-// -------------------------------------------------------------
-async function postToWhatsApp(token: string, phoneId: string, groupId: string, text: string, imageUrl: string) {
-  try {
-    const res = await fetch(`https://graph.facebook.com/v19.0/${phoneId}/messages`, {
-      method: 'POST',
-      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ messaging_product: 'whatsapp', to: groupId, type: 'image', image: { link: imageUrl, caption: text } })
-    });
-    return res.ok;
-  } catch(e) { return false; }
-}
-
-// -------------------------------------------------------------
-// HELPER: Instagram Auto-Poster
-// -------------------------------------------------------------
-async function postToInstagram(token: string, accountId: string, imageUrl: string, caption: string) {
-  try {
-    const containerRes = await fetch(`https://graph.facebook.com/v19.0/${accountId}/media?image_url=${encodeURIComponent(imageUrl)}&caption=${encodeURIComponent(caption)}&access_token=${token}`, { method: 'POST' });
-    const containerData = await containerRes.json();
-    if (containerData.id) {
-      await fetch(`https://graph.facebook.com/v19.0/${accountId}/media_publish?creation_id=${containerData.id}&access_token=${token}`, { method: 'POST' });
-      return true;
-    }
-    return false;
-  } catch(e) { return false; }
-}
-
-// -------------------------------------------------------------
-// HELPER: Twitter Auto-Poster (v2)
-// -------------------------------------------------------------
-async function postToTwitter(bearerToken: string, text: string) {
-  try {
-    const res = await fetch('https://api.twitter.com/2/tweets', {
-      method: 'POST',
-      headers: { 'Authorization': `Bearer ${bearerToken}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text })
-    });
-    return res.ok;
-  } catch (e) { return false; }
-}
+import { postToWhatsApp, postToInstagram, postToTwitter } from '@/lib/social-sharing';
 
 // GET: List posts
 export async function GET(request: Request) {

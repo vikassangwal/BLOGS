@@ -35,7 +35,7 @@ export async function POST(request: Request) {
         name: name || '',
         email,
         password: hashedPassword,
-        role: 'EDITOR',
+        role: 'AUTHOR',
         isVerified: false,
         otpCode,
         otpExpiry,

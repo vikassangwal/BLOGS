@@ -48,10 +48,10 @@ export default function ChatWidget() {
     setIsTyping(true);
 
     try {
-      const res = await fetch('/api/chat', {
+      const res = await fetch('/api/ai/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: userMessage, history: messages })
+        body: JSON.stringify({ message: userMessage, history: messages, postId: 'general' })
       });
       const data = await res.json();
       

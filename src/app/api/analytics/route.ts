@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
 
 export async function POST(request: Request) {
   try {
@@ -8,9 +9,17 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Path is required' }, { status: 400 });
     }
 
-    // Google Analytics handles the tracking now.
-    // We simply return success so the client doesn't throw errors.
-    return NextResponse.json({ success: true, method: 'google_analytics' });
+    // Save pageview to database for admin dashboard analytics
+    await prisma.pageview.create({
+      data: {
+        url: path,
+        postId: postId || null,
+        ip: request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || null,
+        userAgent: request.headers.get('user-agent') || null,
+      }
+    });
+
+    return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Analytics Error:', error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });

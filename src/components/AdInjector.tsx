@@ -10,9 +10,9 @@ export default function AdInjector({ htmlContent }: { htmlContent: string }) {
     fetch('/api/ads')
       .then(r => r.json())
       .then(data => {
-        if (data.ads) {
-          // Filter ads that are meant for "in-content" placement
-          const inContentAds = data.ads.filter((ad: any) => ad.position === 'in-content' && ad.isActive);
+        // API returns a flat array, not { ads: [...] }
+        if (Array.isArray(data)) {
+          const inContentAds = data.filter((ad: any) => ad.position === 'in-content' && ad.isActive);
           setAds(inContentAds);
         }
       })
@@ -23,13 +23,12 @@ export default function AdInjector({ htmlContent }: { htmlContent: string }) {
     if (!containerRef.current || ads.length === 0) return;
 
     const paragraphs = containerRef.current.querySelectorAll('p');
-    // Inject an ad every 4 paragraphs
     const injectionInterval = 4;
     
     let adIndex = 0;
     
     for (let i = injectionInterval; i < paragraphs.length; i += injectionInterval) {
-      if (adIndex >= ads.length) adIndex = 0; // Loop through ads if not enough unique ones
+      if (adIndex >= ads.length) adIndex = 0;
       
       const ad = ads[adIndex];
       const adContainer = document.createElement('div');
@@ -41,18 +40,17 @@ export default function AdInjector({ htmlContent }: { htmlContent: string }) {
       adContainer.style.borderRadius = '8px';
       adContainer.style.textAlign = 'center';
       
-      // We use dangerouslySetInnerHTML logic here by directly setting innerHTML
-      adContainer.innerHTML = `<span style="font-size:0.7rem; color:var(--color-text-secondary); display:block; margin-bottom:0.5rem">Advertisement</span>${ad.code}`;
+      // Use adCode (matching Prisma schema field name) and sanitize to prevent XSS
+      const sanitizedAdCode = sanitizeHtml(ad.adCode || '');
+      adContainer.innerHTML = `<span style="font-size:0.7rem; color:var(--color-text-secondary); display:block; margin-bottom:0.5rem">Advertisement</span>${sanitizedAdCode}`;
       
-      // Insert after the paragraph
       paragraphs[i].parentNode?.insertBefore(adContainer, paragraphs[i].nextSibling);
       
       adIndex++;
     }
   }, [htmlContent, ads]);
 
-  // Pre-process HTML: sanitize first (blog content is author-supplied → XSS risk),
-  // then wrap all tables in responsive wrappers.
+  // Pre-process HTML: sanitize first, then wrap tables
   const processedHtml = sanitizeHtml(htmlContent).replace(
     /<table/g,
     '<div class="table-responsive-wrapper"><table'
@@ -61,7 +59,7 @@ export default function AdInjector({ htmlContent }: { htmlContent: string }) {
     '</table></div>'
   );
 
-  // Also wrap any dynamically inserted tables after ads injection
+  // Wrap dynamically inserted tables after ads injection
   useEffect(() => {
     if (!containerRef.current) return;
     const tables = containerRef.current.querySelectorAll('table');

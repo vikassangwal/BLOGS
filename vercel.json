@@ -7,6 +7,12 @@
     },
     "src/app/api/cron/auto-blog/route.ts": {
       "maxDuration": 60
+    },
+    "src/app/api/cron/researcher/route.ts": {
+      "maxDuration": 60
+    },
+    "src/app/api/cron/syndicator/route.ts": {
+      "maxDuration": 60
     }
   },
   "crons": [

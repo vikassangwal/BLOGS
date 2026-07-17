@@ -6,14 +6,14 @@ import { prisma } from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
-  secret: process.env.AUTH_SECRET || process.env.JWT_SECRET || 'fallback-secret-for-dev',
+  secret: process.env.AUTH_SECRET || process.env.JWT_SECRET,
   adapter: PrismaAdapter(prisma),
   session: { strategy: 'jwt' },
   basePath: '/api/auth',
   providers: [
     GoogleProvider({
-      clientId: process.env.AUTH_GOOGLE_ID || 'dummy',
-      clientSecret: process.env.AUTH_GOOGLE_SECRET || 'dummy',
+      clientId: process.env.AUTH_GOOGLE_ID || '',
+      clientSecret: process.env.AUTH_GOOGLE_SECRET || '',
       allowDangerousEmailAccountLinking: true,
     }),
     CredentialsProvider({

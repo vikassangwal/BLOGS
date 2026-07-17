@@ -6,12 +6,12 @@ import ThemeToggle from './ThemeToggle';
 
 export default function GlobalHeader({ siteName, translateActive }: { siteName?: string, translateActive?: boolean }) {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   
   if (pathname && pathname.startsWith('/admin')) {
     return null; // Hide on admin pages
   }
 
-  const searchParams = useSearchParams();
   const currentTag = searchParams ? searchParams.get('tag') : null;
 
   const isActive = (path: string, tag?: string) => {

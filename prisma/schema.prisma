@@ -261,9 +261,12 @@ model AutoBlogSettings {
 model Pageview {
   id        String   @id @default(uuid())
   url       String
+  postId    String?
   ip        String?
   userAgent String?
   createdAt DateTime @default(now())
+
+  @@index([postId])
 }
 
 // ==========================================

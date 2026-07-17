@@ -24,12 +24,19 @@ export default function AdBanner({
     }
   }, []);
 
+  const publisherId = process.env.NEXT_PUBLIC_ADSENSE_ID || '';
+
+  if (!publisherId) {
+    // Don't render ad slot if no publisher ID is configured
+    return null;
+  }
+
   return (
     <div className={`ad-banner-container my-8 flex justify-center w-full overflow-hidden ${className}`}>
       <ins
         className="adsbygoogle"
         style={{ display: 'block', minWidth: '300px', minHeight: '100px' }}
-        data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" // This should ideally be loaded from SiteSettings or env
+        data-ad-client={publisherId}
         data-ad-slot={dataAdSlot}
         data-ad-format={dataAdFormat}
         data-full-width-responsive={dataFullWidthResponsive}

@@ -23,8 +23,10 @@ export async function generateMetadata(): Promise<Metadata> {
 
   return {
     metadataBase: new URL('https://knowora.in'),
-    title: settings?.seoTitle || settings?.siteName || 'Knowora | Premium Knowledge Base',
-    description: settings?.seoDescription || settings?.siteTagline || 'A dedicated platform for fully automated AI blogging and lead generation.',
+    title: settings?.seoTitle || settings?.siteName || 'Knowora | Premium Knowledge Base by Vikas Sangwal',
+    description: settings?.seoDescription || settings?.siteTagline || 'A dedicated platform for fully automated AI blogging and lead generation, founded by Vikas Sangwal.',
+    authors: [{ name: 'Vikas Sangwal' }],
+    keywords: ['Vikas Sangwal', 'Vikas', 'Knowora', 'Sarkari Job', 'AI Blogging', 'Education'],
     openGraph: {
       type: 'website',
       siteName: settings?.siteName || 'Knowora',
@@ -76,7 +78,12 @@ export default async function RootLayout({
                   "name": siteName,
                   "alternateName": `${siteName} - India's Top AI Blogging & Sarkari Job Portal`,
                   "url": "https://knowora.in",
-                  "description": "India's premier AI-powered blogging and Sarkari result platform delivering instant government job alerts, syllabus, cut-offs, and educational news."
+                  "description": "India's premier AI-powered blogging and Sarkari result platform delivering instant government job alerts, syllabus, cut-offs, and educational news.",
+                  "founder": {
+                    "@type": "Person",
+                    "name": "Vikas Sangwal",
+                    "jobTitle": "Founder & CEO"
+                  }
                 },
                 {
                   "@type": "WebSite",

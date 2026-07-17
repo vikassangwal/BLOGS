@@ -61,6 +61,11 @@ export default async function AboutUsPage() {
     name: 'Knowora',
     url: 'https://knowora.in',
     logo: 'https://knowora.in/logo.png',
+    founder: {
+      '@type': 'Person',
+      name: 'Vikas Sangwal',
+      jobTitle: 'Founder & CEO'
+    },
     sameAs: [],
     contactPoint: {
       '@type': 'ContactPoint',

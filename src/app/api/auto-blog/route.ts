@@ -416,13 +416,16 @@ export async function POST(request: NextRequest) {
 
           console.log(`[Auto-Blog Step 2] Writing article for: ${post.title}`);
           const writePrompt = `You are an expert Hindi content writer. Write a comprehensive, SEO-optimized, highly structured article in Hindi HTML format for the topic: "${post.title}". 
-          Use the following research context as a factual base:\n\n${post.content}\n\n
+          Use the following research context as a factual base. It contains all the real data, dates, and official URLs. Do NOT make up any information.\n\n${post.content}\n\n
           Strictly follow all instructions: 
           1. Write 1500+ words.
           2. Use clean modern headings <h2> and <h3>.
           3. Use tables for quick job facts or key information.
           4. Highlight critical dates and eligibility criteria.
-          5. Never write duplicate links.
+          5. 🚨 STRICT LINK RULE: You MUST extract the 'Official Website', 'Apply Online Link', and 'Notification PDF Link' from the research context and create a table at the end of the article titled "Important Links". You MUST insert the exact URLs into the href attributes (e.g. <a href="exact_url_from_research">यहाँ क्लिक करें</a>). 
+             - NEVER use placeholder links like "#" or empty href.
+             - NEVER write "जल्द आ रहा है" (Coming soon) or leave it blank if the URLs are provided in the research context.
+             - If the research explicitly says the link is not active yet, only then write "लिंक जल्द सक्रिय होगा".
           Wrap your final output in a single <div>...</div>.`;
 
           let articleHtml = "";

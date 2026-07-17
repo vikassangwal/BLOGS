@@ -42,9 +42,11 @@ export async function POST(request: Request) {
       }
     });
 
-    // OTP will be sent via email in production
-    // console.log(`[OTP for ${email}]: ${otpCode}`);
-
+    // TODO: In production, send this via Resend or Nodemailer
+    // Example: await resend.emails.send({ to: email, subject: 'Your OTP', text: `Your code is ${otpCode}` });
+    console.log(`\n========================================`);
+    console.log(`🔑 OTP for ${email}: ${otpCode}`);
+    console.log(`========================================\n`);
     return NextResponse.json({ 
       message: 'Account created! Please verify OTP.',
       userId: user.id

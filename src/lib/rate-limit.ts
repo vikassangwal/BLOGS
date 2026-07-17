@@ -1,4 +1,6 @@
 // Basic in-memory rate limiter for serverless (resets on cold start)
+// TODO: For high-traffic production on Vercel, replace this Map with @upstash/redis
+// Example: const redis = Redis.fromEnv(); await redis.incr(ip);
 const rateLimitCache = new Map<string, { count: number, resetTime: number }>();
 
 export function checkRateLimit(ip: string, limit: number = 10, windowMs: number = 60000): { success: boolean, remaining: number } {

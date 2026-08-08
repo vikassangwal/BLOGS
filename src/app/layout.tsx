@@ -5,6 +5,7 @@ import NextTopLoader from 'nextjs-toploader';
 import './globals.css';
 import GlobalHeader from '@/components/GlobalHeader';
 import GlobalFooter from '@/components/GlobalFooter';
+import NotificationPrompt from '@/components/NotificationPrompt';
 
 import { prisma } from '@/lib/prisma';
 
@@ -145,6 +146,7 @@ export default async function RootLayout({
         </main>
 
         <GlobalFooter siteName={siteName} />
+        <NotificationPrompt />
 
         {isTranslateActive && (
           <>

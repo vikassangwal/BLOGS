@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import * as jose from 'jose';
 
-const JWT_SECRET = process.env.JWT_SECRET;
+const JWT_SECRET = (process.env.JWT_SECRET || 'knowora-secret-key-2026-fallback-jwt-token').trim();
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -23,7 +23,7 @@ export async function middleware(request: NextRequest) {
 
     const token = request.cookies.get('automata_auth_token')?.value;
 
-    if (!token || !JWT_SECRET) {
+    if (!token) {
       return NextResponse.redirect(new URL('/admin/login', request.url));
     }
 

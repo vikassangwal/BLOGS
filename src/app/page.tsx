@@ -8,19 +8,31 @@ export const revalidate = 60; // Revalidate the page every 60 seconds for perfor
 
 async function getPostsByTag(tag: string) {
   try {
+    const keywords: string[] = [];
+    if (tag === 'Guidelines') {
+      keywords.push('guideline', 'guidelines', 'निर्देश', 'गाइडलाइन', 'instruction');
+    } else if (tag === 'Rules & Rights') {
+      keywords.push('rule', 'rules', 'नियम', 'अधिकार', 'right', 'rights', 'visa', 'वीजा', 'law', 'act');
+    }
+
+    const whereClause: any = {
+      status: 'Published',
+      OR: [
+        { gridBox: tag.toLowerCase().replace(/[^a-z0-9]/g, '') },
+        { tags: { some: { tag: { name: { equals: tag, mode: 'insensitive' } } } } }
+      ]
+    };
+
+    if (keywords.length > 0) {
+      keywords.forEach(kw => {
+        whereClause.OR.push({ title: { contains: kw, mode: 'insensitive' } });
+      });
+    }
+
     return await prisma.blogPost.findMany({
-      where: {
-        status: 'Published',
-        tags: {
-          some: {
-            tag: {
-              name: tag
-            }
-          }
-        }
-      },
+      where: whereClause,
       orderBy: { publishedAt: 'desc' },
-      take: 3,
+      take: 4,
       select: {
         id: true,
         title: true,

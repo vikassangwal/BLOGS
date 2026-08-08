@@ -1709,43 +1709,43 @@ YOUR SEO SKILLS:
     const detectedTagsSet = new Set<string>();
     detectedTagsSet.add(selectedCategory); // Add primary niche first
 
-    const lowerTopic = targetTopic.toLowerCase();
-    if (lowerTopic.includes('job') || lowerTopic.includes('recruitment') || lowerTopic.includes('bharti') || lowerTopic.includes('vacancy') || lowerTopic.includes('naukri')) {
+    const fullText = (targetTopic + ' ' + articleTitle).toLowerCase();
+    if (fullText.includes('job') || fullText.includes('recruitment') || fullText.includes('bharti') || fullText.includes('vacancy') || fullText.includes('naukri')) {
       detectedTagsSet.add('Job');
       detectedTagsSet.add('Vacancy');
       detectedTagsSet.add('Career');
     }
-    if (lowerTopic.includes('upcoming') || lowerTopic.includes('expected') || lowerTopic.includes('संभावित') || lowerTopic.includes('coming soon') || lowerTopic.includes('agami')) {
+    if (fullText.includes('upcoming') || fullText.includes('expected') || fullText.includes('संभावित') || fullText.includes('coming soon') || fullText.includes('agami')) {
       detectedTagsSet.add('Upcoming');
     }
-    if (lowerTopic.includes('rule') || lowerTopic.includes('rules') || lowerTopic.includes('नियम') || lowerTopic.includes('अधिकार') || lowerTopic.includes('rights')) {
+    if (fullText.includes('rule') || fullText.includes('rules') || fullText.includes('नियम') || fullText.includes('अधिकार') || fullText.includes('right') || fullText.includes('rights') || fullText.includes('visa') || fullText.includes('वीजा') || fullText.includes('law') || fullText.includes('act')) {
       detectedTagsSet.add('Rules & Rights');
     }
-    if (lowerTopic.includes('guideline') || lowerTopic.includes('guidelines') || lowerTopic.includes('निर्देश') || lowerTopic.includes('गाइडलाइन')) {
+    if (fullText.includes('guideline') || fullText.includes('guidelines') || fullText.includes('निर्देश') || fullText.includes('गाइडलाइन') || fullText.includes('instruction')) {
       detectedTagsSet.add('Guidelines');
     }
-    if (lowerTopic.includes('admit') || lowerTopic.includes('admit card') || lowerTopic.includes(' प्रवेश पत्र')) {
+    if (fullText.includes('admit') || fullText.includes('admit card') || fullText.includes('प्रवेश पत्र')) {
       detectedTagsSet.add('Admit Card');
     }
-    if (lowerTopic.includes('result') || lowerTopic.includes('परिणाम') || lowerTopic.includes('answer key') || lowerTopic.includes('उत्तर कुंजी') || lowerTopic.includes('syllabus') || lowerTopic.includes('cut off') || lowerTopic.includes('cutoff')) {
+    if (fullText.includes('result') || fullText.includes('परिणाम') || fullText.includes('answer key') || fullText.includes('उत्तर कुंजी') || fullText.includes('syllabus') || fullText.includes('cut off') || fullText.includes('cutoff')) {
       detectedTagsSet.add('Results');
     }
-    if (lowerTopic.includes('university') || lowerTopic.includes('ignou') || lowerTopic.includes('college') || lowerTopic.includes('admission') || lowerTopic.includes('counselling') || lowerTopic.includes('counseling') || lowerTopic.includes('admissions') || lowerTopic.includes('merit list') || lowerTopic.includes('timetable') || lowerTopic.includes('time table') || lowerTopic.includes('university results')) {
+    if (fullText.includes('university') || fullText.includes('ignou') || fullText.includes('college') || fullText.includes('admission') || fullText.includes('counselling') || fullText.includes('counseling') || fullText.includes('admissions') || fullText.includes('merit list') || fullText.includes('timetable') || fullText.includes('time table') || fullText.includes('university results')) {
       detectedTagsSet.add('University');
     }
-    if (lowerTopic.includes('scheme') || lowerTopic.includes('yojana') || lowerTopic.includes('योजना') || lowerTopic.includes('pm kisan') || lowerTopic.includes('e-shram') || lowerTopic.includes('shram')) {
+    if (fullText.includes('scheme') || fullText.includes('yojana') || fullText.includes('योजना') || fullText.includes('pm kisan') || fullText.includes('e-shram') || fullText.includes('shram')) {
       detectedTagsSet.add('Scheme');
     }
-    if (lowerTopic.includes('scholarship') || lowerTopic.includes('छात्रवृत्ति')) {
+    if (fullText.includes('scholarship') || fullText.includes('छात्रवृत्ति')) {
       detectedTagsSet.add('Scholarship');
     }
-    if (lowerTopic.includes('tech') || lowerTopic.includes('phone') || lowerTopic.includes('mobile') || lowerTopic.includes('gadget') || lowerTopic.includes('launch') || lowerTopic.includes('recharge') || lowerTopic.includes('outage') || lowerTopic.includes('app')) {
+    if (fullText.includes('tech') || fullText.includes('phone') || fullText.includes('mobile') || fullText.includes('gadget') || fullText.includes('launch') || fullText.includes('recharge') || fullText.includes('outage') || fullText.includes('app')) {
       detectedTagsSet.add('Technology');
     }
-    if (lowerTopic.includes('finance') || lowerTopic.includes('bank') || lowerTopic.includes('banking') || lowerTopic.includes('lic') || lowerTopic.includes('epfo') || lowerTopic.includes('savings') || lowerTopic.includes('interest rate') || lowerTopic.includes('gold rate')) {
+    if (fullText.includes('finance') || fullText.includes('bank') || fullText.includes('banking') || fullText.includes('lic') || fullText.includes('epfo') || fullText.includes('savings') || fullText.includes('interest rate') || fullText.includes('gold rate')) {
       detectedTagsSet.add('Finance');
     }
-    if (lowerTopic.includes('earning') || lowerTopic.includes('earn') || lowerTopic.includes('money') || lowerTopic.includes('course') || lowerTopic.includes('courses') || lowerTopic.includes('free course') || lowerTopic.includes('online earning')) {
+    if (fullText.includes('earning') || fullText.includes('earn') || fullText.includes('money') || fullText.includes('course') || fullText.includes('courses') || fullText.includes('free course') || fullText.includes('online earning')) {
       detectedTagsSet.add('Earning');
     }
 

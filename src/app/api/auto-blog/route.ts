@@ -1,9 +1,13 @@
 
 function getCurrentDateStr() {
-  return new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+  const now = new Date();
+  const options: Intl.DateTimeFormatOptions = { timeZone: 'Asia/Kolkata', weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+  const dateHindi = now.toLocaleDateString('hi-IN', options);
+  const dateEng = now.toLocaleDateString('en-IN', options);
+  return `${dateHindi} (${dateEng})`;
 }
 function getCurrentYearNum() {
-  return new Date().getFullYear();
+  return new Date().toLocaleDateString('en-US', { timeZone: 'Asia/Kolkata', year: 'numeric' });
 }
 
 async function fetchWithTimeout(url: string, options: any = {}, timeoutMs = 3000) {
@@ -1103,7 +1107,7 @@ ${links}
     3. COMPLETENESS: आर्टिकल 100% पूरा होना चाहिए। CONCLUSION लिखकर ही खत्म करें।
     4. NO ESTIMATES/RUMORS WITHOUT OFFICIAL NOTIFICATION (बिना आधिकारिक सूचना के अंदाज़ा लगाना प्रतिबंधित है): बिना किसी आधिकारिक सूचना, प्रेस विज्ञप्ति या विज्ञापन के सामान्य नौकरियों पर अंदाज़े से कोई पोस्ट या मनगढ़ंत डेटा (जैसे काल्पनिक आवेदन तिथि) नहीं लिखेंगे। केवल प्रमाणित तथ्यों का उपयोग करेंगे। अपवाद (Exceptions): OMR Sheets, Answer Keys, संभावित कट-ऑफ (Expected Cut-off), प्रवेश पत्र (Admit Cards), और सरकारी रिजल्ट्स (Results) के लिए आप अंदाज़े वाली या संभावित तारीख (जैसे 'Expected Result Date') लिख सकते हैं, लेकिन यह 100% सुनिश्चित करेंगे कि परीक्षा पहले ही आयोजित की जा चुकी हो। यदि परीक्षा आयोजित नहीं हुई है, तो OMR/Result/Cut-off की कोई भी अंदाज़े वाली पोस्ट लिखना पूर्णतः प्रतिबंधित है। आज की तारीख ${getCurrentDateStr()} है।
     5. NO FILLER CONTENT: "आज के इस आर्टिकल में", "उम्मीद है", "कैसा लगा", "दोस्तों" जैसे शब्द BANNED हैं। सीधे काम की बात लिखें।
-    7. STRICT YEAR CONSISTENCY: Today's date is Monday, July 6, 2026. NEVER mix past years into current year (${getCurrentYearNum()}) notifications. Keep years and dates strictly consistent with today.
+    7. STRICT DATE & YEAR ACCURACY (अति-महत्वपूर्ण तारीख नियम): Today's exact date in India (IST) is ${getCurrentDateStr()}. All notification dates, application deadlines, and exam schedules MUST be calculated accurately relative to today (${getCurrentDateStr()}). NEVER write past months or expired dates for upcoming/active vacancies. NEVER mix past years into current year (${getCurrentYearNum()}) notifications. If exact dates are not officially declared by the department yet, explicitly write '(Expected / संभावित)' or 'जल्द घोषित होगी (To be Announced)' — DO NOT fabricate past dates.
     8. EXACT QUALIFICATION RULE: DO NOT generalize educational qualifications (e.g., do NOT write 'Graduate in any stream' if the job specifically requires B.Tech, Nursing, or B.Ed). Write the EXACT degree required.
     9. NO FAKE RUMOR DATES: Never write clickbait statements like 'Result releasing today at 5 PM' unless officially declared. If it is an unconfirmed rumor, label it clearly as '(Expected/संभावित Date)'.
     10. NO GUESSING VACANCY NUMBERS: If the official notification does not mention exact vacancy numbers, write 'विज्ञप्ति के अनुसार (To be Announced)'. DO NOT make up random numbers like 3000 or 5000.

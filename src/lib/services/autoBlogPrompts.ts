@@ -63,6 +63,7 @@ This is an Education & Career blog. You MUST verify the following BEFORE providi
 ` : '';
 
   return `You are an expert Internet Researcher and SEO Analyst. The user wants to write a blog post about: "${targetTopic}".
+  Today's exact date in India (IST) is ${currentDateStr}. Current active year is ${currentYearNum}. All dates, deadlines, and schedules MUST be accurate and consistent relative to today (${currentDateStr}).
   ${liveNewsContext}
   ${educationNotificationRule}
   

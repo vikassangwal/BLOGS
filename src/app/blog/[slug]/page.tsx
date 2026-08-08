@@ -31,111 +31,116 @@ export async function generateMetadata(
   { params }: Props,
   parent: ResolvingMetadata
 ): Promise<Metadata> {
-  const resolvedParams = await params;
-  const slug = resolvedParams.slug;
+  try {
+    const resolvedParams = await params;
+    const rawSlug = resolvedParams.slug || '';
+    const slug = decodeURIComponent(rawSlug).trim().replace(/\/$/, '');
 
-  const post = await prisma.blogPost.findUnique({
-    where: { slug },
-    include: { tags: { include: { tag: true } } }
-  });
+    let post = await prisma.blogPost.findUnique({
+      where: { slug },
+      include: { tags: { include: { tag: true } } }
+    });
 
-  if (!post) {
-    return { title: 'Post Not Found' };
+    if (!post) {
+      post = await prisma.blogPost.findFirst({
+        where: { slug: { contains: slug, mode: 'insensitive' } },
+        include: { tags: { include: { tag: true } } }
+      });
+    }
+
+    if (!post) {
+      return { title: 'Post Not Found' };
+    }
+
+    const siteSettings = await prisma.siteSettings.findUnique({ where: { id: 'default' } }).catch(() => null);
+    const siteName = siteSettings?.siteName || 'Knowora';
+
+    const title = post.seoTitle || post.title;
+    const description = post.seoDescription || post.excerpt || '';
+    const url = `https://knowora.in/blog/${post.slug}`;
+    const rawImageUrl = post.featuredImage || 'https://knowora.in/default-og.png';
+    const imageUrl = `https://www.knowora.in/api/og?title=${encodeURIComponent(title)}&bg=${encodeURIComponent(rawImageUrl)}`;
+
+    return {
+      title: title,
+      description: description,
+      keywords: post.seoKeywords || '',
+      alternates: { canonical: url },
+      openGraph: {
+        title: title,
+        description: description,
+        url: url,
+        siteName: siteName,
+        images: [{ url: imageUrl, width: 1200, height: 630, alt: title }],
+        locale: 'en_IN',
+        type: 'article',
+        publishedTime: post.publishedAt?.toISOString() || post.createdAt.toISOString(),
+        authors: post.authorId ? ['Author'] : [],
+      },
+      twitter: {
+        card: 'summary_large_image',
+        title: title,
+        description: description,
+        images: [imageUrl],
+      },
+    };
+  } catch (err) {
+    console.error("Error generating metadata:", err);
+    return { title: 'Blog Article | KnowOra' };
   }
-
-  const siteSettings = await prisma.siteSettings.findUnique({ where: { id: 'default' } });
-  const siteName = siteSettings?.siteName || 'Knowora';
-
-  const title = post.seoTitle || post.title;
-  const description = post.seoDescription || post.excerpt || '';
-  const url = `https://knowora.in/blog/${post.slug}`;
-  const rawImageUrl = post.featuredImage || 'https://knowora.in/default-og.png';
-  const imageUrl = `https://www.knowora.in/api/og?title=${encodeURIComponent(title)}&bg=${encodeURIComponent(rawImageUrl)}`;
-
-  return {
-    title: title,
-    description: description,
-    keywords: post.seoKeywords || '',
-    alternates: {
-      canonical: url,
-    },
-    openGraph: {
-      title: title,
-      description: description,
-      url: url,
-      siteName: siteName,
-      images: [
-        {
-          url: imageUrl,
-          width: 1200,
-          height: 630,
-          alt: title,
-        },
-      ],
-      locale: 'en_IN',
-      type: 'article',
-      publishedTime: post.publishedAt?.toISOString() || post.createdAt.toISOString(),
-      authors: post.authorId ? ['Author'] : [],
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title: title,
-      description: description,
-      images: [imageUrl],
-    },
-  };
 }
 
 // 2. SERVER COMPONENT (DATA FETCHING & SCHEMA INJECTION)
 export default async function BlogPostPage({ params }: Props) {
-  const resolvedParams = await params;
-  const slug = resolvedParams.slug;
+  try {
+    const resolvedParams = await params;
+    const rawSlug = resolvedParams.slug || '';
+    const slug = decodeURIComponent(rawSlug).trim().replace(/\/$/, '');
 
-  // Fetch all necessary data server-side for immediate HTML rendering (SEO)
-  let [post, ads, relatedPostsRaw, siteSettings, whatsappLinks] = await Promise.all([
-    prisma.blogPost.findUnique({
+    // Fetch primary blog post first
+    let post = await prisma.blogPost.findUnique({
       where: { slug },
       include: { 
         tags: { include: { tag: true } },
         author: { select: { name: true } }
       }
-    }),
-    prisma.adPlacement.findMany({ where: { isActive: true } }),
-    prisma.blogPost.findMany({
-      where: { status: 'Published', slug: { not: slug } },
-      orderBy: { publishedAt: 'desc' },
-      take: 3,
-      select: { id: true, title: true, slug: true, excerpt: true, featuredImage: true }
-    }),
-    prisma.siteSettings.findUnique({ where: { id: 'default' } }),
-    prisma.socialLink.findMany({ where: { platform: 'whatsapp', isActive: true } })
-  ]);
+    }).catch(() => null);
 
-  if (!post) {
-    // Smart Fallback: if user typed a short slug or prefix, match it using contains/insensitive
-    post = await prisma.blogPost.findFirst({
-      where: {
-        slug: {
-          contains: slug,
-          mode: 'insensitive'
+    if (!post) {
+      // Smart Fallback: if user typed a short slug or prefix, match it using contains/insensitive
+      post = await prisma.blogPost.findFirst({
+        where: {
+          slug: { contains: slug, mode: 'insensitive' }
+        },
+        include: { 
+          tags: { include: { tag: true } },
+          author: { select: { name: true } }
         }
-      },
-      include: { 
-        tags: { include: { tag: true } },
-        author: { select: { name: true } }
-      }
-    });
-  }
+      }).catch(() => null);
+    }
 
-  if (!post) {
-    notFound();
-  }
+    if (!post) {
+      notFound();
+    }
 
-  // Record a view (fire and forget, don't await)
-  prisma.blogPost.update({
-    where: { id: post.id },
-    data: { viewCount: { increment: 1 } }
-  }).catch(() => {});
+    // Fetch secondary data safely with catch fallbacks so DB issues in ads/settings never crash the article
+    const [ads, relatedPostsRaw, siteSettings, whatsappLinks] = await Promise.all([
+      prisma.adPlacement.findMany({ where: { isActive: true } }).catch(() => []),
+      prisma.blogPost.findMany({
+        where: { status: 'Published', slug: { not: post.slug } },
+        orderBy: { publishedAt: 'desc' },
+        take: 3,
+        select: { id: true, title: true, slug: true, excerpt: true, featuredImage: true }
+      }).catch(() => []),
+      prisma.siteSettings.findUnique({ where: { id: 'default' } }).catch(() => null),
+      prisma.socialLink.findMany({ where: { platform: 'whatsapp', isActive: true } }).catch(() => [])
+    ]);
+
+    // Record a view (fire and forget, don't await)
+    prisma.blogPost.update({
+      where: { id: post.id },
+      data: { viewCount: { increment: 1 } }
+    }).catch(() => {});
 
   const siteName = siteSettings?.siteName || 'Knowora';
   const url = `https://knowora.in/blog/${post.slug}`;
@@ -297,4 +302,8 @@ export default async function BlogPostPage({ params }: Props) {
       />
     </>
   );
+  } catch (err) {
+    console.error("Critical Error rendering BlogPostPage:", err);
+    notFound();
+  }
 }

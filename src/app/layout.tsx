@@ -64,6 +64,7 @@ export default async function RootLayout({
     <html lang="en">
       <head>
         <link rel="manifest" href="/manifest.json" />
+        <meta name="google-adsense-account" content="ca-pub-2689010221295201" />
       
         {/* Generative Engine Optimization (GEO) & Brand Schema for Google / ChatGPT / Perplexity */}
         <script
@@ -117,9 +118,9 @@ export default async function RootLayout({
           </>
         )}
         
-        {/* Google AdSense Global Script - auto-detect from env or database */}
+        {/* Google AdSense Global Script - auto-detect from env, database or default */}
         {(() => {
-          let adsenseId = process.env.NEXT_PUBLIC_ADSENSE_ID || '';
+          let adsenseId = process.env.NEXT_PUBLIC_ADSENSE_ID || 'ca-pub-2689010221295201';
           if (!adsenseId && settings?.aiApiKey?.includes('ca-pub-')) {
             const match = settings.aiApiKey.match(/ca-pub-\d+/);
             if (match) adsenseId = match[0];

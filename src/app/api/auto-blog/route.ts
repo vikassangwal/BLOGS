@@ -826,58 +826,123 @@ export async function POST(request: NextRequest) {
         }
       }
 
-      // Live web search using DuckDuckGo to obtain REAL official notification/apply URLs
+      // =====================================================
+      // MULTI-ENGINE WEB SEARCH: Google CSE → Brave → DDG
+      // =====================================================
       let webSearchResults = '';
-      try {
-        const searchWords = targetTopic.split(' ').filter(w => w.length > 2).slice(0, 5).join(' ') || 'india';
-        const ddgUrl = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(searchWords + ' site:gov.in OR site:nic.in official notification apply')}`;
-        const ddgRes = await fetchWithTimeout(ddgUrl, {
-          headers: {
-            'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36',
-            'Accept': 'text/html,application/xhtml+xml',
-            'Accept-Language': 'en-US,en;q=0.9,hi;q=0.8'
-          }
-        }, 6000);
-        const ddgHtml = await ddgRes.text();
-        const links: string[] = [];
-        let count = 0;
-        // Strategy 1: Split by result__body
-        const resultsBlock = ddgHtml.split('result__body');
-        for (let i = 1; i < resultsBlock.length && count < 5; i++) {
-          const block = resultsBlock[i];
-          const urlMatch = block.match(/href="[^"]*uddg=([^&"]+)/) || block.match(/href="(https?:\/\/[^"]+)"/);
-          const titleMatch = block.match(/class="result__a"[^>]*>([\s\S]*?)<\/a>/);
-          const snippetMatch = block.match(/class="result__snippet"[^>]*>([\s\S]*?)<\/a>/) || block.match(/class="result__snippet"[^>]*>([\s\S]*?)<\/span>/);
-          if (urlMatch) {
-            let realUrl = urlMatch[1];
-            try { realUrl = decodeURIComponent(realUrl.replace(/&amp;/g, '&')); } catch(e) {}
-            const title = titleMatch ? titleMatch[1].replace(/<[^>]*>/g, '').trim() : '';
-            const snippet = snippetMatch ? snippetMatch[1].replace(/<[^>]*>/g, '').trim() : '';
-            if (realUrl && !realUrl.includes('duckduckgo.com') && realUrl.startsWith('http')) {
-              links.push(`- URL: ${realUrl}\n  Title: ${title}\n  Description: ${snippet}`);
-              count++;
+      const searchWords = targetTopic.split(' ').filter(w => w.length > 2).slice(0, 6).join(' ') || 'india';
+      const searchQuery = searchWords + ' official notification apply site:gov.in OR site:nic.in OR site:ac.in';
+      const webLinks: string[] = [];
+
+      // --- TIER 1: Google Custom Search API (most reliable) ---
+      const googleApiKey = process.env.GOOGLE_CSE_API_KEY;
+      const googleCseId = process.env.GOOGLE_CSE_ID;
+      if (googleApiKey && googleCseId && webLinks.length === 0) {
+        try {
+          const googleUrl = `https://www.googleapis.com/customsearch/v1?key=${googleApiKey}&cx=${googleCseId}&q=${encodeURIComponent(searchQuery)}&num=5`;
+          const googleRes = await fetchWithTimeout(googleUrl, {}, 6000);
+          const googleData = await googleRes.json();
+          if (googleData.items && Array.isArray(googleData.items)) {
+            for (const item of googleData.items.slice(0, 5)) {
+              if (item.link && item.link.startsWith('http')) {
+                webLinks.push(`- URL: ${item.link}\n  Title: ${item.title || ''}\n  Description: ${item.snippet || ''}`);
+              }
             }
           }
+          if (webLinks.length > 0) {
+            console.log(`✅ Google CSE returned ${webLinks.length} results for: ${targetTopic}`);
+          }
+        } catch (googleErr) {
+          console.warn('Google CSE search failed, trying Brave:', googleErr);
         }
-        // Strategy 2: Fallback global regex if no results from split
-        if (links.length === 0) {
-          const globalRegex = /uddg=([^&"]+)/g;
-          let gMatch;
-          while ((gMatch = globalRegex.exec(ddgHtml)) !== null && count < 5) {
-            try {
-              const url = decodeURIComponent(gMatch[1].replace(/&amp;/g, '&'));
-              if (url.startsWith('http') && !url.includes('duckduckgo.com')) {
-                links.push(`- URL: ${url}`);
+      }
+
+      // --- TIER 2: Brave Search API (good free fallback) ---
+      const braveApiKey = process.env.BRAVE_SEARCH_API_KEY;
+      if (braveApiKey && webLinks.length === 0) {
+        try {
+          const braveUrl = `https://api.search.brave.com/res/v1/web/search?q=${encodeURIComponent(searchQuery)}&count=5&search_lang=hi&country=IN`;
+          const braveRes = await fetchWithTimeout(braveUrl, {
+            headers: {
+              'Accept': 'application/json',
+              'Accept-Encoding': 'gzip',
+              'X-Subscription-Token': braveApiKey
+            }
+          }, 6000);
+          const braveData = await braveRes.json();
+          if (braveData.web?.results && Array.isArray(braveData.web.results)) {
+            for (const result of braveData.web.results.slice(0, 5)) {
+              if (result.url && result.url.startsWith('http')) {
+                webLinks.push(`- URL: ${result.url}\n  Title: ${result.title || ''}\n  Description: ${result.description || ''}`);
+              }
+            }
+          }
+          if (webLinks.length > 0) {
+            console.log(`✅ Brave Search returned ${webLinks.length} results for: ${targetTopic}`);
+          }
+        } catch (braveErr) {
+          console.warn('Brave Search failed, trying DDG:', braveErr);
+        }
+      }
+
+      // --- TIER 3: DuckDuckGo HTML scraping (last resort) ---
+      if (webLinks.length === 0) {
+        try {
+          const ddgUrl = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(searchWords + ' site:gov.in OR site:nic.in official notification apply')}`;
+          const ddgRes = await fetchWithTimeout(ddgUrl, {
+            headers: {
+              'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36',
+              'Accept': 'text/html,application/xhtml+xml',
+              'Accept-Language': 'en-US,en;q=0.9,hi;q=0.8'
+            }
+          }, 6000);
+          const ddgHtml = await ddgRes.text();
+          let count = 0;
+          // Strategy 1: Split by result__body
+          const resultsBlock = ddgHtml.split('result__body');
+          for (let i = 1; i < resultsBlock.length && count < 5; i++) {
+            const block = resultsBlock[i];
+            const urlMatch = block.match(/href="[^"]*uddg=([^&"]+)/) || block.match(/href="(https?:\/\/[^"]+)"/);
+            const titleMatch = block.match(/class="result__a"[^>]*>([\s\S]*?)<\/a>/);
+            const snippetMatch = block.match(/class="result__snippet"[^>]*>([\s\S]*?)<\/a>/) || block.match(/class="result__snippet"[^>]*>([\s\S]*?)<\/span>/);
+            if (urlMatch) {
+              let realUrl = urlMatch[1];
+              try { realUrl = decodeURIComponent(realUrl.replace(/&amp;/g, '&')); } catch(e) {}
+              const title = titleMatch ? titleMatch[1].replace(/<[^>]*>/g, '').trim() : '';
+              const snippet = snippetMatch ? snippetMatch[1].replace(/<[^>]*>/g, '').trim() : '';
+              if (realUrl && !realUrl.includes('duckduckgo.com') && realUrl.startsWith('http')) {
+                webLinks.push(`- URL: ${realUrl}\n  Title: ${title}\n  Description: ${snippet}`);
                 count++;
               }
-            } catch(e) {}
+            }
           }
+          // Strategy 2: Fallback global regex
+          if (webLinks.length === 0) {
+            const globalRegex = /uddg=([^&"]+)/g;
+            let gMatch;
+            while ((gMatch = globalRegex.exec(ddgHtml)) !== null && count < 5) {
+              try {
+                const url = decodeURIComponent(gMatch[1].replace(/&amp;/g, '&'));
+                if (url.startsWith('http') && !url.includes('duckduckgo.com')) {
+                  webLinks.push(`- URL: ${url}`);
+                  count++;
+                }
+              } catch(e) {}
+            }
+          }
+          if (webLinks.length > 0) {
+            console.log(`✅ DDG returned ${webLinks.length} results for: ${targetTopic}`);
+          }
+        } catch (ddgErr) {
+          console.error("DDG live search extraction failed:", ddgErr);
         }
-        if (links.length > 0) {
-          webSearchResults = "LIVE WEB SEARCH RESULTS (Use these exact URLs for Official Notification / Official Website / Apply portal - do NOT guess URLs):\n" + links.join('\n\n');
-        }
-      } catch (ddgErr) {
-        console.error("DDG live search extraction failed:", ddgErr);
+      }
+
+      // Build final web search context for the AI researcher
+      if (webLinks.length > 0) {
+        webSearchResults = "LIVE WEB SEARCH RESULTS (Use these exact URLs for Official Notification / Official Website / Apply portal - do NOT guess URLs):\n" + webLinks.join('\n\n');
+      } else {
+        console.warn(`⚠️ All 3 search engines returned 0 results for: ${targetTopic}`);
       }
 
       const researchPrompt = getResearchPrompt(targetTopic, liveNewsContext + '\n\n' + webSearchResults, customSourceUrl, getCurrentDateStr(), getCurrentYearNum());

@@ -2,18 +2,21 @@ export function getResearchPrompt(targetTopic: string, liveNewsContext: string, 
 
   // Detect if this is an Education & Career topic
   const topicLower = targetTopic.toLowerCase();
+  // Detect if this is an Education & Career / Study topic
   const isEducationTopic = topicLower.includes('job') || topicLower.includes('vacancy') || topicLower.includes('recruitment') ||
     topicLower.includes('exam') || topicLower.includes('admit') || topicLower.includes('notification') ||
     topicLower.includes('scholarship') || topicLower.includes('counselling') || topicLower.includes('apprentice') ||
     topicLower.includes('bharti') || topicLower.includes('भर्ती') || topicLower.includes('ssc') || topicLower.includes('upsc') ||
     topicLower.includes('ibps') || topicLower.includes('railway') || topicLower.includes('rpsc') || topicLower.includes('nta') ||
     topicLower.includes('cutoff') || topicLower.includes('cut-off') || topicLower.includes('answer key') ||
-    topicLower.includes('internship') || topicLower.includes('rojgar') || topicLower.includes('career');
+    topicLower.includes('internship') || topicLower.includes('rojgar') || topicLower.includes('career') ||
+    topicLower.includes('admission') || topicLower.includes('merit list') || topicLower.includes('iti') ||
+    topicLower.includes('college') || topicLower.includes('university') || topicLower.includes('daakhila') || topicLower.includes('दाखिला');
 
   // Topics to COMPLETELY EXCLUDE from Education & Career blogging
   const isResultTopic = topicLower.includes('result') || topicLower.includes('परिणाम');
   const isSyllabusTopic = topicLower.includes('syllabus') || topicLower.includes('सिलेबस');
-  const isEarningTopic = topicLower.includes('earning') || topicLower.includes('कोर्स') || topicLower.includes('course') || topicLower.includes('कमाई');
+  const isEarningTopic = topicLower.includes('earning') || topicLower.includes('कमाई') || topicLower.includes('online earning');
 
   // If it's an excluded Education topic, return ABORT signal immediately
   if (isEducationTopic && (isResultTopic || isSyllabusTopic || isEarningTopic)) {

@@ -67,15 +67,15 @@ This is an Education & Career blog. You MUST verify the following BEFORE providi
   ${liveNewsContext}
   ${educationNotificationRule}
   
-  CRITICAL RULE (STRICT): Only output "ABORT_FAKE_NEWS" if the topic is a malicious or provably false rumor (e.g. "World Ending Tomorrow"). For ANY job, exam, syllabus, result, admit card, scheme, gadget, or finance topic, ASSUME IT IS REAL OR UPCOMING and DO NOT ABORT. Even if you cannot find live news, provide expected/historical research for it (mentioning it is expected/upcoming) so the writer can write an informative guide.
+  CRITICAL RULE (STRICT): 
+  - FOR ALL EDUCATION & CAREER TOPICS (Jobs, Recruitment, Vacancies, Admissions, Scholarships): YOU MUST VERIFY THAT AN OFFICIAL NOTIFICATION, ADVERTISEMENT, OR OFFICIAL BULLETIN HAS BEEN RELEASED BY THE DEPARTMENT. IF NO OFFICIAL NOTIFICATION OR OFFICIAL PDF HAS BEEN RELEASED YET (OR IF IT IS ONLY A RUMOR/NEWS ARTICLE WITHOUT OFFICIAL PDF), YOU MUST OUTPUT EXACTLY "ABORT_NO_NOTIFICATION" AND NOTHING ELSE. DO NOT WRITE ANY EDUCATION BLOG WITHOUT AN OFFICIAL NOTIFICATION.
+  - FOR NON-EDUCATION TOPICS (Gadgets, Finance, General News): Only output "ABORT_FAKE_NEWS" if the topic is a malicious or provably false rumor. Otherwise, provide informative research.
 
   ${isEducationTopic ? `
-🚨 EDUCATION TOPIC SPECIAL INSTRUCTION:
-- For this topic, check if an official notification PDF or official press release has been published.
-- If the official notification IS available: Provide full research with verified official links.
-- If the official notification has NOT been released yet: Output "ABORT_NO_NOTIFICATION"
-- NEVER write about jobs/vacancies based on news articles or Twitter rumors alone.
-- The Apply Online link MUST be from the official department portal only.
+🚨 EDUCATION TOPIC MANDATORY ABORT INSTRUCTION:
+- If the official notification or advertisement HAS NOT been released yet by the conducting body, output "ABORT_NO_NOTIFICATION".
+- If the live search results above DO NOT contain an official .gov.in, .nic.in, .ac.in link or official notification PDF for this vacancy, output "ABORT_NO_NOTIFICATION".
+- NEVER write about jobs or vacancies based on rumors, blog articles, or unconfirmed news.
 ` : ''}
 
   You MUST extract the FULL NOTIFICATION DETAILS. Provide an exhaustive breakdown of ALL of the following (if available):

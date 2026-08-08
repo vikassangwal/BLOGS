@@ -5,25 +5,37 @@ export const dynamic = 'force-dynamic';
 export const revalidate = 3600; // Cache sitemap for 1 hour
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://knowora.in';
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.knowora.in';
 
   try {
-    const [posts, teamMembers] = await Promise.all([
+    const [posts, tags, teamMembers] = await Promise.all([
       prisma.blogPost.findMany({
         where: { status: 'Published' },
-        select: { slug: true, updatedAt: true },
+        select: { slug: true, updatedAt: true, publishedAt: true },
+        orderBy: { publishedAt: 'desc' },
+        take: 1000
       }),
+      prisma.tag.findMany({
+        select: { name: true }
+      }).catch(() => []),
       prisma.teamMember.findMany({
         where: { isActive: true },
         select: { id: true, updatedAt: true }
-      })
+      }).catch(() => [])
     ]);
 
     const blogUrls = posts.map((post) => ({
       url: `${baseUrl}/blog/${post.slug}`,
-      lastModified: post.updatedAt,
-      changeFrequency: 'weekly' as const,
-      priority: 0.8,
+      lastModified: post.updatedAt || post.publishedAt || new Date(),
+      changeFrequency: 'daily' as const,
+      priority: 0.9,
+    }));
+
+    const tagUrls = tags.map((tag) => ({
+      url: `${baseUrl}/blog?tag=${encodeURIComponent(tag.name)}`,
+      lastModified: new Date(),
+      changeFrequency: 'daily' as const,
+      priority: 0.7,
     }));
 
     const teamUrls = teamMembers.map((member) => ({
@@ -37,7 +49,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       {
         url: baseUrl,
         lastModified: new Date(),
-        changeFrequency: 'daily' as const,
+        changeFrequency: 'always' as const,
         priority: 1.0,
       },
       {
@@ -75,6 +87,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     return [
       ...staticPages,
       ...blogUrls,
+      ...tagUrls,
       ...teamUrls
     ];
   } catch (e) {

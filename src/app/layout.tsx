@@ -117,14 +117,22 @@ export default async function RootLayout({
           </>
         )}
         
-        {/* Google AdSense Global Script - only load if publisher ID is set in env */}
-        {process.env.NEXT_PUBLIC_ADSENSE_ID && (
-          <Script 
-            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${process.env.NEXT_PUBLIC_ADSENSE_ID}`}
-            crossOrigin="anonymous" 
-            strategy="lazyOnload" 
-          />
-        )}
+        {/* Google AdSense Global Script - auto-detect from env or database */}
+        {(() => {
+          let adsenseId = process.env.NEXT_PUBLIC_ADSENSE_ID || '';
+          if (!adsenseId && settings?.aiApiKey?.includes('ca-pub-')) {
+            const match = settings.aiApiKey.match(/ca-pub-\d+/);
+            if (match) adsenseId = match[0];
+          }
+          if (!adsenseId) return null;
+          return (
+            <Script 
+              src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsenseId}`}
+              crossOrigin="anonymous" 
+              strategy="lazyOnload" 
+            />
+          );
+        })()}
         <NextTopLoader color="var(--color-accent)" showSpinner={false} />
         <div className="bg-mesh"></div>
         <Suspense fallback={<div className="h-20 w-full" />}>

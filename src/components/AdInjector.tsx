@@ -1,6 +1,6 @@
 'use client';
 import React, { useEffect, useState, useRef } from 'react';
-import { sanitizeHtml } from '@/lib/sanitize';
+import { sanitizeHtml, sanitizeAdCode } from '@/lib/sanitize';
 
 export default function AdInjector({ htmlContent }: { htmlContent: string }) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -10,9 +10,10 @@ export default function AdInjector({ htmlContent }: { htmlContent: string }) {
     fetch('/api/ads')
       .then(r => r.json())
       .then(data => {
-        // API returns a flat array, not { ads: [...] }
         if (Array.isArray(data)) {
-          const inContentAds = data.filter((ad: any) => ad.position === 'in-content' && ad.isActive);
+          const inContentAds = data.filter((ad: any) => 
+            (ad.position === 'in-content' || ad.position === 'in_content') && ad.isActive
+          );
           setAds(inContentAds);
         }
       })
@@ -40,11 +41,29 @@ export default function AdInjector({ htmlContent }: { htmlContent: string }) {
       adContainer.style.borderRadius = '8px';
       adContainer.style.textAlign = 'center';
       
-      // Use adCode (matching Prisma schema field name) and sanitize to prevent XSS
-      const sanitizedAdCode = sanitizeHtml(ad.adCode || '');
+      const sanitizedAdCode = sanitizeAdCode(ad.adCode || '');
       adContainer.innerHTML = `<span style="font-size:0.7rem; color:var(--color-text-secondary); display:block; margin-bottom:0.5rem">Advertisement</span>${sanitizedAdCode}`;
       
       paragraphs[i].parentNode?.insertBefore(adContainer, paragraphs[i].nextSibling);
+
+      // Re-create and append script tags so browser actually executes AdSense JavaScript
+      const scriptTags = adContainer.querySelectorAll('script');
+      scriptTags.forEach(oldScript => {
+        const newScript = document.createElement('script');
+        Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
+        newScript.appendChild(document.createTextNode(oldScript.innerHTML));
+        oldScript.parentNode?.replaceChild(newScript, oldScript);
+      });
+
+      // Trigger AdSense push if ins tag exists
+      if (adContainer.querySelector('.adsbygoogle')) {
+        try {
+          // @ts-ignore
+          (window.adsbygoogle = window.adsbygoogle || []).push({});
+        } catch (e) {
+          console.error("AdSense push error:", e);
+        }
+      }
       
       adIndex++;
     }

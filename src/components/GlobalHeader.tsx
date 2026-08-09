@@ -29,6 +29,7 @@ export default function GlobalHeader({ siteName, translateActive }: { siteName?:
     { name: 'Technology', href: '/blog?tag=Technology', path: '/blog', tag: 'Technology' },
     { name: 'Education & Career', href: '/blog?tag=Education+%26+Career', path: '/blog', tag: 'Education & Career' },
     { name: 'Finance & Earning', href: '/blog?tag=Finance+%26+Earning', path: '/blog', tag: 'Finance & Earning' },
+    { name: '⚡ Web Stories', href: '/web-stories', path: '/web-stories' },
     { name: 'About Us', href: '/about', path: '/about' },
   ];
 

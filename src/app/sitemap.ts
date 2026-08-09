@@ -31,6 +31,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.9,
     }));
 
+    const webStoryUrls = posts.map((post) => ({
+      url: `${baseUrl}/web-stories/${post.slug}`,
+      lastModified: post.updatedAt || post.publishedAt || new Date(),
+      changeFrequency: 'daily' as const,
+      priority: 0.8,
+    }));
+
     const tagUrls = tags.map((tag) => ({
       url: `${baseUrl}/blog?tag=${encodeURIComponent(tag.name)}`,
       lastModified: new Date(),
@@ -54,6 +61,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       },
       {
         url: `${baseUrl}/blog`,
+        lastModified: new Date(),
+        changeFrequency: 'daily' as const,
+        priority: 0.9,
+      },
+      {
+        url: `${baseUrl}/web-stories`,
         lastModified: new Date(),
         changeFrequency: 'daily' as const,
         priority: 0.9,
@@ -87,6 +100,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     return [
       ...staticPages,
       ...blogUrls,
+      ...webStoryUrls,
       ...tagUrls,
       ...teamUrls
     ];

@@ -435,7 +435,7 @@ export default function BlogPostClient({ post, ads, relatedPosts, whatsappLinks,
               </div>
               <div style={{ background: 'rgba(255, 255, 255, 0.02)', padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--color-border)' }}>
                 <span style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', display: 'block', marginBottom: '0.2rem' }}>आयु सीमा (Age Limit)</span>
-                <span style={{ fontSize: '0.9rem', fontWeight 700, color: 'var(--color-text-primary)' }}>
+                <span style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--color-text-primary)' }}>
                   18 से 35-40 वर्ष (नियमानुसार छूट)
                 </span>
               </div>

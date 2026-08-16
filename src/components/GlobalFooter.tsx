@@ -23,6 +23,7 @@ export default function GlobalFooter({ siteName }: { siteName?: string }) {
             <a href="/contact" className="hover:text-white transition-colors">Contact Us</a>
             <a href="/privacy-policy" className="hover:text-white transition-colors">Privacy Policy</a>
             <a href="/terms-of-service" className="hover:text-white transition-colors">Terms of Service</a>
+            <a href="/disclaimer" className="hover:text-white transition-colors">Disclaimer</a>
           </div>
         </div>
       </div>

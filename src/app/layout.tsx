@@ -131,7 +131,7 @@ export default async function RootLayout({
             <Script 
               src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsenseId}`}
               crossOrigin="anonymous" 
-              strategy="lazyOnload" 
+              strategy="afterInteractive" 
             />
           );
         })()}

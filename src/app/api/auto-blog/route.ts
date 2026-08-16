@@ -335,15 +335,44 @@ export async function POST(request: NextRequest) {
           // -------------------------------------------------------------
           let stepTopic = customKeyword.trim();
           if (!stepTopic) {
-            // Find next pending keyword
-            const pendingKeyword = await prisma.autoBlogKeyword.findFirst({
+            let pendingKeyword = await prisma.autoBlogKeyword.findFirst({
               where: { status: 'pending' },
               orderBy: [{ priority: 'desc' }, { createdAt: 'asc' }]
             });
             if (!pendingKeyword) {
-              return NextResponse.json({ success: false, error: 'No pending keywords in queue' });
+              const FALLBACK_TOPICS = [
+                { keyword: "SSC CGL 2026 Notification Release", category: "Education & Career" },
+                { keyword: "UPSC Civil Services 2026 Application Form", category: "Education & Career" },
+                { keyword: "RRB NTPC Vacancy 2026 Online Form", category: "Education & Career" },
+                { keyword: "SBI PO 2026 Recruitment Notification", category: "Education & Career" },
+                { keyword: "PM Kisan 19th Installment Release Date 2026", category: "Finance & Earning" },
+                { keyword: "Realme 14 Pro 5G Launch & Price in India", category: "Technology" },
+                { keyword: "RPSC RAS 2026 Notification PDF Download", category: "Education & Career" },
+                { keyword: "CBSE Board 10th 12th Exam 2026 Updates", category: "Education & Career" },
+                { keyword: "IBPS PO 2026 Exam Date & Notification", category: "Education & Career" },
+                { keyword: "Army Agniveer Bharti 2026 Online Form", category: "Education & Career" },
+                { keyword: "UPSSSC PET 2026 Notification & Apply Online", category: "Education & Career" },
+                { keyword: "EPFO Higher Pension Latest News 2026", category: "Finance & Earning" },
+                { keyword: "Samsung Galaxy S26 Ultra 5G Specs & Launch", category: "Technology" }
+              ];
+              try {
+                for (const item of FALLBACK_TOPICS) {
+                  await prisma.autoBlogKeyword.create({
+                    data: { keyword: item.keyword, niche: item.category, status: 'pending', priority: 1 }
+                  }).catch(() => {});
+                }
+                pendingKeyword = await prisma.autoBlogKeyword.findFirst({
+                  where: { status: 'pending' },
+                  orderBy: [{ priority: 'desc' }, { createdAt: 'asc' }]
+                });
+              } catch (e) {}
             }
-            stepTopic = pendingKeyword.keyword;
+
+            if (!pendingKeyword) {
+              stepTopic = "SSC CGL 2026 Notification Release";
+            } else {
+              stepTopic = pendingKeyword.keyword;
+            }
           }
 
           console.log(`[Auto-Blog Step 1] Researching topic: ${stepTopic}`);          // Live web search using DuckDuckGo for real official links

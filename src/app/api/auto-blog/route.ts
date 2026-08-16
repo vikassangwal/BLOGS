@@ -1048,49 +1048,14 @@ export async function POST(request: NextRequest) {
         return;
       }
 
-      // 🚨 NEW: Block blog writing if no official notification found for Education & Career topics
+      // If official PDF is pending, proceed to write an informative update article instead of skipping
       if (researchData.includes("ABORT_NO_NOTIFICATION")) {
-        console.warn(`[Auto-Blog] ABORT: No official notification found for Education topic: "${targetTopic}". Skipping blog creation.`);
-        if (keywordId) {
-          await prisma.autoBlogKeyword.update({ where: { id: keywordId }, data: { status: 'failed' } });
-        }
-        await prisma.autoBlogLog.create({
-          data: {
-            keyword: targetTopic,
-            status: 'skipped',
-            error: 'Official notification not yet released. Skipping blog creation.'
-          }
-        });
-        if (savedKeys.telegramToken && savedKeys.telegramChatId) {
-          try {
-            await fetch(`https://api.telegram.org/bot${savedKeys.telegramToken}/sendMessage`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                chat_id: savedKeys.telegramChatId,
-                text: `⚠️ <b>Auto-Blog Skip Alert</b>\n\nTopic: <i>${targetTopic}</i>\nStatus: <b>Skipped (Official Notification PDF not found on live search)</b>`,
-                parse_mode: 'HTML'
-              })
-            });
-          } catch(e){}
-        }
-        return;
+        console.log(`[Auto-Blog] Note: Official notification PDF is pending for: "${targetTopic}". Creating informative update article.`);
+        researchData = researchData.replace("ABORT_NO_NOTIFICATION", "").trim() + "\n\nNote: The official notification is expected soon. Write an informative news update article covering expected eligibility, syllabus, and department background based on certified previous year data.";
       }
 
-      // 🚨 NEW: Block excluded topics (Results, Syllabus, Earning & Courses)
       if (researchData.includes("ABORT_EXCLUDED_TOPIC")) {
-        console.warn(`[Auto-Blog] ABORT: Topic "${targetTopic}" is in excluded category (Results/Syllabus/Earning). Skipping.`);
-        if (keywordId) {
-          await prisma.autoBlogKeyword.update({ where: { id: keywordId }, data: { status: 'failed' } });
-        }
-        await prisma.autoBlogLog.create({
-          data: {
-            keyword: targetTopic,
-            status: 'skipped',
-            error: `Topic "${targetTopic}" is excluded (Results/Syllabus/Earning are not auto-blogged).`
-          }
-        });
-        return;
+        researchData = researchData.replace("ABORT_EXCLUDED_TOPIC", "").trim();
       }
 
       // Create Draft BlogPost with status 'Researching'

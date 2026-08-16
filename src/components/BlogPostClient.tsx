@@ -411,8 +411,8 @@ export default function BlogPostClient({ post, ads, relatedPosts, whatsappLinks,
             marginBottom: '2.5rem',
             boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2)'
           }}>
-            <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#60a5fa', margin: '0 0 1rem 0', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              📊 Quick Job Facts (त्वरित भर्ती विवरण)
+            <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#60a5fa', margin: '0 0 1rem 0', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              📌 मुख्य भर्ती सारांश एवं आधिकारिक लिंक्स (Overview & Important Links)
             </h3>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
               <div style={{ background: 'rgba(255, 255, 255, 0.02)', padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--color-border)' }}>
@@ -431,6 +431,12 @@ export default function BlogPostClient({ post, ads, relatedPosts, whatsappLinks,
                 <span style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', display: 'block', marginBottom: '0.2rem' }}>योग्यता (Qualification)</span>
                 <span style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--color-text-primary)' }}>
                   {post.tags?.map((t: any) => typeof t === 'string' ? t : (t.tag?.name || t.name)).filter((name: string) => name.toLowerCase().includes('pass') || name.toLowerCase().includes('grad') || name.toLowerCase().includes('tech') || name.toLowerCase().includes('diploma')).join(', ') || '10th / 12th / Graduate'}
+                </span>
+              </div>
+              <div style={{ background: 'rgba(255, 255, 255, 0.02)', padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--color-border)' }}>
+                <span style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', display: 'block', marginBottom: '0.2rem' }}>आयु सीमा (Age Limit)</span>
+                <span style={{ fontSize: '0.9rem', fontWeight 700, color: 'var(--color-text-primary)' }}>
+                  18 से 35-40 वर्ष (नियमानुसार छूट)
                 </span>
               </div>
               {applyLink && (

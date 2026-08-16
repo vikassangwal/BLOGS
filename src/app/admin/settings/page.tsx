@@ -412,6 +412,21 @@ export default function SettingsAdmin() {
         {activeTab === 'integrations' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem', background: 'rgba(255, 255, 255, 0.05)', padding: '2rem', borderRadius: '16px', border: '1px solid var(--color-border)' }}>
             <div>
+              <h3 style={{ margin: '0 0 0.5rem 0', fontSize: '1.2rem', fontWeight: 700, color: '#60a5fa' }}>💰 Google AdSense Publisher Settings</h3>
+              <p style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)', marginBottom: '1rem' }}>Enter your Publisher ID to activate AdSense globally across all pages and ad units.</p>
+              <label style={{ display: 'block', marginBottom: '0.3rem', fontWeight: 600, fontSize: '0.9rem' }}>AdSense Publisher ID</label>
+              <input 
+                type="text" 
+                value={apiKeys.adsensePublisherId || 'ca-pub-2689010221295201'} 
+                onChange={e => setApiKeys({ ...apiKeys, adsensePublisherId: e.target.value })} 
+                placeholder="ca-pub-2689010221295201" 
+                style={{ width: '100%', padding: '0.7rem', borderRadius: '8px', border: '1px solid var(--color-border)', fontFamily: 'monospace', fontWeight: 600, background: 'var(--color-bg-primary)', color: 'var(--color-text-primary)' }} 
+              />
+            </div>
+
+            <hr style={{ border: 'none', borderTop: '1px solid var(--color-border)' }} />
+
+            <div>
               <h3 style={{ margin: '0 0 1rem 0', fontSize: '1.2rem', fontWeight: 700 }}>Push Notifications (OneSignal)</h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 <div>

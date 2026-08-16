@@ -901,27 +901,29 @@ export default async function HomePage() {
             View All →
           </Link>
         </div>
-        <div className="flex flex-col gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4">
           {posts.map((post) => (
-            <Link href={`/blog/${post.slug}`} key={post.id} className="block group">
-              <div className="premium-card flex flex-row items-center overflow-hidden p-3 gap-4 hover:bg-white/5 transition-colors border border-white/5 rounded-xl">
+            <Link href={`/blog/${post.slug}`} key={post.id} className="block group h-full">
+              <div className="glass-panel flex flex-col sm:flex-row items-start sm:items-center overflow-hidden p-3 gap-3 hover:border-blue-500/30 transition-all border border-white/10 rounded-xl bg-white/5 h-full backdrop-blur-md shadow-md">
                 {post.featuredImage && (
-                  <div className="w-20 h-20 sm:w-28 sm:h-20 relative bg-gray-900 overflow-hidden rounded-lg flex-shrink-0">
-                    <Image src={post.featuredImage} alt={post.title} fill className="object-cover transition-transform duration-500 group-hover:scale-110" sizes="(max-width: 768px) 80px, 112px" />
+                  <div className="w-full sm:w-24 h-32 sm:h-20 relative bg-gray-900 overflow-hidden rounded-lg flex-shrink-0">
+                    <Image src={post.featuredImage} alt={post.title} fill className="object-cover transition-transform duration-500 group-hover:scale-110" sizes="(max-width: 768px) 100vw, 96px" />
                   </div>
                 )}
-                <div className="flex-1 flex flex-col justify-center min-w-0">
-                  <div className="flex items-center gap-2 mb-1.5 flex-wrap">
-                    <span className="text-[10px] text-blue-400 font-semibold bg-blue-500/10 px-2 py-0.5 rounded-full whitespace-nowrap">
-                      {tag}
-                    </span>
-                    <p className="text-[10px] sm:text-xs text-gray-400 whitespace-nowrap">
-                      {new Date(post.publishedAt || post.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                    </p>
+                <div className="flex-1 flex flex-col justify-between min-w-0 h-full py-0.5">
+                  <div>
+                    <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+                      <span className="text-[9px] sm:text-[10px] text-blue-400 font-semibold bg-blue-500/10 border border-blue-500/20 px-2 py-0.5 rounded-full whitespace-nowrap">
+                        {tag}
+                      </span>
+                      <p className="text-[9px] sm:text-[10px] text-gray-400 whitespace-nowrap">
+                        📅 {new Date(post.publishedAt || post.createdAt).toLocaleDateString('en-IN', { month: 'short', day: 'numeric', year: 'numeric' })}
+                      </p>
+                    </div>
+                    <h3 className="text-xs sm:text-sm font-bold text-gray-100 group-hover:text-blue-400 transition-colors line-clamp-2 leading-snug">
+                      {post.title}
+                    </h3>
                   </div>
-                  <h3 className="text-sm sm:text-base font-bold text-white leading-snug group-hover:text-blue-400 transition-colors truncate">
-                    {post.title}
-                  </h3>
                 </div>
               </div>
             </Link>

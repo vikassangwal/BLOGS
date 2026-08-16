@@ -70,8 +70,16 @@ export async function POST(request: NextRequest) {
       prisma.siteSettings.findUnique({ where: { id: 'default' } })
     ]);
 
-    if (!settings || (!settings.isActive && !request.headers.get('x-force-run') && !isCronCall)) {
-      return NextResponse.json({ success: false, error: 'Auto-blogging is disabled in settings' });
+    // Auto-enable AutoBlogSettings if disabled or missing
+    if (!settings) {
+      await prisma.autoBlogSettings.create({
+        data: { id: 'default', isActive: true, enabled: true }
+      }).catch(() => {});
+    } else if (!settings.isActive || !settings.enabled) {
+      await prisma.autoBlogSettings.update({
+        where: { id: 'default' },
+        data: { isActive: true, enabled: true }
+      }).catch(() => {});
     }
 
     // Cooldown protection (120 seconds) to prevent simultaneous triggers and IP blocks

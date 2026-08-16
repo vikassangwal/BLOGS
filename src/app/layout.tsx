@@ -23,14 +23,32 @@ export async function generateMetadata(): Promise<Metadata> {
   } catch (e) {}
 
   return {
-    metadataBase: new URL('https://knowora.in'),
-    title: settings?.seoTitle || settings?.siteName || 'Knowora | Premium Knowledge Base by Vikas Sangwal',
-    description: settings?.seoDescription || settings?.siteTagline || 'A dedicated platform for fully automated AI blogging and lead generation, founded by Vikas Sangwal.',
+    metadataBase: new URL('https://www.knowora.in'),
+    title: settings?.seoTitle || settings?.siteName || 'Knowora | Sarkari Job, Educational News & Tech Portal',
+    description: settings?.seoDescription || settings?.siteTagline || 'KnowOra: Latest Sarkari Job Alerts, Admit Cards, Exam Dates, Sarkari Yojana, Tech Updates & Educational News.',
     authors: [{ name: 'Vikas Sangwal' }],
-    keywords: ['Vikas Sangwal', 'Vikas', 'Knowora', 'Sarkari Job', 'AI Blogging', 'Education'],
+    keywords: ['Knowora', 'Knowora.in', 'Sarkari Job', 'Sarkari Result', 'Vikas Sangwal', 'Admit Card', 'Govt Vacancy 2026', 'Education News'],
     openGraph: {
       type: 'website',
+      locale: 'hi_IN',
+      url: 'https://www.knowora.in',
       siteName: settings?.siteName || 'Knowora',
+      title: settings?.seoTitle || 'Knowora | Sarkari Job & Educational Portal',
+      description: settings?.seoDescription || 'Latest Sarkari Job Alerts, Admit Cards, Exam Dates & Educational News.',
+      images: [
+        {
+          url: '/default-og.png',
+          width: 1200,
+          height: 630,
+          alt: 'KnowOra - Sarkari Job & Educational Portal',
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: settings?.seoTitle || 'Knowora | Sarkari Job & Educational Portal',
+      description: settings?.seoDescription || 'Latest Sarkari Job Alerts, Admit Cards & Educational News.',
+      images: ['/default-og.png'],
     },
     verification: {
       google: '9xaLxx5SOf8hmaKdfKQ5Dgp5Y4abmT27VqN8CIlPdIM',

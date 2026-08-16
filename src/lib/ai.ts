@@ -637,3 +637,57 @@ export function parseAIJsonArray(rawText: string): string[] {
 
   throw new Error("No JSON array found in AI output. AI Output: " + rawText);
 }
+
+// ---------------------------------------------------------------------------
+// UTILITY: Robustly parse a JSON object returned by AI (with fallback recovery)
+// ---------------------------------------------------------------------------
+export function safeParseJsonObject<T = any>(rawText: string): T {
+  let cleaned = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
+
+  const firstBrace = cleaned.indexOf('{');
+  const lastBrace = cleaned.lastIndexOf('}');
+  
+  if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+    const jsonStr = cleaned.substring(firstBrace, lastBrace + 1);
+    
+    // Attempt 1: Direct JSON.parse
+    try {
+      return JSON.parse(jsonStr) as T;
+    } catch (e1) {
+      // Attempt 2: Sanitize control characters & unescaped newlines inside strings
+      try {
+        const sanitized = jsonStr.replace(/[\u0000-\u001F]+/g, (match) => {
+          if (match === '\n') return '\\n';
+          if (match === '\r') return '\\r';
+          if (match === '\t') return '\\t';
+          return '';
+        });
+        return JSON.parse(sanitized) as T;
+      } catch (e2) {
+        // Attempt 3: Remove trailing commas
+        try {
+          const trailingFixed = jsonStr
+            .replace(/,\s*}/g, '}')
+            .replace(/,\s*\]/g, ']');
+          return JSON.parse(trailingFixed) as T;
+        } catch (e3) {
+          // Attempt 4: Regex key extraction for title & content fields
+          const titleMatch = jsonStr.match(/"title"\s*:\s*"([^"]+)"/);
+          const contentMatch = jsonStr.match(/"content"\s*:\s*"([\s\S]+)"/);
+          if (titleMatch || contentMatch) {
+            return {
+              title: titleMatch ? titleMatch[1] : 'Knowora Active Jobs Digest',
+              content: contentMatch ? contentMatch[1] : jsonStr
+            } as unknown as T;
+          }
+        }
+      }
+    }
+  }
+
+  // Fallback if AI returned formatted HTML directly without JSON wrapper
+  return {
+    title: 'Knowora Active Jobs Digest Update',
+    content: cleaned || rawText
+  } as unknown as T;
+}

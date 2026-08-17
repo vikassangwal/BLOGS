@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { parseAIJsonArray } from '@/lib/ai';
+import { getAIConfig, generateAIContent, parseAIJsonArray } from '@/lib/ai';
 
+export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
 
 export async function GET(req: Request) {
@@ -24,10 +25,9 @@ export async function GET(req: Request) {
       return NextResponse.json({ message: 'No seed keywords set.' });
     }
 
-    const apiKeys = await prisma.apiKey.findMany({ where: { isActive: true } });
-    const aiKey = apiKeys.find(k => k.provider === 'openrouter' || k.provider === 'openai')?.apiKey;
+    const aiConfig = await getAIConfig();
 
-    if (!aiKey) {
+    if (!aiConfig) {
        return NextResponse.json({ message: 'No AI key found for researcher.' });
     }
 
@@ -38,20 +38,16 @@ export async function GET(req: Request) {
     Generate exactly 3 high-volume, low-competition keywords in this niche that are trending right now.
     Return ONLY a JSON array of strings. Do not include markdown formatting or backticks. Example: ["keyword 1", "keyword 2", "keyword 3"]`;
 
-    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${aiKey}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        model: researcherModel || 'openai/gpt-4o-mini',
-        messages: [{ role: 'user', content: prompt }]
-      })
-    });
-
-    const data = await response.json();
-    let keywordsText = data.choices?.[0]?.message?.content || '[]';
+    let keywordsText = '';
+    try {
+      if (researcherModel) {
+         aiConfig.model = researcherModel;
+      }
+      keywordsText = await generateAIContent(aiConfig, "You output strict JSON arrays of strings.", prompt, 500);
+    } catch (e: any) {
+      console.error("AI Generation Error in researcher:", e);
+      return NextResponse.json({ message: 'Failed to generate keywords from AI.', error: e.message });
+    }
     
     // Clean up potential markdown from the response
     keywordsText = keywordsText.replace(/```json/g, '').replace(/```/g, '').trim();
@@ -71,7 +67,9 @@ export async function GET(req: Request) {
     // Store in AutoBlogKeyword
     const added = [];
     for (const kw of keywords) {
-      const existing = await prisma.autoBlogKeyword.findFirst({ where: { keyword: kw } });
+      const cleanKw = (kw || '').trim();
+      if (!cleanKw) continue;
+      const existing = await prisma.autoBlogKeyword.findFirst({ where: { keyword: cleanKw } });
       if (!existing) {
         let niche = 'Education & Career'; // Default
         const tLower = kw.toLowerCase();
@@ -98,8 +96,8 @@ export async function GET(req: Request) {
           niche = 'Finance & Earning';
         }
         
-        await prisma.autoBlogKeyword.create({ data: { keyword: kw, niche: niche } });
-        added.push(kw);
+        await prisma.autoBlogKeyword.create({ data: { keyword: cleanKw, niche: niche } });
+        added.push(cleanKw);
       }
     }
 

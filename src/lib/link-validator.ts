@@ -499,7 +499,7 @@ export function validateAndFixLinks(html: string, topicTitle: string): string {
  * Finds the most relevant official portal URL based on the blog topic title.
  */
 function findOfficialPortal(topic: string): string {
-  const tLower = topic.toLowerCase();
+  const tLower = (topic || '').toLowerCase();
   // 1. Check OFFICIAL_PORTALS (longest match first)
   const keys = Object.keys(OFFICIAL_PORTALS).sort((a, b) => b.length - a.length);
   for (const key of keys) {
@@ -526,7 +526,7 @@ function findOfficialPortal(topic: string): string {
  * Finds the most relevant official candidate login / apply page based on the blog topic.
  */
 function findOfficialApplyPortal(topicTitle: string): string {
-  const lower = topicTitle.toLowerCase();
+  const lower = (topicTitle || '').toLowerCase();
   const sortedKeys = Object.keys(PORTAL_APPLY).sort((a, b) => b.length - a.length);
   for (const keyword of sortedKeys) {
     if (lower.includes(keyword)) {
@@ -550,7 +550,7 @@ function findOfficialApplyPortal(topicTitle: string): string {
  * Finds the most relevant official notifications / vacancy bulletin listing page.
  */
 function findOfficialNotificationPortal(topicTitle: string): string {
-  const lower = topicTitle.toLowerCase();
+  const lower = (topicTitle || '').toLowerCase();
   const sortedKeys = Object.keys(PORTAL_NOTIFICATIONS).sort((a, b) => b.length - a.length);
   for (const keyword of sortedKeys) {
     if (lower.includes(keyword)) {
@@ -610,7 +610,7 @@ export function cleanTableOfContents(html: string, title: string): string {
       
       const lowerText = linkText.toLowerCase();
       const lowerHref = href.toLowerCase();
-      const lowerTitle = title.toLowerCase();
+      const lowerTitle = (title || '').toLowerCase();
       
       // 1. Remove Table of Contents references
       if (lowerText.includes('table of contents') || 

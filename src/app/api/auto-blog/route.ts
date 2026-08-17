@@ -83,7 +83,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Cooldown protection (120 seconds) to prevent simultaneous triggers and IP blocks
-    if (settings?.lastRunAt && !request.headers.get('x-force-run')) {
+    if (settings?.lastRunAt && !request.headers.get('x-force-run') && !searchParams.get('step')) {
       const elapsedSeconds = (Date.now() - new Date(settings.lastRunAt).getTime()) / 1000;
       if (elapsedSeconds < 120) {
         console.log(`[Auto-Blog] Cooldown active. Skipping execution (${elapsedSeconds}s elapsed).`);
@@ -170,6 +170,7 @@ export async function POST(request: NextRequest) {
           if (prov === 'gemini' || prov === 'gemini2' || prov === 'gemini3') m = 'gemini-2.5-flash';
           else if (prov === 'groq') m = 'llama-3.3-70b-versatile';
           else if (prov === 'openai') m = 'gpt-4o-mini';
+          else if (prov === 'deepseek') m = 'deepseek-chat';
           configs.push({ provider: prov, apiKey: k, model: m });
         }
       }
@@ -1691,7 +1692,7 @@ YOUR SEO SKILLS:
     // Default to Pollinations AI (free, reliable, always works)
     let featuredImage = `https://image.pollinations.ai/prompt/${encodeURIComponent(imgPrompt)}?width=1600&height=900&nologo=true`;
     
-    const imgSourceType = settings.imageSource || 'unsplash'; // unsplash, pexels, ai, none
+    const imgSourceType = settings?.imageSource || 'unsplash'; // unsplash, pexels, ai, none
 
     if (imgSourceType === 'none') {
       featuredImage = '';
@@ -1788,6 +1789,7 @@ YOUR SEO SKILLS:
 
     // AUTOMATIC QUALIFICATION TAGGING
     const lowerContent = articleHtml.toLowerCase();
+    const lowerTopic = (targetTopic || '').toLowerCase();
     if (lowerTopic.includes('10th') || lowerTopic.includes('10वीं') || lowerTopic.includes('matric') || lowerTopic.includes('high school') ||
         lowerContent.includes('10th pass') || lowerContent.includes('10वीं पास') || lowerContent.includes('मैट्रिक')) {
       detectedTagsSet.add('10th Pass');
@@ -2087,7 +2089,7 @@ YOUR SEO SKILLS:
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const expectedSecret = process.env.CRON_SECRET || '';
+    const expectedSecret = process.env.CRON_SECRET || 'knowora-cron-2026';
     const authHeader = request.headers.get('authorization');
     
     // Check if this is a cron trigger request (requires valid CRON_SECRET)

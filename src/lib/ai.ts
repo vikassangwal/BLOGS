@@ -64,7 +64,11 @@ const PROVIDER_REGISTRY: Record<string, ProviderProfile> = {
       if (data.candidates?.[0]?.finishReason === 'SAFETY') {
         throw new Error('Gemini: Content blocked by safety filters.');
       }
-      return data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+      const parts = data.candidates?.[0]?.content?.parts;
+      if (Array.isArray(parts)) {
+        return parts.map((p: any) => p.text || '').join('');
+      }
+      return '';
     },
     models: ['gemini-'],
     keyPatterns: [/^AIza[a-zA-Z0-9_-]{30,}/],
@@ -279,7 +283,18 @@ export async function getAIConfig(): Promise<AIConfig | null> {
       try {
         if (apiKeyToUse.startsWith('{')) {
           const parsedKeys = JSON.parse(apiKeyToUse);
-          apiKeyToUse = parsedKeys[provider] || parsedKeys['openai'] || Object.values(parsedKeys).find((v: any) => v && String(v).length > 10) as string || '';
+          if (parsedKeys[provider]) {
+            apiKeyToUse = parsedKeys[provider];
+          } else {
+            const foundEntry = Object.entries(parsedKeys).find(([_, v]) => v && String(v).length > 10);
+            if (foundEntry) {
+              // eslint-disable-next-line no-ex-assign
+              provider = foundEntry[0];
+              apiKeyToUse = foundEntry[1] as string;
+            } else {
+              apiKeyToUse = '';
+            }
+          }
         }
       } catch (e) {}
 
@@ -320,19 +335,20 @@ async function fetchWithRetry(url: string, options: any, maxRetries = 5): Promis
     try {
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 35000); // 35s timeout to ensure fallback attempts fit under Vercel 60s limit
-
-      const res = await fetch(url, { ...options, signal: controller.signal });
-      clearTimeout(timeout);
-
-      if (res.status === 429) {
-        if (process.env.VERCEL === '1' || process.env.NEXT_PUBLIC_VERCEL_ENV || attempt >= maxRetries - 1) return res;
-        // Wait 15s for first rate limit, and 30s for subsequent retries to completely clear Google's 1-minute rate limit window!
-        const waitTime = (attempt === 0) ? 15000 : 30000;
-        console.warn(`[AI Rate Limit] Got 429 from API. Waiting ${waitTime / 1000} seconds before retry ${attempt + 1}/${maxRetries}...`);
-        await new Promise(r => setTimeout(r, waitTime));
-        continue;
+      try {
+        const res = await fetch(url, { ...options, signal: controller.signal });
+        if (res.status === 429) {
+          if (process.env.VERCEL === '1' || process.env.NEXT_PUBLIC_VERCEL_ENV || attempt >= maxRetries - 1) return res;
+          // Wait 15s for first rate limit, and 30s for subsequent retries to completely clear Google's 1-minute rate limit window!
+          const waitTime = (attempt === 0) ? 15000 : 30000;
+          console.warn(`[AI Rate Limit] Got 429 from API. Waiting ${waitTime / 1000} seconds before retry ${attempt + 1}/${maxRetries}...`);
+          await new Promise(r => setTimeout(r, waitTime));
+          continue;
+        }
+        return res;
+      } finally {
+        clearTimeout(timeout);
       }
-      return res;
     } catch (error: any) {
       lastError = error;
       if (error.name === 'AbortError') {
@@ -367,12 +383,18 @@ async function parseErrorResponse(res: Response, providerName: string): Promise<
 // ---------------------------------------------------------------------------
 export async function sendTelegramAlert(message: string) {
   try {
-    const settings = await prisma.siteSettings.findUnique({ where: { id: 'default' } });
-    if (!settings || !settings.aiApiKey) return;
-    let keys = {};
-    if (settings.aiApiKey.startsWith('{')) keys = JSON.parse(settings.aiApiKey);
-    const token = (keys as any).telegramToken;
-    const chatId = (keys as any).telegramChatId;
+    const autoSettings = await prisma.autoBlogSettings.findUnique({ where: { id: 'default' } });
+    let token = autoSettings?.telegramToken;
+    let chatId = autoSettings?.telegramChatId;
+
+    if (!token || !chatId) {
+      const siteSettings = await prisma.siteSettings.findUnique({ where: { id: 'default' } });
+      if (siteSettings?.aiApiKey?.startsWith('{')) {
+        const keys = JSON.parse(siteSettings.aiApiKey);
+        token = token || keys.telegramToken;
+        chatId = chatId || keys.telegramChatId;
+      }
+    }
     
     if (token && chatId) {
       await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
@@ -594,6 +616,7 @@ export async function testAPIKey(provider: string, apiKey: string, model?: strin
 // UTILITY: Robustly parse a string list/JSON array returned by AI
 // ---------------------------------------------------------------------------
 export function parseAIJsonArray(rawText: string): string[] {
+  if (!rawText || typeof rawText !== 'string') return [];
   let cleaned = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
 
   // Attempt 1: Standard JSON parse of bracketed content
@@ -642,6 +665,7 @@ export function parseAIJsonArray(rawText: string): string[] {
 // UTILITY: Robustly parse a JSON object returned by AI (with fallback recovery)
 // ---------------------------------------------------------------------------
 export function safeParseJsonObject<T = any>(rawText: string): T {
+  if (!rawText || typeof rawText !== 'string') return {} as T;
   let cleaned = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
 
   const firstBrace = cleaned.indexOf('{');

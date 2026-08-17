@@ -40,15 +40,19 @@ export async function GET(request: NextRequest) {
   }
 
   const urlObj = new URL(request.url);
+  urlObj.searchParams.delete('secret'); // Remove secret so POST doesn't bypass the frequency rate-limit!
   urlObj.searchParams.set('step', targetStep);
   if (targetPostId) {
     urlObj.searchParams.set('postId', targetPostId);
   }
 
-  // Pass incoming GET request as a POST request to the handler to avoid Next.js routing issues
+  // Pass incoming GET request as a POST request to the handler
+  const newHeaders = new Headers(request.headers);
+  newHeaders.set('x-cron-secret', cronSecret);
+
   const postRequest = new NextRequest(urlObj.toString(), {
     method: 'POST',
-    headers: request.headers,
+    headers: newHeaders,
   });
 
   // Run the blog generation in the background so cron-job.org doesn't timeout

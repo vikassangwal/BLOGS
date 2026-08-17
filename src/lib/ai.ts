@@ -330,17 +330,26 @@ export async function getAIConfig(): Promise<AIConfig | null> {
 // ---------------------------------------------------------------------------
 async function fetchWithRetry(url: string, options: any, maxRetries = 5): Promise<Response> {
   let lastError: Error | null = null;
+  const startTime = Date.now();
 
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
       const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 35000); // 35s timeout to ensure fallback attempts fit under Vercel 60s limit
+      // 55s timeout: Give maximum possible time for 1500+ word Hindi generation within Vercel 60s limit
+      const timeout = setTimeout(() => controller.abort(), 55000); 
       try {
         const res = await fetch(url, { ...options, signal: controller.signal });
         if (res.status === 429) {
           if (process.env.VERCEL === '1' || process.env.NEXT_PUBLIC_VERCEL_ENV || attempt >= maxRetries - 1) return res;
+          
           // Wait 15s for first rate limit, and 30s for subsequent retries to completely clear Google's 1-minute rate limit window!
           const waitTime = (attempt === 0) ? 15000 : 30000;
+          
+          // If waiting will exceed Vercel 60s limit, don't wait, just return the 429 response
+          if (Date.now() - startTime + waitTime > 58000) {
+             return res;
+          }
+          
           console.warn(`[AI Rate Limit] Got 429 from API. Waiting ${waitTime / 1000} seconds before retry ${attempt + 1}/${maxRetries}...`);
           await new Promise(r => setTimeout(r, waitTime));
           continue;
@@ -352,11 +361,18 @@ async function fetchWithRetry(url: string, options: any, maxRetries = 5): Promis
     } catch (error: any) {
       lastError = error;
       if (error.name === 'AbortError') {
-        if (attempt >= maxRetries - 1) throw new Error('AI API request timed out (35s)');
-        continue;
+        if (attempt >= maxRetries - 1) throw new Error('AI API request timed out (55s)');
+        // If we aborted at 55s, we definitely don't have time for a retry in Vercel Hobby (60s)
+        throw new Error('AI API request timed out (55s)');
       }
+      
+      // If we've already spent more than 50s, don't even try to retry, we will hit Vercel 60s limit
+      if (Date.now() - startTime > 50000) {
+         throw lastError || new Error('AI API failed (nearing Vercel 60s limit)');
+      }
+      
       if (attempt >= maxRetries - 1) throw error;
-      await new Promise(r => setTimeout(r, 3000));
+      await new Promise(r => setTimeout(r, 2000));
     }
   }
   throw lastError || new Error('AI API failed after retries');

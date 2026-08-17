@@ -2,45 +2,14 @@ name: Auto-Blog Scheduled Runner
 
 on:
   schedule:
-    # Runs every 15 minutes.
-    - cron: '*/15 * * * *'
+    # Runs every 10 minutes.
+    - cron: '*/10 * * * *'
   workflow_dispatch: # Allows you to manually click "Run workflow" in GitHub Actions tab
 
 jobs:
-  run-autoblog:
+  ping-production-cron:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: 'npm'
-
-      - name: Install Dependencies
-        run: npm install --legacy-peer-deps
-
-      - name: Generate Prisma Client
-        run: npx prisma generate
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
-
-      - name: Start Next.js Local Server
+      - name: Ping Auto-Blog Endpoint
         run: |
-          npx next dev &
-          echo "Waiting for local server to start..."
-          sleep 15
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          PORT: 3000
-          TZ: Asia/Kolkata
-
-      - name: Trigger Auto-Blog API
-        run: |
-          curl -i -X POST "http://localhost:3000/api/auto-blog?secret=knowora-cron-2026" \
-            -H "x-force-run: true" \
-            -H "x-cron-secret: knowora-cron-2026"
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          curl -i -X GET "https://www.knowora.in/api/cron/auto-blog?secret=knowora-cron-2026"

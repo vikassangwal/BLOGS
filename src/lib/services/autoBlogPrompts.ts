@@ -1,4 +1,7 @@
-export function getResearchPrompt(targetTopic: string, liveNewsContext: string, customSourceUrl: string, currentDateStr: string, currentYearNum: number | string) {\r\n\r\n  // Detect if this is an Education & Career topic\r\n  const topicLower = (targetTopic || '').toLowerCase();
+export function getResearchPrompt(targetTopic: string, liveNewsContext: string, customSourceUrl: string, currentDateStr: string, currentYearNum: number | string) {
+
+  // Detect if this is an Education & Career topic
+  const topicLower = (targetTopic || '').toLowerCase();
   // Detect if this is an Education & Career / Study topic
   const isEducationTopic = topicLower.includes('job') || topicLower.includes('vacancy') || topicLower.includes('recruitment') ||
     topicLower.includes('exam') || topicLower.includes('admit') || topicLower.includes('notification') ||

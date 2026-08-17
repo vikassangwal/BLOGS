@@ -276,7 +276,7 @@ export async function getAIConfig(): Promise<AIConfig | null> {
   try {
     const settings = await prisma.siteSettings.findUnique({ where: { id: 'default' } });
     if (settings?.aiApiKey) {
-      const provider = settings.aiProvider || 'openai';
+      let provider = settings.aiProvider || 'openai';
       let apiKeyToUse = settings.aiApiKey.trim();
 
       // Handle JSON-encoded multi-provider keys

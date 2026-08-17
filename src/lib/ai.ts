@@ -361,13 +361,13 @@ async function fetchWithRetry(url: string, options: any, maxRetries = 5): Promis
     } catch (error: any) {
       lastError = error;
       if (error.name === 'AbortError') {
-        if (attempt >= maxRetries - 1) throw new Error('AI API request timed out (55s)');
-        // If we aborted at 55s, we definitely don't have time for a retry in Vercel Hobby (60s)
-        throw new Error('AI API request timed out (55s)');
+        if (attempt >= maxRetries - 1) throw new Error('AI API request timed out (45s)');
+        // If we aborted at 45s, we definitely don't have time for a retry in Vercel Hobby (60s)
+        throw new Error('AI API request timed out (45s)');
       }
       
-      // If we've already spent more than 50s, don't even try to retry, we will hit Vercel 60s limit
-      if (Date.now() - startTime > 50000) {
+      // If we've already spent more than 45s, don't even try to retry, we will hit Vercel 60s limit
+      if (Date.now() - startTime > 45000) {
          throw lastError || new Error('AI API failed (nearing Vercel 60s limit)');
       }
       

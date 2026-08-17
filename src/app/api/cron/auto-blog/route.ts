@@ -13,8 +13,40 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
+  const { prisma } = await import('@/lib/prisma');
+  
+  let targetStep = 'stage1';
+  let targetPostId = '';
+
+  // 1. Check if there's a post ready for SEO & Publishing (Stage 3)
+  const stage3Keyword = await prisma.autoBlogKeyword.findFirst({
+    where: { status: 'writing_completed' },
+    orderBy: [{ priority: 'desc' }, { createdAt: 'asc' }]
+  });
+  
+  if (stage3Keyword) {
+    targetStep = 'stage3';
+    targetPostId = stage3Keyword.postId || '';
+  } else {
+    // 2. Check if there's a post ready for Writing (Stage 2)
+    const stage2Keyword = await prisma.autoBlogKeyword.findFirst({
+      where: { status: 'research_completed' },
+      orderBy: [{ priority: 'desc' }, { createdAt: 'asc' }]
+    });
+    if (stage2Keyword) {
+      targetStep = 'stage2';
+      targetPostId = stage2Keyword.postId || '';
+    }
+  }
+
+  const urlObj = new URL(request.url);
+  urlObj.searchParams.set('step', targetStep);
+  if (targetPostId) {
+    urlObj.searchParams.set('postId', targetPostId);
+  }
+
   // Pass incoming GET request as a POST request to the handler to avoid Next.js routing issues
-  const postRequest = new NextRequest(request.url, {
+  const postRequest = new NextRequest(urlObj.toString(), {
     method: 'POST',
     headers: request.headers,
   });
@@ -22,12 +54,11 @@ export async function GET(request: NextRequest) {
   // Run the blog generation in the background so cron-job.org doesn't timeout
   waitUntil(
     POST(postRequest).catch(async (err) => {
-      console.error("Background auto-blog error:", err);
+      console.error(`Background auto-blog error (${targetStep}):`, err);
       try {
-        const { prisma } = await import('@/lib/prisma');
         await prisma.autoBlogLog.create({
           data: {
-            keyword: 'Cron Trigger Error',
+            keyword: `Cron Trigger Error (${targetStep})`,
             status: 'failed',
             error: err.message || 'Unknown error in cron background execution'
           }

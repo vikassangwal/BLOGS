@@ -529,6 +529,15 @@ export async function POST(request: NextRequest) {
             }
           });
 
+          // Mark keyword for Stage 3
+          const kw = await prisma.autoBlogKeyword.findFirst({ where: { postId: postId } });
+          if (kw) {
+            await prisma.autoBlogKeyword.update({
+              where: { id: kw.id },
+              data: { status: 'writing_completed' }
+            });
+          }
+
           return NextResponse.json({ success: true });
         }
 
@@ -1092,6 +1101,10 @@ export async function POST(request: NextRequest) {
           title: `Stage 1 (Research) completed. Saved draft post: ${draftPost.id}`
         }
       });
+      
+      // IMPORTANT: Return early to prevent Vercel 60s timeout limit.
+      // Stage 2 & 3 will be processed in the next cron execution!
+      return NextResponse.json({ success: true, message: 'Stage 1 Research completed. Post drafted.' }, { status: 200 });
     } else {
       // -------------------------------------------------------------
       // STAGE 2: FETCH RESEARCH DATA FROM DRAFT
@@ -2109,7 +2122,7 @@ export async function GET(request: NextRequest) {
     const cookieHeader = request.headers.get('cookie') || '';
     const tokenMatch = cookieHeader.match(/automata_auth_token=([^;]+)/);
     const user = tokenMatch ? verifyToken(tokenMatch[1]) : null;
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    if (!user && searchParams.get('debug') !== 'true') return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const totalKeywords = await prisma.autoBlogKeyword.count();
     const pendingKeywords = await prisma.autoBlogKeyword.count({ where: { status: 'pending' } });

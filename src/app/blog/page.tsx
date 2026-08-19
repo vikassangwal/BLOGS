@@ -17,7 +17,12 @@ export async function generateMetadata(
   const search = resolvedSearchParams.search;
   const qual = resolvedSearchParams.qualification;
 
-  const siteSettings = await prisma.siteSettings.findUnique({ where: { id: 'default' } });
+  let siteSettings = null;
+  try {
+    siteSettings = await prisma.siteSettings.findUnique({ where: { id: 'default' } });
+  } catch (e) {
+    console.error("Prisma error in generateMetadata:", e);
+  }
   const siteName = siteSettings?.siteName || 'Knowora';
 
   let title = `Latest Articles & Updates | ${siteName}`;
@@ -71,7 +76,13 @@ export async function generateMetadata(
 }
 
 export default async function BlogListingPage() {
-  const siteSettings = await prisma.siteSettings.findUnique({ where: { id: 'default' } });
+  let siteSettings = null;
+  try {
+    siteSettings = await prisma.siteSettings.findUnique({ where: { id: 'default' } });
+  } catch (e) {
+    console.error("Prisma error in BlogListingPage:", e);
+  }
+  
   let uiConfig: any = {};
   try {
     if (siteSettings?.aiApiKey?.startsWith('{')) {

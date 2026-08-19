@@ -6,7 +6,12 @@ import AboutClient from '@/components/AboutClient';
 export const revalidate = 3600; // Cache for 1 hour since team changes are infrequent
 
 export async function generateMetadata(): Promise<Metadata> {
-  const siteSettings = await prisma.siteSettings.findUnique({ where: { id: 'default' } });
+  let siteSettings = null;
+  try {
+    siteSettings = await prisma.siteSettings.findUnique({ where: { id: 'default' } });
+  } catch (e) {
+    console.error("Prisma error in about generateMetadata:", e);
+  }
   const siteName = siteSettings?.siteName || 'Knowora';
 
   const title = `About Us | ${siteName} - Platform Expertise & E-E-A-T`;
@@ -35,10 +40,18 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function AboutUsPage() {
-  const [aboutSetting, teamMembers] = await Promise.all([
-    prisma.aboutSetting.findUnique({ where: { id: 'default' } }),
-    prisma.teamMember.findMany({ where: { isActive: true } })
-  ]);
+  let aboutSetting = null;
+  let teamMembers: any[] = [];
+  try {
+    const results = await Promise.all([
+      prisma.aboutSetting.findUnique({ where: { id: 'default' } }),
+      prisma.teamMember.findMany({ where: { isActive: true } })
+    ]);
+    aboutSetting = results[0];
+    teamMembers = results[1];
+  } catch (e) {
+    console.error("Prisma error in AboutUsPage:", e);
+  }
 
   const about = {
     heading: aboutSetting?.heading || 'About Our Blog',

@@ -813,47 +813,84 @@ export default async function HomePage() {
   sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
   // Fetch all categories in parallel on the server
-  const [
-    allPosts, guidelinesPosts, rulesRightsPosts, whatsappLinks, siteSettings,
-    allActiveJobs, allAdmitCards, allExamResults,
-    universityUpdates, allGovtSchemes, scholarships,
-    techMobile, financeBanking, earningCourses, schoolNews, allOtherNews,
-    closingSoonJobs, liveUpdates,
-    allUpcomingJobs
-  ] = await Promise.all([
-    prisma.blogPost.findMany({ where: { status: 'Published' }, orderBy: { publishedAt: 'desc' }, take: 10, select: { id: true, title: true, slug: true, publishedAt: true, featuredImage: true } }),
-    getPostsByTag('Guidelines'),
-    getPostsByTag('Rules & Rights'),
-    prisma.socialLink.findMany({ where: { platform: 'whatsapp', isActive: true } }),
-    prisma.siteSettings.findUnique({ where: { id: 'default' } }),
-    getActiveJobs(150),
-    getAdmitCards(150),
-    getResultsAndSyllabus(150),
-    getUniversityUpdates(8),
-    getSchemes(150),
-    getScholarships(8),
-    getTechNews(8),
-    getFinanceNews(8),
-    getEarningCourses(8),
-    getSchoolNews(8),
-    getOtherNews(150),
-    prisma.blogPost.findMany({
-      where: {
-        status: 'Published',
-        expiryDate: { gte: now }
-      },
-      orderBy: { expiryDate: 'asc' },
-      take: 4,
-      select: { id: true, title: true, slug: true, expiryDate: true }
-    }),
-    prisma.blogPost.findMany({
-      where: { status: 'Published' },
-      orderBy: { publishedAt: 'desc' },
-      take: 6,
-      select: { id: true, title: true, slug: true, publishedAt: true, createdAt: true }
-    }),
-    getUpcomingJobs(150)
-  ]);
+  let allPosts: any[] = [];
+  let guidelinesPosts: any[] = [];
+  let rulesRightsPosts: any[] = [];
+  let whatsappLinks: any[] = [];
+  let siteSettings: any = null;
+  let allActiveJobs: any[] = [];
+  let allAdmitCards: any[] = [];
+  let allExamResults: any[] = [];
+  let universityUpdates: any[] = [];
+  let allGovtSchemes: any[] = [];
+  let scholarships: any[] = [];
+  let techMobile: any[] = [];
+  let financeBanking: any[] = [];
+  let earningCourses: any[] = [];
+  let schoolNews: any[] = [];
+  let allOtherNews: any[] = [];
+  let closingSoonJobs: any[] = [];
+  let liveUpdates: any[] = [];
+  let allUpcomingJobs: any[] = [];
+
+  try {
+    const results = await Promise.all([
+      prisma.blogPost.findMany({ where: { status: 'Published' }, orderBy: { publishedAt: 'desc' }, take: 10, select: { id: true, title: true, slug: true, publishedAt: true, featuredImage: true } }),
+      getPostsByTag('Guidelines'),
+      getPostsByTag('Rules & Rights'),
+      prisma.socialLink.findMany({ where: { platform: 'whatsapp', isActive: true } }),
+      prisma.siteSettings.findUnique({ where: { id: 'default' } }),
+      getActiveJobs(150),
+      getAdmitCards(150),
+      getResultsAndSyllabus(150),
+      getUniversityUpdates(8),
+      getSchemes(150),
+      getScholarships(8),
+      getTechNews(8),
+      getFinanceNews(8),
+      getEarningCourses(8),
+      getSchoolNews(8),
+      getOtherNews(150),
+      prisma.blogPost.findMany({
+        where: {
+          status: 'Published',
+          expiryDate: { gte: now }
+        },
+        orderBy: { expiryDate: 'asc' },
+        take: 4,
+        select: { id: true, title: true, slug: true, expiryDate: true }
+      }),
+      prisma.blogPost.findMany({
+        where: { status: 'Published' },
+        orderBy: { publishedAt: 'desc' },
+        take: 6,
+        select: { id: true, title: true, slug: true, publishedAt: true, createdAt: true }
+      }),
+      getUpcomingJobs(150)
+    ]);
+
+    allPosts = results[0];
+    guidelinesPosts = results[1];
+    rulesRightsPosts = results[2];
+    whatsappLinks = results[3];
+    siteSettings = results[4];
+    allActiveJobs = results[5];
+    allAdmitCards = results[6];
+    allExamResults = results[7];
+    universityUpdates = results[8];
+    allGovtSchemes = results[9];
+    scholarships = results[10];
+    techMobile = results[11];
+    financeBanking = results[12];
+    earningCourses = results[13];
+    schoolNews = results[14];
+    allOtherNews = results[15];
+    closingSoonJobs = results[16];
+    liveUpdates = results[17];
+    allUpcomingJobs = results[18];
+  } catch (e) {
+    console.error("Prisma error in HomePage:", e);
+  }
 
   // Derived lists (up to 8 items)
   const latestJobs = allActiveJobs.slice(0, 8);

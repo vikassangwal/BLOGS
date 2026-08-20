@@ -91,49 +91,71 @@ async function getPostsByTagsAndKeywords(tags: string[], keywords: string[] = []
   }
 }
 
+
+const HINDI_MONTHS_LIST: Record<string, number> = {
+  'जनवरी': 0, 'फ़रवरी': 1, 'फरवरी': 1, 'मार्च': 2, 'अप्रैल': 3, 'मई': 4, 'जून': 5,
+  'जुलाई': 6, 'अगस्त': 7, 'सितंबर': 8, 'सितम्बर': 8, 'अक्टूबर': 9, 'नवंबर': 10, 'नवम्बर': 10, 'दिसंबर': 11, 'दिसम्बर': 11,
+  'january': 0, 'february': 1, 'march': 2, 'april': 3, 'may': 4, 'june': 5,
+  'july': 6, 'august': 7, 'september': 8, 'october': 9, 'november': 10, 'december': 11,
+  'jan': 0, 'feb': 1, 'mar': 2, 'apr': 3, 'jun': 5, 'jul': 6, 'aug': 7, 'sep': 8, 'oct': 9, 'nov': 10, 'dec': 11
+};
+
+function extractLastDateQuick(content: string): Date | null {
+  if (!content) return null;
+  const hindiPattern = /(\d{1,2})\s+([^\s\d<>,()]+)\s+(\d{4})/gi;
+  let match;
+  const dates: Date[] = [];
+  while ((match = hindiPattern.exec(content)) !== null) {
+    const day = parseInt(match[1], 10);
+    const monthWord = match[2].toLowerCase().trim();
+    const year = parseInt(match[3], 10);
+    if (HINDI_MONTHS_LIST[monthWord] !== undefined && year >= 2024 && year <= 2030 && day >= 1 && day <= 31) {
+      dates.push(new Date(Date.UTC(year, HINDI_MONTHS_LIST[monthWord], day, 23, 59, 59)));
+    }
+  }
+  if (dates.length > 0) {
+    dates.sort((a, b) => a.getTime() - b.getTime());
+    return dates[dates.length - 1]; // Return latest date mentioned
+  }
+  return null;
+}
+
 async function getActiveJobs(limit: number = 8) {
   const now = new Date();
+  const nowTime = now.getTime();
+  const twentyOneDaysAgo = nowTime - 21 * 24 * 60 * 60 * 1000;
+
   try {
     const posts = await prisma.blogPost.findMany({
       where: {
         status: 'Published',
-        AND: [
+        OR: [
+          { gridBox: 'latestJobs' },
           {
-            OR: [
-              { applyLastDate: { gte: now } },
-              { AND: [ { applyLastDate: null }, { OR: [ { expiryDate: { gte: now } }, { expiryDate: null } ] } ] }
-            ]
-          },
-          {
-            OR: [
-              { gridBox: 'latestJobs' },
+            AND: [
+              { OR: [ { gridBox: null }, { gridBox: '' } ] },
               {
-                AND: [
-                  { OR: [ { gridBox: null }, { gridBox: '' } ] },
-                  {
-                    OR: [
-                      { tags: { some: { tag: { name: { in: ['Job', 'Vacancy', 'Career', 'Upcoming Job', 'Agami', 'Education & Career'] } } } } },
-                      { title: { contains: 'Recruitment', mode: 'insensitive' } },
-                      { title: { contains: 'Vacancy', mode: 'insensitive' } },
-                      { title: { contains: 'भर्ती' } },
-                      { title: { contains: 'Job', mode: 'insensitive' } },
-                      { title: { contains: 'PO', mode: 'insensitive' } },
-                      { title: { contains: 'Police', mode: 'insensitive' } },
-                      { title: { contains: 'Constable', mode: 'insensitive' } }
-                    ]
-                  },
-                  {
-                    NOT: [
-                      { title: { contains: 'Result', mode: 'insensitive' } },
-                      { title: { contains: 'परिणाम' } },
-                      { title: { contains: 'Admit Card', mode: 'insensitive' } },
-                      { title: { contains: 'प्रवेश पत्र' } },
-                      { title: { contains: 'Answer Key', mode: 'insensitive' } },
-                      { title: { contains: 'उत्तर कुंजी' } },
-                      { title: { contains: 'Syllabus', mode: 'insensitive' } },
-                      { title: { contains: 'सिलेबस' } }
-                    ]
-                  }
+                OR: [
+                  { tags: { some: { tag: { name: { in: ['Job', 'Vacancy', 'Career', 'Upcoming Job', 'Agami', 'Education & Career'] } } } } },
+                  { title: { contains: 'Recruitment', mode: 'insensitive' } },
+                  { title: { contains: 'Vacancy', mode: 'insensitive' } },
+                  { title: { contains: 'भर्ती' } },
+                  { title: { contains: 'Job', mode: 'insensitive' } },
+                  { title: { contains: 'PO', mode: 'insensitive' } },
+                  { title: { contains: 'Police', mode: 'insensitive' } },
+                  { title: { contains: 'Constable', mode: 'insensitive' } }
+                ]
+              },
+              {
+                NOT: [
+                  { title: { contains: 'Result', mode: 'insensitive' } },
+                  { title: { contains: 'परिणाम' } },
+                  { title: { contains: 'Admit Card', mode: 'insensitive' } },
+                  { title: { contains: 'प्रवेश पत्र' } },
+                  { title: { contains: 'Answer Key', mode: 'insensitive' } },
+                  { title: { contains: 'उत्तर कुंजी' } },
+                  { title: { contains: 'Syllabus', mode: 'insensitive' } },
+                  { title: { contains: 'सिलेबस' } }
                 ]
               }
             ]
@@ -141,11 +163,12 @@ async function getActiveJobs(limit: number = 8) {
         ]
       },
       orderBy: { publishedAt: 'desc' },
-      take: limit,
+      take: 150,
       select: {
         id: true,
         title: true,
         slug: true,
+        content: true,
         publishedAt: true,
         createdAt: true,
         expiryDate: true,
@@ -154,7 +177,23 @@ async function getActiveJobs(limit: number = 8) {
       }
     });
 
-    return posts;
+    // Strictly filter only REAL active jobs (where last date >= now)
+    const activePosts = posts.filter(p => {
+      let lDate: Date | null = p.applyLastDate ? new Date(p.applyLastDate) : (p.expiryDate ? new Date(p.expiryDate) : null);
+      if (!lDate && p.content) {
+        lDate = extractLastDateQuick(p.content);
+      }
+
+      if (lDate) {
+        return lDate.getTime() >= nowTime;
+      }
+
+      // If no date found anywhere, only consider active if published recently (within 21 days)
+      const pubTime = new Date(p.publishedAt || p.createdAt).getTime();
+      return pubTime >= twentyOneDaysAgo;
+    });
+
+    return activePosts.slice(0, limit).map(({ content, ...rest }) => rest);
   } catch (err) {
     console.error('Failed to fetch active jobs:', err);
     return [];

@@ -514,10 +514,23 @@ export async function POST(request: NextRequest) {
             throw e;
           }
 
-          // Quality guard: don't overwrite the draft with empty/near-empty content.
+          // Quality guard: strictly reject empty, short, or cut-off articles (Must be full 1200-1500+ words)
           const writtenText = (articleHtml || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
-          if (writtenText.length < 400) {
-            return NextResponse.json({ success: false, error: `AI returned too little content (${writtenText.length} chars). Please try again.` });
+          if (writtenText.length < 1500) {
+            return NextResponse.json({ 
+              success: false, 
+              error: `AI returned incomplete/short content (${writtenText.length} chars, min 1500 required). Skipping to protect blog quality.` 
+            });
+          }
+
+          // Truncation check (ensure article did not end mid-sentence)
+          const tail = articleHtml.slice(-120);
+          const looksTruncated = !/[.!?।>]\s*$/.test(articleHtml.trim()) && !/<\/(p|div|ul|ol|table|h[1-6]|blockquote|details)>\s*$/i.test(tail);
+          if (looksTruncated) {
+            return NextResponse.json({ 
+              success: false, 
+              error: `AI output was cut off mid-sentence. Skipping to avoid publishing an incomplete post.` 
+            });
           }
 
           // Save the written content
@@ -550,6 +563,13 @@ export async function POST(request: NextRequest) {
 
           const post = await prisma.blogPost.findUnique({ where: { id: postId } });
           if (!post) return NextResponse.json({ success: false, error: 'Post not found in database' });
+
+          if (post.status === 'Researching' || (post.content || '').length < 1200 || (post.content || '').startsWith('Topic:')) {
+            return NextResponse.json({ 
+              success: false, 
+              error: 'Cannot publish: Article content is incomplete or still in raw research state. Please complete Stage 2 writing first.' 
+            });
+          }
 
           console.log(`[Auto-Blog Step 3] Generating SEO and publishing: ${post.title}`);
 
@@ -1542,8 +1562,8 @@ YOUR SEO SKILLS:
       // never publish a broken half-written post. This protects the "long & detailed"
       // requirement — it only rejects BAD output, it never shortens good output.
       const plainText = articleHtml.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
-      if (plainText.length < 400) {
-        throw new Error(`Writer produced too little content (${plainText.length} chars) for "${targetTopic}". Skipping to avoid publishing an incomplete post.`);
+      if (plainText.length < 1500) {
+        throw new Error(`Writer produced too little content (${plainText.length} chars, min 1500 required) for "${targetTopic}". Skipping to avoid publishing an incomplete post.`);
       }
       // Detect an article that was cut off mid-sentence (no closing tag near the end
       // and no sentence-ending punctuation) — a sign the model hit its token limit.

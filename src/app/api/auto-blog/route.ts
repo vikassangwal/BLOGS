@@ -6,8 +6,8 @@ function getCurrentDateStr() {
   const dateEng = now.toLocaleDateString('en-IN', options);
   return `${dateHindi} (${dateEng})`;
 }
-function getCurrentYearNum() {
-  return new Date().toLocaleDateString('en-US', { timeZone: 'Asia/Kolkata', year: 'numeric' });
+function getCurrentYearNum(): number {
+  return parseInt(new Date().toLocaleDateString('en-US', { timeZone: 'Asia/Kolkata', year: 'numeric' }), 10) || 2026;
 }
 
 async function fetchWithTimeout(url: string, options: any = {}, timeoutMs = 3000) {
@@ -74,12 +74,12 @@ export async function POST(request: NextRequest) {
     // Auto-enable AutoBlogSettings if disabled or missing
     if (!settings) {
       await prisma.autoBlogSettings.create({
-        data: { id: 'default', isActive: true, enabled: true }
+        data: { id: 'default', isActive: true }
       }).catch(() => {});
-    } else if (!settings?.isActive || !settings?.enabled) {
+    } else if (!settings?.isActive) {
       await prisma.autoBlogSettings.update({
         where: { id: 'default' },
-        data: { isActive: true, enabled: true }
+        data: { isActive: true }
       }).catch(() => {});
     }
 

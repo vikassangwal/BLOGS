@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { generateAIContent, AIConfig } from '@/lib/ai';
+import { detectGridBox } from '@/lib/grid-classifier';
 import { revalidatePath } from 'next/cache';
 
 export const dynamic = 'force-dynamic';
@@ -18,12 +19,12 @@ function isArticleIncomplete(content: string = ''): boolean {
 
   // 3. Truncation check (ended mid-sentence without closing tag)
   const tail = content.slice(-120);
-  const looksTruncated = !/[.!??>]\s*$/.test(content.trim()) && !/<\/(p|div|ul|ol|table|h[1-6]|blockquote|details)>\s*$/i.test(tail);
+  const looksTruncated = !/[.!?।>]\s*$/.test(content.trim()) && !/<\/(p|div|ul|ol|table|h[1-6]|blockquote|details)>\s*$/i.test(tail);
   if (looksTruncated) return true;
 
   // 4. Missing conclusion or FAQs
-  const hasConclusion = content.toLowerCase().includes('conclusion') || content.includes('????????') || content.includes('?????????? ????');
-  const hasFaq = content.toLowerCase().includes('faq') || content.includes('????? ???? ???? ???? ??????') || content.includes('<details>');
+  const hasConclusion = content.toLowerCase().includes('conclusion') || content.includes('निष्कर्ष') || content.includes('महत्वपूर्ण लिंक');
+  const hasFaq = content.toLowerCase().includes('faq') || content.includes('अक्सर पूछे जाने वाले प्रश्न') || content.includes('<details>');
   if (!hasConclusion && !hasFaq) return true;
 
   return false;
@@ -40,7 +41,34 @@ export async function POST(request: NextRequest) {
     const forceAll = searchParams.get('force') === 'true';
     const limit = parseInt(searchParams.get('limit') || '10');
 
-    // 1. Fetch site settings & AI keys
+    // 1. Auto-clean stuck raw research drafts older than 1 hour
+    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
+    await prisma.blogPost.deleteMany({
+      where: {
+        status: 'Researching',
+        createdAt: { lt: oneHourAgo }
+      }
+    }).catch(() => {});
+
+    // 2. Auto-Classify and Fix All Posts into their proper Homepage Grids
+    const allExistingPosts = await prisma.blogPost.findMany({
+      where: { status: 'Published' },
+      select: { id: true, title: true, content: true, gridBox: true, slug: true }
+    });
+
+    let fixedGridCount = 0;
+    for (const p of allExistingPosts) {
+      const correctGrid = detectGridBox(p.title, p.content || '');
+      if (p.gridBox !== correctGrid) {
+        await prisma.blogPost.update({
+          where: { id: p.id },
+          data: { gridBox: correctGrid }
+        });
+        fixedGridCount++;
+      }
+    }
+
+    // 3. Fetch site settings & AI keys
     const [siteSettings, autoBlogSettings] = await Promise.all([
       prisma.siteSettings.findUnique({ where: { id: 'default' } }),
       prisma.autoBlogSettings.findUnique({ where: { id: 'default' } }),
@@ -66,21 +94,12 @@ export async function POST(request: NextRequest) {
 
     if (configs.length === 0) {
       return NextResponse.json({ 
-        success: false, 
-        error: 'No AI API keys configured. Please configure Gemini or OpenAI key in Admin Settings.' 
-      }, { status: 400 });
+        success: true, 
+        message: `Grids fixed for ${fixedGridCount} posts. AI key missing to rewrite content.` 
+      });
     }
 
-    // Auto-clean stuck raw research drafts older than 1 hour
-    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
-    await prisma.blogPost.deleteMany({
-      where: {
-        status: 'Researching',
-        createdAt: { lt: oneHourAgo }
-      }
-    }).catch(() => {});
-
-    // 2. Find incomplete posts
+    // 4. Find incomplete posts to rewrite
     let postsToRewrite: any[] = [];
     if (targetSlug) {
       const singlePost = await prisma.blogPost.findUnique({ where: { slug: targetSlug } });
@@ -98,20 +117,12 @@ export async function POST(request: NextRequest) {
         take: 100
       });
 
-      // Filter for incomplete posts
       postsToRewrite = allPosts.filter(p => forceAll || isArticleIncomplete(p.content)).slice(0, limit);
-    }
-
-    if (postsToRewrite.length === 0) {
-      return NextResponse.json({ 
-        success: true, 
-        message: 'All articles are 100% complete! No incomplete posts found.' 
-      });
     }
 
     const rewrittenResults: any[] = [];
 
-    // 3. Re-write each incomplete post to full 100% complete article
+    // 5. Re-write each incomplete post to full 100% complete article
     for (const post of postsToRewrite) {
       try {
         console.log(`[Auto-Repair] Rewriting to 100% complete article: ${post.title} (slug: ${post.slug})`);
@@ -121,13 +132,13 @@ You write 100% complete, highly engaging, viral Hindi articles in clean semantic
 STRICT MANDATORY RULES:
 1. NEVER STOP WRITING MID-ARTICLE. You MUST write the ENTIRE post from Title to Conclusion without cutting off.
 2. The article MUST include all of these HTML sections:
-   - <h2>Introduction (??????)</h2>
-   - <h2>?? ???? ??? (Key Highlights)</h2>
-   - <h2>?????????? ????? ??? ?????? (Quick Overview Table)</h2>
-   - <h2>???????, ???? ?? ????????? (Eligibility, Rules & Step-by-Step Guide)</h2>
-   - <h2>?????????? ?????? (Important Links Table)</h2> (with <a href="..." target="_blank">?? Click Here</a>)
-   - <h2>????? ???? ???? ???? ?????? (FAQ)</h2> (2-3 detailed Q&As in <details><summary>...</summary><p>...</p></details>)
-   - <h2>???????? (Conclusion)</h2> (Final takeaways + WhatsApp/Telegram share note)
+   - <h2>Introduction (भूमिका)</h2>
+   - <h2>एक नज़र में (Key Highlights)</h2>
+   - <h2>महत्वपूर्ण विवरण एवं तालिका (Quick Overview Table)</h2>
+   - <h2>पात्रता, नियम और प्रक्रिया (Eligibility, Rules & Step-by-Step Guide)</h2>
+   - <h2>महत्वपूर्ण लिंक्स (Important Links Table)</h2> (with <a href="..." target="_blank">👉 Click Here</a>)
+   - <h2>अक्सर पूछे जाने वाले प्रश्न (FAQ)</h2> (2-3 detailed Q&As in <details><summary>...</summary><p>...</p></details>)
+   - <h2>निष्कर्ष (Conclusion)</h2> (Final takeaways + WhatsApp/Telegram share note)
 3. Use clean HTML only (<h2>, <h3>, <p>, <table>, <ul>, <details>, <summary>). Never output Markdown.`;
 
         const writerPrompt = `Topic: "${post.title}"
@@ -144,12 +155,15 @@ Write a 100% COMPLETE, authoritative, rich Hindi HTML blog post on this topic. E
           throw new Error(`AI generated too short content (${plainCheck.length} chars).`);
         }
 
+        const calculatedGridBox = detectGridBox(post.title, fullArticleHtml);
+
         // Update post in database
         await prisma.blogPost.update({
           where: { id: post.id },
           data: {
             content: fullArticleHtml,
             status: 'Published',
+            gridBox: calculatedGridBox,
             updatedAt: new Date(),
           }
         });
@@ -164,6 +178,7 @@ Write a 100% COMPLETE, authoritative, rich Hindi HTML blog post on this topic. E
           id: post.id,
           title: post.title,
           slug: post.slug,
+          gridBox: calculatedGridBox,
           previousLength: (post.content || '').length,
           newLength: fullArticleHtml.length,
           status: '100% Complete & Published'
@@ -181,9 +196,15 @@ Write a 100% COMPLETE, authoritative, rich Hindi HTML blog post on this topic. E
       }
     }
 
+    try {
+      revalidatePath('/');
+      revalidatePath('/blog');
+    } catch(e) {}
+
     return NextResponse.json({
       success: true,
-      processedCount: rewrittenResults.length,
+      fixedGridBoxes: fixedGridCount,
+      rewrittenCount: rewrittenResults.length,
       results: rewrittenResults
     });
 

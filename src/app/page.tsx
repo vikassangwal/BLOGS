@@ -17,6 +17,9 @@ async function getPostsByTag(tag: string) {
 
     const whereClause: any = {
       status: 'Published',
+      NOT: [
+        { gridBox: { in: ['latestJobs', 'upcomingJobs', 'scheme', 'scholarship', 'tech', 'admitCards', 'examResults'] } }
+      ],
       OR: [
         { gridBox: tag.toLowerCase().replace(/[^a-z0-9]/g, '') },
         { tags: { some: { tag: { name: { equals: tag, mode: 'insensitive' } } } } }
@@ -99,7 +102,18 @@ async function getActiveJobs(limit: number = 8) {
           {
             AND: [
               { OR: [ { gridBox: null }, { gridBox: '' } ] },
-              { tags: { some: { tag: { name: { in: ['Job', 'Vacancy', 'Career', 'Upcoming Job', 'Agami', 'Education & Career'] } } } } },
+              {
+                OR: [
+                  { tags: { some: { tag: { name: { in: ['Job', 'Vacancy', 'Career', 'Upcoming Job', 'Agami', 'Education & Career'] } } } } },
+                  { title: { contains: 'Recruitment', mode: 'insensitive' } },
+                  { title: { contains: 'Vacancy', mode: 'insensitive' } },
+                  { title: { contains: 'भर्ती' } },
+                  { title: { contains: 'Job', mode: 'insensitive' } },
+                  { title: { contains: 'PO', mode: 'insensitive' } },
+                  { title: { contains: 'Police', mode: 'insensitive' } },
+                  { title: { contains: 'Constable', mode: 'insensitive' } }
+                ]
+              },
               {
                 NOT: [
                   { title: { contains: 'Result', mode: 'insensitive' } },
@@ -108,16 +122,8 @@ async function getActiveJobs(limit: number = 8) {
                   { title: { contains: 'प्रवेश पत्र' } },
                   { title: { contains: 'Answer Key', mode: 'insensitive' } },
                   { title: { contains: 'उत्तर कुंजी' } },
-                  { title: { contains: 'एक नज़र में' } },
-                  { title: { contains: 'Key Highlights' } },
-                  { title: { contains: 'Highlights', mode: 'insensitive' } },
-                  { title: { contains: 'Question Paper', mode: 'insensitive' } },
-                  { title: { contains: 'प्रश्न पत्र' } },
                   { title: { contains: 'Syllabus', mode: 'insensitive' } },
-                  { title: { contains: 'सिलेबस' } },
-                  { title: { contains: 'Admission', mode: 'insensitive' } },
-                  { title: { contains: 'दाखिला' } },
-                  { title: { contains: 'प्रवेश' } }
+                  { title: { contains: 'सिलेबस' } }
                 ]
               },
               {
@@ -131,43 +137,18 @@ async function getActiveJobs(limit: number = 8) {
         ]
       },
       orderBy: { publishedAt: 'desc' },
-      take: 200, // Fetch extra to filter in memory
+      take: limit,
       select: {
         id: true,
         title: true,
         slug: true,
         publishedAt: true,
         createdAt: true,
-        expiryDate: true,
-        content: true,
-        gridBox: true
+        expiryDate: true
       }
     });
 
-    // Filter to ensure both Apply and Notification links/text exist and application has started
-    const filteredPosts = posts.filter(post => {
-      if (post.gridBox === 'latestJobs') return true;
-      if (!post.content) return false;
-      const content = post.content.toLowerCase();
-      
-      // Must have notification and apply text, plus an HTML link
-      const hasNotification = content.includes('notification') || content.includes('विज्ञप्ति') || content.includes('अधिसूचना');
-      const hasApply = content.includes('apply') || content.includes('आवेदन');
-      const hasLink = content.includes('<a ');
-      
-      // Exclude if it mentions the link will be active in the future
-      const isApplyNotStarted = content.includes('link active on') || 
-                                content.includes('will be active') ||
-                                content.includes('जल्द सक्रिय होगा') ||
-                                content.includes('link will activate') ||
-                                content.includes('to be announced') ||
-                                content.includes('coming soon') ||
-                                content.includes('जल्द उपलब्ध');
-
-      return hasNotification && hasApply && hasLink && !isApplyNotStarted;
-    });
-
-    return filteredPosts.slice(0, limit).map(({ content, gridBox, ...rest }) => rest);
+    return posts;
   } catch (err) {
     console.error('Failed to fetch active jobs:', err);
     return [];
@@ -184,25 +165,12 @@ async function getUpcomingJobs(limit: number = 8) {
           {
             AND: [
               { OR: [ { gridBox: null }, { gridBox: '' } ] },
-              { tags: { some: { tag: { name: { in: ['Job', 'Vacancy', 'Career', 'Upcoming Job', 'Agami', 'Education & Career'] } } } } },
               {
-                NOT: [
-                  { title: { contains: 'Result', mode: 'insensitive' } },
-                  { title: { contains: 'परिणाम' } },
-                  { title: { contains: 'Admit Card', mode: 'insensitive' } },
-                  { title: { contains: 'प्रवेश पत्र' } },
-                  { title: { contains: 'Answer Key', mode: 'insensitive' } },
-                  { title: { contains: 'उत्तर कुंजी' } },
-                  { title: { contains: 'एक नज़र में' } },
-                  { title: { contains: 'Key Highlights' } },
-                  { title: { contains: 'Highlights', mode: 'insensitive' } },
-                  { title: { contains: 'Question Paper', mode: 'insensitive' } },
-                  { title: { contains: 'प्रश्न पत्र' } },
-                  { title: { contains: 'Syllabus', mode: 'insensitive' } },
-                  { title: { contains: 'सिलेबस' } },
-                  { title: { contains: 'Admission', mode: 'insensitive' } },
-                  { title: { contains: 'दाखिला' } },
-                  { title: { contains: 'प्रवेश' } }
+                OR: [
+                  { tags: { some: { tag: { name: { in: ['Upcoming', 'Upcoming Job', 'Agami'] } } } } },
+                  { title: { contains: 'Upcoming', mode: 'insensitive' } },
+                  { title: { contains: 'आगामी' } },
+                  { title: { contains: 'जल्द आएगी' } }
                 ]
               }
             ]
@@ -210,41 +178,18 @@ async function getUpcomingJobs(limit: number = 8) {
         ]
       },
       orderBy: { publishedAt: 'desc' },
-      take: 200, // Fetch extra for memory filtering
+      take: limit,
       select: {
         id: true,
         title: true,
         slug: true,
         publishedAt: true,
         createdAt: true,
-        expiryDate: true,
-        content: true,
-        gridBox: true
+        expiryDate: true
       }
     });
 
-    const filteredPosts = posts.filter(post => {
-      if (post.gridBox === 'upcomingJobs') return true;
-      if (!post.content) return false;
-      const content = post.content.toLowerCase();
-      
-      const hasNotification = content.includes('notification') || content.includes('विज्ञप्ति') || content.includes('अधिसूचना');
-      const hasLink = content.includes('<a ');
-      const hasApply = content.includes('apply') || content.includes('आवेदन');
-      
-      const isApplyNotStarted = content.includes('link active on') || 
-                                content.includes('will be active') ||
-                                content.includes('जल्द सक्रिय होगा') ||
-                                content.includes('link will activate') ||
-                                content.includes('to be announced') ||
-                                content.includes('coming soon') ||
-                                content.includes('जल्द उपलब्ध');
-
-      // Keep in upcoming if there is a notification link, BUT apply link has not started or is missing
-      return hasNotification && hasLink && (!hasApply || isApplyNotStarted);
-    });
-
-    return filteredPosts.slice(0, limit).map(({ content, gridBox, ...rest }) => rest);
+    return posts;
   } catch (err) {
     console.error('Failed to fetch upcoming jobs:', err);
     return [];
@@ -281,32 +226,18 @@ async function getAdmitCards(limit: number = 8) {
         ]
       },
       orderBy: { publishedAt: 'desc' },
-      take: 200,
+      take: limit,
       select: {
         id: true,
         title: true,
         slug: true,
         publishedAt: true,
         createdAt: true,
-        expiryDate: true,
-        content: true,
-        gridBox: true
+        expiryDate: true
       }
     });
 
-    const filteredPosts = posts.filter(post => {
-      if (post.gridBox === 'admitCards') return true;
-      if (!post.content) return false;
-      const content = post.content.toLowerCase();
-      
-      const hasNotificationOrOfficial = content.includes('notification') || content.includes('विज्ञप्ति') || content.includes('official') || content.includes('आधिकारिक');
-      const hasAdmitCardOrCity = content.includes('admit card') || content.includes('प्रवेश पत्र') || content.includes('exam city') || content.includes('परीक्षा शहर');
-      const hasLink = content.includes('<a ');
-
-      return hasNotificationOrOfficial && hasAdmitCardOrCity && hasLink;
-    });
-
-    return filteredPosts.slice(0, limit).map(({ content, gridBox, ...rest }) => rest);
+    return posts;
   } catch (err) {
     console.error('Failed to fetch admit cards:', err);
     return [];
@@ -343,30 +274,18 @@ async function getResultsAndSyllabus(limit: number = 8) {
         ]
       },
       orderBy: { publishedAt: 'desc' },
-      take: 200,
+      take: limit,
       select: {
         id: true,
         title: true,
         slug: true,
         publishedAt: true,
         createdAt: true,
-        expiryDate: true,
-        content: true,
-        gridBox: true
+        expiryDate: true
       }
     });
 
-    const filteredPosts = posts.filter(post => {
-      if (post.gridBox === 'examResults') return true;
-      if (!post.content) return false;
-      const content = post.content.toLowerCase();
-      
-      const hasLink = content.includes('<a ');
-      // We assume if it has the keyword in title/tag, it's relevant, but we enforce it must have a link to download/check
-      return hasLink;
-    });
-
-    return filteredPosts.slice(0, limit).map(({ content, gridBox, ...rest }) => rest);
+    return posts;
   } catch (err) {
     console.error('Failed to fetch results and syllabus:', err);
     return [];
@@ -390,7 +309,8 @@ async function getUniversityUpdates(limit: number = 8) {
                   { title: { contains: 'विश्वविद्यालय' } },
                   { title: { contains: 'College', mode: 'insensitive' } },
                   { title: { contains: 'Admission', mode: 'insensitive' } },
-                  { title: { contains: 'IGNOU', mode: 'insensitive' } }
+                  { title: { contains: 'IGNOU', mode: 'insensitive' } },
+                  { title: { contains: 'RMPU', mode: 'insensitive' } }
                 ]
               }
             ]
@@ -398,25 +318,13 @@ async function getUniversityUpdates(limit: number = 8) {
         ]
       },
       orderBy: { publishedAt: 'desc' },
-      take: 200,
+      take: limit,
       select: {
-        id: true, title: true, slug: true, publishedAt: true, createdAt: true, expiryDate: true, content: true, gridBox: true
+        id: true, title: true, slug: true, publishedAt: true, createdAt: true, expiryDate: true
       }
     });
 
-    const filteredPosts = posts.filter(post => {
-      if (post.gridBox === 'university') return true;
-      if (!post.content) return false;
-      const content = post.content.toLowerCase();
-      
-      const hasOfficial = content.includes('official') || content.includes('आधिकारिक');
-      const hasNotification = content.includes('notification') || content.includes('विज्ञप्ति') || content.includes('अधिसूचना');
-      const hasLink = content.includes('<a ');
-
-      return hasOfficial && hasNotification && hasLink;
-    });
-
-    return filteredPosts.slice(0, limit).map(({ content, gridBox, ...rest }) => rest);
+    return posts;
   } catch (err) {
     console.error('Failed to fetch university updates:', err);
     return [];
@@ -448,24 +356,13 @@ async function getSchemes(limit: number = 8) {
         ]
       },
       orderBy: { publishedAt: 'desc' },
-      take: 200,
+      take: limit,
       select: {
-        id: true, title: true, slug: true, publishedAt: true, createdAt: true, expiryDate: true, content: true, gridBox: true
+        id: true, title: true, slug: true, publishedAt: true, createdAt: true, expiryDate: true
       }
     });
 
-    const filteredPosts = posts.filter(post => {
-      if (post.gridBox === 'scheme') return true;
-      if (!post.content) return false;
-      const content = post.content.toLowerCase();
-      
-      const hasOfficial = content.includes('official') || content.includes('आधिकारिक') || content.includes('website');
-      const hasLink = content.includes('<a ');
-
-      return hasOfficial && hasLink;
-    });
-
-    return filteredPosts.slice(0, limit).map(({ content, gridBox, ...rest }) => rest);
+    return posts;
   } catch (err) {
     console.error('Failed to fetch schemes:', err);
     return [];
@@ -494,25 +391,13 @@ async function getScholarships(limit: number = 8) {
         ]
       },
       orderBy: { publishedAt: 'desc' },
-      take: 200,
+      take: limit,
       select: {
-        id: true, title: true, slug: true, publishedAt: true, createdAt: true, expiryDate: true, content: true, gridBox: true
+        id: true, title: true, slug: true, publishedAt: true, createdAt: true, expiryDate: true
       }
     });
 
-    const filteredPosts = posts.filter(post => {
-      if (post.gridBox === 'scholarship') return true;
-      if (!post.content) return false;
-      const content = post.content.toLowerCase();
-      
-      const hasOfficial = content.includes('official') || content.includes('आधिकारिक') || content.includes('website');
-      const hasNotification = content.includes('notification') || content.includes('विज्ञप्ति') || content.includes('अधिसूचना');
-      const hasLink = content.includes('<a ');
-
-      return hasOfficial && hasNotification && hasLink;
-    });
-
-    return filteredPosts.slice(0, limit).map(({ content, gridBox, ...rest }) => rest);
+    return posts;
   } catch (err) {
     console.error('Failed to fetch scholarships:', err);
     return [];

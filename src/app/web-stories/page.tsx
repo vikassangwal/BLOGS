@@ -19,19 +19,24 @@ export const metadata: Metadata = {
 };
 
 export default async function WebStoriesListPage() {
-  const posts = await prisma.blogPost.findMany({
-    where: { status: 'Published' },
-    orderBy: { publishedAt: 'desc' },
-    take: 24,
-    select: {
-      id: true,
-      title: true,
-      slug: true,
-      excerpt: true,
-      featuredImage: true,
-      publishedAt: true
-    }
-  });
+  let posts: any[] = [];
+  try {
+    posts = await prisma.blogPost.findMany({
+      where: { status: 'Published' },
+      orderBy: { publishedAt: 'desc' },
+      take: 24,
+      select: {
+        id: true,
+        title: true,
+        slug: true,
+        excerpt: true,
+        featuredImage: true,
+        publishedAt: true
+      }
+    });
+  } catch (e) {
+    console.error("Error fetching web stories:", e);
+  }
 
   return (
     <div className="min-h-screen bg-gray-950 text-white py-12 px-4 sm:px-6 lg:px-8">

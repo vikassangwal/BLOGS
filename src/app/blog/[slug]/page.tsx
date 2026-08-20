@@ -304,6 +304,17 @@ export default async function BlogPostPage({ params }: Props) {
   );
   } catch (err) {
     console.error("Critical Error rendering BlogPostPage:", err);
-    notFound();
+    return (
+      <div className="min-h-screen bg-[var(--color-bg-primary)] flex items-center justify-center p-6 text-center">
+        <div className="max-w-md w-full bg-white/5 border border-white/10 rounded-2xl p-8 backdrop-blur-md">
+          <div className="text-4xl mb-4">📰</div>
+          <h2 className="text-xl font-bold text-white mb-2">Article Temporarily Unavailable</h2>
+          <p className="text-gray-400 text-sm mb-6">We encountered an issue loading this article. Please explore other latest updates.</p>
+          <a href="/blog" className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-6 rounded-xl transition-all">
+            View All Articles →
+          </a>
+        </div>
+      </div>
+    );
   }
 }

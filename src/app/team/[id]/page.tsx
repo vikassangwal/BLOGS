@@ -13,47 +13,56 @@ type Props = {
 export async function generateMetadata(
   { params }: Props
 ): Promise<Metadata> {
-  const resolvedParams = await params;
-  const id = resolvedParams.id;
+  try {
+    const resolvedParams = await params;
+    const id = resolvedParams.id;
 
-  const member = await prisma.teamMember.findUnique({ where: { id } });
-  if (!member) {
-    return { title: 'Author Profile Not Found' };
-  }
-
-  const siteSettings = await prisma.siteSettings.findUnique({ where: { id: 'default' } });
-  const siteName = siteSettings?.siteName || 'Knowora';
-
-  const title = `${member.name} - ${member.role} at ${siteName}`;
-  const description = `${member.name} is a ${member.role} at ${siteName}. Read professional articles, guides, and updates authored by ${member.name}.`;
-
-  return {
-    title: title,
-    description: description,
-    alternates: {
-      canonical: `https://knowora.in/team/${member.id}`,
-    },
-    openGraph: {
-      title: title,
-      description: description,
-      url: `https://knowora.in/team/${member.id}`,
-      siteName: siteName,
-      type: 'profile',
-      locale: 'en_IN',
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title: title,
-      description: description,
+    const member = await prisma.teamMember.findUnique({ where: { id } }).catch(() => null);
+    if (!member) {
+      return { title: 'Author Profile | Knowora' };
     }
-  };
+
+    const siteSettings = await prisma.siteSettings.findUnique({ where: { id: 'default' } }).catch(() => null);
+    const siteName = siteSettings?.siteName || 'Knowora';
+
+    const title = `${member.name} - ${member.role} at ${siteName}`;
+    const description = `${member.name} is a ${member.role} at ${siteName}. Read professional articles, guides, and updates authored by ${member.name}.`;
+
+    return {
+      title: title,
+      description: description,
+      alternates: {
+        canonical: `https://knowora.in/team/${member.id}`,
+      },
+      openGraph: {
+        title: title,
+        description: description,
+        url: `https://knowora.in/team/${member.id}`,
+        siteName: siteName,
+        type: 'profile',
+        locale: 'en_IN',
+      },
+      twitter: {
+        card: 'summary_large_image',
+        title: title,
+        description: description,
+      }
+    };
+  } catch (e) {
+    return { title: 'Author Profile | Knowora' };
+  }
 }
 
 export default async function TeamMemberPage({ params }: Props) {
-  const resolvedParams = await params;
-  const id = resolvedParams.id;
+  let member = null;
+  try {
+    const resolvedParams = await params;
+    const id = resolvedParams.id;
+    member = await prisma.teamMember.findUnique({ where: { id } });
+  } catch (e) {
+    console.error("Error fetching team member:", e);
+  }
 
-  const member = await prisma.teamMember.findUnique({ where: { id } });
   if (!member || !member.isActive) {
     notFound();
   }

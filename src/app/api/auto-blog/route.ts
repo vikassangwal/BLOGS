@@ -1258,79 +1258,74 @@ ${links}
     9. HTML FORMAT ONLY: कंटेंट सीधे पब्लिश करने योग्य HTML (<h2>, <p>, <table>, <ul>, <ol>, <li>) में होगा। Markdown (##, **) का उपयोग ना करें।
     10. OFFICIAL HOME PAGE LINKS ONLY: बाहरी लिंक के लिए केवल मुख्य वेबसाइट का होमपेज (जैसे https://ssc.gov.in) दें। अगर आपको पता है कि डायरेक्ट लिंक अभी वेबसाइट पर नहीं आया है, तो साफ़ शब्दों में लिखें: "⚠️ *नोट: अभी डायरेक्ट अप्लाई लिंक या पीडीएफ वेबसाइट पर एक्टिव नहीं हुआ है, कृपया ऑफिशियल वेबसाइट चेक करते रहें।*" कभी भी खुद से फेक लिंक ना बनाएँ।
     11. HINGLISH SEO: 2-3 Hinglish कीवर्ड्स ("kaise kare", "kab aayega") डालें।
-    12. VIRAL LISTICLE FORMAT: जहाँ भी मुमकिन हो (खासकर Technology और Finance में), जानकारियों को "Top 5", "Top 10", या "Best X" वाले पॉइंट-वाइज़ लिस्ट (Listicle) फॉर्मेट में लिखें। यह रीडर्स को बहुत एंगेजिंग लगता है।
-    13. NEVER TRUNCATE: पूरा आर्टिकल (Introduction से Conclusion तक) लिखें।
-    15. STEP-BY-STEP NUMBERING (चरण-दर-चरण निर्देश): "आवेदन कैसे करें (How to Apply)" या कोई भी प्रक्रिया (Process/Steps) दर्शाने के लिए हमेशा 1, 2, 3 नंबरों वाले HTML Ordered List (<ol> और <li>) का उपयोग करें। बिना नंबरों वाले पैराग्राफ या सादे बुलेट पॉइंट (ul) का उपयोग न करें।
-    14. COPYRIGHT SAFETY (कॉपीराइट सुरक्षा - अनिवार्य):
-        - कभी भी किसी सरकारी अधिसूचना, समाचार एजेंसी, या वेबसाइट से टेक्स्ट को शब्दशः (Verbatim) कॉपी-पेस्ट न करें।
-        - सभी जानकारियों को अपने शब्दों में पुनः लिखें (Rewrite in your own words)।
-        - किसी अखबार या वेबसाइट के पूरे पैराग्राफ को कॉपी न करें।
-        - तथ्यों (Facts) का उपयोग करें, लेकिन विश्लेषण (Analysis) और भाषा (Language) मौलिक (Original) होनी चाहिए।
-        - डेटा का स्रोत बताएं: "सूत्र: SSC आधिकारिक वेबसाइट (ssc.gov.in)"।
-        - कोई भी छवि (Image), लोगो, या ग्राफिक कॉपी न करें।
-    ===== END UNIVERSAL RULES =====
-
-    3. IF the topic is about General News, Politics, Sports, Health, or any topic NOT covered by Finance/Tech/Education prompts below, you MUST follow this 🔥 NEWS MASTER PROMPT 🔥:
-        --- START NEWS MASTER PROMPT ---
-        तुम एक Top-Tier Hindi News Writer और SEO Expert हो।
+    12. VIRAL LISTICLE FORMAT: जहाँ भी मुमकिन हो (खासकर Technology और Finance में), जानकारियों को "Top 5", "Top 10", या "Best X" वाले पॉइंट-वाइज़ लिस्ट (Listicle) फॉर्मेट में लिखें। यह रीडर्स को �        --- START MASTER PROMPT ---
+        तुम एक Top-Tier Education/Career Content Writer, Pro SEO Expert और Google Discover Specialist हो। 
         
-        📝 ब्लॉग का अनिवार्य लेआउट (Blog Structure):
-        
-        <h2>Introduction</h2>
-        150-200 शब्दों में ख़बर का पूरा सार लिखो। पहली ही लाइन में सबसे बड़ी बात बताओ (Inverted Pyramid Style)।
-        
-        <h2>एक नज़र में (Key Highlights)</h2>
-        <div class="bg-blue-50 border-l-4 border-blue-500 p-4 my-4 rounded-r">
-          <ul> (4 बुलेट पॉइंट्स में पूरी ख़बर का सार) </ul>
-        </div>
-        
-        <h2 id="what-happened">क्या हुआ? (What Happened)</h2>
-        ख़बर की पूरी Detail — कब, कहाँ, कैसे, किसने। अगर कोई सरकारी आदेश, संख्या, या डेटा हो तो HTML Table में दो।
-        
-        <h2 id="impact">इसका असर क्या होगा? (Impact & Analysis)</h2>
-        आम जनता, छात्रों, नौकरीपेशा, या किसानों पर क्या प्रभाव पड़ेगा? Bullet Points में बताओ।
-        
-        <h2 id="background">पृष्ठभूमि (Background & Context)</h2>
-        इस ख़बर की पिछली कहानी क्या है? पहले क्या-क्या हो चुका है? संक्षेप में 3-4 लाइनों में बताओ।
-        
-        <h2 id="expert-view">विशेषज्ञों की राय (Expert Views)</h2>
-        इस विषय पर विशेषज्ञ क्या कह रहे हैं? 2-3 पॉइंट्स में लिखो।
-        
-        <h2 id="faq">FAQ (अक्सर पूछे जाने वाले प्रश्न)</h2>
-        <details><summary>[Question]</summary><p>[Answer]</p></details> फॉर्मेट में 2 ज़रूरी FAQ लिखो।
-        
-        <h2 id="conclusion">Conclusion</h2>
-        100 शब्दों में ख़बर का निष्कर्ष।
-        <p class="text-xs text-gray-500 mt-4"><em>नोट: यह जानकारी विभिन्न समाचार स्रोतों पर आधारित है। कृपया आधिकारिक सूत्रों से भी पुष्टि करें।</em></p>
-        <p class="font-bold text-green-600 mt-4">💡 <strong>ध्यान दें:</strong> अगर आपको यह ख़बर उपयोगी लगी, तो इसे अपने दोस्तों के साथ <strong>WhatsApp</strong> और <strong>Telegram</strong> पर ज़रूर शेयर करें!</p>
-        --- END NEWS MASTER PROMPT ---
-
-        4. IF the topic is about Finance, Earning Apps, Money, Investing, Share Market, Affiliate Marketing, or Earning Online, you MUST strictly follow this 🔥 FINANCE ULTIMATE MASTER PROMPT 🔥 format EXACTLY AS WRITTEN:
-        --- START FINANCE MASTER PROMPT ---
-        तुम एक Top-Tier Finance & Earning Blogger और SEO Specialist हो। 
         🚫 कड़े नियम (Strictly Enforced BANNED WORDS & RULES):
         - CRITICAL RULE: YOU MUST NOT STOP GENERATING. YOU MUST FINISH THE ENTIRE ARTICLE UP TO THE CONCLUSION. NEVER OUTPUT AN INCOMPLETE HTML.
+        - NO REPETITION FLUFF: जो जानकारी टेबल में दी गई है, उसे पैराग्राफ में बार-बार दोहराने की ज़रूरत नहीं है। पैराग्राफ में केवल व्यावहारिक नियम, महत्वपूर्ण चेतावनियां, सलाह और प्रक्रिया समझाएं।
         - BANNED WORDS: "आज के इस डिजिटल युग में", "आइए जानते हैं", "निष्कर्ष के तौर पर", "दोस्तों", "रोमांचक". सीधे मुद्दे (Point) पर बात शुरू करें।
-        - No Markdown HTML: कंटेंट सीधे पब्लिश करने योग्य HTML फॉर्मेट में होगा (<h2>, <p>, <table>, <ul>)। 
-        - Mobile-First Readability: कोई भी पैराग्राफ 3-4 लाइनों से बड़ा नहीं होना चाहिए।
-        - Highlighting: पैसे (Amount), समय (Time), और महत्वपूर्ण डेटा को हमेशा <strong>Bold</strong> करें।
+        - No Markdown HTML: कंटेंट सीधे पब्लिश करने योग्य HTML फॉर्मेट में होगा (<h2>, <p>, <table>, <ul>, <details>, <summary>)। 
+        - Link Format: जहाँ भी कोई आधिकारिक बाहरी लिंक (वेबसाइट, नोटिफिकेशन आदि) देना हो, वहाँ अनिवार्य रूप से <a href="..." target="_blank" rel="nofollow">👉 Click Here</a> लिखें। 
+        - Mobile-First Readability: कोई भी पैराग्राफ 3-4 लाइनों से बड़ा नहीं होना चाहिए। जानकारी को Bullet Points और Tables में व्यवस्थित करें।
+        - Context-Aware Logic: केवल वही हेडिंग्स और लिंक्स दें जो वर्तमान में लागू हों। (उदा: अगर सिर्फ फॉर्म निकले हैं, तो एडमिट कार्ड या रिजल्ट की हेडिंग/लिंक बिल्कुल न दें)।
+        - Smart Dates: यदि आवेदन या परीक्षा की तिथि घोषित नहीं हुई है, तो केवल "Coming Soon" (जल्द आ रहा है) लिखें या भविष्य के महीनों का अंदाज़ा लगाएं।
+        - Highlighting: पूरे लेख में सबसे अहम जानकारी (जैसे: वेतन, अंतिम तिथि, कुल पद) को हमेशा <strong>Bold</strong> करें।
+        - Hinglish Keywords (Indian SEO): पैराग्राफ और हेडिंग्स के बीच में नेचुरली 2-3 Hinglish कीवर्ड्स (जैसे: "kaise check kare", "online apply direct link", "notification download") का इस्तेमाल करें।
         
         📝 ब्लॉग का अनिवार्य लेआउट (Blog Structure) - YOU MUST USE THESE EXACT HTML HEADINGS:
         
         <h2>Introduction</h2>
-        Write a 150-200 word engaging intro targeting the user's pain point (e.g. looking for extra income). Include the main keyword.
+        Write a 150-200 word highly engaging, conversational introduction. Mention the exact advertisement number if available (e.g. Advt No. 01/2026).
         
-        <h2>एक नज़र में (Quick Overview)</h2>
+        <h2>एक नज़र में (Key Highlights)</h2>
         <div class="bg-blue-50 border-l-4 border-blue-500 p-4 my-4 rounded-r">
-          <ul> 
-            <li><strong>संभावित कमाई (Earning Potential):</strong> [Amount e.g. ₹500/day]</li>
-            <li><strong>लागत (Investment):</strong> [e.g. ₹0 / Zero Investment]</li>
-            <li><strong>कौन कर सकता है? (Eligibility):</strong> [e.g. Students, Housewives]</li>
-            <li><strong>पैसे कैसे मिलेंगे? (Withdrawal):</strong> [e.g. UPI, Bank Transfer]</li>
-          </ul>
+          <ul> (Write 4 crisp bullet points summarizing: Department, Total Posts, Qualification, Pay Level). </ul>
         </div>
         
-        <h2 id="what-is">यह क्या है और कैसे काम करता है? (What is it?)</h2>
+        <h2 id="quick-info">Quick Overview (संक्षिप्त विवरण)</h2>
+        Create ONE HTML Table combining department name, exact advertisement number, post name, total posts, age cutoff date, and job location.
+        
+        <h2 id="dates">Important Dates (महत्वपूर्ण तिथियां)</h2>
+        Create an HTML Table for dates (Notification release, Online Apply Start, Last Date, Fee Deadline, Correction Window if applicable, Exam Date).
+        
+        <h2 id="fee">Application Fee (आवेदन शुल्क)</h2>
+        Create an HTML Table for category-wise fees (UR/General, OBC/EWS, SC/ST/PwD/Women). Note other-state candidate fee policy.
+        
+        <h2 id="breakdown">पदों का कंपनीवार / श्रेणीवार विवरण (Vacancy Breakdown Matrix)</h2>
+        Create a detailed Column-based HTML Table breaking down posts by Company/Zone/Discipline (e.g. Electrical, Mechanical, Civil, Accounts, Clerical) and categories.
+        
+        <h2 id="eligibility">शैक्षणिक योग्यता एवं आयु सीमा (Eligibility & Qualifications)</h2>
+        Create a clear HTML Table / Bullet List specifying exact qualifications (Degree/12th/B.E./B.Tech) and note explicitly if 3-year diploma is NOT eligible or if specific degree is mandatory. List recognized computer certificates (RSCIT, O-Level, CCC, COPA) if applicable.
+        
+        <h2 id="salary">वेतनमान एवं प्रोबेशन अवधि (Salary & Probation Period)</h2>
+        Create an HTML Table comparing: 1. Pay Level, 2. दो वर्ष के प्रोबेशन में निश्चित मासिक वेतन (Fixed Stipend), 3. प्रोबेशन के बाद न्यूनतम बेसिक पे (Regular Basic Pay).
+        
+        <h2 id="selection">चयन प्रक्रिया एवं परीक्षा योजना (Selection Scheme & Weightage)</h2>
+        Create an HTML Table detailing the exam pattern: Part-A (Subject Weightage %), Part-B (General Aptitude/GK/Reasoning %), Screening Pre marks, and Phase-II Typing test marks (Speed & Efficiency) with minimum qualifying passing marks.
+        
+        <h2 id="upload-specs">दस्तावेज अपलोड नियम एवं साइज (Document Upload Specifications)</h2>
+        Create an HTML Table with specifications: Passport Photo (px & KB + live photo requirement), Signature (px & KB, black ink, no capitals), Thumb Impression (px & KB), Handwritten Declaration (px & KB).
+        
+        <h2 id="warnings">उम्मीदवारों के लिए जरूरी दिशा-निर्देश (Important Advisories)</h2>
+        Provide 4-5 bullet points covering critical guidelines: Company/Zone preference locking, single application rule, preview before final submit, and exam center options.
+        
+        <h2 id="apply">How to Apply (ऑनलाइन आवेदन कैसे करें)</h2>
+        Provide 5 simple, actionable step-by-step points explaining registration, form filling, uploading, and fee payment.
+        
+        <h2 id="links">Important Links (महत्वपूर्ण लिंक्स)</h2>
+        Create an HTML Table with links: Apply Online Link, Download Notification PDF, Official Portal. (Use <a href="..." target="_blank" rel="nofollow" class="font-bold text-blue-600 underline">👉 Click Here</a> for active links).
+        
+        <h2 id="faq">FAQ (अक्सर पूछे जाने वाले प्रश्न)</h2>
+        Provide 2-3 detailed FAQs in <details><summary><strong>[Question]</strong></summary><p>[Detailed Answer]</p></details>.
+        
+        <h2 id="conclusion">Conclusion</h2>
+        Write a motivating conclusion.
+        ADD THIS VIRAL CTA:
+        <p class="font-bold text-green-600 mt-4">💡 <strong>शेयर करें:</strong> इस महत्वपूर्ण भर्ती सूचना को अपने दोस्तों और स्टडी ग्रुप्स के साथ <strong>WhatsApp</strong> व <strong>Telegram</strong> पर अवश्य साझा करें!</p>
+        ADD THIS COMMENT HOOK:
+        <p class="font-bold text-blue-600 mt-2">💬 <strong>आपकी राय:</strong> इस भर्ती से जुड़ा कोई भी सवाल हो तो नीचे कमेंट करके पूछें!</p>
+        --- END MASTER PROMPT ---��से काम करता है? (What is it?)</h2>
         Explain the concept easily (e.g. What is Affiliate Marketing / What is this app?).
         
         <h2 id="requirements">ज़रूरी टूल्स और ऐप्स (Tools & Requirements)</h2>
@@ -1421,95 +1416,72 @@ ${links}
         Add the VIRAL CTA: <p class="font-bold text-green-600 mt-4">💡 <strong>ध्यान दें:</strong> अगर आपको यह जानकारी उपयोगी लगी, तो इसे अपने दोस्तों के साथ <strong>WhatsApp</strong> और <strong>Telegram</strong> पर ज़रूर शेयर करें!</p>
         Add COMMENT HOOK: <p class="font-bold text-blue-600 mt-2">💬 <strong>आपकी बारी:</strong> आपको इस फोन का कौन सा फीचर सबसे अच्छा लगा? नीचे कमेंट करके ज़रूर बताएं!</p>
         --- END TECH MASTER PROMPT ---
-    6. IF the topic is about Education, Jobs, Vacancies, Results, or Career, you MUST strictly follow this 🔥 ULTIMATE MASTER PROMPT 3.0 🔥 format EXACTLY AS WRITTEN:
+    6. IF the topic is about Education, Jobs, Vacancies, Results, or Career, you MUST strictly follow this 🔥 ULTIMATE MASTER PROMPT 4.0 🔥 format EXACTLY AS WRITTEN:
         --- START MASTER PROMPT ---
         तुम एक Top-Tier Education/Career Content Writer, Pro SEO Expert और Google Discover Specialist हो। 
         
-        🚫 कड़े नियम (Strictly Enforced BANNED WORDS & RULES):
+        🚫 कड़े नियम (Strictly Enforced BANNED WORDS & ANTI-REPETITION RULES):
         - CRITICAL RULE: YOU MUST NOT STOP GENERATING. YOU MUST FINISH THE ENTIRE ARTICLE UP TO THE CONCLUSION. NEVER OUTPUT AN INCOMPLETE HTML.
+        - NO REPETITION OF TABLE DATA IN PARAGRAPHS: जो जानकारी टेबल में दी गई है, उसे पैराग्राफ में बार-बार दोहराने की ज़रूरत नहीं है। पैराग्राफ में केवल व्यावहारिक नियम, महत्वपूर्ण चेतावनियां, सलाह और प्रक्रिया समझाएं।
         - BANNED WORDS: "आज के इस डिजिटल युग में", "आइए जानते हैं", "निष्कर्ष के तौर पर", "दोस्तों", "रोमांचक". सीधे मुद्दे (Point) पर बात शुरू करें।
-        - No Markdown HTML: कंटेंट सीधे पब्लिश करने योग्य HTML फॉर्मेट में होगा (<h2>, <p>, <table>, <ul>)। 
-        - Link Format: जहाँ भी कोई आधिकारिक बाहरी लिंक (वेबसाइट, नोटिफिकेशन आदि) देना हो, वहाँ अनिवार्य रूप से <a href="..." target="_blank" rel="nofollow">👉 Click Here</a> लिखें। 
-        - Mobile-First Readability: कोई भी पैराग्राफ 3-4 लाइनों से बड़ा नहीं होना चाहिए। जानकारी को Bullet Points में तोड़ें।
-        - Context-Aware Logic: केवल वही हेडिंग्स और लिंक्स दें जो वर्तमान में लागू हों। (उदा: अगर सिर्फ फॉर्म निकले हैं, तो एडमिट कार्ड या रिजल्ट की हेडिंग/लिंक बिल्कुल न दें)।
-        - Omit Irrelevant Sections: If the topic is about Counselling, Admit Card, Answer Key, Result, or Scheme, do NOT write Syllabus or PET tables. Instead, you MUST write a highly detailed, comprehensive post (1200+ words) by adding these specific extra detailed HTML sections: "<h2 id=\"docs\">आवश्यक दस्तावेजों की सूची (Required Documents List)</h2>" (detailed bullet list in Hindi), "<h2 id=\"procedure\">सीट आवंटन के बाद की प्रक्रिया (Post-Allotment Procedure/Reporting Guide)</h2>" (detailed paragraph instructions), and "<h2 id=\"helpline\">सम्पर्क हेल्पलाइन (Official Contact & Support Helpline)</h2>". Never make the article thin or short.
-        - Smart Dates: यदि आवेदन या परीक्षा की तिथि घोषित नहीं हुई है, तो केवल "Coming Soon" (जल्द आ रहा है) लिखें या आज की तारीख के बाद वाले भविष्य के महीनों (जैसे: अगस्त-सितंबर 2026) का अंदाज़ा लगाएं। आज की तारीख (${getCurrentDateStr()}) से पहले के किसी भी बीते हुए महीने या तारीख (जैसे मार्च, अप्रैल, मई 2026) को बिल्कुल न लिखें। बीती हुई तारीखें लिखने से जानकारी पुरानी और नकली लगती है।
-        - Highlighting: पूरे लेख में सबसे अहम जानकारी (जैसे: वेतन ₹35,000, अंतिम तिथि 25 जुलाई, कुल पद 5,000) को हमेशा <strong>Bold</strong> करें।
-        - Hinglish Keywords (Indian SEO): पैराग्राफ और हेडिंग्स के बीच में नेचुरली 2-3 Hinglish कीवर्ड्स (जैसे: "kaise check kare", "kab aayega", "download link") का इस्तेमाल करें।
+        - No Markdown HTML: कंटेंट सीधे पब्लिश करने योग्य HTML फॉर्मेट में होगा (<h2>, <p>, <table>, <ul>, <details>, <summary>)। 
+        - Link Format: जहाँ भी कोई आधिकारिक बाहरी लिंक देना हो, वहाँ अनिवार्य रूप से <a href="..." target="_blank" rel="nofollow">👉 Click Here</a> लिखें। 
+        - Mobile-First Readability: कोई भी पैराग्राफ 3-4 लाइनों से बड़ा नहीं होना चाहिए। जानकारी को Bullet Points और Tables में व्यवस्थित करें।
+        - Highlighting: पूरे लेख में सबसे अहम जानकारी (जैसे: वेतन, अंतिम तिथि, कुल पद) को हमेशा <strong>Bold</strong> करें।
+        - Hinglish Keywords: पैराग्राफ और हेडिंग्स के बीच में नेचुरली Hinglish कीवर्ड्स (जैसे: "kaise check kare", "online apply direct link", "notification download") का इस्तेमाल करें।
         
         📝 ब्लॉग का अनिवार्य लेआउट (Blog Structure) - YOU MUST USE THESE EXACT HTML HEADINGS:
         
         <h2>Introduction</h2>
-        Write a 150-250 word highly engaging, conversational introduction. Speak directly to the candidate like a mentor (e.g. "अगर आप भी इस भर्ती का इंतज़ार कर रहे थे..."). Include the main keyword naturally.
+        Write a 150-200 word highly engaging, conversational introduction. Mention the exact advertisement number if available (e.g. Advt No. 01/2026).
         
-        <h2>एक नज़र में (Key Highlights)</h2>
+        <h2>एक नज़र में (Key Highlights)</h2>
         <div class="bg-blue-50 border-l-4 border-blue-500 p-4 my-4 rounded-r">
-          <ul> (Write 4 highly crisp bullet points summarizing the entire post. Ready for Google Web Stories). </ul>
+          <ul> (Write 4 crisp bullet points summarizing: Department, Total Posts, Qualification, Pay Level). </ul>
         </div>
         
-        <h2 id="quick-info">Quick Information (संक्षिप्त विवरण)</h2>
-        Create ONE HTML Table combining department name, post name, and total posts.
-        | विवरण | जानकारी | (Convert to HTML Table)
-        | विभाग/संस्था | ... |
-        | पद/विषय | ... |
-        | कुल पद (Total Posts) | ... |
-
+        <h2 id="quick-info">Quick Overview (संक्षिप्त विवरण)</h2>
+        Create ONE HTML Table combining department name, exact advertisement number, post name, total posts, age cutoff date, and job location.
+        
         <h2 id="dates">Important Dates (महत्वपूर्ण तिथियां)</h2>
-        Create an HTML Table for dates. DO NOT WRITE PARAGRAPHS.
-        Example Rows: Notification Date, Application Start, Last Date, Exam Date.
-
+        Create an HTML Table for dates (Notification release, Online Apply Start, Last Date, Fee Deadline, Correction Window if applicable, Exam Date).
+        
         <h2 id="fee">Application Fee (आवेदन शुल्क)</h2>
-        Create an HTML Table for fees. DO NOT WRITE PARAGRAPHS.
-        Example Rows: Gen/OBC Fee, SC/ST Fee, Payment Mode.
-
-        <h2 id="details">पदों की जानकारी (Vacancy Details & Eligibility)</h2>
-        Create a detailed Column-based HTML Table for Vacancy distribution. DO NOT WRITE PARAGRAPHS.
-        - CRITICAL RULE: The table MUST have these columns: 1. पद का नाम (Post Name), 2. रिक्तियों की संख्या (Number of Vacancies), 3. आयु सीमा (Age Limit), 4. शैक्षणिक योग्यता (Qualification).
-        - Create a separate row for EACH post. If there are 5 posts, create 5 rows!
-        - If exact vacancy numbers are missing, write 'To be Announced'. Make sure EVERY post's vacancy count is clearly listed inside this grid.
-        - DO NOT create a two-column property-value list. It MUST be a proper data grid.
-
-        <h2 id="selection">Selection Process (चयन प्रक्रिया)</h2>
-        Create an HTML Table for this section. DO NOT WRITE PARAGRAPHS.
-        Example Rows: Stage 1 (e.g. CBT Exam), Stage 2 (PET/PST), Stage 3 (Interview/DV).
-
-        <h2 id="syllabus">Exam Syllabus & Pattern (परीक्षा सिलेबस और पैटर्न)</h2>
-        Detailed breakdown of subjects, questions, and marks.
-        - Create a clean HTML table summarizing: विषय (Subject Name), प्रश्नों की संख्या (Questions), कुल अंक (Marks), परीक्षा समय (Duration), and नेगेटिव मार्किंग (Negative Marking).
-        - List the main syllabus sub-topics (e.g. General Knowledge, Quantitative Aptitude, Reasoning, Language) in a clean bulleted list.
-
-        <h2 id="cutoff">Previous Year Cut-off Marks (पिछले वर्षों की कट-ऑफ)</h2>
-        Create a clean category-wise HTML table comparing UR (General), OBC, SC, ST, and EWS cut-off marks/percentages from the previous exam cycle. If the exact data is unavailable or it is a new recruitment, provide expected/general target percentages (e.g., UR: 70-75%, OBC: 65-70%) to help candidates set a target score.
-
-        <h2 id="links">Important Links (महत्वपूर्ण लिंक)</h2>
-        Create an HTML Table for ALL important links. DO NOT WRITE PARAGRAPHS.
-        Example Rows: Official Website Link, Apply Online Link, Download Notification Link. (Use <a href="..." target="_blank" rel="nofollow" class="font-bold text-blue-600 underline">👉 Click Here</a> for all links to make them stand out).
-
-        <h2 id="apply">How to Apply (आवेदन कैसे करें)</h2>
-        Step-by-step process in 3-4 simple points.
+        Create an HTML Table for category-wise fees (UR/General, OBC/EWS, SC/ST/PwD/Women). Note other-state candidate fee policy.
+        
+        <h2 id="breakdown">पदों का कंपनीवार / श्रेणीवार विवरण (Vacancy Breakdown Matrix)</h2>
+        Create a detailed Column-based HTML Table breaking down posts by Company/Zone/Discipline (e.g. Electrical, Mechanical, Civil, Accounts, Clerical) and categories.
+        
+        <h2 id="eligibility">शैक्षणिक योग्यता एवं आयु सीमा (Eligibility & Qualifications)</h2>
+        Create a clear HTML Table / Bullet List specifying exact qualifications (Degree/12th/B.E./B.Tech) and note explicitly if 3-year diploma is NOT eligible or if specific degree is mandatory. List recognized computer certificates (RSCIT, O-Level, CCC, COPA) if applicable.
+        
+        <h2 id="salary">वेतनमान एवं प्रोबेशन अवधि (Salary & Probation Period)</h2>
+        Create an HTML Table comparing: 1. Pay Level, 2. दो वर्ष के प्रोबेशन में निश्चित मासिक वेतन (Fixed Stipend), 3. प्रोबेशन के बाद न्यूनतम बेसिक पे (Regular Basic Pay).
+        
+        <h2 id="selection">चयन प्रक्रिया एवं परीक्षा योजना (Selection Scheme & Weightage)</h2>
+        Create an HTML Table detailing the exam pattern: Part-A (Subject Weightage %), Part-B (General Aptitude/GK/Reasoning %), Screening Pre marks, and Phase-II Typing test marks (Speed & Efficiency) with minimum qualifying passing marks.
+        
+        <h2 id="upload-specs">दस्तावेज अपलोड नियम एवं साइज (Document Upload Specifications)</h2>
+        Create an HTML Table with specifications: Passport Photo (px & KB + live photo requirement), Signature (px & KB, black ink, no capitals), Thumb Impression (px & KB), Handwritten Declaration (px & KB).
+        
+        <h2 id="warnings">उम्मीदवारों के लिए जरूरी दिशा-निर्देश (Important Advisories)</h2>
+        Provide 4-5 bullet points covering critical guidelines: Company/Zone preference locking, single application rule, preview before final submit, and exam center options.
+        
+        <h2 id="apply">How to Apply (ऑनलाइन आवेदन कैसे करें)</h2>
+        Provide 5 simple, actionable step-by-step points explaining registration, form filling, uploading, and fee payment.
+        
+        <h2 id="links">Important Links (महत्वपूर्ण लिंक्स)</h2>
+        Create an HTML Table with links: Apply Online Link, Download Notification PDF, Official Portal. (Use <a href="..." target="_blank" rel="nofollow" class="font-bold text-blue-600 underline">👉 Click Here</a> for active links).
         
         <h2 id="faq">FAQ (अक्सर पूछे जाने वाले प्रश्न)</h2>
-        You MUST provide EXACTLY 2 FAQs in this exact HTML structure with complete, detailed answers inside:
-        <details>
-          <summary><strong>यहाँ पहला प्रश्न लिखें (जैसे, INI CET Round 2 की रिपोर्टिंग की अंतिम तिथि क्या है?)</strong></summary>
-          <p>यहाँ पूरा विस्तृत उत्तर लिखें (जैसे, आवंटित संस्थानों में रिपोर्ट करने की अंतिम तिथि 16 जुलाई 2026 है।)</p>
-        </details>
-        <details>
-          <summary><strong>यहाँ दूसरा प्रश्न लिखें...</strong></summary>
-          <p>यहाँ दूसरा विस्तृत उत्तर लिखें...</p>
-        </details>
-        (CRITICAL: Do NOT just output the questions. You MUST write both the questions and their detailed answers inside the HTML summary and p tags.)
+        Provide 2-3 detailed FAQs in <details><summary><strong>[Question]</strong></summary><p>[Detailed Answer]</p></details>.
         
         <h2 id="conclusion">Conclusion</h2>
-        Write a 100-word motivating conclusion. 
-        Then ADD THIS EXACT DISCLAIMER: 
-        <p class="text-xs text-gray-500 mt-4"><em>नोट: यह जानकारी इंटरनेट और आधिकारिक सूत्रों पर आधारित है, कृपया फॉर्म भरने से पहले एक बार स्वयं ऑफिशियल नोटिफिकेशन ज़रूर पढ़ें।</em></p>
-        
-        Then ADD THIS VIRAL CTA:
-        <p class="font-bold text-green-600 mt-4">💡 <strong>ध्यान दें:</strong> अगर आपको यह जानकारी उपयोगी लगी, तो इसे अपने दोस्तों और स्टडी ग्रुप्स के साथ <strong>WhatsApp</strong> और <strong>Telegram</strong> पर ज़रूर शेयर करें!</p>
-        
-        Then ADD THIS COMMENT HOOK:
-        <p class="font-bold text-blue-600 mt-2">💬 <strong>आपकी बारी:</strong> आपको क्या लगता है, इस बार कॉम्पिटिशन कैसा रहेगा? नीचे कमेंट करके अपनी राय ज़रूर दें!</p>
+        Write a motivating conclusion.
+        ADD THIS VIRAL CTA:
+        <p class="font-bold text-green-600 mt-4">💡 <strong>शेयर करें:</strong> इस महत्वपूर्ण भर्ती सूचना को अपने दोस्तों और स्टडी ग्रुप्स के साथ <strong>WhatsApp</strong> व <strong>Telegram</strong> पर अवश्य साझा करें!</p>
+        ADD THIS COMMENT HOOK:
+        <p class="font-bold text-blue-600 mt-2">💬 <strong>आपकी राय:</strong> इस भर्ती से जुड़ा कोई भी सवाल हो तो नीचे कमेंट करके पूछें!</p>
         --- END MASTER PROMPT ---
 
     11. CRITICAL LINKING RULE: 

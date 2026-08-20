@@ -82,16 +82,19 @@ This is an Education & Career blog. You MUST verify the following BEFORE providi
 ` : ''}
 
   You MUST extract the FULL NOTIFICATION DETAILS. Provide an exhaustive breakdown of ALL of the following (if available):
-  1. FULL SUMMARY: What is the notification/scholarship/result/scheme about? (Department, Post name, Total Vacancies, Scheme benefits, or University name).
-  2. IMPORTANT DATES: Application Start Date, Last Date, Fee Payment Last Date, Exam/Rally Date, Counselling Date, or Result Date (if any).
-  3. VACANCY/SCHOLARSHIP/COURSE DETAILS: Category-wise breakdown (UR, OBC, SC, ST, EWS), Scholarship Amount, or Scheme Eligibility if available.
-  4. ELIGIBILITY & AGE LIMIT: Educational qualifications required (EXACT degree — e.g. B.Tech NOT just Graduate), Minimum/Maximum Age, and Age Relaxation rules (if applicable). न्यूनतम योग्यता (Minimum Qualification) स्पष्ट रूप से लिखें।
-  5. APPLICATION FEES: Fees for General/OBC and SC/ST/Women.
-  6. SELECTION PROCESS: How will candidates be selected? (Written, Physical, Interview) and basic syllabus topics (if job).
-  7. SALARY/PAY SCALE: What is the expected salary or pay band? (7th CPC Pay Level if govt job)
-  8. REQUIRED DOCUMENTS (SHORT LIST): Provide a concise bulleted list in Hindi of all necessary documents needed to apply (e.g., Educational Certificates (10th/12th/Graduation), Identity Proof (Aadhaar/PAN/Voter ID), Caste Certificate (if applicable), Domicile/Residence Certificate (मूल निवास), Passport size photograph, Signature scan, etc.).
-  9. OFFICIAL LINKS & HOW TO APPLY: 
-     - Official Website: The EXACT conducting department's official homepage (e.g., rpsc.rajasthan.gov.in, ssc.gov.in)
+  1. FULL SUMMARY & ADVERTISEMENT NUMBERS: Exact Notification/Advertisement number (e.g. Advt No. 01/2026, CEN 05/2026), Department/Ministry, Post names, and Total Vacancies.
+  2. IMPORTANT DATES: Application Start Date, Last Date, Fee Payment Last Date, Correction Window (or note if no correction window), Exam Dates.
+  3. COMPANY/ZONE/DISCIPLINE BREAKDOWN MATRIX: If multi-company or multi-zone (e.g., RVUN, RVPN, JVVN, AVVN, JdVVN or Railway Zones), provide exact breakdown table by company, discipline (Electrical, Mech, Civil, Accounts, Clerk), and category.
+  4. ELIGIBILITY & AGE LIMIT: Educational qualifications required (EXACT degree/diploma rules, e.g., whether 3-year diploma is eligible or only B.Tech/BE), Minimum/Maximum Age (as on date), and Age Relaxation rules.
+  5. ACCEPTED COMPUTER QUALIFICATIONS (if applicable): Exhaustive list of valid computer certificates (RSCIT, O-Level, CCC, COPA, DPCS, Degree/Diploma in CS).
+  6. APPLICATION FEES & OUT-OF-STATE RULES: Fees for General/OBC, SC/ST/EWS/Women, and note if other-state candidates are treated as General.
+  7. PROBATION SALARY & REGULAR PAY MATRIX: Fixed stipend during probation period (e.g. 2-year probation pay) vs Regular Basic Pay & 7th CPC Pay Level after probation.
+  8. SELECTION PROCESS & EXAM WEIGHTAGE: Detailed scheme (Part-A % subject weightage, Part-B % general weightage, Pre-screening vs Main weightage, Typing test speed/efficiency marks formula, minimum qualifying %).
+  9. DOCUMENT UPLOAD SPECIFICATIONS: Exact file size (KB) and dimensions (pixels) for passport photograph (note if live webcam capture is mandatory), signature (black ink, no capitals), thumb impression, and handwritten declaration.
+  10. CANDIDATE WARNINGS & ADVISORIES: Critical conditions such as preference locking, negative marking rate clarity, single application rule, etc.
+  11. REQUIRED DOCUMENTS LIST: Clear bulleted list in Hindi of all necessary documents.
+  12. OFFICIAL LINKS & HOW TO APPLY: 
+     - Official Website: The EXACT conducting department's official homepage (e.g., rpsc.rajasthan.gov.in, ssc.gov.in, energy.rajasthan.gov.in)
      - Apply Online Link: ONLY if form is currently active — provide the exact official portal login/apply page
      - Download Notification PDF: Only from official .gov.in or .nic.in — if not available, write "Official Notification PDF - Check official website"
      - OTR/Registration Portal: If OTR/SSO required, mention the exact portal (sso.rajasthan.gov.in, ssc.gov.in/otr etc.)

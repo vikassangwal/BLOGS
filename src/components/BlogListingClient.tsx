@@ -925,9 +925,14 @@ export default function BlogListingClient({ uiConfig }: { uiConfig?: any }) {
                           <p className="blog-date-text">
                             {new Date(post.publishedAt || post.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                           </p>
+                          {post.applyStartDate && (
+                            <span className="blog-tag-badge" style={{ background: "rgba(56, 189, 248, 0.1)", color: "#38bdf8" }}>
+                              📅 शुरू: {new Date(post.applyStartDate).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}
+                            </span>
+                          )}
                           {lastDate && (
-                            <span className={`blog-expiry-badge ${isExpired ? 'expired' : 'active'}`}>
-                              ⏰ {isExpired ? 'Expired' : 'Last Date'}: {lastDate.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                            <span className={`blog-expiry-badge ${isExpired ? "expired" : "active"}`}>
+                              ⏰ {isExpired ? "🔴 समाप्त" : "🟢 अंतिम तिथि"}: {lastDate.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
                             </span>
                           )}
                           {post.officialApplyUrl && !isExpired && (

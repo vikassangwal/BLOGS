@@ -149,7 +149,8 @@ async function getActiveJobs(limit: number = 8) {
         publishedAt: true,
         createdAt: true,
         expiryDate: true,
-        applyLastDate: true
+        applyLastDate: true,
+        applyStartDate: true
       }
     });
 
@@ -1120,23 +1121,31 @@ export default async function HomePage() {
                             </span>
                           )}
                         </Link>
-                        {post.applyLastDate || post.expiryDate ? (
-                          (() => {
-                            const lDate = post.applyLastDate ? new Date(post.applyLastDate) : new Date(post.expiryDate);
-                            const isPast = lDate.getTime() < Date.now();
-                            return (
-                              <p className={`text-[8px] sm:text-[9px] mt-0.5 sm:mt-1 font-semibold ${isPast ? "text-red-400" : "text-emerald-400"}`}>
-                                ⏰ {isPast ? "🔴 आवेदन समाप्त (Closed: " : "🟢 अंतिम तिथि: "}
-                                {lDate.toLocaleDateString("en-IN", { day: "numeric", month: "short" })}
-                                {isPast && ")"}
-                              </p>
-                            );
-                          })()
-                        ) : (
-                          <p className="text-[8px] sm:text-[9px] text-emerald-400/80 mt-0.5 sm:mt-1 font-medium">
-                            🟢 सक्रिय भर्ती (Active)
-                          </p>
-                        )}
+                        {(() => {
+                          const now = Date.now();
+                          const sDate = post.applyStartDate ? new Date(post.applyStartDate) : null;
+                          const lDate = post.applyLastDate ? new Date(post.applyLastDate) : (post.expiryDate ? new Date(post.expiryDate) : null);
+                          const isUpcoming = sDate && sDate.getTime() > now;
+                          const isPast = lDate && lDate.getTime() < now;
+
+                          return (
+                            <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 mt-1 text-[8px] sm:text-[9px] font-medium">
+                              {sDate && (
+                                <span className="text-gray-400">
+                                  📅 शुरू: {sDate.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
+                                </span>
+                              )}
+                              {lDate ? (
+                                <span className={isPast ? "text-red-400 font-semibold" : (isUpcoming ? "text-sky-400 font-semibold" : "text-emerald-400 font-semibold")}>
+                                  ⏰ {isPast ? '🔴 समाप्त: ' : (isUpcoming ? '🚀 शुरू होगी: ' : '🟢 अंतिम तिथि: ')}
+                                  {lDate.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
+                                </span>
+                              ) : (
+                                <span className="text-emerald-400 font-semibold">🟢 सक्रिय (Active)</span>
+                              )}
+                            </div>
+                          );
+                        })()}
                       </div>
                     );
                   })

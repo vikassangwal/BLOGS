@@ -401,76 +401,7 @@ export default function BlogPostClient({ post, ads, relatedPosts, whatsappLinks,
           </figure>
         )}
 
-        {/* Quick Job Summary Table (सर्करी जॉब त्वरित विवरण) */}
-        {isJobPost && (
-          <div style={{
-            background: 'rgba(255, 255, 255, 0.03)',
-            border: '1px solid rgba(59, 130, 246, 0.2)',
-            borderRadius: '16px',
-            padding: '1.5rem',
-            marginBottom: '2.5rem',
-            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2)'
-          }}>
-            <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#60a5fa', margin: '0 0 1rem 0', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              📌 मुख्य भर्ती सारांश एवं आधिकारिक लिंक्स (Overview & Important Links)
-            </h3>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
-              <div style={{ background: 'rgba(255, 255, 255, 0.02)', padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--color-border)' }}>
-                <span style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', display: 'block', marginBottom: '0.2rem' }}>भर्ती विभाग (Department)</span>
-                <span style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--color-text-primary)' }}>
-                  {post.title.split(/[:|-]/)[0]?.trim() || 'Government Sector'}
-                </span>
-              </div>
-              <div style={{ background: 'rgba(255, 255, 255, 0.02)', padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--color-border)' }}>
-                <span style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', display: 'block', marginBottom: '0.2rem' }}>अंतिम तिथि (Last Date)</span>
-                <span style={{ fontSize: '0.9rem', fontWeight: 700, color: post.expiryDate ? '#f87171' : 'var(--color-text-primary)' }}>
-                  {post.expiryDate ? new Date(post.expiryDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }) : 'Apply Soon'}
-                </span>
-              </div>
-              <div style={{ background: 'rgba(255, 255, 255, 0.02)', padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--color-border)' }}>
-                <span style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', display: 'block', marginBottom: '0.2rem' }}>योग्यता (Qualification)</span>
-                <span style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--color-text-primary)' }}>
-                  {post.tags?.map((t: any) => typeof t === 'string' ? t : (t.tag?.name || t.name)).filter((name: string) => name.toLowerCase().includes('pass') || name.toLowerCase().includes('grad') || name.toLowerCase().includes('tech') || name.toLowerCase().includes('diploma')).join(', ') || '10th / 12th / Graduate'}
-                </span>
-              </div>
-              <div style={{ background: 'rgba(255, 255, 255, 0.02)', padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--color-border)' }}>
-                <span style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', display: 'block', marginBottom: '0.2rem' }}>आयु सीमा (Age Limit)</span>
-                <span style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--color-text-primary)' }}>
-                  18 से 35-40 वर्ष (नियमानुसार छूट)
-                </span>
-              </div>
-              {applyLink && (
-                <div style={{ gridColumn: 'span 1', display: 'flex', alignItems: 'center' }}>
-                  <a 
-                    href={applyLink} 
-                    target="_blank" 
-                    rel="noopener noreferrer" 
-                    style={{
-                      background: 'linear-gradient(135deg, #2563eb, #1d4ed8)',
-                      color: '#fff',
-                      padding: '0.8rem 1.2rem',
-                      borderRadius: '8px',
-                      fontWeight: 700,
-                      textDecoration: 'none',
-                      width: '100%',
-                      textAlign: 'center',
-                      fontSize: '0.9rem',
-                      boxShadow: '0 4px 15px rgba(37,99,235,0.3)',
-                      display: 'inline-block',
-                      transition: 'transform 0.2s'
-                    }}
-                    onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.02)'}
-                    onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
-                  >
-                    👉 Apply Online / Notification
-                  </a>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-          {/* Post Content */}
+        {/* Post Content */}
           <div style={{ position: 'relative' }} className="blog-content">
             <AdBanner dataAdSlot="top-content" />
 

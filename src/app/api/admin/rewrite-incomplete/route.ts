@@ -6,6 +6,29 @@ import { revalidatePath } from 'next/cache';
 export const dynamic = 'force-dynamic';
 export const maxDuration = 120; // 2 minutes
 
+function isArticleIncomplete(content: string = ''): boolean {
+  if (!content) return true;
+  const plain = content.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+  
+  // 1. Length check: Must be at least 1500 characters
+  if (plain.length < 1500) return true;
+
+  // 2. Draft/Research check
+  if (content.startsWith('Topic:') || content.includes('Research notes for') || content.includes('ABORT_')) return true;
+
+  // 3. Truncation check (ended mid-sentence without closing tag)
+  const tail = content.slice(-120);
+  const looksTruncated = !/[.!??>]\s*$/.test(content.trim()) && !/<\/(p|div|ul|ol|table|h[1-6]|blockquote|details)>\s*$/i.test(tail);
+  if (looksTruncated) return true;
+
+  // 4. Missing conclusion or FAQs
+  const hasConclusion = content.toLowerCase().includes('conclusion') || content.includes('????????') || content.includes('?????????? ????');
+  const hasFaq = content.toLowerCase().includes('faq') || content.includes('????? ???? ???? ???? ??????') || content.includes('<details>');
+  if (!hasConclusion && !hasFaq) return true;
+
+  return false;
+}
+
 export async function GET(request: NextRequest) {
   return POST(request);
 }
@@ -14,7 +37,8 @@ export async function POST(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const targetSlug = searchParams.get('slug');
-    const limit = parseInt(searchParams.get('limit') || '5');
+    const forceAll = searchParams.get('force') === 'true';
+    const limit = parseInt(searchParams.get('limit') || '10');
 
     // 1. Fetch site settings & AI keys
     const [siteSettings, autoBlogSettings] = await Promise.all([
@@ -47,7 +71,7 @@ export async function POST(request: NextRequest) {
       }, { status: 400 });
     }
 
-    // 2. Find incomplete posts (either specific slug or all short/research posts)
+    // 2. Find incomplete posts
     let postsToRewrite: any[] = [];
     if (targetSlug) {
       const singlePost = await prisma.blogPost.findUnique({ where: { slug: targetSlug } });
@@ -62,50 +86,46 @@ export async function POST(request: NextRequest) {
           ]
         },
         orderBy: { updatedAt: 'desc' },
-        take: 50
+        take: 100
       });
 
-      // Filter in-memory for posts that are incomplete, short (<1500 chars), or raw research
-      postsToRewrite = allPosts.filter(p => {
-        const plain = (p.content || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
-        const isRawResearch = (p.content || '').startsWith('Topic:') || (p.content || '').includes('Research notes for');
-        return plain.length < 1500 || isRawResearch;
-      }).slice(0, limit);
+      // Filter for incomplete posts
+      postsToRewrite = allPosts.filter(p => forceAll || isArticleIncomplete(p.content)).slice(0, limit);
     }
 
     if (postsToRewrite.length === 0) {
       return NextResponse.json({ 
         success: true, 
-        message: 'No incomplete posts found! All published articles meet the 1500+ character completeness standard.' 
+        message: 'All articles are 100% complete! No incomplete posts found.' 
       });
     }
 
     const rewrittenResults: any[] = [];
 
-    // 3. Re-write each incomplete post to full 1500+ word comprehensive article
+    // 3. Re-write each incomplete post to full 100% complete article
     for (const post of postsToRewrite) {
       try {
-        console.log(`[Auto-Repair] Rewriting incomplete post: ${post.title} (slug: ${post.slug})`);
+        console.log(`[Auto-Repair] Rewriting to 100% complete article: ${post.title} (slug: ${post.slug})`);
 
-        const writerSystemPrompt = `You are India's premier Hindi Blog Writer and SEO Expert. 
-You write comprehensive, 100% complete, highly engaging viral Hindi articles in clean HTML.
-CRITICAL MANDATORY RULES:
-1. NEVER stop writing mid-article. You MUST write a FULL 1200-1500+ word article from Introduction to Conclusion.
-2. Structure: 
-   - <h2>Introduction</h2> (Engaging overview)
-   - <h2>?? ???? ??? (Key Highlights)</h2> (Bullet list)
-   - <h2>?????????? ????? (Detailed Information)</h2> (Tables and factual breakdowns)
-   - <h2>??????? ?? ???? (Eligibility & Guidelines)</h2>
-   - <h2>?????????? ??????? ?? ?????? (Important Dates & Links)</h2> (Tables with <a href="..." target="_blank">?? Click Here</a>)
-   - <h2>????? ???? ???? ???? ?????? (FAQ)</h2> (2-3 complete questions with detailed answers in <details><summary>...</summary><p>...</p></details>)
-   - <h2>Conclusion</h2> (Final advice + WhatsApp/Telegram share CTA)
-3. Use clean HTML only (<h2>, <h3>, <p>, <table>, <ul>, <details>). No Markdown.`;
+        const writerSystemPrompt = `You are India's top Hindi Content Writer and SEO Expert.
+You write 100% complete, highly engaging, viral Hindi articles in clean semantic HTML.
+STRICT MANDATORY RULES:
+1. NEVER STOP WRITING MID-ARTICLE. You MUST write the ENTIRE post from Title to Conclusion without cutting off.
+2. The article MUST include all of these HTML sections:
+   - <h2>Introduction (??????)</h2>
+   - <h2>?? ???? ??? (Key Highlights)</h2>
+   - <h2>?????????? ????? ??? ?????? (Quick Overview Table)</h2>
+   - <h2>???????, ???? ?? ????????? (Eligibility, Rules & Step-by-Step Guide)</h2>
+   - <h2>?????????? ?????? (Important Links Table)</h2> (with <a href="..." target="_blank">?? Click Here</a>)
+   - <h2>????? ???? ???? ???? ?????? (FAQ)</h2> (2-3 detailed Q&As in <details><summary>...</summary><p>...</p></details>)
+   - <h2>???????? (Conclusion)</h2> (Final takeaways + WhatsApp/Telegram share note)
+3. Use clean HTML only (<h2>, <h3>, <p>, <table>, <ul>, <details>, <summary>). Never output Markdown.`;
 
         const writerPrompt = `Topic: "${post.title}"
 Existing Context & Notes:
 ${post.content}
 
-Write a completely finished, authoritative, 100% comprehensive Hindi HTML blog post on this topic. Make sure all dates for 2026 are accurate, all instructions are clear, and the article is fully written from start to finish without getting cut off.`;
+Write a 100% COMPLETE, authoritative, rich Hindi HTML blog post on this topic. Ensure all factual details, dates for 2026, eligibility rules, and official links are included and that the article concludes completely without truncation.`;
 
         let fullArticleHtml = await generateAIContent(configs, writerSystemPrompt, writerPrompt, 8000, true);
         fullArticleHtml = fullArticleHtml.replace(/^```html\n?|```$/g, '').trim();
@@ -116,7 +136,7 @@ Write a completely finished, authoritative, 100% comprehensive Hindi HTML blog p
         }
 
         // Update post in database
-        const updated = await prisma.blogPost.update({
+        await prisma.blogPost.update({
           where: { id: post.id },
           data: {
             content: fullArticleHtml,
@@ -137,7 +157,7 @@ Write a completely finished, authoritative, 100% comprehensive Hindi HTML blog p
           slug: post.slug,
           previousLength: (post.content || '').length,
           newLength: fullArticleHtml.length,
-          status: 'rewritten_and_published'
+          status: '100% Complete & Published'
         });
 
       } catch (err: any) {
@@ -154,7 +174,7 @@ Write a completely finished, authoritative, 100% comprehensive Hindi HTML blog p
 
     return NextResponse.json({
       success: true,
-      processed: rewrittenResults.length,
+      processedCount: rewrittenResults.length,
       results: rewrittenResults
     });
 

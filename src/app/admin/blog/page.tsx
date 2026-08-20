@@ -67,16 +67,58 @@ export default function BlogAdmin() {
     );
   };
 
+  const [isRewriting, setIsRewriting] = useState(false);
+
+  const handleRewriteIncomplete = async () => {
+    if (!confirm('क्या आप सभी अधूरे या छोटे आर्टिकल्स को AI से 100% पूरा (Rewrite) करवाना चाहते हैं?')) return;
+    setIsRewriting(true);
+    try {
+      const res = await fetch('/api/admin/rewrite-incomplete');
+      const data = await res.json();
+      if (data.success) {
+        alert(data.message || `सफलतापूर्वक ${data.processedCount || 0} आर्टिकल्स को 100% पूरा लिख दिया गया है!`);
+        fetchPosts();
+      } else {
+        alert('Error: ' + (data.error || 'Rewriting failed'));
+      }
+    } catch (e: any) {
+      alert('Failed to rewrite: ' + e.message);
+    } finally {
+      setIsRewriting(false);
+    }
+  };
+
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
           <h1 style={{ fontSize: '2rem', fontWeight: 800, margin: '0 0 0.5rem 0', color: 'var(--color-text-primary)' }}>Blog Management</h1>
           <p style={{ color: 'var(--color-text-secondary)', margin: 0 }}>Manage your articles, drafts, and scheduled posts.</p>
         </div>
-        <Link href="/admin/blog/new" className="btn-primary" style={{ textDecoration: 'none' }}>
-          + New Post
-        </Link>
+        <div style={{ display: 'flex', gap: '0.75rem' }}>
+          <button 
+            onClick={handleRewriteIncomplete}
+            disabled={isRewriting}
+            className="btn-secondary" 
+            style={{ 
+              background: 'linear-gradient(135deg, #f59e0b, #d97706)', 
+              color: '#fff', 
+              border: 'none', 
+              padding: '0.75rem 1.2rem', 
+              borderRadius: '10px', 
+              fontWeight: 700, 
+              cursor: isRewriting ? 'not-allowed' : 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem'
+            }}
+          >
+            {isRewriting ? '⏳ AI लिख रहा है...' : '⚡ अधूरे आर्टिकल्स पूरे करें'}
+          </button>
+          <Link href="/admin/blog/new" className="btn-primary" style={{ textDecoration: 'none' }}>
+            + New Post
+          </Link>
+        </div>
       </div>
 
       <div style={{ background: 'rgba(255, 255, 255, 0.05)', padding: '1.5rem', borderRadius: '16px', border: '1px solid var(--color-border)', marginBottom: '2rem', display: 'flex', gap: '1rem' }}>

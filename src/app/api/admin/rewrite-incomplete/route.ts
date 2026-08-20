@@ -71,6 +71,15 @@ export async function POST(request: NextRequest) {
       }, { status: 400 });
     }
 
+    // Auto-clean stuck raw research drafts older than 1 hour
+    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
+    await prisma.blogPost.deleteMany({
+      where: {
+        status: 'Researching',
+        createdAt: { lt: oneHourAgo }
+      }
+    }).catch(() => {});
+
     // 2. Find incomplete posts
     let postsToRewrite: any[] = [];
     if (targetSlug) {

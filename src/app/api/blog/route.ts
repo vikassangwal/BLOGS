@@ -91,10 +91,11 @@ export async function GET(request: Request) {
       }
       where.AND.push({ status: 'Published' });
       where.AND.push({ publishedAt: { lte: new Date() } });
-    }
-
-    if (status && status !== 'All') {
+    } else if (status && status !== 'All') {
       where.AND.push({ status });
+    } else {
+      // By default, never expose internal raw 'Researching' drafts to public
+      where.AND.push({ status: { not: 'Researching' } });
     }
 
     if (jobType) {

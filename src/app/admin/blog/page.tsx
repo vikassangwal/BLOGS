@@ -68,6 +68,7 @@ export default function BlogAdmin() {
   };
 
   const [isRewriting, setIsRewriting] = useState(false);
+  const [isGeneratingTrending, setIsGeneratingTrending] = useState(false);
 
   const handleRewriteIncomplete = async () => {
     if (!confirm('क्या आप सभी अधूरे या छोटे आर्टिकल्स को AI से 100% पूरा (Rewrite) करवाना चाहते हैं?')) return;
@@ -88,6 +89,25 @@ export default function BlogAdmin() {
     }
   };
 
+  const handleGenerateTrending = async () => {
+    if (!confirm('क्या आप पिछले 10 दिनों के ट्रेंडिंग टॉपिक्स (RRB NTPC, UP Police Result, PM Kisan, SSC GD आदि) पर नए आर्टिकल्स लिखवाना चाहते हैं?')) return;
+    setIsGeneratingTrending(true);
+    try {
+      const res = await fetch('/api/admin/generate-trending?count=5');
+      const data = await res.json();
+      if (data.success) {
+        alert(data.message || 'सफलतापूर्वक ट्रेंडिंग आर्टिकल्स लिखे जा चुके हैं!');
+        fetchPosts();
+      } else {
+        alert('Error: ' + (data.error || 'Generation failed'));
+      }
+    } catch (e: any) {
+      alert('Failed to generate trending blogs: ' + e.message);
+    } finally {
+      setIsGeneratingTrending(false);
+    }
+  };
+
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
@@ -95,7 +115,26 @@ export default function BlogAdmin() {
           <h1 style={{ fontSize: '2rem', fontWeight: 800, margin: '0 0 0.5rem 0', color: 'var(--color-text-primary)' }}>Blog Management</h1>
           <p style={{ color: 'var(--color-text-secondary)', margin: 0 }}>Manage your articles, drafts, and scheduled posts.</p>
         </div>
-        <div style={{ display: 'flex', gap: '0.75rem' }}>
+        <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+          <button 
+            onClick={handleGenerateTrending}
+            disabled={isGeneratingTrending}
+            className="btn-secondary" 
+            style={{ 
+              background: 'linear-gradient(135deg, #ef4444, #b91c1c)', 
+              color: '#fff', 
+              border: 'none', 
+              padding: '0.75rem 1.2rem', 
+              borderRadius: '10px', 
+              fontWeight: 700, 
+              cursor: isGeneratingTrending ? 'not-allowed' : 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem'
+            }}
+          >
+            {isGeneratingTrending ? '⏳ ट्रेंडिंग आर्टिकल्स लिखे जा रहे हैं...' : '🔥 ट्रेंडिंग आर्टिकल्स लिखें'}
+          </button>
           <button 
             onClick={handleRewriteIncomplete}
             disabled={isRewriting}

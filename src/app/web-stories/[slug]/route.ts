@@ -4,10 +4,20 @@ import { prisma } from '@/lib/prisma';
 export async function GET(request: Request, context: { params: Promise<{ slug: string }> }) {
   try {
     const params = await context.params;
-    const post = await prisma.blogPost.findUnique({
-      where: { slug: params.slug },
+    const rawSlug = params.slug || '';
+    const slug = decodeURIComponent(rawSlug).trim().replace(/\/$/, '');
+
+    let post = await prisma.blogPost.findUnique({
+      where: { slug },
       include: { author: true }
-    });
+    }).catch(() => null);
+
+    if (!post) {
+      post = await prisma.blogPost.findFirst({
+        where: { slug: { contains: slug, mode: 'insensitive' } },
+        include: { author: true }
+      }).catch(() => null);
+    }
 
     if (!post) {
       return new NextResponse('Story not found', { status: 404 });

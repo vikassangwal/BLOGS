@@ -97,39 +97,43 @@ async function getActiveJobs(limit: number = 8) {
     const posts = await prisma.blogPost.findMany({
       where: {
         status: 'Published',
-        OR: [
-          { gridBox: 'latestJobs' },
+        AND: [
           {
-            AND: [
-              { OR: [ { gridBox: null }, { gridBox: '' } ] },
+            OR: [
+              { applyLastDate: { gte: now } },
+              { AND: [ { applyLastDate: null }, { OR: [ { expiryDate: { gte: now } }, { expiryDate: null } ] } ] }
+            ]
+          },
+          {
+            OR: [
+              { gridBox: 'latestJobs' },
               {
-                OR: [
-                  { tags: { some: { tag: { name: { in: ['Job', 'Vacancy', 'Career', 'Upcoming Job', 'Agami', 'Education & Career'] } } } } },
-                  { title: { contains: 'Recruitment', mode: 'insensitive' } },
-                  { title: { contains: 'Vacancy', mode: 'insensitive' } },
-                  { title: { contains: 'भर्ती' } },
-                  { title: { contains: 'Job', mode: 'insensitive' } },
-                  { title: { contains: 'PO', mode: 'insensitive' } },
-                  { title: { contains: 'Police', mode: 'insensitive' } },
-                  { title: { contains: 'Constable', mode: 'insensitive' } }
-                ]
-              },
-              {
-                NOT: [
-                  { title: { contains: 'Result', mode: 'insensitive' } },
-                  { title: { contains: 'परिणाम' } },
-                  { title: { contains: 'Admit Card', mode: 'insensitive' } },
-                  { title: { contains: 'प्रवेश पत्र' } },
-                  { title: { contains: 'Answer Key', mode: 'insensitive' } },
-                  { title: { contains: 'उत्तर कुंजी' } },
-                  { title: { contains: 'Syllabus', mode: 'insensitive' } },
-                  { title: { contains: 'सिलेबस' } }
-                ]
-              },
-              {
-                OR: [
-                  { expiryDate: { gte: now } },
-                  { expiryDate: null }
+                AND: [
+                  { OR: [ { gridBox: null }, { gridBox: '' } ] },
+                  {
+                    OR: [
+                      { tags: { some: { tag: { name: { in: ['Job', 'Vacancy', 'Career', 'Upcoming Job', 'Agami', 'Education & Career'] } } } } },
+                      { title: { contains: 'Recruitment', mode: 'insensitive' } },
+                      { title: { contains: 'Vacancy', mode: 'insensitive' } },
+                      { title: { contains: 'भर्ती' } },
+                      { title: { contains: 'Job', mode: 'insensitive' } },
+                      { title: { contains: 'PO', mode: 'insensitive' } },
+                      { title: { contains: 'Police', mode: 'insensitive' } },
+                      { title: { contains: 'Constable', mode: 'insensitive' } }
+                    ]
+                  },
+                  {
+                    NOT: [
+                      { title: { contains: 'Result', mode: 'insensitive' } },
+                      { title: { contains: 'परिणाम' } },
+                      { title: { contains: 'Admit Card', mode: 'insensitive' } },
+                      { title: { contains: 'प्रवेश पत्र' } },
+                      { title: { contains: 'Answer Key', mode: 'insensitive' } },
+                      { title: { contains: 'उत्तर कुंजी' } },
+                      { title: { contains: 'Syllabus', mode: 'insensitive' } },
+                      { title: { contains: 'सिलेबस' } }
+                    ]
+                  }
                 ]
               }
             ]
@@ -144,7 +148,8 @@ async function getActiveJobs(limit: number = 8) {
         slug: true,
         publishedAt: true,
         createdAt: true,
-        expiryDate: true
+        expiryDate: true,
+        applyLastDate: true
       }
     });
 
@@ -1115,9 +1120,21 @@ export default async function HomePage() {
                             </span>
                           )}
                         </Link>
-                        {post.expiryDate && (
-                          <p className="text-[8px] sm:text-[9px] text-red-400/80 mt-0.5 sm:mt-1 font-medium">
-                            ⏰ Last Date: {new Date(post.expiryDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
+                        {post.applyLastDate || post.expiryDate ? (
+                          (() => {
+                            const lDate = post.applyLastDate ? new Date(post.applyLastDate) : new Date(post.expiryDate);
+                            const isPast = lDate.getTime() < Date.now();
+                            return (
+                              <p className={`text-[8px] sm:text-[9px] mt-0.5 sm:mt-1 font-semibold ${isPast ? "text-red-400" : "text-emerald-400"}`}>
+                                ⏰ {isPast ? "🔴 आवेदन समाप्त (Closed: " : "🟢 अंतिम तिथि: "}
+                                {lDate.toLocaleDateString("en-IN", { day: "numeric", month: "short" })}
+                                {isPast && ")"}
+                              </p>
+                            );
+                          })()
+                        ) : (
+                          <p className="text-[8px] sm:text-[9px] text-emerald-400/80 mt-0.5 sm:mt-1 font-medium">
+                            🟢 सक्रिय भर्ती (Active)
                           </p>
                         )}
                       </div>

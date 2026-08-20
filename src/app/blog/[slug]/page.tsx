@@ -3,28 +3,68 @@ import { notFound } from 'next/navigation';
 import { prisma } from '@/lib/prisma';
 import BlogPostClient from '@/components/BlogPostClient';
 
-export const revalidate = 600; // Cache for 10 minutes
-
-export async function generateStaticParams() {
-  try {
-    const posts = await prisma.blogPost.findMany({
-      where: { status: 'Published' },
-      orderBy: { publishedAt: 'desc' },
-      take: 20,
-      select: { slug: true }
-    });
-    return posts.map((post) => ({
-      slug: post.slug,
-    }));
-  } catch (e) {
-    console.error("Error in generateStaticParams:", e);
-    return [];
-  }
-}
+export const dynamic = 'force-dynamic';
+export const dynamicParams = true;
+export const revalidate = 0;
 
 type Props = {
   params: Promise<{ slug: string }>;
 };
+
+async function getPostBySlugOrId(rawSlug: string) {
+  if (!rawSlug) return null;
+  const decoded = decodeURIComponent(rawSlug).trim().replace(/\/$/, '');
+  const cleanSlug = decoded.toLowerCase();
+
+  try {
+    // 1. Direct exact slug match
+    let post = await prisma.blogPost.findUnique({
+      where: { slug: decoded },
+      include: { 
+        tags: { include: { tag: true } },
+        author: { select: { name: true } }
+      }
+    });
+
+    // 2. Case-insensitive slug match
+    if (!post) {
+      post = await prisma.blogPost.findFirst({
+        where: { slug: { equals: cleanSlug, mode: 'insensitive' } },
+        include: { 
+          tags: { include: { tag: true } },
+          author: { select: { name: true } }
+        }
+      });
+    }
+
+    // 3. Fallback: match by ID if slug is a valid ID
+    if (!post && (decoded.length === 24 || decoded.length === 25 || decoded.length === 36)) {
+      post = await prisma.blogPost.findUnique({
+        where: { id: decoded },
+        include: { 
+          tags: { include: { tag: true } },
+          author: { select: { name: true } }
+        }
+      }).catch(() => null);
+    }
+
+    // 4. Fallback: partial / substring slug match
+    if (!post) {
+      post = await prisma.blogPost.findFirst({
+        where: { slug: { contains: cleanSlug.slice(0, 30), mode: 'insensitive' } },
+        include: { 
+          tags: { include: { tag: true } },
+          author: { select: { name: true } }
+        }
+      });
+    }
+
+    return post;
+  } catch (err) {
+    console.error('Error fetching blog post:', err);
+    return null;
+  }
+}
 
 // 1. DYNAMIC METADATA (OPEN GRAPH, TWITTER CARDS, SEO)
 export async function generateMetadata(
@@ -33,23 +73,10 @@ export async function generateMetadata(
 ): Promise<Metadata> {
   try {
     const resolvedParams = await params;
-    const rawSlug = resolvedParams.slug || '';
-    const slug = decodeURIComponent(rawSlug).trim().replace(/\/$/, '');
-
-    let post = await prisma.blogPost.findUnique({
-      where: { slug },
-      include: { tags: { include: { tag: true } } }
-    });
+    const post = await getPostBySlugOrId(resolvedParams.slug || '');
 
     if (!post) {
-      post = await prisma.blogPost.findFirst({
-        where: { slug: { contains: slug, mode: 'insensitive' } },
-        include: { tags: { include: { tag: true } } }
-      });
-    }
-
-    if (!post) {
-      return { title: 'Post Not Found' };
+      return { title: 'Post Not Found | KnowOra' };
     }
 
     const siteSettings = await prisma.siteSettings.findUnique({ where: { id: 'default' } }).catch(() => null);
@@ -92,55 +119,32 @@ export async function generateMetadata(
 
 // 2. SERVER COMPONENT (DATA FETCHING & SCHEMA INJECTION)
 export default async function BlogPostPage({ params }: Props) {
-  try {
-    const resolvedParams = await params;
-    const rawSlug = resolvedParams.slug || '';
-    const slug = decodeURIComponent(rawSlug).trim().replace(/\/$/, '');
+  const resolvedParams = await params;
+  const rawSlug = resolvedParams.slug || '';
+  const post = await getPostBySlugOrId(rawSlug);
 
-    // Fetch primary blog post first
-    let post = await prisma.blogPost.findUnique({
-      where: { slug },
-      include: { 
-        tags: { include: { tag: true } },
-        author: { select: { name: true } }
-      }
-    }).catch(() => null);
+  if (!post) {
+    notFound();
+  }
 
-    if (!post) {
-      // Smart Fallback: if user typed a short slug or prefix, match it using contains/insensitive
-      post = await prisma.blogPost.findFirst({
-        where: {
-          slug: { contains: slug, mode: 'insensitive' }
-        },
-        include: { 
-          tags: { include: { tag: true } },
-          author: { select: { name: true } }
-        }
-      }).catch(() => null);
-    }
+  // Fetch secondary data safely with catch fallbacks
+  const [ads, relatedPostsRaw, siteSettings, whatsappLinks] = await Promise.all([
+    prisma.adPlacement.findMany({ where: { isActive: true } }).catch(() => []),
+    prisma.blogPost.findMany({
+      where: { status: 'Published', slug: { not: post.slug } },
+      orderBy: { publishedAt: 'desc' },
+      take: 4,
+      select: { id: true, title: true, slug: true, excerpt: true, featuredImage: true }
+    }).catch(() => []),
+    prisma.siteSettings.findUnique({ where: { id: 'default' } }).catch(() => null),
+    prisma.socialLink.findMany({ where: { platform: 'whatsapp', isActive: true } }).catch(() => [])
+  ]);
 
-    if (!post) {
-      notFound();
-    }
-
-    // Fetch secondary data safely with catch fallbacks so DB issues in ads/settings never crash the article
-    const [ads, relatedPostsRaw, siteSettings, whatsappLinks] = await Promise.all([
-      prisma.adPlacement.findMany({ where: { isActive: true } }).catch(() => []),
-      prisma.blogPost.findMany({
-        where: { status: 'Published', slug: { not: post.slug } },
-        orderBy: { publishedAt: 'desc' },
-        take: 3,
-        select: { id: true, title: true, slug: true, excerpt: true, featuredImage: true }
-      }).catch(() => []),
-      prisma.siteSettings.findUnique({ where: { id: 'default' } }).catch(() => null),
-      prisma.socialLink.findMany({ where: { platform: 'whatsapp', isActive: true } }).catch(() => [])
-    ]);
-
-    // Record a view (fire and forget, don't await)
-    prisma.blogPost.update({
-      where: { id: post.id },
-      data: { viewCount: { increment: 1 } }
-    }).catch(() => {});
+  // Record a view (fire and forget)
+  prisma.blogPost.update({
+    where: { id: post.id },
+    data: { viewCount: { increment: 1 } }
+  }).catch(() => {});
 
   const siteName = siteSettings?.siteName || 'Knowora';
   const url = `https://knowora.in/blog/${post.slug}`;
@@ -187,14 +191,13 @@ export default async function BlogPostPage({ params }: Props) {
   }
 
   // Generate JobPosting Schema if it is a recruitment page
-  const tagNames = post.tags.map((t: any) => t.tag.name.toLowerCase());
-  const titleLower = post.title.toLowerCase();
+  const tagNames = (post.tags || []).map((t: any) => t.tag?.name?.toLowerCase() || '');
+  const titleLower = (post.title || '').toLowerCase();
   const isJob = tagNames.some((t: string) => t.includes('job') || t.includes('vacancy') || t.includes('career') || t.includes('recruitment')) ||
                 titleLower.includes('recruitment') || titleLower.includes('vacancy') || titleLower.includes('भर्ती') || titleLower.includes('नौकरी');
 
   let jobPostingJsonLd: any = null;
   if (isJob) {
-    // 1. Determine Hiring Organization
     let orgName = "Government Department";
     if (titleLower.includes('upsc')) orgName = "Union Public Service Commission (UPSC)";
     else if (titleLower.includes('ssc')) orgName = "Staff Selection Commission (SSC)";
@@ -204,19 +207,11 @@ export default async function BlogPostPage({ params }: Props) {
     else if (titleLower.includes('bpsc')) orgName = "Bihar Public Service Commission (BPSC)";
     else if (titleLower.includes('uppsc')) orgName = "Uttar Pradesh Public Service Commission (UPPSC)";
     else if (titleLower.includes('rpsc')) orgName = "Rajasthan Public Service Commission (RPSC)";
+    else if (titleLower.includes('rvun') || titleLower.includes('rvunl') || titleLower.includes('jvvn')) orgName = "Rajasthan Vidyut Nigam (RVUNL)";
     else if (titleLower.includes('hssc')) orgName = "Haryana Staff Selection Commission (HSSC)";
     else if (titleLower.includes('jkssb')) orgName = "Jammu & Kashmir Services Selection Board (JKSSB)";
     else if (titleLower.includes('post office') || titleLower.includes('india post')) orgName = "India Post";
-    else {
-      // Find capitalized abbreviations or words for org matching
-      const words = post.title.split(' ');
-      const uppercaseWord = words.find(w => w.length >= 3 && w === w.toUpperCase() && /^[A-Z]+$/.test(w));
-      if (uppercaseWord) {
-        orgName = `${uppercaseWord} Recruitment Board`;
-      }
-    }
 
-    // 2. Determine Job Location (State)
     const STATES_LIST = ['Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh', 'Goa', 'Gujarat', 'Haryana', 'Himachal Pradesh', 'Jharkhand', 'Karnataka', 'Kerala', 'Madhya Pradesh', 'Maharashtra', 'Manipur', 'Meghalaya', 'Mizoram', 'Nagaland', 'Odisha', 'Punjab', 'Rajasthan', 'Sikkim', 'Tamil Nadu', 'Telangana', 'Tripura', 'Uttar Pradesh', 'Uttarakhand', 'West Bengal', 'Delhi'];
     let stateLocation = "Delhi";
     const matchedState = STATES_LIST.find(s => titleLower.includes(s.toLowerCase()) || tagNames.some(t => t.includes(s.toLowerCase())));
@@ -224,8 +219,7 @@ export default async function BlogPostPage({ params }: Props) {
       stateLocation = matchedState;
     }
 
-    // 3. Strip HTML from description to construct plain description
-    const plainDesc = post.content.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().substring(0, 500) + '...';
+    const plainDesc = (post.content || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().substring(0, 500) + '...';
 
     jobPostingJsonLd = {
       '@context': 'https://schema.org',
@@ -267,7 +261,7 @@ export default async function BlogPostPage({ params }: Props) {
         'itemListElement': [
           { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://knowora.in' },
           { '@type': 'ListItem', position: 2, name: 'Blog', item: 'https://knowora.in/blog' },
-          { '@type': 'ListItem', position: 3, name: post.title, item: `https://knowora.in/blog/${slug}` }
+          { '@type': 'ListItem', position: 3, name: post.title, item: `https://knowora.in/blog/${post.slug}` }
         ]
       }) }} />
 
@@ -302,19 +296,4 @@ export default async function BlogPostPage({ params }: Props) {
       />
     </>
   );
-  } catch (err) {
-    console.error("Critical Error rendering BlogPostPage:", err);
-    return (
-      <div className="min-h-screen bg-[var(--color-bg-primary)] flex items-center justify-center p-6 text-center">
-        <div className="max-w-md w-full bg-white/5 border border-white/10 rounded-2xl p-8 backdrop-blur-md">
-          <div className="text-4xl mb-4">📰</div>
-          <h2 className="text-xl font-bold text-white mb-2">Article Temporarily Unavailable</h2>
-          <p className="text-gray-400 text-sm mb-6">We encountered an issue loading this article. Please explore other latest updates.</p>
-          <a href="/blog" className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-6 rounded-xl transition-all">
-            View All Articles →
-          </a>
-        </div>
-      </div>
-    );
-  }
 }

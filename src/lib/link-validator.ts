@@ -26,7 +26,9 @@ const OFFICIAL_PORTALS: Record<string, string> = {
   'nta': 'https://nta.ac.in',
   'national testing agency': 'https://nta.ac.in',
   'railway': 'https://indianrailways.gov.in',
-  'rrb': 'https://indianrailways.gov.in',
+  'rrb': 'https://rrbapply.gov.in',
+  'rrb apply': 'https://rrbapply.gov.in',
+  'railway recruitment': 'https://rrbapply.gov.in',
   'rrc': 'https://indianrailways.gov.in',
   'rrb ntpc': 'https://indianrailways.gov.in',
   'rrb group d': 'https://indianrailways.gov.in',
@@ -83,6 +85,8 @@ const OFFICIAL_PORTALS: Record<string, string> = {
 
   // Banks & Financial
   'sbi': 'https://sbi.co.in/web/careers',
+  'state bank': 'https://sbi.co.in/web/careers',
+  'state bank of india': 'https://sbi.co.in/web/careers',
   'sbi po': 'https://sbi.co.in/web/careers',
   'sbi clerk': 'https://sbi.co.in/web/careers',
   'rbi': 'https://rbi.org.in',
@@ -368,6 +372,22 @@ const DISTRICT_NIC_MAP: Record<string, string> = {
  * - Replaces broken/fake links with verified official portal homepages or specific apply/notification pages
  * - Adds warning notes for unverified links
  */
+
+/**
+ * Strips fake AI disclaimers and placeholder notes from HTML
+ */
+export function stripLinkDisclaimers(html: string): string {
+  if (!html) return html;
+  return html
+    .replace(/\s*\([\s\u0900-\u097F]*?(?:यह|ये)?\s*लिंक\s*केवल\s*एक\s*उदाहरण[\s\S]*?\)/gi, '')
+    .replace(/\s*\([\s\u0900-\u097F]*?(?:वास्तविक|ऑफिशियल|असली)\s*(?:अधिसूचना|आवेदन|लिंक|पोर्टल)[\s\S]*?\)/gi, '')
+    .replace(/\s*\([\s\u0900-\u097F]*?उदाहरण\s*(?:के\s*लिए|स्वरूप)?[\s\S]*?\)/gi, '')
+    .replace(/\s*\([\s\u0900-\u097F]*?डमी\s*लिंक[\s\S]*?\)/gi, '')
+    .replace(/\s*\((?:example|placeholder|dummy|sample)\s*link[\s\S]*?\)/gi, '')
+    .replace(/\s*\(this is a sample link[\s\S]*?\)/gi, '')
+    .replace(/\s*\(link is for demonstration[\s\S]*?\)/gi, '');
+}
+
 export function validateAndFixLinks(html: string, topicTitle: string): string {
   if (!html) return html;
 
@@ -492,7 +512,7 @@ export function validateAndFixLinks(html: string, topicTitle: string): string {
     return `<span style="color: var(--color-text-secondary);">जल्द उपलब्ध होगा</span>`;
   });
 
-  return fixedHtml;
+  return stripLinkDisclaimers(fixedHtml);
 }
 
 /**

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { generateAIContent, AIConfig } from '@/lib/ai';
 import { detectGridBox } from '@/lib/grid-classifier';
+import { validateAndFixLinks, stripLinkDisclaimers } from '@/lib/link-validator';
 import { revalidatePath } from 'next/cache';
 
 export const dynamic = 'force-dynamic';
@@ -136,7 +137,7 @@ STRICT MANDATORY RULES:
    - <h2>एक नज़र में (Key Highlights)</h2>
    - <h2>महत्वपूर्ण विवरण एवं तालिका (Quick Overview Table)</h2>
    - <h2>पात्रता, नियम और प्रक्रिया (Eligibility, Rules & Step-by-Step Guide)</h2>
-   - <h2>महत्वपूर्ण लिंक्स (Important Links Table)</h2> (with <a href="..." target="_blank">👉 Click Here</a>)
+   - <h2>महत्वपूर्ण लिंक्स (Important Links Table)</h2> (Provide 100% REAL official authority portals like sbi.co.in/web/careers, upsc.gov.in, ssc.gov.in, rrbapply.gov.in. NEVER write disclaimers like "(यह लिंक केवल एक उदाहरण है)")
    - <h2>अक्सर पूछे जाने वाले प्रश्न (FAQ)</h2> (2-3 detailed Q&As in <details><summary>...</summary><p>...</p></details>)
    - <h2>निष्कर्ष (Conclusion)</h2> (Final takeaways + WhatsApp/Telegram share note)
 3. Use clean HTML only (<h2>, <h3>, <p>, <table>, <ul>, <details>, <summary>). Never output Markdown.`;

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { generateAIContent, AIConfig } from '@/lib/ai';
+import { validateAndFixLinks, stripLinkDisclaimers } from '@/lib/link-validator';
 import { detectGridBox } from '@/lib/grid-classifier';
 import { revalidatePath } from 'next/cache';
 

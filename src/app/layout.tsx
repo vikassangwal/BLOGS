@@ -23,7 +23,7 @@ export async function generateMetadata(): Promise<Metadata> {
   } catch (e) {}
 
   return {
-    metadataBase: new URL('https://www.knowora.in'),
+    metadataBase: new URL('https://knowora.in'),
     title: settings?.seoTitle || settings?.siteName || 'Knowora | Sarkari Job, Educational News & Tech Portal',
     description: settings?.seoDescription || settings?.siteTagline || 'KnowOra: Latest Sarkari Job Alerts, Admit Cards, Exam Dates, Sarkari Yojana, Tech Updates & Educational News.',
     authors: [{ name: 'Vikas Sangwal' }],
@@ -31,7 +31,7 @@ export async function generateMetadata(): Promise<Metadata> {
     openGraph: {
       type: 'website',
       locale: 'hi_IN',
-      url: 'https://www.knowora.in',
+      url: 'https://knowora.in',
       siteName: settings?.siteName || 'Knowora',
       title: settings?.seoTitle || 'Knowora | Sarkari Job & Educational Portal',
       description: settings?.seoDescription || 'Latest Sarkari Job Alerts, Admit Cards, Exam Dates & Educational News.',

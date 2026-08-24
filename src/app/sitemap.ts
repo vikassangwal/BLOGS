@@ -5,7 +5,7 @@ export const dynamic = 'force-dynamic';
 export const revalidate = 3600; // Cache sitemap for 1 hour
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.knowora.in';
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://knowora.in';
 
   try {
     const [posts, tags, teamMembers] = await Promise.all([

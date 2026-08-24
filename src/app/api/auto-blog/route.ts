@@ -515,24 +515,51 @@ export async function POST(request: NextRequest) {
             throw e;
           }
 
-          // Quality guard: strictly reject empty, short, or cut-off articles (Must be full 1200-1500+ words)
-          const writtenText = (articleHtml || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+
+          // Auto-Continuation: if article is short or truncated, ask AI to continue
+          let writtenText = (articleHtml || "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+          let continuationAttempts = 0;
+          const MAX_CONTINUATIONS = 2;
+
+          while (continuationAttempts < MAX_CONTINUATIONS) {
+            const tailChk = articleHtml.slice(-120);
+            const looksTruncated = !/[.!?।>]\s*$/.test(articleHtml.trim()) && !/<\/(p|div|ul|ol|table|h[1-6]|blockquote|details)>\s*$/i.test(tailChk);
+            const missingConclusion = !articleHtml.toLowerCase().includes("निष्कर्ष") && !articleHtml.toLowerCase().includes("conclusion");
+            const missingFaq = !articleHtml.toLowerCase().includes("faq") && !articleHtml.includes("अक्सर पूछे जाने वाले") && !articleHtml.includes("<details>");
+
+            if (!looksTruncated && !missingConclusion && writtenText.length >= 1500) {
+              break; // Article is complete
+            }
+
+            continuationAttempts++;
+            console.log(`[Auto-Blog Stage 2] Article incomplete (attempt ${continuationAttempts}/${MAX_CONTINUATIONS}), auto-continuing...`);
+
+            const continuePrompt = `यह लेख अधूरा रह गया है। नीचे लेख का अंतिम 800 अक्षर दिए गए हैं। इसे वहीं से आगे जारी रखें और पूरा करें।\n\nअधूरा लेख का अंतिम भाग:\n${articleHtml.slice(-800)}\n\nMANDATORY: आपको इन सभी अनुभागों को जोड़कर लेख पूरा करना है (जो भी गायब हैं):\n${missingFaq ? "- <h2>अक्सर पूछे जाने वाले प्रश्न (FAQ)</h2> with 3-4 <details><summary>...</summary><p>...</p></details>" : ""}\n${missingConclusion ? "- <h2>निष्कर्ष (Conclusion)</h2> with final summary paragraph" : ""}\n- अंत में WhatsApp/Telegram शेयर CTA\n\nकेवल बाकी का HTML लिखें, पहले से लिखा हुआ दोबारा न लिखें।`;
+
+            try {
+              let continuation = await generateContentWithFallback(writerConfig, "You are continuing an incomplete Hindi blog article. Output only the remaining HTML sections.", continuePrompt);
+              continuation = continuation.replace(/^```html\n?|```$/g, "").trim();
+
+              if (continuation && continuation.length > 200) {
+                articleHtml = articleHtml + "\n" + continuation;
+                writtenText = articleHtml.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+              } else {
+                break;
+              }
+            } catch(contErr) {
+              console.error("[Auto-Blog] Continuation attempt failed:", contErr);
+              break;
+            }
+          }
+
+          // Final quality check after all continuation attempts
           if (writtenText.length < 1500) {
-            return NextResponse.json({ 
-              success: false, 
-              error: `AI returned incomplete/short content (${writtenText.length} chars, min 1500 required). Skipping to protect blog quality.` 
+            return NextResponse.json({
+              success: false,
+              error: `AI returned incomplete content even after ${continuationAttempts} continuation attempts (${writtenText.length} chars). Skipping.`
             });
           }
 
-          // Truncation check (ensure article did not end mid-sentence)
-          const tail = articleHtml.slice(-120);
-          const looksTruncated = !/[.!?।>]\s*$/.test(articleHtml.trim()) && !/<\/(p|div|ul|ol|table|h[1-6]|blockquote|details)>\s*$/i.test(tail);
-          if (looksTruncated) {
-            return NextResponse.json({ 
-              success: false, 
-              error: `AI output was cut off mid-sentence. Skipping to avoid publishing an incomplete post.` 
-            });
-          }
 
           // Save the written content
           await prisma.blogPost.update({
@@ -1532,19 +1559,44 @@ YOUR SEO SKILLS:
       // Clean up markdown wrappers
       articleHtml = articleHtml.replace(/^```html\n?|```$/g, '').trim();
 
-      // Quality guard: reject empty / suspiciously short / truncated articles so we
-      // never publish a broken half-written post. This protects the "long & detailed"
-      // requirement — it only rejects BAD output, it never shortens good output.
-      const plainText = articleHtml.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
-      if (plainText.length < 1500) {
-        throw new Error(`Writer produced too little content (${plainText.length} chars, min 1500 required) for "${targetTopic}". Skipping to avoid publishing an incomplete post.`);
+      // Auto-Continuation for cron writer
+      let plainText = articleHtml.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+      let cronContinuationAttempts = 0;
+      const CRON_MAX_CONTINUATIONS = 2;
+
+      while (cronContinuationAttempts < CRON_MAX_CONTINUATIONS) {
+        const tailChk = articleHtml.slice(-120);
+        const looksTruncated = !/[.!?।>]\s*$/.test(articleHtml.trim()) && !/<\/(p|div|ul|ol|table|h[1-6]|blockquote|details)>\s*$/i.test(tailChk);
+        const missingConclusion = !articleHtml.toLowerCase().includes("निष्कर्ष") && !articleHtml.toLowerCase().includes("conclusion");
+        const missingFaq = !articleHtml.toLowerCase().includes("faq") && !articleHtml.includes("अक्सर पूछे जाने वाले") && !articleHtml.includes("<details>");
+
+        if (!looksTruncated && !missingConclusion && plainText.length >= 1500) {
+          break;
+        }
+
+        cronContinuationAttempts++;
+        console.log(`[Auto-Blog Cron] Article incomplete (attempt ${cronContinuationAttempts}/${CRON_MAX_CONTINUATIONS}), continuing for "${targetTopic}"...`);
+
+        const continuePrompt = `यह लेख अधूरा रह गया है। नीचे लेख का अंतिम 800 अक्षर दिए गए हैं। इसे वहीं से आगे जारी रखें और पूरा करें।\n\nअधूरा लेख का अंतिम भाग:\n${articleHtml.slice(-800)}\n\nMANDATORY: आपको इन सभी अनुभागों को जोड़कर लेख पूरा करना है (जो भी गायब हैं):\n${missingFaq ? "- <h2>अक्सर पूछे जाने वाले प्रश्न (FAQ)</h2> with 3-4 <details><summary>...</summary><p>...</p></details>" : ""}\n${missingConclusion ? "- <h2>निष्कर्ष (Conclusion)</h2> with final summary paragraph" : ""}\n- अंत में WhatsApp/Telegram शेयर CTA\n\nकेवल बाकी का HTML लिखें, पहले से लिखा हुआ दोबारा न लिखें।`;
+
+        try {
+          let continuation = await generateContentWithFallback(writerConfig, "You are continuing an incomplete Hindi blog article. Output only the remaining HTML sections.", continuePrompt);
+          continuation = continuation.replace(/^```html\n?|```$/g, "").trim();
+
+          if (continuation && continuation.length > 200) {
+            articleHtml = articleHtml + "\n" + continuation;
+            plainText = articleHtml.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+          } else {
+            break;
+          }
+        } catch(contErr) {
+          console.error("[Auto-Blog Cron] Continuation attempt failed:", contErr);
+          break;
+        }
       }
-      // Detect an article that was cut off mid-sentence (no closing tag near the end
-      // and no sentence-ending punctuation) — a sign the model hit its token limit.
-      const tail = articleHtml.slice(-120);
-      const looksTruncated = !/[.!?।>]\s*$/.test(articleHtml.trim()) && !/<\/(p|div|ul|ol|table|h[1-6]|blockquote)>\s*$/i.test(tail);
-      if (looksTruncated) {
-        throw new Error(`Writer output for "${targetTopic}" appears truncated (ended mid-sentence). Skipping to avoid publishing an incomplete post.`);
+
+      if (plainText.length < 1500) {
+        throw new Error(`Writer produced too little content (${plainText.length} chars) for "${targetTopic}" even after ${cronContinuationAttempts} continuation attempts.`);
       }
     } catch(error: any) {
       console.error("Writer generation failed", error);

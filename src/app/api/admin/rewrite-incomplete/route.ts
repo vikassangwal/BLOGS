@@ -147,7 +147,7 @@ ${post.content}
 
 Write a 100% COMPLETE, authoritative, rich Hindi HTML blog post on this topic. Ensure all factual details, dates for 2026, eligibility rules, and official links are included and that the article concludes completely without truncation.`;
 
-        let fullArticleHtml = await generateAIContent(configs, writerSystemPrompt, writerPrompt, 8000, true);
+        let fullArticleHtml = await generateAIContent(configs, writerSystemPrompt, writerPrompt, 16000, true);
         fullArticleHtml = fullArticleHtml.replace(/^```html\n?|```$/g, '').trim();
 
         const plainCheck = fullArticleHtml.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();

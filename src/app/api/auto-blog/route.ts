@@ -302,7 +302,7 @@ export async function POST(request: NextRequest) {
     const researcherConfig = buildAgentConfigs('researcher', 'openrouter', rModel || 'google/gemini-2.5-flash', 1500);
     // 8000 tokens gives the writer enough room to finish long, detailed articles
     // without hitting the token limit and getting truncated mid-post.
-    const writerConfig = buildAgentConfigs('writer', 'openrouter', wModel || 'openai/gpt-4o-mini', 8000);
+    const writerConfig = buildAgentConfigs('writer', 'openrouter', wModel || 'openai/gpt-4o-mini', 16000);
     const seoConfig = buildAgentConfigs('seo', 'openrouter', sModel || 'openai/gpt-4o-mini', 500);
     
     // Feature: Auto-inject Native Gemini for Google Search Grounding if key exists

@@ -52,11 +52,25 @@ export async function GET(request: NextRequest) {
 
     const results: any[] = [];
     for (const post of posts) {
-      const url = `https://knowora.in/blog/${post.slug}`;
-      const res = await submitToGoogleIndexing(url, 'URL_UPDATED', googleIndexingJson);
+      // Try both www and non-www to match whatever property is in Google Search Console
+      const urlNonWww = `https://knowora.in/blog/${post.slug}`;
+      const urlWww = `https://www.knowora.in/blog/${post.slug}`;
+
+      let res = await submitToGoogleIndexing(urlNonWww, 'URL_UPDATED', googleIndexingJson);
+      let usedUrl = urlNonWww;
+
+      if (!res.success && res.message?.includes('403')) {
+        // Fallback to www URL which matches the Search Console property
+        const resWww = await submitToGoogleIndexing(urlWww, 'URL_UPDATED', googleIndexingJson);
+        if (resWww.success) {
+          res = resWww;
+          usedUrl = urlWww;
+        }
+      }
+
       results.push({
         title: post.title.slice(0, 50),
-        url,
+        url: usedUrl,
         status: res.success ? '✅ Google Indexing Notified' : `❌ Failed: ${res.message}`
       });
     }

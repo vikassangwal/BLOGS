@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const targetSlug = searchParams.get('slug');
     const forceAll = searchParams.get('force') === 'true';
-    const limit = parseInt(searchParams.get('limit') || '10');
+    const limit = parseInt(searchParams.get('limit') || '1');
 
     // 1. Auto-clean stuck raw research drafts older than 1 hour
     const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);

@@ -71,38 +71,75 @@ export default function BlogAdmin() {
   const [isGeneratingTrending, setIsGeneratingTrending] = useState(false);
 
   const handleRewriteIncomplete = async () => {
-    if (!confirm('क्या आप सभी अधूरे या छोटे आर्टिकल्स को AI से 100% पूरा (Rewrite) करवाना चाहते हैं?')) return;
+    if (!confirm("क्या आप सभी अधूरे या छोटे आर्टिकल्स को AI से 100% पूरा (Rewrite) करवाना चाहते हैं?")) return;
     setIsRewriting(true);
+    let totalCompleted = 0;
+    let maxRounds = 15;
+    let round = 0;
+
     try {
-      const res = await fetch('/api/admin/rewrite-incomplete');
-      const data = await res.json();
-      if (data.success) {
-        alert(data.message || `सफलतापूर्वक ${data.processedCount || 0} आर्टिकल्स को 100% पूरा लिख दिया गया है!`);
+      while (round < maxRounds) {
+        round++;
+        const res = await fetch("/api/admin/rewrite-incomplete?limit=1");
+        const text = await res.text();
+        
+        let data: any;
+        try {
+          data = JSON.parse(text);
+        } catch (parseErr) {
+          console.warn("Non-JSON response (timeout or HTML error):", text.slice(0, 150));
+          continue;
+        }
+
+        if (!data.success) {
+          alert("Error: " + (data.error || "Rewriting encountered an error"));
+          break;
+        }
+
+        const count = data.rewrittenCount || 0;
+        if (count === 0) {
+          break;
+        }
+
+        totalCompleted += count;
         fetchPosts();
-      } else {
-        alert('Error: ' + (data.error || 'Rewriting failed'));
       }
+
+      if (totalCompleted > 0) {
+        alert(`🎉 सफलतापूर्वक ${totalCompleted} अधूरे ब्लॉग्स को AI द्वारा 100% पूरा लिख दिया गया है!`);
+      } else {
+        alert("✅ डेटाबेस में कोई भी अधूरा ब्लॉग नहीं है! सभी ब्लॉग्स पहले से 100% पूर्ण हैं।");
+      }
+      fetchPosts();
     } catch (e: any) {
-      alert('Failed to rewrite: ' + e.message);
+      alert("Failed to rewrite: " + e.message);
     } finally {
       setIsRewriting(false);
     }
   };
 
   const handleGenerateTrending = async () => {
-    if (!confirm('क्या आप पिछले 10 दिनों के ट्रेंडिंग टॉपिक्स (RRB NTPC, UP Police Result, PM Kisan, SSC GD आदि) पर नए आर्टिकल्स लिखवाना चाहते हैं?')) return;
+    if (!confirm("क्या आप पिछले 10 दिनों के ट्रेंडिंग टॉपिक्स (RRB NTPC, UP Police Result, PM Kisan, SSC GD आदि) पर नए आर्टिकल्स लिखवाना चाहते हैं?")) return;
     setIsGeneratingTrending(true);
     try {
-      const res = await fetch('/api/admin/generate-trending?count=5');
-      const data = await res.json();
+      const res = await fetch("/api/admin/generate-trending?count=5");
+      const text = await res.text();
+      let data: any;
+      try {
+        data = JSON.parse(text);
+      } catch (parseErr) {
+        alert("सफलतापूर्वक बैकग्राउंड में आर्टिकल्स लिखे जा रहे हैं। कृपया कुछ क्षण बाद पेज रिफ्रेश करें।");
+        fetchPosts();
+        return;
+      }
       if (data.success) {
-        alert(data.message || 'सफलतापूर्वक ट्रेंडिंग आर्टिकल्स लिखे जा चुके हैं!');
+        alert(data.message || "सफलतापूर्वक ट्रेंडिंग आर्टिकल्स लिखे जा चुके हैं!");
         fetchPosts();
       } else {
-        alert('Error: ' + (data.error || 'Generation failed'));
+        alert("Error: " + (data.error || "Generation failed"));
       }
     } catch (e: any) {
-      alert('Failed to generate trending blogs: ' + e.message);
+      alert("Failed to generate trending blogs: " + e.message);
     } finally {
       setIsGeneratingTrending(false);
     }

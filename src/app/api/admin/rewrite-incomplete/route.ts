@@ -42,14 +42,22 @@ export async function POST(request: NextRequest) {
     const forceAll = searchParams.get('force') === 'true';
     const limit = parseInt(searchParams.get('limit') || '1');
 
-    // 1. Auto-clean stuck raw research drafts older than 1 hour
-    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
-    await prisma.blogPost.deleteMany({
-      where: {
-        status: 'Researching',
-        createdAt: { lt: oneHourAgo }
-      }
-    }).catch(() => {});
+    // 1. Auto-clean stuck raw research drafts older than 24 hours (safely reset keywords first)
+    const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    const oldResearchDrafts = await prisma.blogPost.findMany({
+      where: { status: 'Researching', createdAt: { lt: oneDayAgo } },
+      select: { id: true }
+    });
+    if (oldResearchDrafts.length > 0) {
+      const draftIds = oldResearchDrafts.map(d => d.id);
+      await prisma.autoBlogKeyword.updateMany({
+        where: { postId: { in: draftIds } },
+        data: { status: 'pending', postId: null }
+      }).catch(() => {});
+      await prisma.blogPost.deleteMany({
+        where: { id: { in: draftIds } }
+      }).catch(() => {});
+    }
 
     // 2. Auto-Classify and Fix All Posts into their proper Homepage Grids
     const allExistingPosts = await prisma.blogPost.findMany({

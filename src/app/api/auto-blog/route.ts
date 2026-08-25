@@ -1159,10 +1159,20 @@ export async function POST(request: NextRequest) {
       // STAGE 2: FETCH RESEARCH DATA FROM DRAFT
       // -------------------------------------------------------------
       const draftPost = await prisma.blogPost.findUnique({
-        where: { id: researchedKeyword?.postId || '' }
+        where: { id: researchedKeyword?.postId || "" }
       });
       if (!draftPost) {
-        throw new Error(`Draft post not found for ID: ${researchedKeyword?.postId}`);
+        console.warn(`[Auto-Blog] Draft post not found for ID: ${researchedKeyword?.postId}. Resetting keyword to pending.`);
+        if (researchedKeyword) {
+          await prisma.autoBlogKeyword.update({
+            where: { id: researchedKeyword.id },
+            data: { status: "pending", postId: null }
+          }).catch(() => {});
+        }
+        return NextResponse.json({
+          success: false,
+          message: `Draft post not found for keyword. Reset to pending for clean retry.`
+        }, { status: 200 });
       }
       researchData = draftPost.content;
       draftPostId = draftPost.id;
@@ -2111,42 +2121,48 @@ YOUR SEO SKILLS:
         }
 
         // Revalidate pages
-        try { revalidatePath('/'); revalidatePath('/blog'); } catch (e) { console.warn('Revalidate failed:', e); }
+        try { revalidatePath("/"); revalidatePath("/blog"); } catch (e) { console.warn("Revalidate failed:", e); }
       } catch (broadcastError) {
-        console.error('[Auto-Blog] Broadcasting error (non-fatal):', broadcastError);
+        console.error("[Auto-Blog] Broadcasting error (non-fatal):", broadcastError);
       }
     } catch (error: any) {
-      console.error('Background auto-blog fatal error:', error);
+      console.error("Auto-blog generation fatal error:", error);
+      if (keywordId) {
+        await prisma.autoBlogKeyword.update({
+          where: { id: keywordId },
+          data: { status: "failed" }
+        }).catch(() => {});
+      }
       await prisma.autoBlogLog.create({
         data: {
-          keyword: targetTopic || 'Unknown/Crash',
-          status: 'failed',
-          error: error.message || 'Unknown error'
+          keyword: targetTopic || "Unknown/Crash",
+          status: "failed",
+          error: error.message || "Unknown error"
         }
-      });
+      }).catch(() => {});
     }
   })());
 
-    if (!targetTopic) {
-      return NextResponse.json({
-        success: true,
-        message: 'Queue is empty. Fresh topics are being generated in the background. Please wait 15 seconds and refresh.'
-      }, { status: 202 });
-    } else if (isStage2) {
-      return NextResponse.json({
-        success: true,
-        message: `Stage 2: Blog writing & publishing started in the background for "${targetTopic}". It will take 15-20 seconds. Please check the logs tab shortly.`
-      }, { status: 202 });
-    } else {
-      return NextResponse.json({
-        success: true,
-        message: `Stage 1: Research and draft creation started in the background for "${targetTopic}". It will take 10 seconds. Please check the logs tab shortly.`
-      }, { status: 202 });
-    }
-  } catch (error: any) {
-    console.error('Auto-blog entry fatal error:', error);
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  if (!targetTopic) {
+    return NextResponse.json({
+      success: true,
+      message: "Queue is empty. Fresh topics are being generated in the background. Please wait 15 seconds and refresh."
+    }, { status: 202 });
+  } else if (isStage2) {
+    return NextResponse.json({
+      success: true,
+      message: `Stage 2: Blog writing & publishing started in the background for "${targetTopic}". It will take 15-20 seconds. Please check the logs tab shortly.`,
+    }, { status: 202 });
+  } else {
+    return NextResponse.json({
+      success: true,
+      message: `Stage 1: Research and draft creation started in the background for "${targetTopic}". It will take 10 seconds. Please check the logs tab shortly.`,
+    }, { status: 202 });
   }
+} catch (error: any) {
+  console.error("Auto-blog entry fatal error:", error);
+  return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+}
 }
 
 export async function GET(request: NextRequest) {

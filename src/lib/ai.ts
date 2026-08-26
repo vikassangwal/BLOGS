@@ -565,7 +565,7 @@ function getDefaultModel(provider: string): string {
     anthropic: 'claude-sonnet-4-20250514',
     deepseek: 'deepseek-chat',
     openrouter: 'google/gemini-2.0-flash-exp:free',
-    groq: 'meta-llama/llama-4-scout-17b-16e-instruct',
+    groq: 'llama-3.1-70b-versatile',
     mistral: 'mistral-small-latest',
     together: 'meta-llama/Llama-3-70b-chat-hf',
     fireworks: 'accounts/fireworks/models/llama-v3p1-70b-instruct',

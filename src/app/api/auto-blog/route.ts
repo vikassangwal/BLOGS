@@ -139,16 +139,32 @@ export async function POST(request: NextRequest) {
 
     
     function getApiKeyForProvider(p: string): string {
-      let key = (savedKeys[p] || '').trim();
-      if (!key) {
-        // Fallback to any valid key in savedKeys >= 10 chars
-        const fallback = Object.keys(savedKeys).find(k => 
-          !k.includes('Provider') && !k.includes('Model') && !k.includes('Token') && !k.includes('Id') &&
-          savedKeys[k] && typeof savedKeys[k] === 'string' && savedKeys[k].length >= 10
-        );
-        if (fallback) key = String(savedKeys[fallback]).trim();
+      const pLower = (p || "").toLowerCase().trim();
+      const possibleKeys = [
+        p,
+        pLower,
+        `${pLower}ApiKey`,
+        `${pLower}Key`,
+        `${pLower}_api_key`,
+        `${pLower}_key`,
+        pLower === "gemini" ? "google" : "",
+        pLower === "gemini" ? "googleApiKey" : "",
+        pLower === "openrouter" ? "openRouter" : "",
+        pLower === "openrouter" ? "openRouterApiKey" : "",
+      ].filter(Boolean);
+
+      for (const k of possibleKeys) {
+        const val = (savedKeys[k] || "").trim();
+        if (val && val.length >= 10) return val;
       }
-      return key;
+
+      // If specific key not found, fallback to any valid AI key in settings
+      const fallback = Object.keys(savedKeys).find(k => 
+        !k.includes("Provider") && !k.includes("Model") && !k.includes("Token") && !k.includes("Id") &&
+        !k.includes("telegram") && !k.includes("resend") && !k.includes("newsdata") && !k.includes("indexing") &&
+        savedKeys[k] && typeof savedKeys[k] === "string" && savedKeys[k].trim().length >= 10
+      );
+      return fallback ? String(savedKeys[fallback]).trim() : "";
     }
 
     function buildAgentConfigs(prefix: string, defaultProvider: string, defaultModel: string, defaultTokens: number): { configs: AIConfig[]; maxTokens: number } {
@@ -162,25 +178,27 @@ export async function POST(request: NextRequest) {
         configs.push({ provider: primaryProvider, apiKey: key1, model: primaryModel });
       }
 
-      // Add ALL available backup keys in priority order: gemini, gemini2, gemini3, openrouter, groq, openai, deepseek
-      const fallbackProviders = ['gemini', 'gemini2', 'gemini3', 'openrouter', 'groq', 'openai', 'deepseek'];
+      // Add ALL available backup keys in priority order: gemini, openrouter, groq, openai, deepseek
+      const fallbackProviders = ["gemini", "openrouter", "groq", "openai", "deepseek"];
       for (const prov of fallbackProviders) {
-        const k = (savedKeys[prov] || '').trim();
-        if (k && k.length >= 10 && prov !== primaryProvider) {
-          let m = 'google/gemini-2.5-flash';
-          if (prov === 'gemini' || prov === 'gemini2' || prov === 'gemini3') m = 'gemini-2.5-flash';
-          else if (prov === 'groq') m = 'meta-llama/llama-4-scout-17b-16e-instruct';
-          else if (prov === 'openai') m = 'gpt-4o-mini';
-          else if (prov === 'deepseek') m = 'deepseek-chat';
+        if (prov === primaryProvider) continue;
+        const k = getApiKeyForProvider(prov);
+        if (k && k.length >= 10 && !configs.some(c => c.apiKey === k)) {
+          let m = "gemini-2.5-flash";
+          if (prov === "gemini") m = "gemini-2.5-flash";
+          else if (prov === "openrouter") m = "google/gemini-2.0-flash-exp:free";
+          else if (prov === "groq") m = "llama-3.1-70b-versatile";
+          else if (prov === "openai") m = "gpt-4o-mini";
+          else if (prov === "deepseek") m = "deepseek-chat";
           configs.push({ provider: prov, apiKey: k, model: m });
         }
       }
 
-      // If still empty, try single fallback key
+      // If still empty, try any available key
       if (configs.length === 0) {
-        const anyKey = getApiKeyForProvider('gemini');
+        const anyKey = getApiKeyForProvider("gemini") || getApiKeyForProvider("openrouter");
         if (anyKey) {
-          configs.push({ provider: 'gemini', apiKey: anyKey, model: 'gemini-2.5-flash' });
+          configs.push({ provider: "gemini", apiKey: anyKey, model: "gemini-2.5-flash" });
         }
       }
 

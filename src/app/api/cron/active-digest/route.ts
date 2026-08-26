@@ -57,7 +57,7 @@ export async function GET(request: NextRequest) {
       for (const prov of fallbackProviders) {
         const k = (savedKeys[prov] || '').trim();
         if (k && k.length >= 10 && prov !== primaryProvider) {
-          const m = prov.startsWith('gemini') ? 'gemini-2.0-flash' : prov === 'groq' ? 'llama-3.3-70b-versatile' : prov === 'openai' ? 'gpt-4o-mini' : 'google/gemini-2.5-flash';
+          const m = prov.startsWith('gemini') ? 'gemini-2.0-flash' : prov === 'groq' ? 'meta-llama/llama-4-scout-17b-16e-instruct' : prov === 'openai' ? 'gpt-4o-mini' : 'google/gemini-2.5-flash';
           configs.push({ provider: prov, apiKey: k, model: m });
         }
       }

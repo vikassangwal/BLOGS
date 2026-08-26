@@ -98,7 +98,7 @@ export async function GET(request: NextRequest) {
       
       else if (strategy === 'fast') {
         // Flash/Haiku/Mini models
-        const fastTier = ['google/gemini-2.5-flash', 'openai/gpt-4o-mini', 'anthropic/claude-3-haiku', 'groq/llama-3.3-70b-versatile'];
+        const fastTier = ['google/gemini-2.5-flash', 'openai/gpt-4o-mini', 'anthropic/claude-3-haiku', 'groq/meta-llama/llama-4-scout-17b-16e-instruct'];
         for (const t of fastTier) {
           if (candidates.some((c: any) => c.id === t)) return t;
         }

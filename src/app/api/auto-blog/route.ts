@@ -169,7 +169,7 @@ export async function POST(request: NextRequest) {
         if (k && k.length >= 10 && prov !== primaryProvider) {
           let m = 'google/gemini-2.5-flash';
           if (prov === 'gemini' || prov === 'gemini2' || prov === 'gemini3') m = 'gemini-2.5-flash';
-          else if (prov === 'groq') m = 'llama-3.3-70b-versatile';
+          else if (prov === 'groq') m = 'meta-llama/llama-4-scout-17b-16e-instruct';
           else if (prov === 'openai') m = 'gpt-4o-mini';
           else if (prov === 'deepseek') m = 'deepseek-chat';
           configs.push({ provider: prov, apiKey: k, model: m });

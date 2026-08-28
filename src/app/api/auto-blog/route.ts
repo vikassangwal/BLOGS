@@ -1566,8 +1566,8 @@ ${links}
       const writerSystemPrompt = `You are India's #1 Hindi Blog Writer and Google SEO Expert. You write highly engaging, mobile-optimized viral Hindi content.
 
 CRITICAL INSTRUCTIONS (PENALTY FOR FAILING):
-1. HIGH-CTR MAIN HEADING: The first heading (<h2> or <h1>) at the very top of your HTML MUST be an extremely catchy, clickbait-style title in Hindi/Hinglish that draws immediate clicks on Google Discover. It MUST include key details: recruitment agency, vacancy count (e.g., 5000+ Posts), qualification (e.g., 10th/12th Pass), and urgent terms like "बंपर भर्ती", "अभी-अभी जारी Notification", "यहाँ से डायरेक्ट करें आवेदन".
-   - Example: "<h2>Railway RRC Recruitment 2026: 10th Pass के लिए 5000+ पदों पर बंपर भर्ती, अभी-अभी जारी हुआ नोटिफिकेशन!</h2>"
+1. PROFESSIONAL HIGH-AUTHORITY HEADING: The first heading (<h2> or <h1>) at the very top of your HTML MUST be a clean, professional, and informative title in Hindi/Hinglish compliant with Google AdSense & Publisher Policies. It MUST clearly specify the recruitment agency, vacancy count (e.g. 5000 Posts), qualification (e.g. 10th/12th Pass), and official update. NEVER use sensational clickbait phrases like "बंपर भर्ती", "अभी-अभी जारी", "धमाका", "मचाएगा तहलका".
+   - Example: "<h2>Railway RRC Recruitment 2026: 10th Pass के लिए 5000 पदों पर भर्ती अधिसूचना जारी, जानें आवेदन प्रक्रिया</h2>"
 2. NO LONG PARAGRAPHS: Every <p> must be strictly 2-3 lines max. Break large text blocks into multiple short <p> tags.
 3. HINGLISH KEYWORDS (MANDATORY): You MUST organically insert exact English/Hinglish search phrases inside the Hindi text (e.g., "online apply kaise kare", "result kab aayega", "direct link"). Do NOT translate them to pure Hindi.
 4. BOLD ALL NUMBERS: Every single number, date, fee, or salary (e.g., <strong>₹1,000</strong>, <strong>500 Posts</strong>) MUST be wrapped in <strong> tags, EVEN inside tables.
@@ -1676,7 +1676,7 @@ YOUR SEO SKILLS:
     Analyze the following article and generate optimized metadata for maximum Google ranking.
     
     RULES:
-    1. seoTitle: Generate a VERY SIMPLE, CATCHY, and EASY TO UNDERSTAND Hindi title that common people can read easily. Use words like "बंपर भर्ती", "रिजल्ट जारी", "नया नियम". Mix in the main English keyword naturally. Keep it under 65 chars. Example: "SSC CGL ${getCurrentYearNum()}: बंपर भर्ती का नोटिफिकेशन जारी, ऐसे करें अप्लाई!"
+    1. seoTitle: Generate a professional, clear, and informative Hindi title under 65 chars compliant with Google AdSense policies. State the recruitment agency, year (2026), and topic clearly. Never use clickbait terms like "बंपर भर्ती" or "धमाका". Example: "SSC CGL ${getCurrentYearNum()}: भर्ती अधिसूचना जारी, ऐसे करें ऑनलाइन आवेदन"
     2. seoDescription: Write a compelling meta description in simple Hindi that makes users CLICK. Under 155 chars. Include primary keyword.
     3. seoKeywords: List 6-8 comma-separated keywords mixing Hindi, English, and Hinglish (e.g. "SSC CGL 2026, SSC CGL notification, SSC CGL kab aayega, एसएससी सीजीएल 2026").
     4. slug: Short, keyword-rich English-only URL slug (e.g. "ssc-cgl-2026-notification"). No random numbers.

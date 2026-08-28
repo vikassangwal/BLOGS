@@ -841,6 +841,7 @@ export async function POST(request: NextRequest) {
         🚨 STRICT RULE: Every topic must have active open applications and solid deadlines. Never guess dates or write an article based on guesses! If a deadline is not announced, write "Coming Soon" (जल्द आ रहा है) instead of guessing.
         🚨 CRITICAL RULE: NEVER include any job/recruitment where the 'Last Date to Apply' has already passed before ${getCurrentDateStr()}.
         👉 2nd PRIORITY (FALLBACK) 👉: If there are not enough new government job updates, fill the slots with contractual recruitments, private sector jobs (TCS off-campus, bank openings), ongoing applications with active deadlines, or career guides (e.g. "Best courses after 12th").
+        🚨 MANDATORY YEAR RULE: Every single job/vacancy/recruitment keyword MUST explicitly have '2026' in it (e.g. 'SSC MTS Recruitment 2026', 'Railway RPF Bharti 2026'). Never output a vacancy without the current year!
         🚨 NO COMBO/GENERIC JOBS RULE: Every job topic MUST be for ONE SPECIFIC department and ONE SPECIFIC post (e.g. 'RPSC Programmer Recruitment ${getCurrentYearNum()}'). NEVER combine multiple departments or unrelated posts into a single topic.
       - 1 Technology topics: Telecom plans/5G updates, Smartphone/Gadget launches, WhatsApp/Instagram updates, AI Tools, EV Scooter launches, BGMI/Gaming, or Cyber Scam Alerts.
       - 1 Finance & Earning topics: RBI Rules, E-Shram/PM Kisan updates, Online Earning Apps/Work from home, EPF withdrawal, Zero Balance Accounts, IPOs, Gold Rates, or Post Office/LIC Schemes.
@@ -1676,7 +1677,7 @@ YOUR SEO SKILLS:
     Analyze the following article and generate optimized metadata for maximum Google ranking.
     
     RULES:
-    1. seoTitle: Generate a professional, clear, and informative Hindi title under 65 chars compliant with Google AdSense policies. State the recruitment agency, year (2026), and topic clearly. Never use clickbait terms like "बंपर भर्ती" or "धमाका". Example: "SSC CGL ${getCurrentYearNum()}: भर्ती अधिसूचना जारी, ऐसे करें ऑनलाइन आवेदन"
+    1. seoTitle: Generate a professional, clear, and informative Hindi title under 65 chars compliant with Google AdSense policies. MANDATORY: The title MUST include the current year '2026' for all vacancies/recruitment/news. State the recruitment agency, year (2026), and topic clearly. Never use clickbait terms like "बंपर भर्ती" or "धमाका". Example: "SSC CGL ${getCurrentYearNum()}: भर्ती अधिसूचना जारी, ऐसे करें ऑनलाइन आवेदन"
     2. seoDescription: Write a compelling meta description in simple Hindi that makes users CLICK. Under 155 chars. Include primary keyword.
     3. seoKeywords: List 6-8 comma-separated keywords mixing Hindi, English, and Hinglish (e.g. "SSC CGL 2026, SSC CGL notification, SSC CGL kab aayega, एसएससी सीजीएल 2026").
     4. slug: Short, keyword-rich English-only URL slug (e.g. "ssc-cgl-2026-notification"). No random numbers.

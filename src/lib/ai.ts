@@ -484,7 +484,8 @@ export async function generateAIContent(
   }
 
     // Default model if not specified
-    const model = config.model?.trim() || getDefaultModel(providerName);
+    let model = config.model?.trim() || getDefaultModel(providerName);
+    if (providerName === 'groq') model = sanitizeGroqModel(model);
 
     // Build request URL
     let url = profile.baseUrl;
@@ -570,7 +571,7 @@ function getDefaultModel(provider: string): string {
     anthropic: 'claude-sonnet-4-20250514',
     deepseek: 'deepseek-chat',
     openrouter: 'google/gemini-2.0-flash-exp:free',
-    groq: 'llama-3.1-70b-versatile',
+    groq: 'llama-3.3-70b-specdec',
     mistral: 'mistral-small-latest',
     together: 'meta-llama/Llama-3-70b-chat-hf',
     fireworks: 'accounts/fireworks/models/llama-v3p1-70b-instruct',
@@ -579,6 +580,13 @@ function getDefaultModel(provider: string): string {
     xai: 'grok-3-mini',
   };
   return defaults[provider] || 'gpt-4o-mini';
+}
+
+function sanitizeGroqModel(model: string): string {
+  const m = (model || '').toLowerCase().trim();
+  if (m.includes('70b') || m.includes('versatile')) return 'llama-3.3-70b-specdec';
+  if (m.includes('8b')) return 'llama-3.1-8b-instant';
+  return m || 'llama-3.3-70b-specdec';
 }
 
 function sanitizeGeminiModel(model: string): string {

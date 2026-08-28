@@ -198,7 +198,7 @@ export async function POST(request: NextRequest) {
           let m = "gemini-2.5-flash";
           if (prov === "gemini") m = "gemini-2.5-flash";
           else if (prov === "openrouter") m = "google/gemini-2.0-flash-exp:free";
-          else if (prov === "groq") m = "llama-3.1-70b-versatile";
+          else if (prov === "groq") m = "llama-3.3-70b-specdec";
           else if (prov === "deepseek") m = "deepseek-chat";
           else if (prov === "openai") m = "gpt-4o-mini";
           configs.push({ provider: prov, apiKey: k, model: m });

@@ -66,7 +66,7 @@ export async function GET(request: NextRequest) {
         if (prov !== primaryProvider) {
           const k = getApiKeyForProvider(prov);
           if (k) {
-            const m = prov.startsWith('gemini') ? 'gemini-2.0-flash' : prov === 'groq' ? 'llama-3.1-70b-versatile' : 'gpt-4o-mini';
+            const m = prov.startsWith('gemini') ? 'gemini-2.0-flash' : prov === 'groq' ? 'llama-3.3-70b-specdec' : 'gpt-4o-mini';
             list.push({ provider: prov, apiKey: k, model: m });
           }
         }

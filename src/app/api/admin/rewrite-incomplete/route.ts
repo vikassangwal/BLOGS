@@ -94,7 +94,7 @@ export async function POST(request: NextRequest) {
       const k = (savedKeys[prov] || '').trim();
       if (k && k.length >= 10) {
         let m = 'gemini-2.5-flash';
-        if (prov === 'groq') m = 'llama-3.1-70b-versatile';
+        if (prov === 'groq') m = 'llama-3.3-70b-specdec';
         else if (prov === 'openai') m = 'gpt-4o-mini';
         else if (prov === 'deepseek') m = 'deepseek-chat';
         configs.push({ provider: prov, apiKey: k, model: m });

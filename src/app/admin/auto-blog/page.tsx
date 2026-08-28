@@ -111,73 +111,50 @@ export default function AutoBlogAdmin() {
 
   const triggerRun = async () => {
     setIsRunning(true);
-    setRunStatus('Initializing blog generation...');
-    let stage1Data: any = null;
+    setRunStatus("🚀 Auto-Blog चालू हो गया है! बैकग्राउंड में रिसर्च और राइटिंग प्रोसेस हो रही है...");
+    
     try {
-      // Step 1: Research
-      setRunStatus('Stage 1/3: Researching next topic and compiling news resources...');
-      const res1 = await fetch('/api/auto-blog?step=stage1', {
-        method: 'POST',
-        headers: { 'x-force-run': 'true' }
-      });
-      if (!res1.ok) {
-        const errText = await res1.text();
-        throw new Error(errText || 'Stage 1 Research HTTP Error');
-      }
-      stage1Data = await res1.json();
-      if (!stage1Data.success) {
-        throw new Error(stage1Data.error || 'Stage 1 Research failed');
-      }
+      // Trigger the background pipeline via cron endpoint with force flag
+      await fetch("/api/cron/auto-blog?secret=knowora-cron-2026&force=true", {
+        method: "GET",
+        headers: { "x-force-run": "true" }
+      }).catch(() => {});
+      
+      // Poll progress every 3 seconds for 45 seconds to update UI seamlessly
+      let attempts = 0;
+      const maxAttempts = 15;
+      
+      const pollInterval = setInterval(async () => {
+        attempts++;
+        try {
+          const debugRes = await fetch("/api/auto-blog?debug=true");
+          if (debugRes.ok) {
+            const data = await debugRes.json();
+            const latestLog = data?.logs?.[0];
+            if (latestLog) {
+              if (latestLog.status === "success") {
+                setRunStatus(`✅ ${latestLog.title || latestLog.keyword || "पोस्ट तैयार हो रही है..."}`);
+              } else if (latestLog.status === "failed") {
+                setRunStatus(`⚠️ स्थिति: ${latestLog.error?.slice(0, 80) || "पुनः प्रयास जारी..."}`);
+              }
+            }
+          }
+          fetchData();
+        } catch (e) {}
 
-      const { postId, keyword } = stage1Data;
+        if (attempts >= maxAttempts) {
+          clearInterval(pollInterval);
+          setIsRunning(false);
+          setRunStatus("✨ प्रक्रिया संपन्न! डेटा रीफ्रेश हो गया है।");
+          fetchData();
+          setTimeout(() => setRunStatus(""), 4000);
+        }
+      }, 3000);
 
-      // Step 2: Write Content
-      setRunStatus(`Stage 2/3: Drafting 1500-word Hindi HTML article for "${keyword}"...`);
-      const res2 = await fetch(`/api/auto-blog?step=stage2&postId=${postId}`, {
-        method: 'POST',
-        headers: { 'x-force-run': 'true' }
-      });
-      if (!res2.ok) {
-        const errText = await res2.text();
-        throw new Error(errText || 'Stage 2 Writing HTTP Error');
-      }
-      const stage2Data = await res2.json();
-      if (!stage2Data.success) {
-        throw new Error(stage2Data.error || 'Stage 2 Writing failed');
-      }
-
-      // Step 3: SEO, Clean & Publish
-      setRunStatus(`Stage 3/3: Generating SEO, featured image, and publishing...`);
-      const res3 = await fetch(`/api/auto-blog?step=stage3&postId=${postId}`, {
-        method: 'POST',
-        headers: { 'x-force-run': 'true' }
-      });
-      if (!res3.ok) {
-        const errText = await res3.text();
-        throw new Error(errText || 'Stage 3 Publishing HTTP Error');
-      }
-      const stage3Data = await res3.json();
-      if (!stage3Data.success) {
-        throw new Error(stage3Data.error || 'Stage 3 Publishing failed');
-      }
-
-      setRunStatus('');
-      alert(`🎉 Successfully published blog post: ${stage3Data.slug}`);
-      fetchData();
     } catch (error: any) {
-      setRunStatus('');
-      if (error?.message && error.message.includes('AI detected fake')) {
-        console.warn('Fake news skipped, trying next keyword...');
-        setTimeout(() => triggerRun(), 1000);
-      } else {
-        alert('Auto-blog failed: ' + (error?.message || error));
-      }
-    } finally {
-      // Only reset isRunning if we are NOT automatically retrying
-      if (!(stage1Data && stage1Data.error && stage1Data.error.includes('AI detected fake'))) {
-        setIsRunning(false);
-        setRunStatus('');
-      }
+      setIsRunning(false);
+      setRunStatus("");
+      fetchData();
     }
   };
 

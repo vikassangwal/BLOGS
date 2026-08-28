@@ -226,28 +226,32 @@ const PROVIDER_REGISTRY: Record<string, ProviderProfile> = {
 // AUTO-DETECT: Guess provider from API key pattern or model name
 // ---------------------------------------------------------------------------
 function autoDetectProvider(apiKey: string, model: string): string {
-  const key = apiKey.trim();
-  const mdl = model.toLowerCase().trim();
+  const key = (apiKey || "").trim();
+  const mdl = (model || "").toLowerCase().trim();
 
-  // Step 1: Match by API key pattern (most reliable)
+  // Step 1: Match by distinctive key prefixes
+  if (key.startsWith("AIza")) return "gemini";
+  if (key.startsWith("sk-or-")) return "openrouter";
+  if (key.startsWith("gsk_")) return "groq";
+  if (key.startsWith("sk-ant-")) return "anthropic";
+
+  // Step 2: Match by model name hints
+  if (mdl.includes("gemini")) return "gemini";
+  if (mdl.includes("claude")) return "anthropic";
+  if (mdl.includes("deepseek")) return "deepseek";
+
+  // Step 3: Match by registered regex patterns
   for (const [providerName, profile] of Object.entries(PROVIDER_REGISTRY)) {
     for (const pattern of profile.keyPatterns) {
       if (pattern.test(key)) return providerName;
     }
   }
 
-  // Step 2: Match by model name prefix
-  for (const [providerName, profile] of Object.entries(PROVIDER_REGISTRY)) {
-    for (const prefix of profile.models) {
-      if (mdl.startsWith(prefix.toLowerCase())) return providerName;
-    }
-  }
+  // Step 4: If model contains "/" it is OpenRouter format
+  if (mdl.includes("/")) return "openrouter";
 
-  // Step 3: If model contains '/' it's likely OpenRouter format
-  if (mdl.includes('/')) return 'openrouter';
-
-  // Step 4: Default fallback
-  return 'openai';
+  // Step 5: Default fallback (Gemini)
+  return "gemini";
 }
 
 // ---------------------------------------------------------------------------
@@ -445,8 +449,9 @@ export async function generateAIContent(
     const config = configs[i];
     
     // Pre-flight validation
-    if (!config.apiKey?.trim()) {
-      lastError = new Error(`API Key खाली है। कृपया Admin Panel > Settings में API Key डालें।`);
+    const rawKey = config.apiKey ? config.apiKey.trim() : "";
+    if (!rawKey || rawKey.startsWith("{") || rawKey.includes('"private_key"') || rawKey.includes('"type":')) {
+      console.warn(`[AI] Config ${i + 1}/${configs.length} for ${config.provider} has invalid/JSON key. Skipping...`);
       continue;
     }
 

@@ -138,6 +138,14 @@ export async function POST(request: NextRequest) {
     } catch(e) {}
 
     
+    function isValidAiKey(val: any): boolean {
+      if (!val || typeof val !== 'string') return false;
+      const trimmed = val.trim();
+      if (trimmed.length < 10) return false;
+      if (trimmed.startsWith('{') || trimmed.includes('"type":') || trimmed.includes('"private_key"')) return false;
+      return true;
+    }
+
     function getApiKeyForProvider(p: string): string {
       const pLower = (p || "").toLowerCase().trim();
       const possibleKeys = [
@@ -147,29 +155,32 @@ export async function POST(request: NextRequest) {
         `${pLower}Key`,
         `${pLower}_api_key`,
         `${pLower}_key`,
+        pLower === "gemini" ? "gemini" : "",
+        pLower === "gemini" ? "gemini2" : "",
+        pLower === "gemini" ? "gemini3" : "",
         pLower === "gemini" ? "google" : "",
         pLower === "gemini" ? "googleApiKey" : "",
+        pLower === "openrouter" ? "openrouter" : "",
         pLower === "openrouter" ? "openRouter" : "",
         pLower === "openrouter" ? "openRouterApiKey" : "",
+        pLower === "groq" ? "groq" : "",
+        pLower === "groq" ? "groqApiKey" : "",
+        pLower === "openai" ? "openai" : "",
+        pLower === "openai" ? "openaiApiKey" : "",
+        pLower === "deepseek" ? "deepseek" : "",
       ].filter(Boolean);
 
       for (const k of possibleKeys) {
         const val = (savedKeys[k] || "").trim();
-        if (val && val.length >= 10) return val;
+        if (isValidAiKey(val)) return val;
       }
 
-      // If specific key not found, fallback to any valid AI key in settings
-      const fallback = Object.keys(savedKeys).find(k => 
-        !k.includes("Provider") && !k.includes("Model") && !k.includes("Token") && !k.includes("Id") &&
-        !k.includes("telegram") && !k.includes("resend") && !k.includes("newsdata") && !k.includes("indexing") &&
-        savedKeys[k] && typeof savedKeys[k] === "string" && savedKeys[k].trim().length >= 10
-      );
-      return fallback ? String(savedKeys[fallback]).trim() : "";
+      return "";
     }
 
     function buildAgentConfigs(prefix: string, defaultProvider: string, defaultModel: string, defaultTokens: number): { configs: AIConfig[]; maxTokens: number } {
-      const primaryProvider = savedKeys[`${prefix}Provider`] || siteSettings?.aiProvider || defaultProvider;
-      const primaryModel = (savedKeys[`${prefix}Model`] || siteSettings?.aiModel || defaultModel).trim();
+      let primaryProvider = savedKeys[`${prefix}Provider`] || siteSettings?.aiProvider || defaultProvider;
+      let primaryModel = (savedKeys[`${prefix}Model`] || siteSettings?.aiModel || defaultModel).trim();
       const maxTokens = parseInt(savedKeys[`${prefix}Tokens`]) || defaultTokens;
 
       const configs: AIConfig[] = [];
@@ -178,27 +189,19 @@ export async function POST(request: NextRequest) {
         configs.push({ provider: primaryProvider, apiKey: key1, model: primaryModel });
       }
 
-      // Add ALL available backup keys in priority order: gemini, openrouter, groq, openai, deepseek
-      const fallbackProviders = ["gemini", "openrouter", "groq", "openai", "deepseek"];
+      // Add ALL available backup keys in priority order: gemini, openrouter, groq, deepseek, openai
+      const fallbackProviders = ["gemini", "openrouter", "groq", "deepseek", "openai"];
       for (const prov of fallbackProviders) {
-        if (prov === primaryProvider) continue;
+        if (prov === primaryProvider && key1) continue;
         const k = getApiKeyForProvider(prov);
-        if (k && k.length >= 10 && !configs.some(c => c.apiKey === k)) {
+        if (k && !configs.some(c => c.apiKey === k)) {
           let m = "gemini-2.5-flash";
           if (prov === "gemini") m = "gemini-2.5-flash";
           else if (prov === "openrouter") m = "google/gemini-2.0-flash-exp:free";
           else if (prov === "groq") m = "llama-3.1-70b-versatile";
-          else if (prov === "openai") m = "gpt-4o-mini";
           else if (prov === "deepseek") m = "deepseek-chat";
+          else if (prov === "openai") m = "gpt-4o-mini";
           configs.push({ provider: prov, apiKey: k, model: m });
-        }
-      }
-
-      // If still empty, try any available key
-      if (configs.length === 0) {
-        const anyKey = getApiKeyForProvider("gemini") || getApiKeyForProvider("openrouter");
-        if (anyKey) {
-          configs.push({ provider: "gemini", apiKey: anyKey, model: "gemini-2.5-flash" });
         }
       }
 

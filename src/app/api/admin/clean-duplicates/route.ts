@@ -5,22 +5,8 @@ import { revalidatePath } from 'next/cache';
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300;
 
-// Helper to normalize title for duplicate detection
-function normalizeTitle(title: string): string {
-  return title
-    .toLowerCase()
-    .replace(/[^a-z0-9\u0900-\u097F]+/g, ' ')
-    .replace(/\b(2025|2026|2027|2028)\b/g, '')
-    .replace(/\b(notification|online|form|bharti|recruitment|apply|updates|download|news|release)\b/g, '')
-    .replace(/(बंपर भर्ती|बंपर मौका|अभी अभी जारी|डायरेक्ट करें|यहाँ से करें|आवेदन|विज्ञप्ति|सूचना)/g, '')
-    .replace(/\s+/g, ' ')
-    .trim();
-}
-
-// Helper to sanitize clickbait phrases
-function sanitizeClickbait(text: string): string {
-  if (!text) return text;
-  return text
+function cleanString(str: string): string {
+  return (str || '')
     .replace(/बंपर भर्ती/g, 'भर्ती')
     .replace(/बंपर मौका/g, 'अवसर')
     .replace(/बंपर दाखिले का मौका/g, 'दाखिले का अवसर')
@@ -48,6 +34,49 @@ function sanitizeClickbait(text: string): string {
     .trim();
 }
 
+// Extract core topic key e.g. "ssc cgl", "rrb ntpc", "tanuvas ug", etc.
+function extractCoreKey(title: string, slug: string): string {
+  const t = (slug + ' ' + title).toLowerCase();
+  
+  const knownKeywords = [
+    'ssc-cgl', 'ssc cgl',
+    'rrb-ntpc', 'rrb ntpc',
+    'upsc-civil-services', 'upsc cse', 'upsc civil services',
+    'sbi-po', 'sbi po',
+    'ibps-po', 'ibps po',
+    'rpsc-ras', 'rpsc ras',
+    'upsssc-pet', 'upsssc pet',
+    'army-agniveer', 'army agniveer',
+    'cbse-board', 'cbse board',
+    'tanuvas-ug', 'tanuvas ug',
+    'hamirpur-college', 'hamirpur college',
+    'hazaribagh-chc', 'hazaribagh chc',
+    'iit-madras-ai', 'iit madras ai',
+    'realme-14-pro', 'realme 14 pro',
+    'samsung-galaxy-s26', 'samsung galaxy s26',
+    'epfo-higher-pension', 'epfo higher pension',
+    'up-police-constable', 'up police constable',
+    'du-ug-admission', 'du ug admission',
+    'iti-yamunanagar', 'iti yamunanagar',
+    'neki-ram-college', 'neki ram college',
+    'jnv-mandi', 'jnv mandi',
+    'jnv-kothipura', 'jnv kothipura',
+    'mandi-iti', 'mandi iti',
+    'bhiwani-iti', 'bhiwani iti',
+    'pspcl-je', 'pspcl je'
+  ];
+
+  for (const kw of knownKeywords) {
+    if (t.includes(kw)) {
+      return kw.replace(/-/g, ' ');
+    }
+  }
+
+  // Fallback: first 3 alphanumeric words of slug
+  const cleanSlug = slug.replace(/-\d+$/, '').replace(/[^a-z0-9]+/g, '-');
+  return cleanSlug.split('-').slice(0, 3).join(' ');
+}
+
 export async function GET(request: NextRequest) {
   try {
     const allPosts = await prisma.blogPost.findMany({
@@ -68,11 +97,10 @@ export async function GET(request: NextRequest) {
     const updatedIds: string[] = [];
     const thinDeletedIds: string[] = [];
 
-    // 1. Group by normalized title and base slug to find duplicates
+    // 1. Group by extracted core topic key
     const groups: Record<string, typeof allPosts> = {};
 
     for (const post of allPosts) {
-      // Check for thin content (< 150 words)
       const wordCount = post.content.replace(/<[^>]+>/g, ' ').trim().split(/\s+/).length;
       if (wordCount < 150) {
         await prisma.blogPost.delete({ where: { id: post.id } }).catch(() => {});
@@ -80,19 +108,15 @@ export async function GET(request: NextRequest) {
         continue;
       }
 
-      // Base slug without trailing random numbers (e.g. ssc-cgl-2026-notification-release-3352 -> ssc-cgl-2026-notification-release)
-      const baseSlug = post.slug.replace(/-\d{3,5}$/, '');
-      const normTitle = normalizeTitle(post.title);
-      const key = baseSlug.length > 5 ? `slug:${baseSlug}` : `title:${normTitle}`;
-
-      if (!groups[key]) groups[key] = [];
-      groups[key].push(post);
+      const coreKey = extractCoreKey(post.title, post.slug);
+      if (!groups[coreKey]) groups[coreKey] = [];
+      groups[coreKey].push(post);
     }
 
-    // 2. Process duplicate groups: Keep best, delete rest
+    // 2. Process duplicate groups: Keep best, delete extra copies
     for (const [key, group] of Object.entries(groups)) {
       if (group.length > 1) {
-        // Sort by content length (descending) and viewCount (descending)
+        // Sort by content length (descending) then viewCount (descending)
         group.sort((a, b) => {
           const lenA = a.content.length;
           const lenB = b.content.length;
@@ -100,7 +124,7 @@ export async function GET(request: NextRequest) {
           return b.viewCount - a.viewCount;
         });
 
-        // Keep group[0], delete group[1..n]
+        // Keep group[0], delete rest
         const duplicates = group.slice(1);
         for (const dup of duplicates) {
           await prisma.blogPost.delete({ where: { id: dup.id } }).catch(() => {});
@@ -109,7 +133,7 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // 3. Clean clickbait titles and content across all remaining posts
+    // 3. Clean clickbait phrases from all remaining posts
     const remainingPosts = await prisma.blogPost.findMany({
       select: {
         id: true,
@@ -121,13 +145,10 @@ export async function GET(request: NextRequest) {
     });
 
     for (const post of remainingPosts) {
-      const cleanTitle = sanitizeClickbait(post.title);
-      const cleanSeoTitle = post.seoTitle ? sanitizeClickbait(post.seoTitle) : cleanTitle;
-      const cleanExcerpt = post.excerpt ? sanitizeClickbait(post.excerpt) : null;
-      
-      // Also clean any h1/h2 tags inside content
-      let cleanContent = post.content;
-      cleanContent = sanitizeClickbait(cleanContent);
+      const cleanTitle = cleanString(post.title);
+      const cleanSeoTitle = post.seoTitle ? cleanString(post.seoTitle) : cleanTitle;
+      const cleanExcerpt = post.excerpt ? cleanString(post.excerpt) : null;
+      const cleanContent = cleanString(post.content);
 
       if (cleanTitle !== post.title || cleanSeoTitle !== post.seoTitle || cleanExcerpt !== post.excerpt || cleanContent !== post.content) {
         await prisma.blogPost.update({
@@ -157,6 +178,8 @@ export async function GET(request: NextRequest) {
       duplicatesDeleted: deletedIds.length,
       thinDeleted: thinDeletedIds.length,
       titlesSanitized: updatedIds.length,
+      deletedIds,
+      updatedTitlesCount: updatedIds.length
     });
   } catch (error: any) {
     console.error('Error cleaning duplicates:', error);

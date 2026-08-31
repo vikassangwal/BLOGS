@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
     if (text === '/start') {
       await sendTelegramMessage(
         chatId,
-        '👋 <b>नमस्ते! मैं Knowora AI Blog Publisher Bot हूँ।</b>\n\nमुझे कोई भी <b>वेबसाइट लिंक (URL)</b> या <b>सरकारी भर्ती / न्यूज़ का नाम</b> भेजें (जैसे: <i>SSC GD 2026</i> या <i>Railway NTPC</i>) — मैं तुरंत पूरा 2000+ शब्दों का ब्लॉग लिखकर <a href="https://www.knowora.in">Knowora.in</a> पर लाइव पब्लिश कर दूँगा!'
+        '👋 <b>नमस्ते! मैं Knowora AI (ChatGPT & Gemini) Blog Publisher Bot हूँ।</b>\n\nमुझे कोई भी <b>वेबसाइट लिंक (URL)</b> या <b>सरकारी भर्ती / न्यूज़ का नाम</b> भेजें (जैसे: <i>SSC GD 2026</i> या <i>Railway NTPC</i>) — मैं तुरंत पूरा 2000+ शब्दों का ब्लॉग लिखकर <a href="https://www.knowora.in">Knowora.in</a> पर लाइव पब्लिश कर दूँगा!'
       );
       return NextResponse.json({ ok: true });
     }
@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
     // Acknowledge receipt to user
     await sendTelegramMessage(
       chatId,
-      '⏳ <b>आपकी खबर मिल गई है!</b>\nGoogle Gemini 2.5 AI से 2000+ शब्दों का संपूर्ण हिंदी ब्लॉग, टेबल्स व फोटो तैयार की जा रही है... (कृपया 10-15 सेकंड प्रतीक्षा करें)'
+      '⏳ <b>आपकी खबर मिल गई है!</b>\nChatGPT / Gemini AI से 2000+ शब्दों का संपूर्ण हिंदी ब्लॉग, टेबल्स व असली सरकारी लिंक्स तैयार किए जा रहे हैं... (कृपया 10-15 सेकंड प्रतीक्षा करें)'
     );
 
     // 1. Check if input contains URL
@@ -98,17 +98,17 @@ export async function POST(request: NextRequest) {
     } catch (e) {}
 
     const aiConfigs: AIConfig[] = [];
+    const openaiKey = savedKeys['openai'] || (rawApiKey.startsWith('sk-') && !rawApiKey.startsWith('sk-or-') && !rawApiKey.startsWith('sk-ant-') ? rawApiKey : '');
     const geminiKey = savedKeys['gemini'] || (rawApiKey.startsWith('AIza') ? rawApiKey : '');
     const anthropicKey = savedKeys['anthropic'] || (rawApiKey.startsWith('sk-ant-') ? rawApiKey : '');
     const openrouterKey = savedKeys['openrouter'] || (rawApiKey.startsWith('sk-or-') ? rawApiKey : '');
     const groqKey = savedKeys['groq'] || (rawApiKey.startsWith('gsk_') ? rawApiKey : '');
-    const openaiKey = savedKeys['openai'] || (rawApiKey.startsWith('sk-') && !rawApiKey.startsWith('sk-or-') && !rawApiKey.startsWith('sk-ant-') ? rawApiKey : '');
 
+    if (openaiKey) aiConfigs.push({ provider: 'openai', apiKey: openaiKey, model: 'gpt-4o-mini' });
     if (geminiKey) aiConfigs.push({ provider: 'gemini', apiKey: geminiKey, model: 'gemini-2.5-flash' });
     if (openrouterKey) aiConfigs.push({ provider: 'openrouter', apiKey: openrouterKey, model: 'google/gemini-2.5-flash' });
     if (anthropicKey) aiConfigs.push({ provider: 'anthropic', apiKey: anthropicKey, model: 'claude-3-5-sonnet-20241022' });
     if (groqKey) aiConfigs.push({ provider: 'groq', apiKey: groqKey, model: 'llama-3.3-70b-specdec' });
-    if (openaiKey) aiConfigs.push({ provider: 'openai', apiKey: openaiKey, model: 'gpt-4o-mini' });
 
     const sysPrompt = `आप Knowora.in के चीफ एडिटर हैं। 
 

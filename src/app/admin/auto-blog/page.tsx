@@ -11,6 +11,34 @@ export default function AutoBlogAdmin() {
   const [isRunning, setIsRunning] = useState(false);
   const [isDigestRunning, setIsDigestRunning] = useState(false);
   const [runStatus, setRunStatus] = useState('');
+  const [inputUrl, setInputUrl] = useState('');
+  const [selectedAiProvider, setSelectedAiProvider] = useState('gemini');
+  const [isUrlGenerating, setIsUrlGenerating] = useState(false);
+  const [urlGenResult, setUrlGenResult] = useState<any>(null);
+
+  const handleUrlToBlog = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!inputUrl) return;
+    setIsUrlGenerating(true);
+    setUrlGenResult(null);
+    try {
+      const res = await fetch('/api/admin/url-to-blog', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: inputUrl, preferredProvider: selectedAiProvider })
+      });
+      const data = await res.json();
+      setUrlGenResult(data);
+      if (data.success) {
+        setInputUrl('');
+        fetchData();
+      }
+    } catch (err: any) {
+      setUrlGenResult({ success: false, error: err.message });
+    } finally {
+      setIsUrlGenerating(false);
+    }
+  };
 
   const [runnerState, setRunnerState] = useState({
     agent: 'updater', // 'updater' | 'editor'
@@ -230,6 +258,62 @@ export default function AutoBlogAdmin() {
           `}</style>
         </div>
       )}
+
+      
+      {/* 1-CLICK URL TO LIVE BLOG (GEMINI / CLAUDE / OPENROUTER) */}
+      <div style={{ background: 'linear-gradient(135deg, rgba(37, 99, 235, 0.1), rgba(147, 51, 234, 0.1))', border: '1px solid rgba(59, 130, 246, 0.3)', padding: '1.5rem', borderRadius: '16px', marginBottom: '2rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+          <div>
+            <h2 style={{ margin: 0, fontSize: '1.3rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              ⚡ 1-Click Link to Published Blog (AI Powered)
+            </h2>
+            <p style={{ margin: '0.3rem 0 0', fontSize: '0.85rem', color: 'var(--color-text-secondary)' }}>
+              किसी भी सरकारी भर्ती, न्यूज़ या वेबसाइट का लिंक डालें — Gemini या Claude खुद पूरा 2026 ब्लॉग लिखकर तुरंत पब्लिश कर देगा!
+            </p>
+          </div>
+          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+            <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>AI Engine:</span>
+            <select
+              value={selectedAiProvider}
+              onChange={(e) => setSelectedAiProvider(e.target.value)}
+              style={{ padding: '0.4rem 0.8rem', borderRadius: '8px', border: '1px solid var(--color-border)', background: 'var(--color-bg-secondary)', color: 'var(--color-text-primary)', fontWeight: 600, fontSize: '0.85rem' }}
+            >
+              <option value="gemini">✨ Google Gemini 2.5</option>
+              <option value="anthropic">🧠 Anthropic Claude 3.5</option>
+              <option value="openrouter">🌐 OpenRouter Universal</option>
+            </select>
+          </div>
+        </div>
+
+        <form onSubmit={handleUrlToBlog} style={{ display: 'flex', gap: '0.8rem', flexWrap: 'wrap' }}>
+          <input
+            type="url"
+            placeholder="यहाँ कोई भी URL (वेबसाइट लिंक) पेस्ट करें: https://..."
+            value={inputUrl}
+            onChange={(e) => setInputUrl(e.target.value)}
+            required
+            style={{ flex: 1, minWidth: '280px', padding: '0.8rem 1.2rem', borderRadius: '10px', border: '1px solid var(--color-border)', background: 'rgba(0,0,0,0.2)', color: 'var(--color-text-primary)', fontSize: '0.95rem' }}
+          />
+          <button
+            type="submit"
+            disabled={isUrlGenerating}
+            style={{ background: 'linear-gradient(135deg, #2563eb, #7c3aed)', color: '#fff', border: 'none', padding: '0.8rem 1.8rem', borderRadius: '10px', fontWeight: 700, cursor: isUrlGenerating ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', opacity: isUrlGenerating ? 0.7 : 1 }}
+          >
+            {isUrlGenerating ? 'Writing & Publishing...' : '🚀 Write & Publish Now'}
+          </button>
+        </form>
+
+        {urlGenResult && (
+          <div style={{ marginTop: '1rem', padding: '0.8rem 1.2rem', borderRadius: '10px', background: urlGenResult.success ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.15)', border: `1px solid ${urlGenResult.success ? '#10b981' : '#ef4444'}`, color: urlGenResult.success ? '#10b981' : '#ef4444', fontSize: '0.9rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
+            <span>{urlGenResult.message || urlGenResult.error}</span>
+            {urlGenResult.post && (
+              <a href={urlGenResult.post.url} target="_blank" rel="noopener noreferrer" style={{ color: '#fff', background: '#10b981', padding: '0.3rem 0.8rem', borderRadius: '6px', textDecoration: 'none', fontWeight: 600, fontSize: '0.85rem' }}>
+                👉 Live पोस्ट देखें
+              </a>
+            )}
+          </div>
+        )}
+      </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1.5rem', marginBottom: '2rem' }}>
         <div style={{ background: 'rgba(255, 255, 255, 0.05)', padding: '1.5rem', borderRadius: '16px', border: '1px solid var(--color-border)' }}>

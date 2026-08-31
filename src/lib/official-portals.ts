@@ -72,3 +72,29 @@ export function resolveOfficialUrl(text: string): string {
   }
   return 'https://knowora.in/blog';
 }
+
+export function detectGridBox(title: string, text: string): string {
+  const combined = (title + ' ' + text).toLowerCase();
+  if (combined.includes('admit card') || combined.includes('hall ticket') || combined.includes('एडमिट कार्ड') || combined.includes('प्रवेश पत्र') || combined.includes('city intimation')) {
+    return 'admitCard';
+  }
+  if (combined.includes('result') || combined.includes('रिजल्ट') || combined.includes('cut off') || combined.includes('कट ऑफ') || combined.includes('scorecard') || combined.includes('answer key') || combined.includes('उत्तर कुंजी')) {
+    return 'examResults';
+  }
+  if (combined.includes('scholarship') || combined.includes('छात्रवृत्ति') || combined.includes('nsp') || combined.includes('स्कॉलरशिप')) {
+    return 'scholarship';
+  }
+  if (combined.includes('yojana') || combined.includes('योजना') || combined.includes('kisan') || combined.includes('subsidy') || combined.includes('आवास') || combined.includes('ई-श्रम')) {
+    return 'scheme';
+  }
+  if (combined.includes('mobile') || combined.includes('smartphone') || combined.includes('5g') || combined.includes('phone') || combined.includes('camera') || combined.includes('tech') || combined.includes('स्मार्टफोन')) {
+    return 'tech';
+  }
+  if (combined.includes('bank') || combined.includes('fd interest') || combined.includes('pension') || combined.includes('पेंशन') || combined.includes('loan') || combined.includes('लोन') || combined.includes('finance')) {
+    return 'finance';
+  }
+  if (combined.includes('upcoming') || combined.includes('आगामी') || combined.includes('जल्द आएगी') || combined.includes('soon')) {
+    return 'upcomingJobs';
+  }
+  return 'latestJobs';
+}

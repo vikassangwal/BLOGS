@@ -1,3 +1,4 @@
+import { resolveOfficialUrl, detectGridBox } from '@/lib/official-portals';
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { generateAIContent, AIConfig } from '@/lib/ai';
@@ -72,12 +73,23 @@ export async function POST(request: NextRequest) {
       if (groqKey) aiConfigs.push({ provider: 'groq', apiKey: groqKey, model: 'llama-3.3-70b-specdec' });
       if (openaiKey) aiConfigs.push({ provider: 'openai', apiKey: openaiKey, model: 'gpt-4o-mini' });
 
-      const sysPrompt = `आप Knowora.in के मुख्य लेखक हैं। दिए गए वेबपेज से 100% संपूर्ण, उच्च-गुणवत्तापूर्ण, तथ्यात्मक और आकर्षक हिंदी ब्लॉग लिखें।
-नियम:
-1. वर्ष अनिवार्य रूप से 2026 होना चाहिए।
-2. कोई क्लिकबेट नहीं।
-3. <h2>, <table>, <ul>, <details> FAQ और निष्कर्ष (<h2 id="conclusion">Conclusion</h2>) शामिल होना अनिवार्य है।
-4. आउटपुट केवल शुद्ध JSON में दें।`;
+      const sysPrompt = `आप Knowora.in के चीफ एडिटर हैं। 
+
+⚠️ सबसे महत्वपूर्ण नियम (Strict Single Topic Rule):
+1. **एक ब्लॉग में केवल और केवल 1 ही भर्ती या 1 ही विषय पर लिखें।** कभी भी कई अलग-अलग भर्तियों (जैसे SSC, रेलवे, पुलिस) को एक ही आर्टिकल में खिचड़ी बनाकर न लिखें!
+2. अगर इनपुट में सिर्फ एक भर्ती है, तो शुरुआत से लेकर अंत तक सिर्फ उसी भर्ती के बारे में 2000+ शब्दों का गहन और संपूर्ण आर्टिकल लिखें।
+3. वर्ष 2026 होना अनिवार्य है।
+4. ग्रिड बॉक्स (gridBox) को विषय के अनुसार सही पहचानें:
+   - 'latestJobs' -> चालू भर्ती (Active Application)
+   - 'upcomingJobs' -> आगामी भर्ती
+   - 'admitCard' -> एडमिट कार्ड / हॉल टिकट / एग्जाम सिटी
+   - 'examResults' -> रिजल्ट / कट-ऑफ / आंसर की
+   - 'scheme' -> सरकारी योजना / सब्सिडी
+   - 'scholarship' -> छात्रवृत्ति
+   - 'tech' -> स्मार्टफोन / टेक न्यूज़
+   - 'finance' -> बैंकिंग / पेंशन / लोन / FD
+5. आर्टिकल में <h2>, विस्तृत <table>, <details> FAQ और निष्कर्ष (<h2 id="conclusion">Conclusion</h2>) शामिल होना अनिवार्य है।
+6. आउटपुट केवल शुद्ध JSON में दें।`;
 
       const userPrompt = `दिए गए संदर्भ से ब्लॉग पोस्ट तैयार करें:
 URL: ${url}
@@ -125,7 +137,7 @@ URL: ${url}
           featuredImage,
           status: 'Published',
           publishedAt: new Date(),
-          gridBox: postData.gridBox || 'latestJobs',
+          gridBox: postData.gridBox || detectGridBox(postData.title, postData.content),
           seoTitle: postData.seoTitle || postData.title,
           seoDescription: postData.seoDescription || postData.excerpt,
           seoKeywords: postData.seoKeywords || '',

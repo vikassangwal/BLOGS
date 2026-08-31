@@ -1,21 +1,157 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { generateAIContent, AIConfig } from '@/lib/ai';
 import { revalidatePath } from 'next/cache';
 
 export const dynamic = 'force-dynamic';
+export const maxDuration = 120;
 
 const SECRET_KEY = 'knowora-secret-2026';
+
+function cleanHtmlToText(html: string): string {
+  let text = html
+    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+    .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, '')
+    .replace(/<svg\b[^<]*(?:(?!<\/svg>)<[^<]*)*<\/svg>/gi, '')
+    .replace(/<nav\b[^<]*(?:(?!<\/nav>)<[^<]*)*<\/nav>/gi, '')
+    .replace(/<footer\b[^<]*(?:(?!<\/footer>)<[^<]*)*<\/footer>/gi, '')
+    .replace(/<header\b[^<]*(?:(?!<\/header>)<[^<]*)*<\/header>/gi, '');
+
+  text = text.replace(/<br\s*\/?>/gi, '\n').replace(/<\/p>/gi, '\n\n');
+  text = text.replace(/<[^>]+>/g, ' ');
+  return text.replace(/\s+/g, ' ').trim().slice(0, 15000);
+}
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { secret, title, content, excerpt, slug, gridBox, officialApplyUrl, jobStates, qualifications } = body;
+    const { secret, url, title, content, excerpt, slug, gridBox, officialApplyUrl, jobStates, qualifications } = body;
 
-    // Verify secret
+    // 1. Verify Secret Key
     if (secret !== SECRET_KEY) {
       return NextResponse.json({ error: 'Unauthorized: Invalid secret key' }, { status: 401 });
     }
 
+    // 2. MODE A: Automatic URL Processing (Make.com / Zapier / Telegram RSS)
+    if (url && (!title || !content)) {
+      let scrapedText = '';
+      try {
+        const resp = await fetch(url, {
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          }
+        });
+        if (resp.ok) {
+          const html = await resp.text();
+          scrapedText = cleanHtmlToText(html);
+        }
+      } catch (e) {}
+
+      if (!scrapedText || scrapedText.length < 50) {
+        scrapedText = `URL: ${url} (कृपया इस विषय पर 2026 आधारित संपूर्ण विस्तृत हिंदी ब्लॉग लिखें)`;
+      }
+
+      // Fetch AI keys
+      const settings = await prisma.siteSettings.findUnique({ where: { id: 'default' } });
+      let rawApiKey = settings?.aiApiKey || '';
+      let savedKeys: Record<string, string> = {};
+      try {
+        if (rawApiKey.startsWith('{')) savedKeys = JSON.parse(rawApiKey);
+      } catch (e) {}
+
+      const aiConfigs: AIConfig[] = [];
+      const geminiKey = savedKeys['gemini'] || (rawApiKey.startsWith('AIza') ? rawApiKey : '');
+      const anthropicKey = savedKeys['anthropic'] || (rawApiKey.startsWith('sk-ant-') ? rawApiKey : '');
+      const openrouterKey = savedKeys['openrouter'] || (rawApiKey.startsWith('sk-or-') ? rawApiKey : '');
+      const groqKey = savedKeys['groq'] || (rawApiKey.startsWith('gsk_') ? rawApiKey : '');
+      const openaiKey = savedKeys['openai'] || (rawApiKey.startsWith('sk-') && !rawApiKey.startsWith('sk-or-') && !rawApiKey.startsWith('sk-ant-') ? rawApiKey : '');
+
+      if (geminiKey) aiConfigs.push({ provider: 'gemini', apiKey: geminiKey, model: 'gemini-2.5-flash' });
+      if (openrouterKey) aiConfigs.push({ provider: 'openrouter', apiKey: openrouterKey, model: 'google/gemini-2.5-flash' });
+      if (anthropicKey) aiConfigs.push({ provider: 'anthropic', apiKey: anthropicKey, model: 'claude-3-5-sonnet-20241022' });
+      if (groqKey) aiConfigs.push({ provider: 'groq', apiKey: groqKey, model: 'llama-3.3-70b-specdec' });
+      if (openaiKey) aiConfigs.push({ provider: 'openai', apiKey: openaiKey, model: 'gpt-4o-mini' });
+
+      const sysPrompt = `आप Knowora.in के मुख्य लेखक हैं। दिए गए वेबपेज से 100% संपूर्ण, उच्च-गुणवत्तापूर्ण, तथ्यात्मक और आकर्षक हिंदी ब्लॉग लिखें।
+नियम:
+1. वर्ष अनिवार्य रूप से 2026 होना चाहिए।
+2. कोई क्लिकबेट नहीं।
+3. <h2>, <table>, <ul>, <details> FAQ और निष्कर्ष (<h2 id="conclusion">Conclusion</h2>) शामिल होना अनिवार्य है।
+4. आउटपुट केवल शुद्ध JSON में दें।`;
+
+      const userPrompt = `दिए गए संदर्भ से ब्लॉग पोस्ट तैयार करें:
+URL: ${url}
+डेटा: ${scrapedText.slice(0, 8000)}
+
+केवल इस JSON प्रारूप में उत्तर दें:
+{
+  "title": "आकर्षक, 2026 वर्ष युक्त पूर्ण हिंदी शीर्षक",
+  "slug": "unique-english-slug-2026",
+  "gridBox": "latestJobs" | "upcomingJobs" | "admitCard" | "examResults" | "scheme" | "scholarship" | "university" | "tech" | "finance" | "learning" | "news",
+  "excerpt": "2-3 पंक्तियों का आकर्षक हिंदी सारांश",
+  "seoTitle": "SEO Friendly Title (under 60 chars)",
+  "seoDescription": "Meta Description (under 160 chars)",
+  "seoKeywords": "Keyword 1, Keyword 2 2026",
+  "jobStates": ["All India"],
+  "qualifications": ["10th Pass"],
+  "officialApplyUrl": "${url}",
+  "content": "<h2>हेडिंग</h2><p>विवरण...</p><table>...</table><h2>Important Links</h2><table>...</table><h2>FAQ</h2><details><summary>...</summary><p>...</p></details><h2 id=\"conclusion\">Conclusion</h2><p>...</p>"
+}`;
+
+      const rawResponse = await generateAIContent(aiConfigs, sysPrompt, userPrompt, 8000, true);
+
+      let jsonStr = rawResponse.trim();
+      if (jsonStr.startsWith('```json')) {
+        jsonStr = jsonStr.replace(/^```json/, '').replace(/```$/, '').trim();
+      } else if (jsonStr.startsWith('```')) {
+        jsonStr = jsonStr.replace(/^```/, '').replace(/```$/, '').trim();
+      }
+
+      const postData = JSON.parse(jsonStr);
+
+      const imagePrompt = encodeURIComponent(`${postData.title.slice(0, 50)} India modern official high resolution`);
+      const featuredImage = `https://image.pollinations.ai/prompt/${imagePrompt}?width=1600&height=900&nologo=true`;
+
+      let baseSlug = (postData.slug || `post-${Date.now()}`).toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/-+/g, '-');
+      const existing = await prisma.blogPost.findUnique({ where: { slug: baseSlug } });
+      if (existing) baseSlug = `${baseSlug}-${Date.now().toString().slice(-4)}`;
+
+      const newPost = await prisma.blogPost.create({
+        data: {
+          title: postData.title,
+          slug: baseSlug,
+          content: postData.content,
+          excerpt: postData.excerpt,
+          featuredImage,
+          status: 'Published',
+          publishedAt: new Date(),
+          gridBox: postData.gridBox || 'latestJobs',
+          seoTitle: postData.seoTitle || postData.title,
+          seoDescription: postData.seoDescription || postData.excerpt,
+          seoKeywords: postData.seoKeywords || '',
+          jobStates: postData.jobStates || [],
+          qualifications: postData.qualifications || [],
+          officialApplyUrl: postData.officialApplyUrl || url,
+          autoGenerated: true,
+          allowAutoUpdate: false,
+        }
+      });
+
+      try {
+        revalidatePath('/', 'layout');
+        revalidatePath('/blog', 'layout');
+      } catch (e) {}
+
+      return NextResponse.json({
+        success: true,
+        message: 'Blog scraped, written by AI and published successfully!',
+        url: `https://knowora.in/blog/${newPost.slug}`,
+        id: newPost.id,
+        title: newPost.title
+      });
+    }
+
+    // 3. MODE B: Direct Content Submission (from ChatGPT / Claude Custom GPT)
     if (!title || !content) {
       return NextResponse.json({ error: 'Title and content are required' }, { status: 400 });
     }

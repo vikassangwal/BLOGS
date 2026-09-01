@@ -150,6 +150,54 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized: Invalid secret key' }, { status: 401 });
     }
 
+    // CLEANUP / DELETE DUPLICATES ACTION
+    if (body.action === 'cleanAll' || body.deleteSlugs) {
+      const slugsToDelete = body.deleteSlugs || [
+        '2026',
+        '31-2026',
+        '2026-3580',
+        'india-post-gds-recruitment-2026-10',
+        'ibps-clerk-recruitment-2026-crp-csa-xvi-31-2026-27',
+        'ibps-clerk-recruitment-2026-crp-csa-xvi-exam-dates-syllabus'
+      ];
+
+      const delResult = await prisma.blogPost.deleteMany({
+        where: { slug: { in: slugsToDelete } }
+      });
+
+      // Clean citation tags from all posts
+      const allPosts = await prisma.blogPost.findMany();
+      let cleaned = 0;
+      for (const p of allPosts) {
+        if (/citeturn\d+search\d+/i.test(p.content) || /turn\d+search\d+/i.test(p.content)) {
+          const newContent = cleanAndFormatContent(p.content);
+          await prisma.blogPost.update({
+            where: { id: p.id },
+            data: { content: newContent }
+          });
+          cleaned++;
+        }
+      }
+
+      try {
+        revalidatePath('/', 'layout');
+        revalidatePath('/blog', 'layout');
+      } catch (e) {}
+
+      const total = await prisma.blogPost.count({ where: { status: 'Published' } });
+
+      return NextResponse.json({
+        success: true,
+        message: `Deleted ${delResult.count} bad posts, cleaned ${cleaned} posts. Total active posts: ${total}`,
+        deletedCount: delResult.count,
+        cleanedCount: cleaned,
+        totalActivePosts: total
+      });
+    }
+
+      return NextResponse.json({ error: 'Unauthorized: Invalid secret key' }, { status: 401 });
+    }
+
     // 2. MODE A: Automatic URL Processing (Make.com / Zapier / Telegram RSS)
     if (url && (!title || !content)) {
       let scrapedText = '';

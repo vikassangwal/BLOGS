@@ -23,6 +23,123 @@ function cleanHtmlToText(html: string): string {
   return text.replace(/\s+/g, ' ').trim().slice(0, 15000);
 }
 
+
+function cleanAndFormatContent(raw: string): string {
+  if (!raw) return '';
+
+  // 1. Remove raw citation tags from ChatGPT search
+  let text = raw
+    .replace(/citeturn\d+search\d+/gi, '')
+    .replace(/turn\d+search\d+/gi, '')
+    .replace(/\[citation needed\]/gi, '')
+    .replace(/\[\d+\]/g, '');
+
+  // If already HTML with <h2> or <p>, just clean citations and return
+  if (text.includes('<h2>') || text.includes('<p>') || text.includes('<table>')) {
+    return text.trim();
+  }
+
+  // 2. Convert Markdown to clean HTML
+  const lines = text.split('\n');
+  let html = '';
+  let inTable = false;
+  let inList = false;
+  let tableHeaderDone = false;
+
+  for (let i = 0; i < lines.length; i++) {
+    let line = lines[i].trim();
+
+    if (!line) {
+      if (inList) {
+        html += '</ul>\n';
+        inList = false;
+      }
+      if (inTable) {
+        html += '</tbody></table>\n';
+        inTable = false;
+        tableHeaderDone = false;
+      }
+      continue;
+    }
+
+    // Markdown Headings
+    if (line.startsWith('### ')) {
+      if (inList) { html += '</ul>\n'; inList = false; }
+      if (inTable) { html += '</tbody></table>\n'; inTable = false; tableHeaderDone = false; }
+      html += `<h3>${line.replace(/^###\s+/, '')}</h3>\n`;
+      continue;
+    }
+    if (line.startsWith('## ')) {
+      if (inList) { html += '</ul>\n'; inList = false; }
+      if (inTable) { html += '</tbody></table>\n'; inTable = false; tableHeaderDone = false; }
+      html += `<h2>${line.replace(/^##\s+/, '')}</h2>\n`;
+      continue;
+    }
+    if (line.startsWith('# ')) {
+      if (inList) { html += '</ul>\n'; inList = false; }
+      if (inTable) { html += '</tbody></table>\n'; inTable = false; tableHeaderDone = false; }
+      html += `<h2>${line.replace(/^#\s+/, '')}</h2>\n`;
+      continue;
+    }
+
+    // Markdown Tables (| col | col |)
+    if (line.startsWith('|') && line.endsWith('|')) {
+      if (line.includes('---')) {
+        tableHeaderDone = true;
+        continue;
+      }
+      const cells = line.split('|').slice(1, -1).map(c => c.trim());
+      if (!inTable) {
+        inTable = true;
+        tableHeaderDone = false;
+        html += '<table><thead><tr>' + cells.map(c => `<th>${formatInline(c)}</th>`).join('') + '</tr></thead><tbody>\n';
+      } else {
+        html += '<tr>' + cells.map(c => `<td>${formatInline(c)}</td>`).join('') + '</tr>\n';
+      }
+      continue;
+    } else if (inTable) {
+      html += '</tbody></table>\n';
+      inTable = false;
+      tableHeaderDone = false;
+    }
+
+    // Lists (- or * or 1.)
+    if (line.startsWith('- ') || line.startsWith('* ')) {
+      if (!inList) {
+        inList = true;
+        html += '<ul>\n';
+      }
+      html += `<li>${formatInline(line.replace(/^[-*]\s+/, ''))}</li>\n`;
+      continue;
+    } else if (/^\d+\.\s+/.test(line)) {
+      if (!inList) {
+        inList = true;
+        html += '<ol>\n';
+      }
+      html += `<li>${formatInline(line.replace(/^\d+\.\s+/, ''))}</li>\n`;
+      continue;
+    } else if (inList) {
+      html += '</ul>\n';
+      inList = false;
+    }
+
+    // Regular Paragraph
+    html += `<p>${formatInline(line)}</p>\n`;
+  }
+
+  if (inList) html += '</ul>\n';
+  if (inTable) html += '</tbody></table>\n';
+
+  return html;
+}
+
+function formatInline(text: string): string {
+  return text
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.*?)\*/g, '<em>$1</em>')
+    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="nofollow">$1</a>');
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -179,7 +296,8 @@ URL: ${url}
     const imagePrompt = encodeURIComponent(`${title.slice(0, 50)} India modern official high resolution`);
     const featuredImage = `https://image.pollinations.ai/prompt/${imagePrompt}?width=1600&height=900&nologo=true`;
 
-    const resolved = resolveOfficialLinks(title, content);
+    const formattedContent = cleanAndFormatContent(content);
+    const resolved = resolveOfficialLinks(title, formattedContent);
     const post = await prisma.blogPost.create({
       data: {
         title,

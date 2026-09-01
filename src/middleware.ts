@@ -21,7 +21,7 @@ export async function middleware(request: NextRequest) {
       return response;
     }
 
-    const token = request.cookies.get('automata_auth_token')?.value;
+    const token = request.cookies.get('automata_auth_token')?.value || request.cookies.get('admin_token')?.value;
 
     if (!token) {
       return NextResponse.redirect(new URL('/admin/login', request.url));
@@ -35,6 +35,7 @@ export async function middleware(request: NextRequest) {
       // Token invalid or expired
       const redirectResponse = NextResponse.redirect(new URL('/admin/login', request.url));
       redirectResponse.cookies.delete('automata_auth_token');
+      redirectResponse.cookies.delete('admin_token');
       return redirectResponse;
     }
   }

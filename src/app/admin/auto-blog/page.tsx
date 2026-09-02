@@ -16,6 +16,43 @@ export default function AutoBlogAdmin() {
   const [isUrlGenerating, setIsUrlGenerating] = useState(false);
   const [urlGenResult, setUrlGenResult] = useState<any>(null);
 
+  
+  const [bulkTitles, setBulkTitles] = useState('');
+  const [isBulkPublishing, setIsBulkPublishing] = useState(false);
+  const [bulkResults, setBulkResults] = useState<any>(null);
+
+  const handleBulkPublish = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!bulkTitles.trim()) return;
+
+    const titleList = bulkTitles.split('\n').map(t => t.trim()).filter(t => t.length > 2);
+    if (titleList.length === 0) return;
+
+    setIsBulkPublishing(true);
+    setBulkResults(null);
+
+    try {
+      const res = await fetch('/api/admin/bulk-publish', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          titles: titleList,
+          preferredProvider: selectedAiProvider
+        })
+      });
+      const data = await res.json();
+      setBulkResults(data);
+      if (data.success) {
+        setBulkTitles('');
+        fetchData();
+      }
+    } catch (err: any) {
+      setBulkResults({ success: false, error: err.message });
+    } finally {
+      setIsBulkPublishing(false);
+    }
+  };
+
   const handleUrlToBlog = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!inputUrl) return;
@@ -260,6 +297,81 @@ export default function AutoBlogAdmin() {
       )}
 
       
+      
+      {/* 🚀 BULK MULTI-TOPIC AUTO-BLOG PUBLISHER (1 TO 20 BLOGS IN 1-CLICK) */}
+      <div style={{ background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(6, 182, 212, 0.1))', border: '1px solid rgba(16, 185, 129, 0.3)', padding: '1.5rem', borderRadius: '16px', marginBottom: '2rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+          <div>
+            <h2 style={{ margin: 0, fontSize: '1.3rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#10b981' }}>
+              📚 Bulk Multi-Topic Auto-Blog Generator (1 से 20 ब्लॉग्स 1-क्लिक में)
+            </h2>
+            <p style={{ margin: '0.3rem 0 0', fontSize: '0.85rem', color: 'var(--color-text-secondary)' }}>
+              यहाँ एक साथ 1 से 20 टाइटल्स (एक लाइन में एक टाइटल) पेस्ट करें — AI खुद सबके लिए अलग-अलग 2000+ शब्दों के संपूर्ण ब्लॉग्स लिखकर पब्लिश कर देगा!
+            </p>
+          </div>
+        </div>
+
+        <form onSubmit={handleBulkPublish} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <textarea
+            rows={5}
+            placeholder={`यहाँ टाइटल्स पेस्ट करें (एक लाइन में एक):
+SSC CGL 2026 भर्ती
+Railway NTPC 2026 Notification
+UP Police SI 2026 Syllabus
+PM Kisan 19th Installment 2026
+Redmi Note 15 Pro Plus 5G`}
+            value={bulkTitles}
+            onChange={(e) => setBulkTitles(e.target.value)}
+            required
+            style={{ width: '100%', padding: '1rem', borderRadius: '10px', border: '1px solid var(--color-border)', background: 'rgba(0,0,0,0.25)', color: 'var(--color-text-primary)', fontSize: '0.95rem', fontFamily: 'inherit', resize: 'vertical' }}
+          />
+
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+            <span style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)' }}>
+              💡 कुल टाइटल्स: {bulkTitles.split('\n').filter(t => t.trim().length > 2).length}
+            </span>
+            <button
+              type="submit"
+              disabled={isBulkPublishing || !bulkTitles.trim()}
+              style={{ background: 'linear-gradient(135deg, #10b981, #059669)', color: '#fff', border: 'none', padding: '0.8rem 2rem', borderRadius: '10px', fontWeight: 700, cursor: (isBulkPublishing || !bulkTitles.trim()) ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', opacity: (isBulkPublishing || !bulkTitles.trim()) ? 0.7 : 1 }}
+            >
+              {isBulkPublishing ? (
+                <>
+                  <div style={{ width: '16px', height: '16px', border: '2px solid #fff', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
+                  AI लिख रहा है और पब्लिश कर रहा है...
+                </>
+              ) : (
+                '🚀 सभी टाइटल्स पर अलग-अलग ब्लॉग्स पब्लिश करें'
+              )}
+            </button>
+          </div>
+        </form>
+
+        {bulkResults && (
+          <div style={{ marginTop: '1.2rem', padding: '1rem', borderRadius: '10px', background: bulkResults.success ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.15)', border: bulkResults.success ? '1px solid rgba(16, 185, 129, 0.3)' : '1px solid rgba(239, 68, 68, 0.3)' }}>
+            <p style={{ margin: 0, fontWeight: 700, color: bulkResults.success ? '#34d399' : '#f87171' }}>
+              {bulkResults.success ? `🎉 ${bulkResults.message}` : `❌ एरर: ${bulkResults.error}`}
+            </p>
+            {bulkResults.results && bulkResults.results.length > 0 && (
+              <div style={{ marginTop: '0.8rem', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                {bulkResults.results.map((r: any, idx: number) => (
+                  <div key={idx} style={{ fontSize: '0.85rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.3rem 0.6rem', background: 'rgba(0,0,0,0.2)', borderRadius: '6px' }}>
+                    <span>{idx + 1}. {r.title}</span>
+                    {r.success ? (
+                      <a href={r.url} target="_blank" rel="noopener noreferrer" style={{ color: '#60a5fa', fontWeight: 600, textDecoration: 'underline' }}>
+                        लाइव देखें ↗
+                      </a>
+                    ) : (
+                      <span style={{ color: '#f87171' }}>{r.error}</span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
       {/* 1-CLICK URL TO LIVE BLOG (GEMINI / CLAUDE / OPENROUTER) */}
       <div style={{ background: 'linear-gradient(135deg, rgba(37, 99, 235, 0.1), rgba(147, 51, 234, 0.1))', border: '1px solid rgba(59, 130, 246, 0.3)', padding: '1.5rem', borderRadius: '16px', marginBottom: '2rem' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>

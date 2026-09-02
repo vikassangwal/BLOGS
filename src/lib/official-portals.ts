@@ -230,26 +230,42 @@ export function resolveOfficialLinks(title: string, rawContent: string): { offic
 
 export function detectGridBox(title: string, text: string): string {
   const combined = (title + ' ' + text).toLowerCase();
-  if (combined.includes('admit card') || combined.includes('hall ticket') || combined.includes('एडमिट कार्ड') || combined.includes('प्रवेश पत्र') || combined.includes('city intimation')) {
+
+  // 1. Admit Card & City Intimation
+  if (combined.includes('admit card') || combined.includes('hall ticket') || combined.includes('एडमिट कार्ड') || combined.includes('प्रवेश पत्र') || combined.includes('city intimation') || combined.includes('call letter')) {
     return 'admitCard';
   }
-  if (combined.includes('result') || combined.includes('रिजल्ट') || combined.includes('cut off') || combined.includes('कट ऑफ') || combined.includes('scorecard') || combined.includes('answer key') || combined.includes('उत्तर कुंजी')) {
+
+  // 2. Exam Results, Answer Keys, Cut Off
+  if (combined.includes('result') || combined.includes('रिजल्ट') || combined.includes('cut off') || combined.includes('कट ऑफ') || combined.includes('scorecard') || combined.includes('answer key') || combined.includes('उत्तर कुंजी') || combined.includes('merit list') || combined.includes('मेरिट')) {
     return 'examResults';
   }
-  if (combined.includes('scholarship') || combined.includes('छात्रवृत्ति') || combined.includes('nsp') || combined.includes('स्कॉलरशिप')) {
+
+  // 3. Scholarship & Education (Admissions, CUET, NEET, Board Exams)
+  if (combined.includes('scholarship') || combined.includes('छात्रवृत्ति') || combined.includes('nsp') || combined.includes('स्कॉलरशिप') || combined.includes('admission') || combined.includes('cuet') || combined.includes('neet') || combined.includes('jee main') || combined.includes('board exam') || combined.includes('cbse') || combined.includes('कॉलेज एडमिशन')) {
     return 'scholarship';
   }
-  if (combined.includes('yojana') || combined.includes('योजना') || combined.includes('kisan') || combined.includes('subsidy') || combined.includes('आवास') || combined.includes('ई-श्रम')) {
+
+  // 4. Government Schemes & Welfare (Yojanas)
+  if (combined.includes('yojana') || combined.includes('योजना') || combined.includes('kisan') || combined.includes('subsidy') || combined.includes('आवास') || combined.includes('ई-श्रम') || combined.includes('ladli') || combined.includes('ration card') || combined.includes('राशन') || combined.includes('ayushman') || combined.includes('pm-kisan')) {
     return 'scheme';
   }
-  if (combined.includes('mobile') || combined.includes('smartphone') || combined.includes('5g') || combined.includes('phone') || combined.includes('camera') || combined.includes('tech') || combined.includes('स्मार्टफोन')) {
+
+  // 5. Technology, AI, Gadgets & 5G
+  if (combined.includes('mobile') || combined.includes('smartphone') || combined.includes('5g') || combined.includes('phone') || combined.includes('camera') || combined.includes('tech') || combined.includes('स्मार्टफोन') || combined.includes('ai tool') || combined.includes('artificial intelligence') || combined.includes('chatgpt') || combined.includes('gemini') || combined.includes('apple') || combined.includes('samsung') || combined.includes('redmi') || combined.includes('realme') || combined.includes('xiaomi')) {
     return 'tech';
   }
-  if (combined.includes('bank') || combined.includes('fd interest') || combined.includes('pension') || combined.includes('पेंशन') || combined.includes('loan') || combined.includes('लोन') || combined.includes('finance')) {
+
+  // 6. Finance, Banking, Loans, Tax & FD Rates
+  if (combined.includes('bank') || combined.includes('fd interest') || combined.includes('pension') || combined.includes('पेंशन') || combined.includes('loan') || combined.includes('लोन') || combined.includes('finance') || combined.includes('rbi') || combined.includes('fixed deposit') || combined.includes('credit card') || combined.includes('income tax') || combined.includes('mutual fund') || combined.includes('share market') || combined.includes('ईपीएफओ') || combined.includes('epfo')) {
     return 'finance';
   }
-  if (combined.includes('upcoming') || combined.includes('आगामी') || combined.includes('जल्द आएगी') || combined.includes('soon')) {
+
+  // 7. Upcoming Jobs
+  if (combined.includes('upcoming') || combined.includes('आगामी') || combined.includes('जल्द आएगी') || combined.includes('soon') || combined.includes('expected vacancy')) {
     return 'upcomingJobs';
   }
+
+  // 8. Default: Latest Jobs & Career Recruitment
   return 'latestJobs';
 }

@@ -128,10 +128,18 @@ function cleanAndFormatContent(raw: string): string {
 }
 
 function formatInline(text: string): string {
-  return text
+  let res = text
     .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
     .replace(/\*(.*?)\*/g, '<em>$1</em>')
-    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="nofollow">$1</a>');
+    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="nofollow" class="text-blue-500 font-bold underline hover:text-blue-400">$1</a>');
+
+  // Convert raw URLs not already in markdown
+  res = res.replace(/(?<!href=["'])(https?:\/\/[a-zA-Z0-9.-]+(?:\/[^\s<>"'()]*)?)/gi, (match) => {
+    if (match.startsWith('<a')) return match;
+    return `<a href="${match}" target="_blank" rel="nofollow" class="text-blue-500 font-bold underline hover:text-blue-400">${match}</a>`;
+  });
+
+  return res;
 }
 
 export async function POST(request: NextRequest) {

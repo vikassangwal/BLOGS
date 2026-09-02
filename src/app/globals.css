@@ -448,3 +448,37 @@ footer a {
     gap: 1rem !important;
   }
 }
+
+/* Enhanced Clickable Links for Blog Content */
+.blog-content a {
+  color: #3b82f6 !important;
+  text-decoration: underline !important;
+  text-underline-offset: 4px !important;
+  font-weight: 700 !important;
+  cursor: pointer !important;
+  pointer-events: auto !important;
+  display: inline !important;
+  transition: all 0.2s ease-in-out !important;
+}
+
+.blog-content a:hover {
+  color: #60a5fa !important;
+  text-decoration-color: #60a5fa !important;
+}
+
+.blog-content table a {
+  display: inline-flex !important;
+  align-items: center !important;
+  background: rgba(59, 130, 246, 0.15) !important;
+  color: #60a5fa !important;
+  padding: 4px 12px !important;
+  border-radius: 6px !important;
+  border: 1px solid rgba(59, 130, 246, 0.3) !important;
+  text-decoration: none !important;
+  font-size: 0.9rem !important;
+}
+
+.blog-content table a:hover {
+  background: rgba(59, 130, 246, 0.3) !important;
+  color: #ffffff !important;
+}

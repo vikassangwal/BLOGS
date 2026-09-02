@@ -212,10 +212,13 @@ export function resolveOfficialLinks(title: string, rawContent: string): { offic
     }
   }
 
-  // Replace fake / placeholder links in content with real verified links
+  // 1. Replace fake / placeholder links
   let sanitized = rawContent
     .replace(/href=["'](https?:\/\/)?(www\.)?(example\.com|placeholder\.com|#)[^"']*["']/gi, `href="${target.apply}" target="_blank" rel="nofollow"`)
     .replace(/href=["']#["']/gi, `href="${target.official}" target="_blank" rel="nofollow"`);
+
+  // 2. Autolink any raw plaintext URLs like https://... or http://... that are not inside an href
+  sanitized = sanitized.replace(/(?<!href=["']|src=["']|>)(https?:\/\/[a-zA-Z0-9.-]+(?:\/[^\s<>"'()]*)?)/gi, '<a href="$1" target="_blank" rel="nofollow" class="text-blue-500 font-bold underline hover:text-blue-400">$1</a>');
 
   return {
     official: target.official,

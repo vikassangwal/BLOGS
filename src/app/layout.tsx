@@ -83,7 +83,12 @@ export default async function RootLayout({
     <html lang="en">
       <head>
         <link rel="manifest" href="/manifest.json" />
-        <meta name="google-adsense-account" content="ca-pub-2689010221295201" />
+                <meta name="google-adsense-account" content="ca-pub-2689010221295201" />
+        <script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2689010221295201"
+          crossOrigin="anonymous"
+        />
       
         {/* Generative Engine Optimization (GEO) & Brand Schema for Google / ChatGPT / Perplexity */}
         <script

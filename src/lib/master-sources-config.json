@@ -133,5 +133,812 @@
     "source_url_must_be_official_when_available": true,
     "one_article_per_event": true
   },
-  "source_count": 315
+  "source_count": 315,
+  "sources": [
+    {
+      "id": 1,
+      "name": "pib.gov.in",
+      "url": "https://pib.gov.in",
+      "category": "News/Press Release",
+      "priority": "High",
+      "check_frequency": "1 hour"
+    },
+    {
+      "id": 2,
+      "name": "rbi.org.in",
+      "url": "https://rbi.org.in",
+      "category": "Finance/Regulatory",
+      "priority": "High",
+      "check_frequency": "1 hour"
+    },
+    {
+      "id": 3,
+      "name": "education.gov.in",
+      "url": "https://education.gov.in",
+      "category": "Education/Exam",
+      "priority": "High",
+      "check_frequency": "1 hour"
+    },
+    {
+      "id": 4,
+      "name": "cbse.gov.in",
+      "url": "https://cbse.gov.in",
+      "category": "Education/Exam",
+      "priority": "High",
+      "check_frequency": "1 hour"
+    },
+    {
+      "id": 5,
+      "name": "ncert.nic.in",
+      "url": "https://ncert.nic.in",
+      "category": "Education/Exam",
+      "priority": "High",
+      "check_frequency": "1 hour"
+    },
+    {
+      "id": 6,
+      "name": "ugc.gov.in",
+      "url": "https://ugc.gov.in",
+      "category": "Education/Exam",
+      "priority": "High",
+      "check_frequency": "1 hour"
+    },
+    {
+      "id": 7,
+      "name": "aicte-india.org",
+      "url": "https://aicte-india.org",
+      "category": "Education/Exam",
+      "priority": "High",
+      "check_frequency": "1 hour"
+    },
+    {
+      "id": 8,
+      "name": "nta.ac.in",
+      "url": "https://nta.ac.in",
+      "category": "Education/Exam",
+      "priority": "High",
+      "check_frequency": "1 hour"
+    },
+    {
+      "id": 9,
+      "name": "rajeduboard.rajasthan.gov.in",
+      "url": "https://rajeduboard.rajasthan.gov.in",
+      "category": "Education/Exam",
+      "priority": "High",
+      "check_frequency": "1 hour"
+    },
+    {
+      "id": 10,
+      "name": "nios.ac.in",
+      "url": "https://nios.ac.in",
+      "category": "Education/Exam",
+      "priority": "High",
+      "check_frequency": "1 hour"
+    },
+    {
+      "id": 11,
+      "name": "ignou.ac.in",
+      "url": "https://ignou.ac.in",
+      "category": "Education/Exam",
+      "priority": "High",
+      "check_frequency": "1 hour"
+    },
+    {
+      "id": 12,
+      "name": "employmentnews.gov.in",
+      "url": "https://employmentnews.gov.in",
+      "category": "Government/Official",
+      "priority": "High",
+      "check_frequency": "1 hour"
+    },
+    {
+      "id": 13,
+      "name": "ncs.gov.in",
+      "url": "https://www.ncs.gov.in",
+      "category": "Government/Official",
+      "priority": "High",
+      "check_frequency": "1 hour"
+    },
+    {
+      "id": 14,
+      "name": "upsc.gov.in",
+      "url": "https://upsc.gov.in",
+      "category": "Recruitment/Exam",
+      "priority": "High",
+      "check_frequency": "1 hour"
+    },
+    {
+      "id": 15,
+      "name": "ssc.gov.in",
+      "url": "https://ssc.gov.in",
+      "category": "Recruitment/Exam",
+      "priority": "High",
+      "check_frequency": "1 hour"
+    },
+    {
+      "id": 16,
+      "name": "indianrailways.gov.in",
+      "url": "https://indianrailways.gov.in",
+      "category": "Government/Official",
+      "priority": "High",
+      "check_frequency": "1 hour"
+    },
+    {
+      "id": 17,
+      "name": "rsmssb.rajasthan.gov.in",
+      "url": "https://rsmssb.rajasthan.gov.in",
+      "category": "Recruitment/Exam",
+      "priority": "High",
+      "check_frequency": "1 hour"
+    },
+    {
+      "id": 18,
+      "name": "rpsc.rajasthan.gov.in",
+      "url": "https://rpsc.rajasthan.gov.in",
+      "category": "Recruitment/Exam",
+      "priority": "High",
+      "check_frequency": "1 hour"
+    },
+    {
+      "id": 19,
+      "name": "sso.rajasthan.gov.in",
+      "url": "https://sso.rajasthan.gov.in",
+      "category": "Government/Official",
+      "priority": "High",
+      "check_frequency": "1 hour"
+    },
+    {
+      "id": 20,
+      "name": "egazette.gov.in",
+      "url": "https://egazette.gov.in",
+      "category": "Government/Official",
+      "priority": "High",
+      "check_frequency": "1 hour"
+    },
+    {
+      "id": 21,
+      "name": "egazette.rajasthan.gov.in",
+      "url": "https://egazette.rajasthan.gov.in",
+      "category": "Government/Official",
+      "priority": "High",
+      "check_frequency": "1 hour"
+    },
+    {
+      "id": 22,
+      "name": "dipr.rajasthan.gov.in",
+      "url": "https://dipr.rajasthan.gov.in",
+      "category": "News/Press Release",
+      "priority": "High",
+      "check_frequency": "1 hour"
+    },
+    {
+      "id": 23,
+      "name": "information.up.gov.in",
+      "url": "https://information.up.gov.in",
+      "category": "News/Press Release",
+      "priority": "High",
+      "check_frequency": "1 hour"
+    },
+    {
+      "id": 24,
+      "name": "mpinfo.org",
+      "url": "https://mpinfo.org",
+      "category": "News/Press Release",
+      "priority": "High",
+      "check_frequency": "1 hour"
+    },
+    {
+      "id": 25,
+      "name": "sewayojan.up.nic.in",
+      "url": "https://sewayojan.up.nic.in",
+      "category": "Government/Official",
+      "priority": "High",
+      "check_frequency": "1 hour"
+    },
+    {
+      "id": 26,
+      "name": "mprojgar.gov.in",
+      "url": "https://mprojgar.gov.in",
+      "category": "Government/Official",
+      "priority": "High",
+      "check_frequency": "1 hour"
+    },
+    {
+      "id": 27,
+      "name": "employment.livelihoods.rajasthan.gov.in",
+      "url": "https://employment.livelihoods.rajasthan.gov.in",
+      "category": "Government/Official",
+      "priority": "High",
+      "check_frequency": "1 hour"
+    },
+    {
+      "id": 28,
+      "name": "hkrnl.itiharyana.gov.in",
+      "url": "https://hkrnl.itiharyana.gov.in",
+      "category": "Government/Official",
+      "priority": "High",
+      "check_frequency": "1 hour"
+    },
+    {
+      "id": 29,
+      "name": "anubandham.gujarat.gov.in",
+      "url": "https://anubandham.gujarat.gov.in",
+      "category": "Government/Official",
+      "priority": "High",
+      "check_frequency": "1 hour"
+    },
+    {
+      "id": 30,
+      "name": "rojgar.mahaswayam.gov.in",
+      "url": "https://rojgar.mahaswayam.gov.in",
+      "category": "Education/Exam",
+      "priority": "High",
+      "check_frequency": "1 hour"
+    },
+    {
+      "id": 31,
+      "name": "jobs.delhi.gov.in",
+      "url": "https://jobs.delhi.gov.in",
+      "category": "Government/Official",
+      "priority": "High",
+      "check_frequency": "1 hour"
+    },
+    {
+      "id": 32,
+      "name": "uppsc.up.nic.in",
+      "url": "https://uppsc.up.nic.in",
+      "category": "Recruitment/Exam",
+      "priority": "High",
+      "check_frequency": "1 hour"
+    },
+    {
+      "id": 33,
+      "name": "bpsc.bih.nic.in",
+      "url": "https://bpsc.bih.nic.in",
+      "category": "Recruitment/Exam",
+      "priority": "High",
+      "check_frequency": "1 hour"
+    },
+    {
+      "id": 34,
+      "name": "mppsc.mp.gov.in",
+      "url": "https://mppsc.mp.gov.in",
+      "category": "Recruitment/Exam",
+      "priority": "High",
+      "check_frequency": "1 hour"
+    },
+    {
+      "id": 35,
+      "name": "hpsc.gov.in",
+      "url": "https://hpsc.gov.in",
+      "category": "Recruitment/Exam",
+      "priority": "High",
+      "check_frequency": "1 hour"
+    },
+    {
+      "id": 36,
+      "name": "upsssc.gov.in",
+      "url": "https://upsssc.gov.in",
+      "category": "Recruitment/Exam",
+      "priority": "High",
+      "check_frequency": "1 hour"
+    },
+    {
+      "id": 37,
+      "name": "hssc.gov.in",
+      "url": "https://hssc.gov.in",
+      "category": "Recruitment/Exam",
+      "priority": "High",
+      "check_frequency": "1 hour"
+    },
+    {
+      "id": 38,
+      "name": "sssc.uk.gov.in",
+      "url": "https://sssc.uk.gov.in",
+      "category": "Recruitment/Exam",
+      "priority": "High",
+      "check_frequency": "1 hour"
+    },
+    {
+      "id": 39,
+      "name": "bssc.bihar.gov.in",
+      "url": "https://bssc.bihar.gov.in",
+      "category": "Recruitment/Exam",
+      "priority": "High",
+      "check_frequency": "1 hour"
+    },
+    {
+      "id": 40,
+      "name": "linkedin.com",
+      "url": "https://www.linkedin.com/jobs",
+      "category": "Private/Industry/Education",
+      "priority": "Medium",
+      "check_frequency": "1 hour"
+    },
+    {
+      "id": 41,
+      "name": "hirist.tech",
+      "url": "https://www.hirist.tech",
+      "category": "Private/Industry/Education",
+      "priority": "Medium",
+      "check_frequency": "1 hour"
+    },
+    {
+      "id": 42,
+      "name": "naukri.com",
+      "url": "https://www.naukri.com",
+      "category": "Private/Industry/Education",
+      "priority": "Medium",
+      "check_frequency": "1 hour"
+    },
+    {
+      "id": 43,
+      "name": "in.indeed.com",
+      "url": "https://in.indeed.com",
+      "category": "Private/Industry/Education",
+      "priority": "Medium",
+      "check_frequency": "1 hour"
+    },
+    {
+      "id": 44,
+      "name": "wellfound.com",
+      "url": "https://wellfound.com",
+      "category": "Private/Industry/Education",
+      "priority": "Medium",
+      "check_frequency": "1 hour"
+    },
+    {
+      "id": 45,
+      "name": "cutshort.io",
+      "url": "https://cutshort.io",
+      "category": "Private/Industry/Education",
+      "priority": "Medium",
+      "check_frequency": "1 hour"
+    },
+    {
+      "id": 46,
+      "name": "swayam.gov.in",
+      "url": "https://swayam.gov.in",
+      "category": "Education/Exam",
+      "priority": "High",
+      "check_frequency": "1 hour"
+    },
+    {
+      "id": 47,
+      "name": "nptel.ac.in",
+      "url": "https://nptel.ac.in",
+      "category": "Education/Exam",
+      "priority": "High",
+      "check_frequency": "1 hour"
+    },
+    {
+      "id": 48,
+      "name": "skillindiadigital.gov.in",
+      "url": "https://www.skillindiadigital.gov.in",
+      "category": "Education/Exam",
+      "priority": "High",
+      "check_frequency": "1 hour"
+    },
+    {
+      "id": 49,
+      "name": "freecodecamp.org",
+      "url": "https://www.freecodecamp.org",
+      "category": "Private/Industry/Education",
+      "priority": "Medium",
+      "check_frequency": "1 hour"
+    },
+    {
+      "id": 50,
+      "name": "coursera.org",
+      "url": "https://www.coursera.org",
+      "category": "Private/Industry/Education",
+      "priority": "Medium",
+      "check_frequency": "1 hour"
+    },
+    {
+      "id": 51,
+      "name": "edx.org",
+      "url": "https://www.edx.org",
+      "category": "Private/Industry/Education",
+      "priority": "Medium",
+      "check_frequency": "1 hour"
+    },
+    {
+      "id": 52,
+      "name": "sebi.gov.in",
+      "url": "https://www.sebi.gov.in",
+      "category": "Finance/Regulatory",
+      "priority": "High",
+      "check_frequency": "1 hour"
+    },
+    {
+      "id": 53,
+      "name": "nseindia.com",
+      "url": "https://www.nseindia.com",
+      "category": "Finance/Regulatory",
+      "priority": "High",
+      "check_frequency": "1 hour"
+    },
+    {
+      "id": 54,
+      "name": "bseindia.com",
+      "url": "https://www.bseindia.com",
+      "category": "Finance/Regulatory",
+      "priority": "High",
+      "check_frequency": "1 hour"
+    },
+    {
+      "id": 55,
+      "name": "meity.gov.in",
+      "url": "https://www.meity.gov.in",
+      "category": "Government/Institution",
+      "priority": "High",
+      "check_frequency": "1 hour"
+    },
+    {
+      "id": 56,
+      "name": "cdac.in",
+      "url": "https://www.cdac.in",
+      "category": "Government/Institution",
+      "priority": "High",
+      "check_frequency": "1 hour"
+    },
+    {
+      "id": 57,
+      "name": "nasscom.in",
+      "url": "https://nasscom.in",
+      "category": "Private/Industry/Education",
+      "priority": "Medium",
+      "check_frequency": "1 hour"
+    },
+    {
+      "id": 58,
+      "name": "isro.gov.in",
+      "url": "https://www.isro.gov.in/Careers.html",
+      "category": "Government/Institution",
+      "priority": "High",
+      "check_frequency": "1 hour"
+    },
+    {
+      "id": 59,
+      "name": "drdo.gov.in",
+      "url": "https://drdo.gov.in/careers",
+      "category": "Government/Institution",
+      "priority": "High",
+      "check_frequency": "1 hour"
+    },
+    {
+      "id": 60,
+      "name": "joinindianarmy.nic.in",
+      "url": "https://joinindianarmy.nic.in",
+      "category": "Recruitment/Exam",
+      "priority": "High",
+      "check_frequency": "1 hour"
+    },
+    {
+      "id": 61,
+      "name": "ibps.in",
+      "url": "https://www.ibps.in",
+      "category": "Recruitment/Exam",
+      "priority": "High",
+      "check_frequency": "1 hour"
+    },
+    {
+      "id": 62,
+      "name": "sbi.co.in",
+      "url": "https://sbi.co.in/web/careers",
+      "category": "Recruitment/Exam",
+      "priority": "High",
+      "check_frequency": "1 hour"
+    },
+    {
+      "id": 63,
+      "name": "kvsangathan.nic.in",
+      "url": "https://kvsangathan.nic.in",
+      "category": "Education/Exam",
+      "priority": "High",
+      "check_frequency": "1 hour"
+    },
+    {
+      "id": 64,
+      "name": "navodaya.gov.in",
+      "url": "https://navodaya.gov.in",
+      "category": "Education/Exam",
+      "priority": "High",
+      "check_frequency": "1 hour"
+    },
+    {
+      "id": 65,
+      "name": "dsssb.delhi.gov.in",
+      "url": "https://dsssb.delhi.gov.in",
+      "category": "Recruitment/Exam",
+      "priority": "High",
+      "check_frequency": "1 hour"
+    },
+    {
+      "id": 66,
+      "name": "apprenticeshipindia.gov.in",
+      "url": "https://apprenticeshipindia.gov.in",
+      "category": "Government/Official",
+      "priority": "High",
+      "check_frequency": "1 hour"
+    },
+    {
+      "id": 67,
+      "name": "nats.education.gov.in",
+      "url": "https://nats.education.gov.in",
+      "category": "Education/Exam",
+      "priority": "High",
+      "check_frequency": "1 hour"
+    },
+    {
+      "id": 68,
+      "name": "internship.aicte-india.org",
+      "url": "https://internship.aicte-india.org",
+      "category": "Education/Exam",
+      "priority": "High",
+      "check_frequency": "1 hour"
+    },
+    {
+      "id": 69,
+      "name": "sci.gov.in",
+      "url": "https://sci.gov.in/recruitment",
+      "category": "Government/Official",
+      "priority": "High",
+      "check_frequency": "1 hour"
+    },
+    {
+      "id": 70,
+      "name": "hcraj.nic.in",
+      "url": "https://hcraj.nic.in",
+      "category": "Government/Official",
+      "priority": "High",
+      "check_frequency": "1 hour"
+    },
+    {
+      "id": 71,
+      "name": "nabard.org",
+      "url": "https://nabard.org",
+      "category": "Finance/Regulatory",
+      "priority": "High",
+      "check_frequency": "1 hour"
+    },
+    {
+      "id": 72,
+      "name": "icar.org.in",
+      "url": "https://icar.org.in",
+      "category": "Government/Institution",
+      "priority": "High",
+      "check_frequency": "1 hour"
+    },
+    {
+      "id": 73,
+      "name": "rajswasthya.nic.in",
+      "url": "https://rajswasthya.nic.in",
+      "category": "Government/Official",
+      "priority": "High",
+      "check_frequency": "1 hour"
+    },
+    {
+      "id": 74,
+      "name": "police.rajasthan.gov.in",
+      "url": "https://police.rajasthan.gov.in",
+      "category": "Recruitment/Exam",
+      "priority": "High",
+      "check_frequency": "1 hour"
+    },
+    {
+      "id": 75,
+      "name": "uppbpb.gov.in",
+      "url": "https://uppbpb.gov.in",
+      "category": "Government/Official",
+      "priority": "High",
+      "check_frequency": "1 hour"
+    },
+    {
+      "id": 76,
+      "name": "delhipolice.gov.in",
+      "url": "https://delhipolice.gov.in",
+      "category": "Government/Official",
+      "priority": "High",
+      "check_frequency": "1 hour"
+    },
+    {
+      "id": 77,
+      "name": "rect.crpf.gov.in",
+      "url": "https://rect.crpf.gov.in",
+      "category": "Recruitment/Exam",
+      "priority": "High",
+      "check_frequency": "1 hour"
+    },
+    {
+      "id": 78,
+      "name": "rectt.bsf.gov.in",
+      "url": "https://rectt.bsf.gov.in",
+      "category": "Recruitment/Exam",
+      "priority": "High",
+      "check_frequency": "1 hour"
+    },
+    {
+      "id": 79,
+      "name": "cisfrectt.cisf.gov.in",
+      "url": "https://cisfrectt.cisf.gov.in",
+      "category": "Recruitment/Exam",
+      "priority": "High",
+      "check_frequency": "1 hour"
+    },
+    {
+      "id": 80,
+      "name": "recruitment.itbpolice.nic.in",
+      "url": "https://recruitment.itbpolice.nic.in",
+      "category": "Recruitment/Exam",
+      "priority": "High",
+      "check_frequency": "1 hour"
+    },
+    {
+      "id": 81,
+      "name": "indianairforce.nic.in",
+      "url": "https://indianairforce.nic.in",
+      "category": "Recruitment/Exam",
+      "priority": "High",
+      "check_frequency": "1 hour"
+    },
+    {
+      "id": 82,
+      "name": "joinindiannavy.gov.in",
+      "url": "https://joinindiannavy.gov.in",
+      "category": "Recruitment/Exam",
+      "priority": "High",
+      "check_frequency": "1 hour"
+    },
+    {
+      "id": 83,
+      "name": "indiancoastguard.gov.in",
+      "url": "https://indiancoastguard.gov.in",
+      "category": "Recruitment/Exam",
+      "priority": "High",
+      "check_frequency": "1 hour"
+    },
+    {
+      "id": 84,
+      "name": "aiimsexams.ac.in",
+      "url": "https://aiimsexams.ac.in",
+      "category": "Education/Exam",
+      "priority": "High",
+      "check_frequency": "1 hour"
+    },
+    {
+      "id": 85,
+      "name": "nmc.org.in",
+      "url": "https://nmc.org.in",
+      "category": "Education/Exam",
+      "priority": "High",
+      "check_frequency": "1 hour"
+    },
+    {
+      "id": 86,
+      "name": "mcc.nic.in",
+      "url": "https://mcc.nic.in",
+      "category": "Education/Exam",
+      "priority": "High",
+      "check_frequency": "1 hour"
+    },
+    {
+      "id": 87,
+      "name": "icmr.nic.in",
+      "url": "https://icmr.nic.in",
+      "category": "Education/Exam",
+      "priority": "High",
+      "check_frequency": "1 hour"
+    },
+    {
+      "id": 88,
+      "name": "fssai.gov.in",
+      "url": "https://fssai.gov.in",
+      "category": "Government/Institution",
+      "priority": "High",
+      "check_frequency": "1 hour"
+    },
+    {
+      "id": 89,
+      "name": "hal-india.co.in",
+      "url": "https://hal-india.co.in",
+      "category": "PSU/Recruitment",
+      "priority": "High",
+      "check_frequency": "1 hour"
+    },
+    {
+      "id": 90,
+      "name": "sailcareers.com",
+      "url": "https://sailcareers.com",
+      "category": "PSU/Recruitment",
+      "priority": "High",
+      "check_frequency": "1 hour"
+    },
+    {
+      "id": 91,
+      "name": "coalindia.in",
+      "url": "https://coalindia.in",
+      "category": "PSU/Recruitment",
+      "priority": "High",
+      "check_frequency": "1 hour"
+    },
+    {
+      "id": 92,
+      "name": "bel-india.in",
+      "url": "https://bel-india.in",
+      "category": "PSU/Recruitment",
+      "priority": "High",
+      "check_frequency": "1 hour"
+    },
+    {
+      "id": 93,
+      "name": "iocl.com",
+      "url": "https://iocl.com",
+      "category": "PSU/Recruitment",
+      "priority": "High",
+      "check_frequency": "1 hour"
+    },
+    {
+      "id": 94,
+      "name": "careers.ntpc.co.in",
+      "url": "https://careers.ntpc.co.in",
+      "category": "PSU/Recruitment",
+      "priority": "High",
+      "check_frequency": "1 hour"
+    },
+    {
+      "id": 95,
+      "name": "ongcindia.com",
+      "url": "https://ongcindia.com",
+      "category": "PSU/Recruitment",
+      "priority": "High",
+      "check_frequency": "1 hour"
+    },
+    {
+      "id": 96,
+      "name": "bhel.com",
+      "url": "https://bhel.com",
+      "category": "PSU/Recruitment",
+      "priority": "High",
+      "check_frequency": "1 hour"
+    },
+    {
+      "id": 97,
+      "name": "gailonline.com",
+      "url": "https://gailonline.com",
+      "category": "PSU/Recruitment",
+      "priority": "High",
+      "check_frequency": "1 hour"
+    },
+    {
+      "id": 98,
+      "name": "powergrid.in",
+      "url": "https://powergrid.in",
+      "category": "PSU/Recruitment",
+      "priority": "High",
+      "check_frequency": "1 hour"
+    },
+    {
+      "id": 99,
+      "name": "du.ac.in",
+      "url": "https://du.ac.in",
+      "category": "Education/Exam",
+      "priority": "High",
+      "check_frequency": "1 hour"
+    },
+    {
+      "id": 100,
+      "name": "jnu.ac.in",
+      "url": "https://jnu.ac.in",
+      "category": "Education/Exam",
+      "priority": "High",
+      "check_frequency": "1 hour"
+    }
+  ],
+  "webhook": {
+    "endpoint": "https://www.knowora.in/api/publish-from-ai",
+    "secret": "knowora-secret-2026",
+    "method": "POST"
+  }
 }

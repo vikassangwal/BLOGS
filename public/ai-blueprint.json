@@ -1,6 +1,6 @@
 {
   "config_version": "1.0.0",
-  "project": "Knowora.in",
+  "project": "Navra.in",
   "purpose": "24-hour official-source research and one-time blog topic generation",
   "timezone": "Asia/Kolkata",
   "window": {
@@ -133,6 +133,74 @@
     "source_url_must_be_official_when_available": true,
     "one_article_per_event": true
   },
+  "database_schema": {
+    "source_items": [
+      "source_id",
+      "canonical_url",
+      "official_id",
+      "published_at",
+      "updated_at",
+      "title",
+      "raw_text",
+      "content_hash",
+      "document_hash"
+    ],
+    "processed_events": [
+      "event_fingerprint",
+      "first_seen_at",
+      "source_id",
+      "source_url",
+      "title",
+      "status",
+      "article_id"
+    ],
+    "articles": [
+      "article_id",
+      "event_fingerprint",
+      "title",
+      "created_at",
+      "status",
+      "source_urls",
+      "content_hash"
+    ]
+  },
+  "processing_states": [
+    "discovered",
+    "validated",
+    "new",
+    "duplicate",
+    "stale",
+    "rejected",
+    "drafted",
+    "published"
+  ],
+  "workflow": [
+    "fetch_source",
+    "extract_official_timestamp",
+    "extract_canonical_url_and_document_id",
+    "normalize_content",
+    "calculate_sha256",
+    "check_persistent_duplicate_registry",
+    "apply_24_hour_window",
+    "merge_cross_source_duplicates",
+    "validate_against_official_source",
+    "score_blog_worthiness",
+    "create_one_unique_topic",
+    "generate_hindi_draft",
+    "human_review",
+    "publish",
+    "store_final_fingerprint"
+  ],
+  "reprocessing_protection": {
+    "critical": true,
+    "rule": "After an item/event has produced a blog, its event_fingerprint remains permanently blocked unless an administrator explicitly reopens it.",
+    "repeat_same_url": "blocked",
+    "repeat_same_document_hash": "blocked",
+    "repeat_same_notice_number": "blocked",
+    "repeat_same_event_across_sources": "blocked",
+    "revised_document": "allowed only when substantive_change=true",
+    "admin_override_required_for_republish": true
+  },
   "source_count": 315,
   "sources": [
     {
@@ -140,805 +208,3169 @@
       "name": "pib.gov.in",
       "url": "https://pib.gov.in",
       "category": "News/Press Release",
+      "scope": "nan",
       "priority": "High",
-      "check_frequency": "1 hour"
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
     },
     {
       "id": 2,
       "name": "rbi.org.in",
       "url": "https://rbi.org.in",
       "category": "Finance/Regulatory",
+      "scope": "nan",
       "priority": "High",
-      "check_frequency": "1 hour"
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
     },
     {
       "id": 3,
       "name": "education.gov.in",
       "url": "https://education.gov.in",
       "category": "Education/Exam",
+      "scope": "nan",
       "priority": "High",
-      "check_frequency": "1 hour"
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
     },
     {
       "id": 4,
       "name": "cbse.gov.in",
       "url": "https://cbse.gov.in",
-      "category": "Education/Exam",
+      "category": "Finance/Regulatory",
+      "scope": "nan",
       "priority": "High",
-      "check_frequency": "1 hour"
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
     },
     {
       "id": 5,
       "name": "ncert.nic.in",
       "url": "https://ncert.nic.in",
       "category": "Education/Exam",
+      "scope": "nan",
       "priority": "High",
-      "check_frequency": "1 hour"
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
     },
     {
       "id": 6,
       "name": "ugc.gov.in",
       "url": "https://ugc.gov.in",
       "category": "Education/Exam",
+      "scope": "nan",
       "priority": "High",
-      "check_frequency": "1 hour"
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
     },
     {
       "id": 7,
       "name": "aicte-india.org",
       "url": "https://aicte-india.org",
       "category": "Education/Exam",
+      "scope": "nan",
       "priority": "High",
-      "check_frequency": "1 hour"
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
     },
     {
       "id": 8,
       "name": "nta.ac.in",
       "url": "https://nta.ac.in",
       "category": "Education/Exam",
+      "scope": "nan",
       "priority": "High",
-      "check_frequency": "1 hour"
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
     },
     {
       "id": 9,
       "name": "rajeduboard.rajasthan.gov.in",
       "url": "https://rajeduboard.rajasthan.gov.in",
       "category": "Education/Exam",
+      "scope": "nan",
       "priority": "High",
-      "check_frequency": "1 hour"
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
     },
     {
       "id": 10,
       "name": "nios.ac.in",
       "url": "https://nios.ac.in",
       "category": "Education/Exam",
+      "scope": "nan",
       "priority": "High",
-      "check_frequency": "1 hour"
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
     },
     {
       "id": 11,
       "name": "ignou.ac.in",
       "url": "https://ignou.ac.in",
       "category": "Education/Exam",
+      "scope": "nan",
       "priority": "High",
-      "check_frequency": "1 hour"
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
     },
     {
       "id": 12,
       "name": "employmentnews.gov.in",
       "url": "https://employmentnews.gov.in",
       "category": "Government/Official",
+      "scope": "nan",
       "priority": "High",
-      "check_frequency": "1 hour"
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
     },
     {
       "id": 13,
       "name": "ncs.gov.in",
       "url": "https://www.ncs.gov.in",
       "category": "Government/Official",
+      "scope": "nan",
       "priority": "High",
-      "check_frequency": "1 hour"
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
     },
     {
       "id": 14,
       "name": "upsc.gov.in",
       "url": "https://upsc.gov.in",
       "category": "Recruitment/Exam",
+      "scope": "nan",
       "priority": "High",
-      "check_frequency": "1 hour"
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
     },
     {
       "id": 15,
       "name": "ssc.gov.in",
       "url": "https://ssc.gov.in",
       "category": "Recruitment/Exam",
+      "scope": "nan",
       "priority": "High",
-      "check_frequency": "1 hour"
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
     },
     {
       "id": 16,
       "name": "indianrailways.gov.in",
       "url": "https://indianrailways.gov.in",
       "category": "Government/Official",
+      "scope": "nan",
       "priority": "High",
-      "check_frequency": "1 hour"
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
     },
     {
       "id": 17,
       "name": "rsmssb.rajasthan.gov.in",
       "url": "https://rsmssb.rajasthan.gov.in",
       "category": "Recruitment/Exam",
+      "scope": "nan",
       "priority": "High",
-      "check_frequency": "1 hour"
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
     },
     {
       "id": 18,
       "name": "rpsc.rajasthan.gov.in",
       "url": "https://rpsc.rajasthan.gov.in",
       "category": "Recruitment/Exam",
+      "scope": "nan",
       "priority": "High",
-      "check_frequency": "1 hour"
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
     },
     {
       "id": 19,
       "name": "sso.rajasthan.gov.in",
       "url": "https://sso.rajasthan.gov.in",
       "category": "Government/Official",
+      "scope": "nan",
       "priority": "High",
-      "check_frequency": "1 hour"
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
     },
     {
       "id": 20,
       "name": "egazette.gov.in",
       "url": "https://egazette.gov.in",
       "category": "Government/Official",
+      "scope": "nan",
       "priority": "High",
-      "check_frequency": "1 hour"
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
     },
     {
       "id": 21,
       "name": "egazette.rajasthan.gov.in",
       "url": "https://egazette.rajasthan.gov.in",
       "category": "Government/Official",
+      "scope": "nan",
       "priority": "High",
-      "check_frequency": "1 hour"
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
     },
     {
       "id": 22,
       "name": "dipr.rajasthan.gov.in",
       "url": "https://dipr.rajasthan.gov.in",
       "category": "News/Press Release",
+      "scope": "nan",
       "priority": "High",
-      "check_frequency": "1 hour"
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
     },
     {
       "id": 23,
       "name": "information.up.gov.in",
       "url": "https://information.up.gov.in",
       "category": "News/Press Release",
+      "scope": "nan",
       "priority": "High",
-      "check_frequency": "1 hour"
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
     },
     {
       "id": 24,
       "name": "mpinfo.org",
       "url": "https://mpinfo.org",
       "category": "News/Press Release",
+      "scope": "nan",
       "priority": "High",
-      "check_frequency": "1 hour"
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
     },
     {
       "id": 25,
       "name": "sewayojan.up.nic.in",
       "url": "https://sewayojan.up.nic.in",
       "category": "Government/Official",
+      "scope": "nan",
       "priority": "High",
-      "check_frequency": "1 hour"
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
     },
     {
       "id": 26,
       "name": "mprojgar.gov.in",
       "url": "https://mprojgar.gov.in",
       "category": "Government/Official",
+      "scope": "nan",
       "priority": "High",
-      "check_frequency": "1 hour"
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
     },
     {
       "id": 27,
       "name": "employment.livelihoods.rajasthan.gov.in",
       "url": "https://employment.livelihoods.rajasthan.gov.in",
       "category": "Government/Official",
+      "scope": "nan",
       "priority": "High",
-      "check_frequency": "1 hour"
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
     },
     {
       "id": 28,
       "name": "hkrnl.itiharyana.gov.in",
       "url": "https://hkrnl.itiharyana.gov.in",
       "category": "Government/Official",
+      "scope": "nan",
       "priority": "High",
-      "check_frequency": "1 hour"
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
     },
     {
       "id": 29,
       "name": "anubandham.gujarat.gov.in",
       "url": "https://anubandham.gujarat.gov.in",
       "category": "Government/Official",
+      "scope": "nan",
       "priority": "High",
-      "check_frequency": "1 hour"
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
     },
     {
       "id": 30,
       "name": "rojgar.mahaswayam.gov.in",
       "url": "https://rojgar.mahaswayam.gov.in",
       "category": "Education/Exam",
+      "scope": "nan",
       "priority": "High",
-      "check_frequency": "1 hour"
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
     },
     {
       "id": 31,
       "name": "jobs.delhi.gov.in",
       "url": "https://jobs.delhi.gov.in",
       "category": "Government/Official",
+      "scope": "nan",
       "priority": "High",
-      "check_frequency": "1 hour"
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
     },
     {
       "id": 32,
       "name": "uppsc.up.nic.in",
       "url": "https://uppsc.up.nic.in",
       "category": "Recruitment/Exam",
+      "scope": "nan",
       "priority": "High",
-      "check_frequency": "1 hour"
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
     },
     {
       "id": 33,
       "name": "bpsc.bih.nic.in",
       "url": "https://bpsc.bih.nic.in",
       "category": "Recruitment/Exam",
+      "scope": "nan",
       "priority": "High",
-      "check_frequency": "1 hour"
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
     },
     {
       "id": 34,
       "name": "mppsc.mp.gov.in",
       "url": "https://mppsc.mp.gov.in",
       "category": "Recruitment/Exam",
+      "scope": "nan",
       "priority": "High",
-      "check_frequency": "1 hour"
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
     },
     {
       "id": 35,
       "name": "hpsc.gov.in",
       "url": "https://hpsc.gov.in",
       "category": "Recruitment/Exam",
+      "scope": "nan",
       "priority": "High",
-      "check_frequency": "1 hour"
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
     },
     {
       "id": 36,
       "name": "upsssc.gov.in",
       "url": "https://upsssc.gov.in",
       "category": "Recruitment/Exam",
+      "scope": "nan",
       "priority": "High",
-      "check_frequency": "1 hour"
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
     },
     {
       "id": 37,
       "name": "hssc.gov.in",
       "url": "https://hssc.gov.in",
       "category": "Recruitment/Exam",
+      "scope": "nan",
       "priority": "High",
-      "check_frequency": "1 hour"
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
     },
     {
       "id": 38,
       "name": "sssc.uk.gov.in",
       "url": "https://sssc.uk.gov.in",
       "category": "Recruitment/Exam",
+      "scope": "nan",
       "priority": "High",
-      "check_frequency": "1 hour"
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
     },
     {
       "id": 39,
       "name": "bssc.bihar.gov.in",
       "url": "https://bssc.bihar.gov.in",
       "category": "Recruitment/Exam",
+      "scope": "nan",
       "priority": "High",
-      "check_frequency": "1 hour"
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
     },
     {
       "id": 40,
       "name": "linkedin.com",
       "url": "https://www.linkedin.com/jobs",
       "category": "Private/Industry/Education",
+      "scope": "nan",
       "priority": "Medium",
-      "check_frequency": "1 hour"
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
     },
     {
       "id": 41,
       "name": "hirist.tech",
       "url": "https://www.hirist.tech",
       "category": "Private/Industry/Education",
+      "scope": "nan",
       "priority": "Medium",
-      "check_frequency": "1 hour"
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
     },
     {
       "id": 42,
       "name": "naukri.com",
       "url": "https://www.naukri.com",
       "category": "Private/Industry/Education",
+      "scope": "nan",
       "priority": "Medium",
-      "check_frequency": "1 hour"
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
     },
     {
       "id": 43,
       "name": "in.indeed.com",
       "url": "https://in.indeed.com",
       "category": "Private/Industry/Education",
+      "scope": "nan",
       "priority": "Medium",
-      "check_frequency": "1 hour"
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
     },
     {
       "id": 44,
       "name": "wellfound.com",
       "url": "https://wellfound.com",
       "category": "Private/Industry/Education",
+      "scope": "nan",
       "priority": "Medium",
-      "check_frequency": "1 hour"
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
     },
     {
       "id": 45,
       "name": "cutshort.io",
       "url": "https://cutshort.io",
       "category": "Private/Industry/Education",
+      "scope": "nan",
       "priority": "Medium",
-      "check_frequency": "1 hour"
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
     },
     {
       "id": 46,
       "name": "swayam.gov.in",
       "url": "https://swayam.gov.in",
       "category": "Education/Exam",
+      "scope": "nan",
       "priority": "High",
-      "check_frequency": "1 hour"
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
     },
     {
       "id": 47,
       "name": "nptel.ac.in",
       "url": "https://nptel.ac.in",
       "category": "Education/Exam",
+      "scope": "nan",
       "priority": "High",
-      "check_frequency": "1 hour"
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
     },
     {
       "id": 48,
       "name": "skillindiadigital.gov.in",
       "url": "https://www.skillindiadigital.gov.in",
       "category": "Education/Exam",
+      "scope": "nan",
       "priority": "High",
-      "check_frequency": "1 hour"
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
     },
     {
       "id": 49,
       "name": "freecodecamp.org",
       "url": "https://www.freecodecamp.org",
       "category": "Private/Industry/Education",
+      "scope": "nan",
       "priority": "Medium",
-      "check_frequency": "1 hour"
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
     },
     {
       "id": 50,
       "name": "coursera.org",
       "url": "https://www.coursera.org",
       "category": "Private/Industry/Education",
+      "scope": "nan",
       "priority": "Medium",
-      "check_frequency": "1 hour"
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
     },
     {
       "id": 51,
       "name": "edx.org",
       "url": "https://www.edx.org",
       "category": "Private/Industry/Education",
+      "scope": "nan",
       "priority": "Medium",
-      "check_frequency": "1 hour"
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
     },
     {
       "id": 52,
       "name": "sebi.gov.in",
       "url": "https://www.sebi.gov.in",
       "category": "Finance/Regulatory",
+      "scope": "nan",
       "priority": "High",
-      "check_frequency": "1 hour"
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
     },
     {
       "id": 53,
       "name": "nseindia.com",
       "url": "https://www.nseindia.com",
       "category": "Finance/Regulatory",
+      "scope": "nan",
       "priority": "High",
-      "check_frequency": "1 hour"
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
     },
     {
       "id": 54,
       "name": "bseindia.com",
       "url": "https://www.bseindia.com",
       "category": "Finance/Regulatory",
+      "scope": "nan",
       "priority": "High",
-      "check_frequency": "1 hour"
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
     },
     {
       "id": 55,
       "name": "meity.gov.in",
       "url": "https://www.meity.gov.in",
       "category": "Government/Institution",
+      "scope": "nan",
       "priority": "High",
-      "check_frequency": "1 hour"
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
     },
     {
       "id": 56,
       "name": "cdac.in",
       "url": "https://www.cdac.in",
       "category": "Government/Institution",
+      "scope": "nan",
       "priority": "High",
-      "check_frequency": "1 hour"
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
     },
     {
       "id": 57,
       "name": "nasscom.in",
       "url": "https://nasscom.in",
       "category": "Private/Industry/Education",
+      "scope": "nan",
       "priority": "Medium",
-      "check_frequency": "1 hour"
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
     },
     {
       "id": 58,
       "name": "isro.gov.in",
       "url": "https://www.isro.gov.in/Careers.html",
       "category": "Government/Institution",
+      "scope": "nan",
       "priority": "High",
-      "check_frequency": "1 hour"
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
     },
     {
       "id": 59,
       "name": "drdo.gov.in",
-      "url": "https://drdo.gov.in/careers",
+      "url": "https://www.drdo.gov.in/careers",
       "category": "Government/Institution",
+      "scope": "nan",
       "priority": "High",
-      "check_frequency": "1 hour"
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
     },
     {
       "id": 60,
       "name": "joinindianarmy.nic.in",
       "url": "https://joinindianarmy.nic.in",
       "category": "Recruitment/Exam",
+      "scope": "nan",
       "priority": "High",
-      "check_frequency": "1 hour"
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
     },
     {
       "id": 61,
       "name": "ibps.in",
       "url": "https://www.ibps.in",
       "category": "Recruitment/Exam",
+      "scope": "nan",
       "priority": "High",
-      "check_frequency": "1 hour"
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
     },
     {
       "id": 62,
       "name": "sbi.co.in",
       "url": "https://sbi.co.in/web/careers",
       "category": "Recruitment/Exam",
+      "scope": "nan",
       "priority": "High",
-      "check_frequency": "1 hour"
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
     },
     {
       "id": 63,
       "name": "kvsangathan.nic.in",
       "url": "https://kvsangathan.nic.in",
       "category": "Education/Exam",
+      "scope": "nan",
       "priority": "High",
-      "check_frequency": "1 hour"
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
     },
     {
       "id": 64,
       "name": "navodaya.gov.in",
       "url": "https://navodaya.gov.in",
       "category": "Education/Exam",
+      "scope": "nan",
       "priority": "High",
-      "check_frequency": "1 hour"
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
     },
     {
       "id": 65,
       "name": "dsssb.delhi.gov.in",
       "url": "https://dsssb.delhi.gov.in",
       "category": "Recruitment/Exam",
+      "scope": "nan",
       "priority": "High",
-      "check_frequency": "1 hour"
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
     },
     {
       "id": 66,
       "name": "apprenticeshipindia.gov.in",
       "url": "https://apprenticeshipindia.gov.in",
       "category": "Government/Official",
+      "scope": "nan",
       "priority": "High",
-      "check_frequency": "1 hour"
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
     },
     {
       "id": 67,
       "name": "nats.education.gov.in",
       "url": "https://nats.education.gov.in",
       "category": "Education/Exam",
+      "scope": "nan",
       "priority": "High",
-      "check_frequency": "1 hour"
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
     },
     {
       "id": 68,
       "name": "internship.aicte-india.org",
       "url": "https://internship.aicte-india.org",
       "category": "Education/Exam",
+      "scope": "nan",
       "priority": "High",
-      "check_frequency": "1 hour"
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
     },
     {
       "id": 69,
       "name": "sci.gov.in",
       "url": "https://sci.gov.in/recruitment",
       "category": "Government/Official",
+      "scope": "nan",
       "priority": "High",
-      "check_frequency": "1 hour"
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
     },
     {
       "id": 70,
       "name": "hcraj.nic.in",
       "url": "https://hcraj.nic.in",
       "category": "Government/Official",
+      "scope": "nan",
       "priority": "High",
-      "check_frequency": "1 hour"
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
     },
     {
       "id": 71,
       "name": "nabard.org",
       "url": "https://nabard.org",
       "category": "Finance/Regulatory",
+      "scope": "nan",
       "priority": "High",
-      "check_frequency": "1 hour"
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
     },
     {
       "id": 72,
       "name": "icar.org.in",
       "url": "https://icar.org.in",
       "category": "Government/Institution",
+      "scope": "nan",
       "priority": "High",
-      "check_frequency": "1 hour"
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
     },
     {
       "id": 73,
       "name": "rajswasthya.nic.in",
       "url": "https://rajswasthya.nic.in",
       "category": "Government/Official",
+      "scope": "nan",
       "priority": "High",
-      "check_frequency": "1 hour"
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
     },
     {
       "id": 74,
       "name": "police.rajasthan.gov.in",
       "url": "https://police.rajasthan.gov.in",
       "category": "Recruitment/Exam",
+      "scope": "nan",
       "priority": "High",
-      "check_frequency": "1 hour"
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
     },
     {
       "id": 75,
       "name": "uppbpb.gov.in",
       "url": "https://uppbpb.gov.in",
       "category": "Government/Official",
+      "scope": "nan",
       "priority": "High",
-      "check_frequency": "1 hour"
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
     },
     {
       "id": 76,
       "name": "delhipolice.gov.in",
       "url": "https://delhipolice.gov.in",
       "category": "Government/Official",
+      "scope": "nan",
       "priority": "High",
-      "check_frequency": "1 hour"
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
     },
     {
       "id": 77,
       "name": "rect.crpf.gov.in",
       "url": "https://rect.crpf.gov.in",
       "category": "Recruitment/Exam",
+      "scope": "nan",
       "priority": "High",
-      "check_frequency": "1 hour"
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
     },
     {
       "id": 78,
       "name": "rectt.bsf.gov.in",
       "url": "https://rectt.bsf.gov.in",
       "category": "Recruitment/Exam",
+      "scope": "nan",
       "priority": "High",
-      "check_frequency": "1 hour"
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
     },
     {
       "id": 79,
       "name": "cisfrectt.cisf.gov.in",
       "url": "https://cisfrectt.cisf.gov.in",
       "category": "Recruitment/Exam",
+      "scope": "nan",
       "priority": "High",
-      "check_frequency": "1 hour"
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
     },
     {
       "id": 80,
       "name": "recruitment.itbpolice.nic.in",
       "url": "https://recruitment.itbpolice.nic.in",
       "category": "Recruitment/Exam",
+      "scope": "nan",
       "priority": "High",
-      "check_frequency": "1 hour"
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
     },
     {
       "id": 81,
       "name": "indianairforce.nic.in",
       "url": "https://indianairforce.nic.in",
       "category": "Recruitment/Exam",
+      "scope": "nan",
       "priority": "High",
-      "check_frequency": "1 hour"
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
     },
     {
       "id": 82,
       "name": "joinindiannavy.gov.in",
       "url": "https://joinindiannavy.gov.in",
       "category": "Recruitment/Exam",
+      "scope": "nan",
       "priority": "High",
-      "check_frequency": "1 hour"
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
     },
     {
       "id": 83,
       "name": "indiancoastguard.gov.in",
       "url": "https://indiancoastguard.gov.in",
       "category": "Recruitment/Exam",
+      "scope": "nan",
       "priority": "High",
-      "check_frequency": "1 hour"
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
     },
     {
       "id": 84,
       "name": "aiimsexams.ac.in",
       "url": "https://aiimsexams.ac.in",
       "category": "Education/Exam",
+      "scope": "nan",
       "priority": "High",
-      "check_frequency": "1 hour"
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
     },
     {
       "id": 85,
       "name": "nmc.org.in",
       "url": "https://nmc.org.in",
       "category": "Education/Exam",
+      "scope": "nan",
       "priority": "High",
-      "check_frequency": "1 hour"
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
     },
     {
       "id": 86,
       "name": "mcc.nic.in",
       "url": "https://mcc.nic.in",
       "category": "Education/Exam",
+      "scope": "nan",
       "priority": "High",
-      "check_frequency": "1 hour"
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
     },
     {
       "id": 87,
       "name": "icmr.nic.in",
       "url": "https://icmr.nic.in",
       "category": "Education/Exam",
+      "scope": "nan",
       "priority": "High",
-      "check_frequency": "1 hour"
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
     },
     {
       "id": 88,
       "name": "fssai.gov.in",
       "url": "https://fssai.gov.in",
       "category": "Government/Institution",
+      "scope": "nan",
       "priority": "High",
-      "check_frequency": "1 hour"
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
     },
     {
       "id": 89,
       "name": "hal-india.co.in",
       "url": "https://hal-india.co.in",
       "category": "PSU/Recruitment",
+      "scope": "nan",
       "priority": "High",
-      "check_frequency": "1 hour"
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
     },
     {
       "id": 90,
       "name": "sailcareers.com",
       "url": "https://sailcareers.com",
       "category": "PSU/Recruitment",
+      "scope": "nan",
       "priority": "High",
-      "check_frequency": "1 hour"
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
     },
     {
       "id": 91,
       "name": "coalindia.in",
       "url": "https://coalindia.in",
       "category": "PSU/Recruitment",
+      "scope": "nan",
       "priority": "High",
-      "check_frequency": "1 hour"
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
     },
     {
       "id": 92,
       "name": "bel-india.in",
       "url": "https://bel-india.in",
       "category": "PSU/Recruitment",
+      "scope": "nan",
       "priority": "High",
-      "check_frequency": "1 hour"
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
     },
     {
       "id": 93,
       "name": "iocl.com",
       "url": "https://iocl.com",
       "category": "PSU/Recruitment",
+      "scope": "nan",
       "priority": "High",
-      "check_frequency": "1 hour"
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
     },
     {
       "id": 94,
       "name": "careers.ntpc.co.in",
       "url": "https://careers.ntpc.co.in",
       "category": "PSU/Recruitment",
+      "scope": "nan",
       "priority": "High",
-      "check_frequency": "1 hour"
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
     },
     {
       "id": 95,
       "name": "ongcindia.com",
       "url": "https://ongcindia.com",
       "category": "PSU/Recruitment",
+      "scope": "nan",
       "priority": "High",
-      "check_frequency": "1 hour"
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
     },
     {
       "id": 96,
       "name": "bhel.com",
       "url": "https://bhel.com",
       "category": "PSU/Recruitment",
+      "scope": "nan",
       "priority": "High",
-      "check_frequency": "1 hour"
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
     },
     {
       "id": 97,
       "name": "gailonline.com",
       "url": "https://gailonline.com",
       "category": "PSU/Recruitment",
+      "scope": "nan",
       "priority": "High",
-      "check_frequency": "1 hour"
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
     },
     {
       "id": 98,
       "name": "powergrid.in",
       "url": "https://powergrid.in",
       "category": "PSU/Recruitment",
+      "scope": "nan",
       "priority": "High",
-      "check_frequency": "1 hour"
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
     },
     {
       "id": 99,
       "name": "du.ac.in",
       "url": "https://du.ac.in",
       "category": "Education/Exam",
+      "scope": "nan",
       "priority": "High",
-      "check_frequency": "1 hour"
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
     },
     {
       "id": 100,
       "name": "jnu.ac.in",
       "url": "https://jnu.ac.in",
       "category": "Education/Exam",
+      "scope": "nan",
       "priority": "High",
-      "check_frequency": "1 hour"
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
+    },
+    {
+      "id": 101,
+      "name": "bhu.ac.in",
+      "url": "https://bhu.ac.in",
+      "category": "Education/Exam",
+      "scope": "nan",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
+    },
+    {
+      "id": 102,
+      "name": "jmi.ac.in",
+      "url": "https://jmi.ac.in",
+      "category": "Education/Exam",
+      "scope": "nan",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
+    },
+    {
+      "id": 103,
+      "name": "amu.ac.in",
+      "url": "https://amu.ac.in",
+      "category": "Education/Exam",
+      "scope": "nan",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
+    },
+    {
+      "id": 104,
+      "name": "iitd.ac.in",
+      "url": "https://iitd.ac.in",
+      "category": "Education/Exam",
+      "scope": "nan",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
+    },
+    {
+      "id": 105,
+      "name": "iitb.ac.in",
+      "url": "https://iitb.ac.in",
+      "category": "Education/Exam",
+      "scope": "nan",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
+    },
+    {
+      "id": 106,
+      "name": "iitm.ac.in",
+      "url": "https://iitm.ac.in",
+      "category": "Education/Exam",
+      "scope": "nan",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
+    },
+    {
+      "id": 107,
+      "name": "iitk.ac.in",
+      "url": "https://iitk.ac.in",
+      "category": "Education/Exam",
+      "scope": "nan",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
+    },
+    {
+      "id": 108,
+      "name": "upmsp.edu.in",
+      "url": "https://upmsp.edu.in",
+      "category": "Education/Exam",
+      "scope": "nan",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
+    },
+    {
+      "id": 109,
+      "name": "biharboardonline.bihar.gov.in",
+      "url": "https://biharboardonline.bihar.gov.in",
+      "category": "Education/Exam",
+      "scope": "nan",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
+    },
+    {
+      "id": 110,
+      "name": "mpbse.nic.in",
+      "url": "https://mpbse.nic.in",
+      "category": "Finance/Regulatory",
+      "scope": "nan",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
+    },
+    {
+      "id": 111,
+      "name": "bseh.org.in",
+      "url": "https://bseh.org.in",
+      "category": "Finance/Regulatory",
+      "scope": "nan",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
+    },
+    {
+      "id": 112,
+      "name": "gseb.org",
+      "url": "https://gseb.org",
+      "category": "Education/Exam",
+      "scope": "nan",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
+    },
+    {
+      "id": 113,
+      "name": "mahahsscboard.in",
+      "url": "https://mahahsscboard.in",
+      "category": "Recruitment/Exam",
+      "scope": "nan",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
+    },
+    {
+      "id": 114,
+      "name": "icai.org",
+      "url": "https://icai.org",
+      "category": "Government/Official",
+      "scope": "nan",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
+    },
+    {
+      "id": 115,
+      "name": "icsi.edu",
+      "url": "https://icsi.edu",
+      "category": "Government/Official",
+      "scope": "nan",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
+    },
+    {
+      "id": 116,
+      "name": "incometaxindia.gov.in",
+      "url": "https://incometaxindia.gov.in",
+      "category": "Finance/Regulatory",
+      "scope": "nan",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
+    },
+    {
+      "id": 117,
+      "name": "cag.gov.in",
+      "url": "https://cag.gov.in",
+      "category": "Finance/Regulatory",
+      "scope": "nan",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
+    },
+    {
+      "id": 118,
+      "name": "epfindia.gov.in",
+      "url": "https://epfindia.gov.in",
+      "category": "Finance/Regulatory",
+      "scope": "nan",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
+    },
+    {
+      "id": 119,
+      "name": "esic.gov.in",
+      "url": "https://esic.gov.in",
+      "category": "Finance/Regulatory",
+      "scope": "nan",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
+    },
+    {
+      "id": 120,
+      "name": "aai.aero",
+      "url": "https://aai.aero",
+      "category": "Government/Institution",
+      "scope": "nan",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
+    },
+    {
+      "id": 121,
+      "name": "dgca.gov.in",
+      "url": "https://dgca.gov.in",
+      "category": "Government/Institution",
+      "scope": "nan",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
+    },
+    {
+      "id": 122,
+      "name": "nhai.gov.in",
+      "url": "https://nhai.gov.in",
+      "category": "Government/Institution",
+      "scope": "nan",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
+    },
+    {
+      "id": 123,
+      "name": "barcouncilofindia.org",
+      "url": "https://barcouncilofindia.org",
+      "category": "Government/Institution",
+      "scope": "nan",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
+    },
+    {
+      "id": 124,
+      "name": "consortiumofnlus.ac.in",
+      "url": "https://consortiumofnlus.ac.in",
+      "category": "Government/Institution",
+      "scope": "nan",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
+    },
+    {
+      "id": 125,
+      "name": "uidai.gov.in",
+      "url": "https://uidai.gov.in",
+      "category": "Government/Institution",
+      "scope": "nan",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
+    },
+    {
+      "id": 126,
+      "name": "digitalindia.gov.in",
+      "url": "https://digitalindia.gov.in",
+      "category": "Government/Institution",
+      "scope": "nan",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
+    },
+    {
+      "id": 127,
+      "name": "startupindia.gov.in",
+      "url": "https://startupindia.gov.in",
+      "category": "Government/Institution",
+      "scope": "nan",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
+    },
+    {
+      "id": 128,
+      "name": "makeinindia.com",
+      "url": "https://makeinindia.com",
+      "category": "Government/Institution",
+      "scope": "nan",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Review"
+    },
+    {
+      "id": 129,
+      "name": "NCS Latest Updates",
+      "url": "https://www.ncs.gov.in/latest-update",
+      "category": "Jobs",
+      "scope": "nan",
+      "priority": "High",
+      "check_frequency": "15 min",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 130,
+      "name": "NCS State Employment Portals",
+      "url": "https://www.ncs.gov.in/devPortalList",
+      "category": "Jobs",
+      "scope": "nan",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 131,
+      "name": "Ministry of Labour & Employment",
+      "url": "https://labour.gov.in",
+      "category": "Jobs",
+      "scope": "nan",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 132,
+      "name": "Ministry of Skill Development & Entrepreneurship",
+      "url": "https://www.msde.gov.in",
+      "category": "Career/Skills",
+      "scope": "nan",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 133,
+      "name": "Apprenticeship India",
+      "url": "https://www.apprenticeshipindia.gov.in",
+      "category": "Jobs",
+      "scope": "nan",
+      "priority": "High",
+      "check_frequency": "30 min",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 134,
+      "name": "PM Internship Scheme / NCS",
+      "url": "https://www.ncs.gov.in/Pmis-jobList",
+      "category": "Jobs",
+      "scope": "nan",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 135,
+      "name": "APPSC",
+      "url": "https://psc.ap.gov.in",
+      "category": "Jobs",
+      "scope": "nan",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 136,
+      "name": "APSLPRB",
+      "url": "https://slprb.ap.gov.in",
+      "category": "Jobs",
+      "scope": "nan",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 137,
+      "name": "Arunachal PSC",
+      "url": "https://appsc.gov.in",
+      "category": "Jobs",
+      "scope": "nan",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 138,
+      "name": "Assam PSC",
+      "url": "https://apsc.nic.in",
+      "category": "Jobs",
+      "scope": "nan",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 139,
+      "name": "BPSC",
+      "url": "https://bpsc.bihar.gov.in",
+      "category": "Jobs",
+      "scope": "nan",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 140,
+      "name": "Chhattisgarh PSC",
+      "url": "https://psc.cg.gov.in",
+      "category": "Jobs",
+      "scope": "nan",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 141,
+      "name": "Goa PSC",
+      "url": "https://gpsc.goa.gov.in",
+      "category": "Jobs",
+      "scope": "nan",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 142,
+      "name": "HPPSC",
+      "url": "https://hppsc.hp.gov.in",
+      "category": "Jobs",
+      "scope": "nan",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 143,
+      "name": "JKPSC",
+      "url": "https://jkpsc.nic.in",
+      "category": "Jobs",
+      "scope": "nan",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 144,
+      "name": "Jharkhand PSC",
+      "url": "https://www.jpsc.gov.in",
+      "category": "Jobs",
+      "scope": "nan",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 145,
+      "name": "KPSC",
+      "url": "https://kpsc.kar.nic.in",
+      "category": "Jobs",
+      "scope": "nan",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 146,
+      "name": "Kerala PSC",
+      "url": "https://www.keralapsc.gov.in",
+      "category": "Jobs",
+      "scope": "nan",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 147,
+      "name": "Manipur PSC",
+      "url": "https://mpscmanipur.gov.in",
+      "category": "Jobs",
+      "scope": "nan",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 148,
+      "name": "Meghalaya PSC",
+      "url": "https://mpsc.nic.in",
+      "category": "Jobs",
+      "scope": "nan",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 149,
+      "name": "Mizoram PSC",
+      "url": "https://mpsc.mizoram.gov.in",
+      "category": "Jobs",
+      "scope": "nan",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 150,
+      "name": "Nagaland PSC",
+      "url": "https://npsc.nagaland.gov.in",
+      "category": "Jobs",
+      "scope": "nan",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 151,
+      "name": "Odisha PSC",
+      "url": "https://www.opsc.gov.in",
+      "category": "Jobs",
+      "scope": "nan",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 152,
+      "name": "PPSC",
+      "url": "https://ppsc.gov.in",
+      "category": "Jobs",
+      "scope": "nan",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 153,
+      "name": "Sikkim PSC",
+      "url": "https://spsc.sikkim.gov.in",
+      "category": "Jobs",
+      "scope": "nan",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 154,
+      "name": "TNPSC",
+      "url": "https://www.tnpsc.gov.in",
+      "category": "Jobs",
+      "scope": "nan",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 155,
+      "name": "TSPSC",
+      "url": "https://websitenew.tspsc.gov.in",
+      "category": "Jobs",
+      "scope": "nan",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 156,
+      "name": "Tripura PSC",
+      "url": "https://tpsc.tripura.gov.in",
+      "category": "Jobs",
+      "scope": "nan",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 157,
+      "name": "UKPSC",
+      "url": "https://psc.uk.gov.in",
+      "category": "Jobs",
+      "scope": "nan",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 158,
+      "name": "WBPSC",
+      "url": "https://psc.wb.gov.in",
+      "category": "Jobs",
+      "scope": "nan",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 159,
+      "name": "Chhattisgarh Employment",
+      "url": "https://erojgar.cg.gov.in",
+      "category": "Jobs",
+      "scope": "nan",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 160,
+      "name": "Delhi Employment",
+      "url": "https://onlineemploymentportal.delhi.gov.in",
+      "category": "Jobs",
+      "scope": "nan",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 161,
+      "name": "Haryana Employment",
+      "url": "https://www.hrex.gov.in",
+      "category": "Jobs",
+      "scope": "nan",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 162,
+      "name": "Himachal Employment",
+      "url": "https://eemis.hp.gov.in",
+      "category": "Jobs",
+      "scope": "nan",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 163,
+      "name": "J&K Employment",
+      "url": "https://jakemp.nic.in",
+      "category": "Jobs",
+      "scope": "nan",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 164,
+      "name": "Jharkhand Recruitment",
+      "url": "http://recruitment.jharkhand.gov.in",
+      "category": "Jobs",
+      "scope": "nan",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 165,
+      "name": "Karnataka Employment",
+      "url": "https://itiemp.karnataka.gov.in/13/employment-wing/en",
+      "category": "Jobs",
+      "scope": "nan",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 166,
+      "name": "Kerala Employment",
+      "url": "https://www.employment.kerala.gov.in",
+      "category": "Jobs",
+      "scope": "nan",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 167,
+      "name": "Odisha Employment",
+      "url": "https://empmission.odisha.gov.in/Exchange/Entry.jsp",
+      "category": "Jobs",
+      "scope": "nan",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 168,
+      "name": "Punjab Employment",
+      "url": "https://www.pgrkam.com",
+      "category": "Jobs",
+      "scope": "nan",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 169,
+      "name": "Rajasthan Employment",
+      "url": "https://rajemployment.rajasthan.gov.in",
+      "category": "Jobs",
+      "scope": "nan",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 170,
+      "name": "Tamil Nadu Employment",
+      "url": "https://tnvelaivaaippu.gov.in",
+      "category": "Jobs",
+      "scope": "nan",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 171,
+      "name": "West Bengal Employment Bank",
+      "url": "https://employmentbankwb.gov.in",
+      "category": "Jobs",
+      "scope": "nan",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 172,
+      "name": "National Scholarship Portal",
+      "url": "https://scholarships.gov.in",
+      "category": "Study",
+      "scope": "nan",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 173,
+      "name": "Vidya Lakshmi",
+      "url": "https://www.vidyalakshmi.co.in",
+      "category": "Study/Finance",
+      "scope": "nan",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 174,
+      "name": "PM Vidyalaxmi",
+      "url": "https://pmvidyalaxmi.co.in",
+      "category": "Study/Finance",
+      "scope": "nan",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 175,
+      "name": "AISHE",
+      "url": "https://aishe.gov.in",
+      "category": "Study",
+      "scope": "nan",
+      "priority": "Medium",
+      "check_frequency": "1 day",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 176,
+      "name": "National Testing Agency Exams",
+      "url": "https://exams.nta.ac.in",
+      "category": "Study",
+      "scope": "nan",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 177,
+      "name": "Common University Entrance Test",
+      "url": "https://cuet.nta.nic.in",
+      "category": "Study",
+      "scope": "nan",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 178,
+      "name": "JEE Main",
+      "url": "https://jeemain.nta.nic.in",
+      "category": "Study",
+      "scope": "nan",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 179,
+      "name": "NEET UG",
+      "url": "https://neet.nta.nic.in",
+      "category": "Study",
+      "scope": "nan",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 180,
+      "name": "UGC NET",
+      "url": "https://ugcnet.nta.ac.in",
+      "category": "Study",
+      "scope": "nan",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 181,
+      "name": "CSIR NET",
+      "url": "https://csirnet.nta.ac.in",
+      "category": "Study",
+      "scope": "nan",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 182,
+      "name": "National Board of Examinations",
+      "url": "https://natboard.edu.in",
+      "category": "Study",
+      "scope": "nan",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 183,
+      "name": "JoSAA",
+      "url": "https://josaa.nic.in",
+      "category": "Study",
+      "scope": "nan",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 184,
+      "name": "CSAB",
+      "url": "https://csab.nic.in",
+      "category": "Study",
+      "scope": "nan",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 185,
+      "name": "AICTE Approval / Notices",
+      "url": "https://www.aicte-india.org",
+      "category": "Study",
+      "scope": "nan",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 186,
+      "name": "Ministry of Finance",
+      "url": "https://www.finmin.gov.in",
+      "category": "Finance",
+      "scope": "nan",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 187,
+      "name": "Department of Economic Affairs",
+      "url": "https://dea.gov.in",
+      "category": "Finance",
+      "scope": "nan",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 188,
+      "name": "Department of Financial Services",
+      "url": "https://financialservices.gov.in",
+      "category": "Finance",
+      "scope": "nan",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 189,
+      "name": "IRDAI",
+      "url": "https://irdai.gov.in",
+      "category": "Finance",
+      "scope": "nan",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 190,
+      "name": "PFRDA",
+      "url": "https://www.pfrda.org.in",
+      "category": "Finance",
+      "scope": "nan",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 191,
+      "name": "IFSCA",
+      "url": "https://ifsca.gov.in",
+      "category": "Finance",
+      "scope": "nan",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 192,
+      "name": "GST Portal",
+      "url": "https://www.gst.gov.in",
+      "category": "Finance",
+      "scope": "nan",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 193,
+      "name": "Income Tax e-Filing",
+      "url": "https://www.incometax.gov.in",
+      "category": "Finance",
+      "scope": "nan",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 194,
+      "name": "CBDT",
+      "url": "https://www.incometaxindia.gov.in",
+      "category": "Finance",
+      "scope": "nan",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 195,
+      "name": "MCA",
+      "url": "https://www.mca.gov.in",
+      "category": "Finance/Business",
+      "scope": "nan",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 196,
+      "name": "IBBI",
+      "url": "https://www.ibbi.gov.in",
+      "category": "Finance",
+      "scope": "nan",
+      "priority": "Medium",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 197,
+      "name": "CCI",
+      "url": "https://www.cci.gov.in",
+      "category": "Finance/Business",
+      "scope": "nan",
+      "priority": "Medium",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 198,
+      "name": "IndiaAI",
+      "url": "https://indiaai.gov.in",
+      "category": "Technology",
+      "scope": "nan",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 199,
+      "name": "Digital India",
+      "url": "https://www.digitalindia.gov.in",
+      "category": "Technology",
+      "scope": "nan",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 200,
+      "name": "NIC",
+      "url": "https://www.nic.gov.in",
+      "category": "Technology",
+      "scope": "nan",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 201,
+      "name": "CERT-In",
+      "url": "https://www.cert-in.org.in",
+      "category": "Technology",
+      "scope": "nan",
+      "priority": "High",
+      "check_frequency": "30 min",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 202,
+      "name": "STPI",
+      "url": "https://stpi.in",
+      "category": "Technology",
+      "scope": "nan",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 203,
+      "name": "CSIR",
+      "url": "https://www.csir.res.in",
+      "category": "Technology/Science",
+      "scope": "nan",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 204,
+      "name": "DST",
+      "url": "https://dst.gov.in",
+      "category": "Technology/Science",
+      "scope": "nan",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 205,
+      "name": "DBT",
+      "url": "https://dbtindia.gov.in",
+      "category": "Science",
+      "scope": "nan",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 206,
+      "name": "Department of Space",
+      "url": "https://www.isro.gov.in",
+      "category": "Technology/Science",
+      "scope": "nan",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 207,
+      "name": "DoT",
+      "url": "https://dot.gov.in",
+      "category": "Technology",
+      "scope": "nan",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 208,
+      "name": "TRAI",
+      "url": "https://www.trai.gov.in",
+      "category": "Technology/Finance",
+      "scope": "nan",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 209,
+      "name": "BIS",
+      "url": "https://www.bis.gov.in",
+      "category": "Technology/Industry",
+      "scope": "nan",
+      "priority": "Medium",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 210,
+      "name": "myScheme",
+      "url": "https://www.myscheme.gov.in",
+      "category": "Government Schemes",
+      "scope": "Central/State/UT",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 211,
+      "name": "myScheme Search",
+      "url": "https://search.myscheme.gov.in",
+      "category": "Government Schemes",
+      "scope": "Central/State/UT",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 212,
+      "name": "National Government Services Portal",
+      "url": "https://services.india.gov.in",
+      "category": "Government Services",
+      "scope": "Central/State/UT",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 213,
+      "name": "NSP Schemes",
+      "url": "https://scholarships.gov.in/allschemesdepartment",
+      "category": "Scholarships",
+      "scope": "Central/State",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 214,
+      "name": "Vidyasaarathi",
+      "url": "https://www.vidyasaarathi.co.in",
+      "category": "Education Finance",
+      "scope": "India",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 215,
+      "name": "NCS Schemes",
+      "url": "https://ncs.gov.in/careerSchemes",
+      "category": "Career/Skills",
+      "scope": "Central",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 216,
+      "name": "Ministry of Education",
+      "url": "https://www.education.gov.in",
+      "category": "Study",
+      "scope": "Central",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 217,
+      "name": "Department of School Education",
+      "url": "https://dsel.education.gov.in",
+      "category": "School Education",
+      "scope": "Central",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 218,
+      "name": "Department of Higher Education",
+      "url": "https://www.education.gov.in/higher_education",
+      "category": "Higher Education",
+      "scope": "Central",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 219,
+      "name": "National Council for Teacher Education",
+      "url": "https://ncte.gov.in",
+      "category": "Education",
+      "scope": "Central",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 220,
+      "name": "National Board of Accreditation",
+      "url": "https://www.nbaind.org",
+      "category": "Higher Education",
+      "scope": "Central",
+      "priority": "Medium",
+      "check_frequency": "1 day",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 221,
+      "name": "National Academic Depository",
+      "url": "https://nad.digilocker.gov.in",
+      "category": "Results/Credentials",
+      "scope": "Central",
+      "priority": "High",
+      "check_frequency": "1 day",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 222,
+      "name": "DigiLocker",
+      "url": "https://www.digilocker.gov.in",
+      "category": "Results/Documents",
+      "scope": "Central",
+      "priority": "High",
+      "check_frequency": "1 day",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 223,
+      "name": "Academic Bank of Credits",
+      "url": "https://www.abc.gov.in",
+      "category": "Higher Education",
+      "scope": "Central",
+      "priority": "High",
+      "check_frequency": "1 day",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 224,
+      "name": "PARAKH",
+      "url": "https://parakh.ncert.gov.in",
+      "category": "School Education",
+      "scope": "Central",
+      "priority": "Medium",
+      "check_frequency": "1 day",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 225,
+      "name": "National Testing Agency",
+      "url": "https://www.nta.ac.in",
+      "category": "Exams/Results",
+      "scope": "Central",
+      "priority": "High",
+      "check_frequency": "30 min",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 226,
+      "name": "CUET PG",
+      "url": "https://exams.nta.ac.in/CUET-PG",
+      "category": "Exams/Admissions",
+      "scope": "Central",
+      "priority": "High",
+      "check_frequency": "30 min",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 227,
+      "name": "Study in India",
+      "url": "https://studyinindia.gov.in",
+      "category": "Higher Education",
+      "scope": "Central",
+      "priority": "Medium",
+      "check_frequency": "1 day",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 228,
+      "name": "National Institute Ranking Framework",
+      "url": "https://www.nirfindia.org",
+      "category": "Higher Education",
+      "scope": "Central",
+      "priority": "Medium",
+      "check_frequency": "1 day",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 229,
+      "name": "National Digital Library of India",
+      "url": "https://ndl.iitkgp.ac.in",
+      "category": "Study Resources",
+      "scope": "Central",
+      "priority": "Medium",
+      "check_frequency": "1 day",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 230,
+      "name": "ePathshala",
+      "url": "https://epathshala.nic.in",
+      "category": "School Resources",
+      "scope": "Central",
+      "priority": "Medium",
+      "check_frequency": "1 day",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 231,
+      "name": "DIKSHA",
+      "url": "https://diksha.gov.in",
+      "category": "School/Teacher Education",
+      "scope": "Central/State",
+      "priority": "High",
+      "check_frequency": "1 day",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 232,
+      "name": "PM eVIDYA",
+      "url": "https://pmevidya.education.gov.in",
+      "category": "Digital Education",
+      "scope": "Central",
+      "priority": "High",
+      "check_frequency": "1 day",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 233,
+      "name": "Shodhganga",
+      "url": "https://shodhganga.inflibnet.ac.in",
+      "category": "Research",
+      "scope": "Central",
+      "priority": "Medium",
+      "check_frequency": "1 day",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 234,
+      "name": "INFLIBNET",
+      "url": "https://www.inflibnet.ac.in",
+      "category": "Higher Education",
+      "scope": "Central",
+      "priority": "Medium",
+      "check_frequency": "1 day",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 235,
+      "name": "CSIR-HRDG",
+      "url": "https://csirhrdg.res.in",
+      "category": "Research/Fellowship",
+      "scope": "Central",
+      "priority": "High",
+      "check_frequency": "1 day",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 236,
+      "name": "UGC",
+      "url": "https://www.ugc.gov.in",
+      "category": "Higher Education",
+      "scope": "Central",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 237,
+      "name": "PMKVY",
+      "url": "https://www.pmkvyofficial.org",
+      "category": "Skills",
+      "scope": "Central",
+      "priority": "High",
+      "check_frequency": "1 day",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 238,
+      "name": "DDU-GKY",
+      "url": "https://ddugky.info",
+      "category": "Skills/Jobs",
+      "scope": "Central/State",
+      "priority": "High",
+      "check_frequency": "1 day",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 239,
+      "name": "RBI",
+      "url": "https://www.rbi.org.in",
+      "category": "Finance",
+      "scope": "Central",
+      "priority": "High",
+      "check_frequency": "30 min",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 240,
+      "name": "EPFO",
+      "url": "https://www.epfindia.gov.in",
+      "category": "Finance/Social Security",
+      "scope": "Central",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 241,
+      "name": "ESIC",
+      "url": "https://www.esic.gov.in",
+      "category": "Finance/Social Security",
+      "scope": "Central",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 242,
+      "name": "NABARD",
+      "url": "https://www.nabard.org",
+      "category": "Finance/Jobs",
+      "scope": "Central",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 243,
+      "name": "RBI Opportunities",
+      "url": "https://opportunities.rbi.org.in",
+      "category": "Banking Jobs",
+      "scope": "Central",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 244,
+      "name": "ISRO Careers",
+      "url": "https://www.isro.gov.in/CurrentOpportunities.html",
+      "category": "Technology/Jobs",
+      "scope": "Central",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 245,
+      "name": "DRDO Careers",
+      "url": "https://drdo.gov.in/careers",
+      "category": "Technology/Jobs",
+      "scope": "Central",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 246,
+      "name": "India Semiconductor Mission",
+      "url": "https://ism.gov.in",
+      "category": "Technology/Industry",
+      "scope": "Central",
+      "priority": "Medium",
+      "check_frequency": "1 day",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 247,
+      "name": "Bhashini",
+      "url": "https://bhashini.gov.in",
+      "category": "Technology/AI",
+      "scope": "Central",
+      "priority": "Medium",
+      "check_frequency": "1 day",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 248,
+      "name": "Startup India",
+      "url": "https://www.startupindia.gov.in",
+      "category": "Technology/Business",
+      "scope": "Central",
+      "priority": "High",
+      "check_frequency": "1 day",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 249,
+      "name": "Andhra Pradesh Board of Secondary Education",
+      "url": "https://bse.ap.gov.in",
+      "category": "School Education/Results",
+      "scope": "Andhra Pradesh",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 250,
+      "name": "Andhra Pradesh Board of Intermediate Education",
+      "url": "https://bieap.apcfss.in",
+      "category": "School Education/Results",
+      "scope": "Andhra Pradesh",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 251,
+      "name": "Assam SEBA",
+      "url": "https://site.sebaonline.org",
+      "category": "School Education/Results",
+      "scope": "Assam",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 252,
+      "name": "Assam AHSEC",
+      "url": "https://ahsec.assam.gov.in",
+      "category": "School Education/Results",
+      "scope": "Assam",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 253,
+      "name": "Chhattisgarh Board",
+      "url": "https://cgbse.nic.in",
+      "category": "School Education/Results",
+      "scope": "Chhattisgarh",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 254,
+      "name": "Goa Board",
+      "url": "https://gbshse.in",
+      "category": "School Education/Results",
+      "scope": "Goa",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 255,
+      "name": "Gujarat Board",
+      "url": "https://www.gseb.org",
+      "category": "School Education/Results",
+      "scope": "Gujarat",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 256,
+      "name": "Himachal Pradesh Board",
+      "url": "https://hpbose.org",
+      "category": "School Education/Results",
+      "scope": "Himachal Pradesh",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 257,
+      "name": "Jammu Kashmir Board",
+      "url": "https://jkbose.nic.in",
+      "category": "School Education/Results",
+      "scope": "Jammu & Kashmir",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 258,
+      "name": "Jharkhand Academic Council",
+      "url": "https://jac.jharkhand.gov.in",
+      "category": "School Education/Results",
+      "scope": "Jharkhand",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 259,
+      "name": "Karnataka School Examination Board",
+      "url": "https://kseab.karnataka.gov.in",
+      "category": "School Education/Results",
+      "scope": "Karnataka",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 260,
+      "name": "Kerala Pareeksha Bhavan",
+      "url": "https://pareekshabhavan.kerala.gov.in",
+      "category": "School Education/Results",
+      "scope": "Kerala",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 261,
+      "name": "Kerala DHSE",
+      "url": "https://www.dhsekerala.gov.in",
+      "category": "School Education/Results",
+      "scope": "Kerala",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 262,
+      "name": "Manipur Board",
+      "url": "https://bsem.nic.in",
+      "category": "School Education/Results",
+      "scope": "Manipur",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 263,
+      "name": "Meghalaya Board",
+      "url": "https://mbose.in",
+      "category": "School Education/Results",
+      "scope": "Meghalaya",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 264,
+      "name": "Mizoram Board",
+      "url": "https://mbse.edu.in",
+      "category": "School Education/Results",
+      "scope": "Mizoram",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 265,
+      "name": "Nagaland Board",
+      "url": "https://nbsenl.edu.in",
+      "category": "School Education/Results",
+      "scope": "Nagaland",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 266,
+      "name": "Odisha Board",
+      "url": "https://www.bseodisha.ac.in",
+      "category": "School Education/Results",
+      "scope": "Odisha",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 267,
+      "name": "Odisha CHSE",
+      "url": "https://chseodisha.nic.in",
+      "category": "School Education/Results",
+      "scope": "Odisha",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 268,
+      "name": "Punjab School Education Board",
+      "url": "https://www.pseb.ac.in",
+      "category": "School Education/Results",
+      "scope": "Punjab",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 269,
+      "name": "Tamil Nadu DGE",
+      "url": "https://dge.tn.gov.in",
+      "category": "School Education/Results",
+      "scope": "Tamil Nadu",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 270,
+      "name": "Telangana Board of Intermediate Education",
+      "url": "https://tgbie.cgg.gov.in",
+      "category": "School Education/Results",
+      "scope": "Telangana",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 271,
+      "name": "Tripura Board",
+      "url": "https://tbse.tripura.gov.in",
+      "category": "School Education/Results",
+      "scope": "Tripura",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 272,
+      "name": "Uttarakhand Board",
+      "url": "https://ubse.uk.gov.in",
+      "category": "School Education/Results",
+      "scope": "Uttarakhand",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 273,
+      "name": "West Bengal Board",
+      "url": "https://wbbse.wb.gov.in",
+      "category": "School Education/Results",
+      "scope": "West Bengal",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 274,
+      "name": "West Bengal HS Council",
+      "url": "https://wbchse.wb.gov.in",
+      "category": "School Education/Results",
+      "scope": "West Bengal",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 275,
+      "name": "Delhi Directorate of Education",
+      "url": "https://www.edudel.nic.in",
+      "category": "School Education",
+      "scope": "Delhi",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 276,
+      "name": "Delhi University",
+      "url": "https://www.du.ac.in",
+      "category": "College/University",
+      "scope": "Delhi",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 277,
+      "name": "Puducherry Directorate of School Education",
+      "url": "https://schooledn.py.gov.in",
+      "category": "School Education",
+      "scope": "Puducherry",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 278,
+      "name": "Chandigarh Education Department",
+      "url": "https://chdeducation.gov.in",
+      "category": "School Education",
+      "scope": "Chandigarh",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 279,
+      "name": "Dadra Nagar Haveli and Daman Diu Education",
+      "url": "https://ddd.gov.in",
+      "category": "School Education/Services",
+      "scope": "Dadra & Nagar Haveli and Daman & Diu",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 280,
+      "name": "Andaman & Nicobar Education",
+      "url": "https://education.andaman.gov.in",
+      "category": "School Education",
+      "scope": "Andaman & Nicobar Islands",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 281,
+      "name": "Lakshadweep Education",
+      "url": "https://lakshadweep.gov.in",
+      "category": "School Education/Services",
+      "scope": "Lakshadweep",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 282,
+      "name": "Andhra Pradesh Government",
+      "url": "https://www.ap.gov.in",
+      "category": "State Government",
+      "scope": "Andhra Pradesh",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 283,
+      "name": "Arunachal Pradesh Government",
+      "url": "https://arunachalpradesh.gov.in",
+      "category": "State Government",
+      "scope": "Arunachal Pradesh",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 284,
+      "name": "Assam Government",
+      "url": "https://assam.gov.in",
+      "category": "State Government",
+      "scope": "Assam",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 285,
+      "name": "Bihar Government",
+      "url": "https://state.bihar.gov.in",
+      "category": "State Government",
+      "scope": "Bihar",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 286,
+      "name": "Chhattisgarh Government",
+      "url": "https://cgstate.gov.in",
+      "category": "State Government",
+      "scope": "Chhattisgarh",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 287,
+      "name": "Goa Government",
+      "url": "https://www.goa.gov.in",
+      "category": "State Government",
+      "scope": "Goa",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 288,
+      "name": "Gujarat Government",
+      "url": "https://gujaratindia.gov.in",
+      "category": "State Government",
+      "scope": "Gujarat",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 289,
+      "name": "Haryana Government",
+      "url": "https://haryana.gov.in",
+      "category": "State Government",
+      "scope": "Haryana",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 290,
+      "name": "Himachal Pradesh Government",
+      "url": "https://himachal.nic.in",
+      "category": "State Government",
+      "scope": "Himachal Pradesh",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 291,
+      "name": "Jharkhand Government",
+      "url": "https://www.jharkhand.gov.in",
+      "category": "State Government",
+      "scope": "Jharkhand",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 292,
+      "name": "Karnataka Government",
+      "url": "https://www.karnataka.gov.in",
+      "category": "State Government",
+      "scope": "Karnataka",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 293,
+      "name": "Kerala Government",
+      "url": "https://kerala.gov.in",
+      "category": "State Government",
+      "scope": "Kerala",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 294,
+      "name": "Madhya Pradesh Government",
+      "url": "https://mp.gov.in",
+      "category": "State Government",
+      "scope": "Madhya Pradesh",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 295,
+      "name": "Maharashtra Government",
+      "url": "https://www.maharashtra.gov.in",
+      "category": "State Government",
+      "scope": "Maharashtra",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 296,
+      "name": "Manipur Government",
+      "url": "https://manipur.gov.in",
+      "category": "State Government",
+      "scope": "Manipur",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 297,
+      "name": "Meghalaya Government",
+      "url": "https://meghalaya.gov.in",
+      "category": "State Government",
+      "scope": "Meghalaya",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 298,
+      "name": "Mizoram Government",
+      "url": "https://mizoram.gov.in",
+      "category": "State Government",
+      "scope": "Mizoram",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 299,
+      "name": "Nagaland Government",
+      "url": "https://nagaland.gov.in",
+      "category": "State Government",
+      "scope": "Nagaland",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 300,
+      "name": "Odisha Government",
+      "url": "https://odisha.gov.in",
+      "category": "State Government",
+      "scope": "Odisha",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 301,
+      "name": "Punjab Government",
+      "url": "https://punjab.gov.in",
+      "category": "State Government",
+      "scope": "Punjab",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 302,
+      "name": "Rajasthan Government",
+      "url": "https://rajasthan.gov.in",
+      "category": "State Government",
+      "scope": "Rajasthan",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 303,
+      "name": "Sikkim Government",
+      "url": "https://www.sikkim.gov.in",
+      "category": "State Government",
+      "scope": "Sikkim",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 304,
+      "name": "Tamil Nadu Government",
+      "url": "https://www.tn.gov.in",
+      "category": "State Government",
+      "scope": "Tamil Nadu",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 305,
+      "name": "Telangana Government",
+      "url": "https://www.telangana.gov.in",
+      "category": "State Government",
+      "scope": "Telangana",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 306,
+      "name": "Tripura Government",
+      "url": "https://tripura.gov.in",
+      "category": "State Government",
+      "scope": "Tripura",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 307,
+      "name": "Uttar Pradesh Government",
+      "url": "https://up.gov.in",
+      "category": "State Government",
+      "scope": "Uttar Pradesh",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 308,
+      "name": "Uttarakhand Government",
+      "url": "https://uk.gov.in",
+      "category": "State Government",
+      "scope": "Uttarakhand",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 309,
+      "name": "West Bengal Government",
+      "url": "https://wb.gov.in",
+      "category": "State Government",
+      "scope": "West Bengal",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 310,
+      "name": "Delhi Government",
+      "url": "https://delhi.gov.in",
+      "category": "UT Government",
+      "scope": "Delhi",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 311,
+      "name": "Jammu Kashmir Government",
+      "url": "https://jk.gov.in",
+      "category": "UT Government",
+      "scope": "Jammu & Kashmir",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 312,
+      "name": "Ladakh Administration",
+      "url": "https://ladakh.gov.in",
+      "category": "UT Government",
+      "scope": "Ladakh",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 313,
+      "name": "Puducherry Government",
+      "url": "https://py.gov.in",
+      "category": "UT Government",
+      "scope": "Puducherry",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 314,
+      "name": "Andaman & Nicobar Administration",
+      "url": "https://andaman.gov.in",
+      "category": "UT Government",
+      "scope": "Andaman & Nicobar Islands",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
+    },
+    {
+      "id": 315,
+      "name": "Chandigarh Administration",
+      "url": "https://chandigarh.gov.in",
+      "category": "UT Government",
+      "scope": "Chandigarh",
+      "priority": "High",
+      "check_frequency": "1 hour",
+      "blog_worthy_default": "Yes"
     }
   ],
   "webhook": {
     "endpoint": "https://www.knowora.in/api/publish-from-ai",
-    "secret": "knowora-secret-2026",
-    "method": "POST"
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "x-ai-secret": "knowora-secret-2026"
+    },
+    "payload_schema": {
+      "title": "String (Required - Catchy, High-CTR, SEO-optimized title in Hinglish/English)",
+      "slug": "String (Optional - Auto-generated kebab-case if omitted)",
+      "content": "String (Required - Minimum 2000-2800+ words Markdown/HTML with Tables, Eligibility, Age Relaxation, 7th CPC Salary, 90-Day Strategy, Step-by-Step Guide, 10 FAQs in details/summary)",
+      "excerpt": "String (Required - 140-160 character meta description)",
+      "category": "String (Required - Sarkari Jobs | Education | Admissions | Results | Schemes | Technology | Finance)",
+      "tags": "Array of Strings (Required - e.g. [\"Sarkari Result\", \"UP Police\", \"Notification 2026\"])",
+      "featuredImage": "String (Optional - High quality Unsplash/Official banner URL)",
+      "officialSourceUrl": "String (Required - Official .gov.in/.nic.in portal URL matching one of the 315 sources)",
+      "status": "String (Optional - \"PUBLISHED\" or \"DRAFT\", default: \"PUBLISHED\")"
+    }
   }
 }

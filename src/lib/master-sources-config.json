@@ -1,0 +1,137 @@
+{
+  "config_version": "1.0.0",
+  "project": "Knowora.in",
+  "purpose": "24-hour official-source research and one-time blog topic generation",
+  "timezone": "Asia/Kolkata",
+  "window": {
+    "type": "rolling",
+    "hours": 24,
+    "include_items_published_or_updated_since": "now_minus_24h",
+    "exclude_future_timestamps": true,
+    "timestamp_priority": [
+      "official_updated_at",
+      "official_published_at",
+      "document_date",
+      "page_modified_at"
+    ],
+    "fallback_timestamp_policy": "If no trustworthy source timestamp exists, mark timestamp_unverified=true and do not auto-publish."
+  },
+  "content_scope": [
+    "Study",
+    "Schools",
+    "Colleges",
+    "Universities",
+    "Courses",
+    "Admissions",
+    "Entrance Exams",
+    "Results",
+    "Answer Keys",
+    "Counselling",
+    "Scholarships",
+    "Education Loans",
+    "Internships",
+    "Apprenticeships",
+    "Government Jobs",
+    "PSU Jobs",
+    "Private Jobs",
+    "Career",
+    "Finance",
+    "Banking",
+    "Tax",
+    "Insurance",
+    "Technology",
+    "AI",
+    "Cybersecurity",
+    "Science",
+    "Government Schemes",
+    "Skill Development",
+    "Fellowships"
+  ],
+  "source_policy": {
+    "preferred_source_order": [
+      "official_government_notification",
+      "official_government_webpage",
+      "official_rss_or_atom",
+      "official_api",
+      "official_pdf",
+      "official_institution_page"
+    ],
+    "secondary_sources_allowed_for_discovery_only": true,
+    "secondary_sources_must_not_be_final_fact_source": true,
+    "private_job_portals_are_labeled_private": true
+  },
+  "freshness_rules": {
+    "only_process_last_24_hours": true,
+    "use_source_timestamp_not_crawl_timestamp": true,
+    "same_document_version_is_not_new": true,
+    "older_content_updated_without_substantive_change_is_not_new": true,
+    "future_dated_items_are_rejected": true,
+    "duplicate_across_multiple_sources_should_be_merged": true
+  },
+  "deduplication": {
+    "enabled": true,
+    "persistent_store_required": true,
+    "never_reuse_processed_fingerprint": true,
+    "fingerprint_priority": [
+      "official_document_id",
+      "official_notice_number",
+      "canonical_url",
+      "document_sha256",
+      "normalized_title_plus_source_plus_event_date"
+    ],
+    "url_normalization": {
+      "remove_tracking_parameters": true,
+      "normalize_trailing_slash": true,
+      "lowercase_hostname": true
+    },
+    "content_hash_algorithm": "sha256",
+    "semantic_duplicate_check": true,
+    "semantic_similarity_threshold": 0.92,
+    "duplicate_action": "merge_into_existing_item_and_do_not_create_new_blog"
+  },
+  "topic_rules": {
+    "one_blog_per_unique_event": true,
+    "same_event_from_multiple_sources": "one_topic",
+    "minor_update_without_new_information": "skip",
+    "correction_or_revised_notification": "new_topic_only_if_substantive_change",
+    "result_update": "new_topic_if_result_is_new",
+    "job_recruitment": "new_topic_if_new_advertisement_or_substantive_corrigendum",
+    "scholarship": "new_topic_if_new_scheme_window_deadline_amount_eligibility_or_payment_update",
+    "loan": "new_topic_if_new_rate_rule_eligibility_deadline_or_official_scheme_update",
+    "internship": "new_topic_if_new_opportunity_or_deadline",
+    "technology": "new_topic_if_official_new_release_policy_project_or_recruitment",
+    "finance": "new_topic_if_official_new_rule_circular_rate_or_notification"
+  },
+  "genuineness": {
+    "minimum_official_sources_per_article": 1,
+    "preferred_official_sources_per_article": 2,
+    "official_source_required_for_claims": true,
+    "no_unsourced_numbers": true,
+    "no_inferred_eligibility": true,
+    "no_invented_dates": true,
+    "no_invented_vacancies": true,
+    "no_clickbait_claims_not_supported_by_source": true,
+    "if_source_conflicts": "show_conflict_and_prioritize_latest_primary_source",
+    "if_source_is_unclear": "do_not_auto_publish"
+  },
+  "article_generation": {
+    "status": "draft_only_until_human_approval",
+    "language": "Hindi",
+    "tone": "clear, factual, useful",
+    "required_sections": [
+      "title",
+      "summary",
+      "what_is_new",
+      "important_details",
+      "eligibility_or_applicability_if_relevant",
+      "dates_if_relevant",
+      "how_to_apply_or_check_if_relevant",
+      "official_source",
+      "faq_if_supported_by_source"
+    ],
+    "must_cite_source_urls": true,
+    "source_url_must_be_official_when_available": true,
+    "one_article_per_event": true
+  },
+  "source_count": 315
+}

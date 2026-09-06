@@ -1,18 +1,14 @@
-import { NextResponse, NextRequest } from 'next/server';
-import masterSources from '@/lib/master-sources-config.json';
+import { NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET(request: NextRequest) {
-  const { searchParams } = new URL(request.url);
-  const format = searchParams.get('format') || 'json';
-
+export async function GET() {
   const payload = {
     system_name: "Knowora Universal AI Research & Auto-Blog Engine",
     canonical_domain: "https://www.knowora.in",
     webhook_endpoint: "https://www.knowora.in/api/publish-from-ai",
     webhook_secret: "knowora-secret-2026",
-    config_version: masterSources.config_version || "1.0.0",
+    config_version: "1.0.0",
     purpose: "24-hour official-source research and 2000-2800+ words Hindi master blog generation",
     rules: {
       freshness: "Only process official government / institutional notifications published in the last 24 hours.",
@@ -72,48 +68,13 @@ export async function GET(request: NextRequest) {
         officialApplyUrl: "https://rrbapply.gov.in"
       }
     },
-    master_prompt_for_ai: `आप Knowora (https://www.knowora.in) के मुख्य चीफ एडिटर हैं। 
-आपका कार्य पिछले 24 घंटों में भारत सरकार (Central/State Govt), भर्ती बोर्डों, विश्वविद्यालयों, या नियामक संस्थाओं द्वारा जारी किसी भी आधिकारिक अधिसूचना, परीक्षा परिणाम, एडमिट कार्ड, योजना, तकनीकी लॉन्च या वित्तीय अपडेट पर 2000-2800+ शब्दों का एक संपूर्ण, प्रामाणिक और विस्तृत हिंदी ब्लॉग आर्टिकल लिखना है।
-
-हर आर्टिकल में निम्नलिखित 14 बिंदु 100% शामिल होने चाहिए:
-1. 📊 Key Highlights Table (भर्ती बोर्ड, पद, वेतन, अंतिम तिथि, आधिकारिक पोर्टल)
-2. 📋 श्रेणीवार रिक्तियों का विस्तृत वर्गीकरण तालिका (UR, OBC, EWS, SC, ST, PwD)
-3. 🎓 विस्तृत शैक्षणिक योग्यता एवं पात्रता मापदंड
-4. 🎂 आयु सीमा एवं श्रेणीवार छूट तालिका (3 वर्ष, 5 वर्ष, 10 वर्ष)
-5. 🏆 चयन प्रक्रिया के 4 चरण (लिखित परीक्षा → स्किल टेस्ट → दस्तावेज सत्यापन → मेडिकल)
-6. 📝 विस्तृत परीक्षा पैटर्न, अंक योजना और समय अवधि तालिका
-7. 💰 7वें वेतन आयोग के अनुसार इन-हैंड सैलरी स्ट्रक्चर तालिका
-8. 📅 90-दिवसीय वैज्ञानिक तैयारी रणनीति (Phase 1, 2, 3)
-9. 📲 ऑनलाइन आवेदन करने की 7-स्टेप चरणबद्ध गाइड
-10. ⚠️ 7 बड़ी गलतियां जिनसे बचना आवश्यक है
-11. 🔗 महत्वपूर्ण आधिकारिक वेब लिंक्स तालिका (100% असली सरकारी लिंक्स)
-12. ❓ 10 महत्वपूर्ण FAQs (<details><summary> टैग में)
-13. 📌 निष्कर्ष एवं अभ्यर्थियों के लिए संदेश
-
-जब आप आर्टिकल तैयार कर लें, तो सीधे POST https://www.knowora.in/api/publish-from-ai पर secret: "knowora-secret-2026" के साथ JSON भेजकर पब्लिश करें।`
+    master_prompt_for_ai: "आप Knowora (https://www.knowora.in) के मुख्य चीफ एडिटर हैं। आपका कार्य पिछले 24 घंटों में भारत सरकार (Central/State Govt), भर्ती बोर्डों, विश्वविद्यालयों, या नियामक संस्थाओं द्वारा जारी किसी भी आधिकारिक अधिसूचना, परीक्षा परिणाम, एडमिट कार्ड, योजना, तकनीकी लॉन्च या वित्तीय अपडेट पर 2000-2800+ शब्दों का एक संपूर्ण, प्रामाणिक और विस्तृत हिंदी ब्लॉग आर्टिकल लिखना है। जब आप आर्टिकल तैयार कर लें, तो सीधे POST https://www.knowora.in/api/publish-from-ai पर secret: \"knowora-secret-2026\" के साथ JSON भेजकर पब्लिश करें।"
   };
-
-  if (format === 'text' || format === 'markdown') {
-    const textOutput = `# Knowora Universal AI Master Blueprint & Feed
-**Canonical Domain:** ${payload.canonical_domain}
-**Publishing Webhook:** ${payload.webhook_endpoint}
-**Webhook Secret:** `knowora-secret-2026`
-
-## Master Instructions for AI Agents
-${payload.master_prompt_for_ai}
-
-## JSON API Endpoint
-To consume as JSON: `https://www.knowora.in/api/ai-blueprint?format=json`
-`;
-    return new NextResponse(textOutput, {
-      headers: { 'Content-Type': 'text/plain; charset=utf-8' }
-    });
-  }
 
   return NextResponse.json(payload, {
     headers: {
       'Access-Control-Allow-Origin': '*',
-      'Cache-Control': 'public, max-age=300'
+      'Cache-Control': 'public, max-age=60'
     }
   });
 }

@@ -136,8 +136,24 @@ export function resolveOfficialLinks(title: string, rawContent: string): { offic
     .replace(/href=["'](https?:\/\/)?(www\.)?(example\.com|placeholder\.com|#)[^"']*["']/gi, `href="${target.apply}" target="_blank" rel="nofollow"`)
     .replace(/href=["']#["']/gi, `href="${target.official}" target="_blank" rel="nofollow"`);
 
-  // Autolink plain URLs
-  sanitized = sanitized.replace(/(?<!href=["']|src=["']|>)(https?:\/\/[a-zA-Z0-9.-]+(?:\/[^\s<>"'()]*)?)/gi, '<a href="$1" target="_blank" rel="nofollow" class="text-blue-500 font-bold underline hover:text-blue-400">$1</a>');
+  // 1. Convert markdown links [text](url) -> <a href="url" target="_blank" rel="noopener noreferrer">text</a>
+  sanitized = sanitized.replace(/\[([^\]]+)\]\((https?:\/\/[^\s\)]+)\)/gi, (match, linkTitle, linkUrl) => {
+    return `<a href="${linkUrl}" target="_blank" rel="noopener noreferrer" class="text-blue-500 font-bold underline hover:text-blue-400">👉 ${linkTitle}</a>`;
+  });
+
+  // 2. Autolink plain URLs that are not already inside an <a> tag
+  const parts = sanitized.split(/(<a\b[^>]*>[\s\S]*?<\/a>|<[^>]+>)/gi);
+  for (let i = 0; i < parts.length; i++) {
+    if (parts[i] && !parts[i].startsWith('<')) {
+      parts[i] = parts[i].replace(/(https?:\/\/[a-zA-Z0-9.\-_~:\/?#[\]@!$&'()*+,;=%]+)/gi, (url) => {
+        return `<a href="${url}" target="_blank" rel="noopener noreferrer" class="text-blue-500 font-bold underline hover:text-blue-400">🔗 ${url}</a>`;
+      });
+    }
+  }
+  sanitized = parts.join('');
+
+  // 3. Ensure all existing <a> tags have target="_blank" and rel="noopener noreferrer"
+  sanitized = sanitized.replace(/<a\s+(?![^>]*target=)([^>]*href=["'][^"']+["'][^>]*)>/gi, '<a target="_blank" rel="noopener noreferrer" $1>');
 
   // If no links table, append verified official links table
   const hasLinks = sanitized.includes('<a href=') && (sanitized.includes('Official Links') || sanitized.includes('आधिकारिक') || sanitized.includes('Important Links'));
@@ -152,9 +168,9 @@ export function resolveOfficialLinks(title: string, rawContent: string): { offic
     </tr>
   </thead>
   <tbody>
-    <tr><td>आधिकारिक पोर्टल (${target.name})</td><td><a href="${target.official}" target="_blank" rel="nofollow" class="text-blue-500 font-bold underline">👉 Visit Official Website</a></td></tr>
-    <tr><td>ऑनलाइन आवेदन / सूचना लिंक (Apply / Result Portal)</td><td><a href="${target.apply}" target="_blank" rel="nofollow" class="text-blue-500 font-bold underline">👉 Click Here to Access</a></td></tr>
-    <tr><td>विस्तृत अधिसूचना एवं दिशा-निर्देश (Official Notification)</td><td><a href="${target.notification}" target="_blank" rel="nofollow" class="text-blue-500 font-bold underline">👉 Download Details</a></td></tr>
+    <tr><td>आधिकारिक पोर्टल (${target.name})</td><td><a href="${target.official}" target="_blank" rel="noopener noreferrer" class="text-blue-500 font-bold underline">👉 Visit Official Website (${target.official.replace('https://', '')})</a></td></tr>
+    <tr><td>ऑनलाइन आवेदन / सूचना लिंक (Apply / Result Portal)</td><td><a href="${target.apply}" target="_blank" rel="noopener noreferrer" class="text-blue-500 font-bold underline">👉 Click Here to Apply / Access Portal</a></td></tr>
+    <tr><td>विस्तृत अधिसूचना एवं दिशा-निर्देश (Official Notification)</td><td><a href="${target.notification}" target="_blank" rel="noopener noreferrer" class="text-blue-500 font-bold underline">👉 Download Official Notification PDF</a></td></tr>
   </tbody>
 </table>`;
   }

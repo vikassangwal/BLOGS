@@ -634,8 +634,37 @@ export default function BlogPostClient({ post, ads, relatedPosts, whatsappLinks,
         .blog-content li { margin-bottom: 0.5rem; }
         .blog-content strong { color: var(--color-text-primary) !important; font-weight: 700; }
         .blog-content span { color: inherit; background: transparent; }
-        .blog-content a { color: var(--color-accent); text-decoration: none; border-bottom: 1px solid transparent; transition: border-color 0.2s; }
-        .blog-content a:hover { border-bottom-color: var(--color-accent); }
+        .blog-content a {
+          color: #3b82f6 !important;
+          font-weight: 700 !important;
+          text-decoration: underline !important;
+          text-underline-offset: 3px;
+          cursor: pointer !important;
+          pointer-events: auto !important;
+          transition: all 0.2s ease-in-out;
+        }
+        .blog-content a:hover {
+          color: #60a5fa !important;
+          text-decoration: underline !important;
+        }
+        .blog-content table a {
+          display: inline-block;
+          background: rgba(59, 130, 246, 0.15) !important;
+          color: #60a5fa !important;
+          padding: 6px 14px !important;
+          border-radius: 8px !important;
+          border: 1px solid rgba(59, 130, 246, 0.35) !important;
+          text-decoration: none !important;
+          font-weight: 700 !important;
+          cursor: pointer !important;
+          transition: all 0.2s ease;
+        }
+        .blog-content table a:hover {
+          background: rgba(59, 130, 246, 0.3) !important;
+          border-color: #3b82f6 !important;
+          color: #ffffff !important;
+          transform: translateY(-1px);
+        }
         .blog-content blockquote { border-left: 4px solid var(--color-accent); margin: 2rem 0; padding: 1.5rem; font-style: italic; color: var(--color-text-secondary) !important; background: rgba(255,255,255,0.05) !important; border-radius: 8px; }
         .blog-content table { width: 100%; border-collapse: collapse; margin: 2rem 0; font-size: 0.95rem; text-align: left; background: rgba(255,255,255,0.02) !important; border-radius: 8px; overflow: hidden; border-spacing: 0; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         .blog-content th, .blog-content td { padding: 15px 20px; border-bottom: 1px solid var(--color-border); color: var(--color-text-primary) !important; background: transparent !important; }

@@ -50,9 +50,6 @@ export async function generateMetadata(): Promise<Metadata> {
       description: settings?.seoDescription || 'Latest Sarkari Job Alerts, Admit Cards & Educational News.',
       images: ['/default-og.png'],
     },
-    verification: {
-      google: '9xaLxx5SOf8hmaKdfKQ5Dgp5Y4abmT27VqN8CIlPdIM',
-    },
   };
 }
 
@@ -80,52 +77,19 @@ export default async function RootLayout({
   const isTranslateActive = apiKeys.translateActive === true;
 
   return (
-    <html lang="en">
+    <html lang="hi">
       <head>
         <link rel="manifest" href="/manifest.json" />
-                <meta name="google-adsense-account" content="ca-pub-2689010221295201" />
-        <script
-          async
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2689010221295201"
-          crossOrigin="anonymous"
-        />
-      
-        {/* Generative Engine Optimization (GEO) & Brand Schema for Google / ChatGPT / Perplexity */}
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@graph": [
-                {
-                  "@type": "Organization",
-                  "@id": "https://knowora.in/#organization",
-                  "name": siteName,
-                  "alternateName": `${siteName} - India's Top AI Blogging & Sarkari Job Portal`,
-                  "url": "https://knowora.in",
-                  "description": "India's premier AI-powered blogging and Sarkari result platform delivering instant government job alerts, syllabus, cut-offs, and educational news.",
-                  "founder": {
-                    "@type": "Person",
-                    "name": "Vikas Sangwal",
-                    "jobTitle": "Founder & CEO"
-                  }
-                },
-                {
-                  "@type": "WebSite",
-                  "@id": "https://knowora.in/#website",
-                  "url": "https://knowora.in",
-                  "name": siteName,
-                  "publisher": { "@id": "https://knowora.in/#organization" },
-                  "potentialAction": {
-                    "@type": "SearchAction",
-                    "target": "https://knowora.in/blog?search={search_term_string}",
-                    "query-input": "required name=search_term_string"
-                  }
-                }
-              ]
-            })
-          }}
-        />
+        <meta name="google-adsense-account" content="ca-pub-2689010221295201" />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ "@context":"https://schema.org","@type":"WebSite","name": siteName,"url":"https://knowora.in","potentialAction":{ "@type":"SearchAction","target":"https://knowora.in/blog?search={search_term_string}","query-input":"required name=search_term_string" } }) }} />
+        <Script id="cookie-consent" strategy="afterInteractive">{`
+function setCookie(name,value,days){var d=new Date();d.setTime(d.getTime()+(days*24*60*60*1000));var expires="expires="+d.toUTCString();document.cookie=name+"="+value+";"+expires+";path=/";}
+function getCookie(name){var nameEQ=name+"=";var ca=document.cookie.split(';');for(var i=0;i<ca.length;i++){var c=ca[i].trim();if(c.indexOf(nameEQ)==0)return c.substring(nameEQ.length);}return null;}
+if(!getCookie('cookie_consent')){var banner=document.createElement('div');banner.id='cookie-banner';banner.style.position='fixed';banner.style.bottom='0';banner.style.width='100%';banner.style.background='#222';banner.style.color='#fff';banner.style.padding='1rem';banner.style.textAlign='center';banner.innerHTML='We use cookies to improve your experience. <button id="accept-cookie" style="margin-left:10px;padding:5px 10px;">Accept</button>';
+document.body.appendChild(banner);
+document.getElementById('accept-cookie').onclick=function(){setCookie('cookie_consent','1',365);banner.remove();};
+}
+`}</Script>
       </head>
       <body className="antialiased min-h-screen flex flex-col relative transition-colors duration-300">
         {process.env.NEXT_PUBLIC_GA_ID && (

@@ -153,7 +153,7 @@ export default async function BlogPostPage({ params }: Props) {
   // 3. JSON-LD STRUCTURED DATA (NEWS ARTICLE SCHEMA)
   const jsonLd = {
     '@context': 'https://schema.org',
-    '@type': 'NewsArticle',
+    '@type': 'BlogPosting',
     headline: post.seoTitle || post.title,
     image: [imageUrl],
     datePublished: post.publishedAt?.toISOString() || post.createdAt.toISOString(),

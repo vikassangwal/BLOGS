@@ -87,7 +87,7 @@ export async function POST(request: NextRequest) {
 }`;
 
         const userPrompt = `विषय: "${singleTitle}" (कृपया 2026 आधारित संपूर्ण जानकारी लिखें)`;
-        const aiResponse = await generateAIContent(systemPrompt, userPrompt, aiConfig);
+        const aiResponse = await generateAIContent(aiConfig, systemPrompt, userPrompt);
 
         let parsed: any = {};
         try {

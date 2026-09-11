@@ -2,7 +2,7 @@
 // This script connects to the Prisma client and scans all blog posts.
 // It calculates word count of each post's content and logs posts with fewer than 500 words.
 
-import { prisma } from '../lib/prisma';
+import { prisma } from '../src/lib/prisma';
 
 async function countWords(text: string): Promise<number> {
   // Strip HTML tags and count words separated by whitespace.

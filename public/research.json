@@ -1,0 +1,21 @@
+{
+  "status": "active",
+  "service": "Knowora Official Research Engine",
+  "canonical_domain": "https://www.knowora.in",
+  "endpoints": {
+    "blueprint": "https://www.knowora.in/ai-blueprint.json",
+    "publish": "https://www.knowora.in/api/publish-from-ai",
+    "feed": "https://www.knowora.in/api/ai-feed",
+    "openapi": "https://www.knowora.in/openapi.json"
+  },
+  "publishing_credentials": {
+    "secret": "knowora-secret-2026",
+    "method": "POST",
+    "target_endpoint": "https://www.knowora.in/api/publish-from-ai"
+  },
+  "rules": {
+    "min_words": 2000,
+    "language": "Hindi",
+    "facts_policy": "Strictly official sources only"
+  }
+}

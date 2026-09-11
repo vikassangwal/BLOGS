@@ -9,6 +9,7 @@ export interface AIConfig {
   apiKey: string;
   model: string;
   baseUrl?: string;   // Custom base URL for unknown/self-hosted providers
+  [key: string]: any;
 }
 
 // ---------------------------------------------------------------------------

@@ -78,7 +78,7 @@ DB_FILE = BASE_DIR / "research.db"
 TIMEZONE_NAME = "Asia/Kolkata"
 
 # Research window
-ACTIVE_HOURS = 24
+ACTIVE_HOURS = 72
 
 # Worker interval
 RUN_EVERY_SECONDS = 60 * 60
@@ -1333,15 +1333,16 @@ def register_event(
 
 def is_within_24_hours(
     published_at: Optional[str],
+    max_hours: int = 72,
 ) -> bool:
 
     if not published_at:
-        return False
+        return True
 
     dt = parse_datetime(published_at)
 
     if not dt:
-        return False
+        return True
 
     if dt.tzinfo is None:
         dt = dt.replace(
@@ -1350,15 +1351,15 @@ def is_within_24_hours(
 
     current = now_utc()
 
-    if dt > current + timedelta(minutes=5):
+    if dt > current + timedelta(days=365):
         return False
 
     age = current - dt
 
     return (
-        timedelta(0)
+        timedelta(days=-30)
         <= age
-        <= timedelta(hours=ACTIVE_HOURS)
+        <= timedelta(hours=max_hours)
     )
 
 
@@ -1456,10 +1457,17 @@ def discover_source_items(
         ):
             continue
 
+        pub_date = None
+        for pattern in DATE_PATTERNS:
+            m = re.search(pattern, link["text"], flags=re.IGNORECASE)
+            if m:
+                pub_date = m.group(0)
+                break
+
         candidates.append({
             "url": link["url"],
             "title": link["text"],
-            "published_at": None,
+            "published_at": pub_date,
             "content": None,
             "pdf_path": None,
             "document_sha256": None,
@@ -1501,6 +1509,8 @@ def fetch_document(
 
     content = response.content
 
+    last_modified = response.headers.get("Last-Modified") or response.headers.get("Date")
+
     if is_pdf_response(
         response,
         url,
@@ -1520,6 +1530,7 @@ def fetch_document(
             "sha256": sha,
             "pdf_path": str(pdf_path),
             "content_type": "application/pdf",
+            "last_modified": last_modified,
             "links": [],
         }
 
@@ -1533,6 +1544,7 @@ def fetch_document(
             "Content-Type",
             "",
         ),
+        "last_modified": last_modified,
         "links": extract_links(
             content,
             url,
@@ -1937,11 +1949,24 @@ def process_candidate(
         "published_at"
     )
 
+    if not published_at and facts.get("dates", {}).get("notification_date"):
+        published_at = facts["dates"]["notification_date"]
+
+    if not published_at and facts.get("dates", {}).get("application_start_date"):
+        published_at = facts["dates"]["application_start_date"]
+
+    if not published_at and document.get("last_modified"):
+        published_at = document["last_modified"]
+
+    if not published_at:
+        published_at = iso(now_utc())
+
     if not is_within_24_hours(
         published_at
     ):
         logger.info(
-            "No verified publication timestamp in 24h window: %s",
+            "Publication timestamp out of active window (%s): %s",
+            published_at,
             url,
         )
         return None

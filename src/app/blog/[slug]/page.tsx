@@ -68,25 +68,32 @@ async function getPostBySlugOrId(rawSlug: string) {
 
 // 1. DYNAMIC METADATA (OPEN GRAPH, TWITTER CARDS, SEO)
 export async function generateMetadata(
-  { params }: Props,
-  parent: ResolvingMetadata
+  { params }: Props
 ): Promise<Metadata> {
   try {
     const resolvedParams = await params;
-    const post = await getPostBySlugOrId(resolvedParams.slug || '');
+    const post = await getPostBySlugOrId(resolvedParams?.slug || '');
 
     if (!post) {
-      return { title: 'Post Not Found | KnowOra' };
+      return { title: 'Post Not Found | Knowora' };
     }
 
-    const siteSettings = await prisma.siteSettings.findUnique({ where: { id: 'default' } }).catch(() => null);
-    const siteName = siteSettings?.siteName || 'Knowora';
-
-    const title = post.seoTitle || post.title;
+    const title = post.seoTitle || post.title || 'Knowora Blog';
     const description = post.seoDescription || post.excerpt || '';
     const url = `https://knowora.in/blog/${post.slug}`;
     const rawImageUrl = post.featuredImage || 'https://knowora.in/default-og.png';
-    const imageUrl = `https://www.knowora.in/api/og?title=${encodeURIComponent(title)}&bg=${encodeURIComponent(rawImageUrl)}`;
+
+    const safeDate = (d: any) => {
+      if (!d) return undefined;
+      try {
+        const dt = new Date(d);
+        return isNaN(dt.getTime()) ? undefined : dt.toISOString();
+      } catch {
+        return undefined;
+      }
+    };
+
+    const pubDate = safeDate(post.publishedAt) || safeDate(post.createdAt) || new Date().toISOString();
 
     return {
       title: title,
@@ -97,30 +104,29 @@ export async function generateMetadata(
         title: title,
         description: description,
         url: url,
-        siteName: siteName,
-        images: [{ url: imageUrl, width: 1200, height: 630, alt: title }],
-        locale: 'en_IN',
+        siteName: 'Knowora',
+        images: [{ url: rawImageUrl, width: 1200, height: 630, alt: title }],
+        locale: 'hi_IN',
         type: 'article',
-        publishedTime: post.publishedAt?.toISOString() || post.createdAt.toISOString(),
-        authors: post.authorId ? ['Author'] : [],
+        publishedTime: pubDate,
       },
       twitter: {
         card: 'summary_large_image',
         title: title,
         description: description,
-        images: [imageUrl],
+        images: [rawImageUrl],
       },
     };
   } catch (err) {
     console.error("Error generating metadata:", err);
-    return { title: 'Blog Article | KnowOra' };
+    return { title: 'Blog Article | Knowora' };
   }
 }
 
 // 2. SERVER COMPONENT (DATA FETCHING & SCHEMA INJECTION)
 export default async function BlogPostPage({ params }: Props) {
   const resolvedParams = await params;
-  const rawSlug = resolvedParams.slug || '';
+  const rawSlug = resolvedParams?.slug || '';
   const post = await getPostBySlugOrId(rawSlug);
 
   if (!post) {
@@ -132,19 +138,13 @@ export default async function BlogPostPage({ params }: Props) {
     prisma.adPlacement.findMany({ where: { isActive: true } }).catch(() => []),
     prisma.blogPost.findMany({
       where: { status: 'Published', slug: { not: post.slug } },
-      orderBy: { publishedAt: 'desc' },
+      orderBy: [{ publishedAt: 'desc' }, { createdAt: 'desc' }],
       take: 4,
       select: { id: true, title: true, slug: true, excerpt: true, featuredImage: true }
     }).catch(() => []),
     prisma.siteSettings.findUnique({ where: { id: 'default' } }).catch(() => null),
     prisma.socialLink.findMany({ where: { platform: 'whatsapp', isActive: true } }).catch(() => [])
   ]);
-
-  // Record a view (fire and forget)
-  prisma.blogPost.update({
-    where: { id: post.id },
-    data: { viewCount: { increment: 1 } }
-  }).catch(() => {});
 
   const siteName = siteSettings?.siteName || 'Knowora';
   const url = `https://knowora.in/blog/${post.slug}`;

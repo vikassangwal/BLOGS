@@ -22,11 +22,11 @@ export default function NotFound() {
         </div>
 
         <h1 className="text-4xl sm:text-6xl font-black text-white tracking-tight mb-4">
-          ??? ???? ????
+          पेज नहीं मिला
         </h1>
 
         <p className="text-gray-300 text-base sm:text-lg max-w-lg mx-auto mb-8 leading-relaxed">
-          ?? ??? ??? ?? ???? ??? ??? ?? ???? ??? ???? ??? ??, ???? ??? ??? ??? ?? ?? ?? ??????? ??? ?? ???????? ???
+          आप जिस पेज को खोज रहे हैं वह शायद हटा दिया गया है, उसका नाम बदल गया है या वह अस्थायी रूप से अनुपलब्ध है।
         </p>
 
         {/* Search Bar */}
@@ -52,19 +52,19 @@ export default function NotFound() {
           </p>
           <div className="flex flex-wrap justify-center gap-2">
             <Link href="/blog?jobType=active" className="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-medium text-blue-300 transition-colors">
-              ?? Latest Jobs
+              💼 Latest Jobs
             </Link>
             <Link href="/blog?jobType=admit_card" className="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-medium text-emerald-300 transition-colors">
-              ?? Admit Cards
+              🎫 Admit Cards
             </Link>
             <Link href="/blog?jobType=result" className="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-medium text-purple-300 transition-colors">
-              ?? Results & Syllabus
+              📊 Results & Syllabus
             </Link>
             <Link href="/blog?tag=Technology" className="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-medium text-red-300 transition-colors">
-              ? Tech News
+              📱 Tech News
             </Link>
             <Link href="/blog?tag=Finance%20%26%20Earning" className="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-medium text-amber-300 transition-colors">
-              ?? Finance
+              💰 Finance
             </Link>
           </div>
         </div>
@@ -75,13 +75,13 @@ export default function NotFound() {
             href="/"
             className="w-full sm:w-auto px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm transition-all hover:scale-105 shadow-[0_0_20px_rgba(37,99,235,0.3)]"
           >
-            ?? ????? ????? (Home) ?? ????
+            🏠 होमपेज (Home) पर जाएं
           </Link>
           <Link
             href="/blog"
             className="w-full sm:w-auto px-6 py-3 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 text-white font-bold text-sm transition-all"
           >
-            ?? ??? ????????? ?????
+            📰 सभी आर्टिकल्स देखें
           </Link>
         </div>
       </div>

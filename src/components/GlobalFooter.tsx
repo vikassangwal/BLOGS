@@ -17,7 +17,7 @@ export default function GlobalFooter({ siteName }: { siteName?: string }) {
         <SocialJoinStrip title="चैनल ज्वाइन करें (Join Social Channels):" />
         
         <div className="flex flex-col md:flex-row items-center justify-between text-sm text-gray-400 mt-6 pt-6 border-t border-white/5">
-          <p>© {new Date().getFullYear()} {siteName || 'Our Blog'}. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} {siteName || 'Knowora'}. All rights reserved.</p>
           <div className="flex flex-wrap gap-x-6 gap-y-2 mt-4 md:mt-0 justify-center md:justify-end">
             <a href="/about" className="hover:text-white transition-colors">About Us</a>
             <a href="/contact" className="hover:text-white transition-colors">Contact Us</a>

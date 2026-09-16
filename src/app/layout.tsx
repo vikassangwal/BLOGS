@@ -65,7 +65,7 @@ export default async function RootLayout({
     autoBlogSettings = await prisma.autoBlogSettings.findUnique({ where: { id: 'default' } });
   } catch (e) {}
 
-  const siteName = settings?.siteName || 'Our Blog';
+  const siteName = settings?.siteName || 'Knowora';
   const onesignalAppId = autoBlogSettings?.onesignalAppId || '';
   let apiKeys: any = {};
   try {
@@ -81,6 +81,11 @@ export default async function RootLayout({
       <head>
         <link rel="manifest" href="/manifest.json" />
         <meta name="google-adsense-account" content="ca-pub-2689010221295201" />
+        <script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2689010221295201"
+          crossOrigin="anonymous"
+        />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ "@context":"https://schema.org","@type":"WebSite","name": siteName,"url":"https://knowora.in","potentialAction":{ "@type":"SearchAction","target":"https://knowora.in/blog?search={search_term_string}","query-input":"required name=search_term_string" } }) }} />
         <Script id="cookie-consent" strategy="afterInteractive">{`
 function setCookie(name,value,days){var d=new Date();d.setTime(d.getTime()+(days*24*60*60*1000));var expires="expires="+d.toUTCString();document.cookie=name+"="+value+";"+expires+";path=/";}
@@ -105,23 +110,6 @@ document.getElementById('accept-cookie').onclick=function(){setCookie('cookie_co
             </Script>
           </>
         )}
-        
-        {/* Google AdSense Global Script - auto-detect from env, database or default */}
-        {(() => {
-          let adsenseId = process.env.NEXT_PUBLIC_ADSENSE_ID || 'ca-pub-2689010221295201';
-          if (!adsenseId && settings?.aiApiKey?.includes('ca-pub-')) {
-            const match = settings.aiApiKey.match(/ca-pub-\d+/);
-            if (match) adsenseId = match[0];
-          }
-          if (!adsenseId) return null;
-          return (
-            <Script 
-              src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsenseId}`}
-              crossOrigin="anonymous" 
-              strategy="afterInteractive" 
-            />
-          );
-        })()}
         <NextTopLoader color="var(--color-accent)" showSpinner={false} />
         <div className="bg-mesh"></div>
         <Suspense fallback={<div className="h-20 w-full" />}>

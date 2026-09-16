@@ -20,7 +20,10 @@ export default function AdBanner({
   const adRef = useRef<HTMLDivElement>(null);
   const publisherId = process.env.NEXT_PUBLIC_ADSENSE_ID || 'ca-pub-2689010221295201';
 
+  const isNumericSlot = Boolean(dataAdSlot && /^\d+$/.test(dataAdSlot.trim()));
+
   useEffect(() => {
+    if (!adCode && !isNumericSlot) return;
     try {
       if (typeof window !== 'undefined') {
         // @ts-ignore
@@ -29,7 +32,7 @@ export default function AdBanner({
     } catch (err) {
       console.error('AdSense push error:', err);
     }
-  }, []);
+  }, [adCode, isNumericSlot]);
 
   if (adCode) {
     return (
@@ -39,6 +42,10 @@ export default function AdBanner({
         dangerouslySetInnerHTML={{ __html: adCode }}
       />
     );
+  }
+
+  if (!isNumericSlot) {
+    return null;
   }
 
   return (

@@ -1,9 +1,9 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Knowora Publisher",
-    "version": "2.0.0",
-    "description": "Knowora.in AI Blog Publishing API. This action allows the AI to publish SEO-optimized, categorized, and verified blog articles directly to Knowora.in."
+    "title": "Knowora Universal AI Master Manager",
+    "version": "3.0.0",
+    "description": "Complete AI Action API to Read all blogs, Detect Errors, Update/Edit posts, Delete unwanted posts, and Publish new verified articles on Knowora.in."
   },
   "servers": [
     {
@@ -11,11 +11,217 @@
     }
   ],
   "paths": {
+    "/api/gpt/blogs": {
+      "get": {
+        "operationId": "listAllBlogs",
+        "summary": "Read and analyze all blogs for quality and errors",
+        "description": "Retrieves blogs with word count analysis, detected issues (thin content, missing tables, missing FAQs, broken links), and status.",
+        "parameters": [
+          {
+            "name": "secret",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "default": "knowora-secret-2026"
+            },
+            "description": "API Secret Key"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 30
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "name": "filterQuality",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "all",
+                "errors_only",
+                "thin_only"
+              ]
+            },
+            "description": "Filter to view only blogs with errors or thin content"
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Search keyword"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of blogs with quality analysis"
+          }
+        }
+      }
+    },
+    "/api/gpt/blogs/{id}": {
+      "get": {
+        "operationId": "getBlogDetails",
+        "summary": "Read full content of a specific blog",
+        "description": "Returns the complete HTML body, metadata, and fields of a blog post by ID or slug.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Blog ID or URL slug"
+          },
+          {
+            "name": "secret",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "default": "knowora-secret-2026"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Full blog content"
+          }
+        }
+      },
+      "put": {
+        "operationId": "updateBlog",
+        "summary": "Edit and fix errors in an existing blog",
+        "description": "Update the title, content HTML, excerpt, SEO metadata, or status of an existing blog to fix mistakes and expand content.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Blog ID or Slug to edit"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "secret"
+                ],
+                "properties": {
+                  "secret": {
+                    "type": "string",
+                    "default": "knowora-secret-2026"
+                  },
+                  "title": {
+                    "type": "string",
+                    "description": "Updated Hindi SEO title"
+                  },
+                  "content": {
+                    "type": "string",
+                    "description": "Complete updated HTML content with tables and FAQ"
+                  },
+                  "excerpt": {
+                    "type": "string",
+                    "description": "Updated summary"
+                  },
+                  "gridBox": {
+                    "type": "string",
+                    "enum": [
+                      "latestJobs",
+                      "admitCard",
+                      "examResults",
+                      "scholarship",
+                      "scheme",
+                      "tech",
+                      "finance"
+                    ]
+                  },
+                  "seoTitle": {
+                    "type": "string"
+                  },
+                  "seoDescription": {
+                    "type": "string"
+                  },
+                  "seoKeywords": {
+                    "type": "string"
+                  },
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "Published",
+                      "Draft"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Blog updated successfully"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteBlog",
+        "summary": "Delete an unwanted or poor quality blog",
+        "description": "Permanently removes a blog post by ID or slug.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "secret",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "default": "knowora-secret-2026"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Blog deleted successfully"
+          }
+        }
+      }
+    },
     "/api/publish-from-ai": {
       "post": {
-        "operationId": "publishBlog",
-        "summary": "Publish a complete blog post to Knowora.in",
-        "description": "Publishes a complete Hindi or English blog article to Knowora.in. The AI should verify article information before calling this action.",
+        "operationId": "publishNewBlog",
+        "summary": "Publish a new comprehensive blog post",
+        "description": "Publishes a 2000+ words Hindi master blog with tables, FAQs, and official links.",
         "requestBody": {
           "required": true,
           "content": {
@@ -30,117 +236,28 @@
                 "properties": {
                   "secret": {
                     "type": "string",
-                    "description": "Secure publishing secret used to authenticate the AI publishing request (knowora-secret-2026)."
+                    "default": "knowora-secret-2026"
                   },
                   "title": {
-                    "type": "string",
-                    "description": "Main SEO-friendly article title."
+                    "type": "string"
                   },
                   "content": {
-                    "type": "string",
-                    "description": "Complete article body in clean HTML or Markdown with tables and FAQ details/summary tags."
+                    "type": "string"
                   },
                   "excerpt": {
-                    "type": "string",
-                    "description": "Short summary/excerpt of the article (140-160 characters)."
-                  },
-                  "category": {
-                    "type": "string",
-                    "description": "Main category of the article.",
-                    "enum": [
-                      "recruitment",
-                      "government-jobs",
-                      "result",
-                      "admit-card",
-                      "answer-key",
-                      "syllabus",
-                      "scholarship",
-                      "study",
-                      "education",
-                      "career",
-                      "technology",
-                      "ai",
-                      "finance",
-                      "earning",
-                      "business",
-                      "government-schemes",
-                      "news",
-                      "updates",
-                      "how-to",
-                      "other"
-                    ]
-                  },
-                  "status": {
-                    "type": "string",
-                    "description": "Publishing status: 'publish' for live publication, 'draft' for draft.",
-                    "enum": [
-                      "publish",
-                      "draft"
-                    ],
-                    "default": "publish"
-                  },
-                  "slug": {
-                    "type": "string",
-                    "description": "SEO-friendly unique URL slug (e.g. up-police-bharti-2026)."
-                  },
-                  "metaTitle": {
-                    "type": "string",
-                    "description": "SEO meta title for search engines."
-                  },
-                  "metaDescription": {
-                    "type": "string",
-                    "description": "SEO meta description."
-                  },
-                  "keywords": {
-                    "type": "array",
-                    "description": "Relevant SEO keywords for the article.",
-                    "items": {
-                      "type": "string"
-                    }
-                  },
-                  "tags": {
-                    "type": "array",
-                    "description": "Relevant article tags.",
-                    "items": {
-                      "type": "string"
-                    }
-                  },
-                  "sourceUrls": {
-                    "type": "array",
-                    "description": "Official .gov.in/.nic.in source URLs used to verify the article.",
-                    "items": {
-                      "type": "string"
-                    }
-                  },
-                  "featuredImage": {
-                    "type": "string",
-                    "description": "Featured image URL for the article."
+                    "type": "string"
                   },
                   "gridBox": {
-                    "type": "string",
-                    "description": "Homepage section grid box.",
-                    "enum": [
-                      "latestJobs",
-                      "results",
-                      "admitCards",
-                      "answerKeys",
-                      "scholarships",
-                      "education",
-                      "technology",
-                      "ai",
-                      "finance",
-                      "news",
-                      "latest"
-                    ],
-                    "default": "latestJobs"
+                    "type": "string"
                   },
-                  "author": {
-                    "type": "string",
-                    "description": "Author name displayed on the article."
+                  "slug": {
+                    "type": "string"
                   },
-                  "officialApplyUrl": {
-                    "type": "string",
-                    "description": "Official online application link."
+                  "metaTitle": {
+                    "type": "string"
+                  },
+                  "metaDescription": {
+                    "type": "string"
                   }
                 }
               }
@@ -149,168 +266,7 @@
         },
         "responses": {
           "200": {
-            "description": "Article published successfully.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "required": [
-                    "success",
-                    "message"
-                  ],
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "postId": {
-                      "type": "string"
-                    },
-                    "url": {
-                      "type": "string"
-                    },
-                    "slug": {
-                      "type": "string"
-                    },
-                    "status": {
-                      "type": "string"
-                    },
-                    "category": {
-                      "type": "string"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "201": {
-            "description": "Article created successfully.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "required": [
-                    "success",
-                    "message"
-                  ],
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "postId": {
-                      "type": "string"
-                    },
-                    "url": {
-                      "type": "string"
-                    },
-                    "slug": {
-                      "type": "string"
-                    },
-                    "status": {
-                      "type": "string"
-                    },
-                    "category": {
-                      "type": "string"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad request or missing/invalid fields.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "error": {
-                      "type": "string"
-                    },
-                    "message": {
-                      "type": "string"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Authentication failed.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "error": {
-                      "type": "string"
-                    },
-                    "message": {
-                      "type": "string"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation error.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "error": {
-                      "type": "string"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "fields": {
-                      "type": "array",
-                      "items": {
-                        "type": "string"
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Knowora server error.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "error": {
-                      "type": "string"
-                    },
-                    "message": {
-                      "type": "string"
-                    }
-                  }
-                }
-              }
-            }
+            "description": "Blog published successfully"
           }
         }
       }

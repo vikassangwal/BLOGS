@@ -150,14 +150,24 @@ export default async function BlogPostPage({ params }: Props) {
   const url = `https://knowora.in/blog/${post.slug}`;
   const imageUrl = post.featuredImage || 'https://knowora.in/default-og.png';
 
+  const toIso = (d: any): string | undefined => {
+    if (!d) return undefined;
+    try {
+      const dt = new Date(d);
+      return isNaN(dt.getTime()) ? undefined : dt.toISOString();
+    } catch {
+      return undefined;
+    }
+  };
+
   // 3. JSON-LD STRUCTURED DATA (NEWS ARTICLE SCHEMA)
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'BlogPosting',
     headline: post.seoTitle || post.title,
     image: [imageUrl],
-    datePublished: post.publishedAt?.toISOString() || post.createdAt.toISOString(),
-    dateModified: post.updatedAt.toISOString(),
+    datePublished: toIso(post.publishedAt) || toIso(post.createdAt) || new Date().toISOString(),
+    dateModified: toIso(post.updatedAt) || toIso(post.createdAt) || new Date().toISOString(),
     author: [{
       '@type': 'Person',
       name: post.author?.name || `${siteName} Team`,
@@ -226,8 +236,8 @@ export default async function BlogPostPage({ params }: Props) {
       '@type': 'JobPosting',
       title: post.title.replace(/संभावित|Upcoming|Expected|आगामी/gi, '').trim(),
       description: post.excerpt || plainDesc,
-      datePosted: post.publishedAt?.toISOString() || post.createdAt.toISOString(),
-      validThrough: post.expiryDate ? post.expiryDate.toISOString() : undefined,
+      datePosted: toIso(post.publishedAt) || toIso(post.createdAt) || new Date().toISOString(),
+      validThrough: toIso(post.expiryDate),
       employmentType: 'FULL_TIME',
       hiringOrganization: {
         '@type': 'Organization',

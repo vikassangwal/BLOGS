@@ -34,14 +34,14 @@ export default function BlogChatbot({ postTitle, postId, postTags, whatsappLinks
   
   // Helper to find a link by label keyword
   const findLink = (keyword: string) => {
-    return links.find(l => l.label.toLowerCase().includes(keyword))?.url;
+    return links.find(l => (l?.label || '').toLowerCase().includes(keyword))?.url;
   };
 
   let whatsappLink = findLink('general') || '#';
   let groupName = 'Join Our WhatsApp Group';
   
   if (postTags && postTags.length > 0) {
-    const tagNames = postTags.map(t => (t.tag?.name || t.name || '').toLowerCase());
+    const tagNames = postTags.map(t => (t?.tag?.name || t?.name || (typeof t === 'string' ? t : '')).toLowerCase());
     if (tagNames.some(t => t.includes('finance') || t.includes('earning') || t.includes('money'))) {
       whatsappLink = findLink('finance') || findLink('earn') || whatsappLink;
       groupName = 'Join Finance Group';

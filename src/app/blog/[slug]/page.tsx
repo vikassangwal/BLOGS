@@ -3,9 +3,8 @@ import { notFound } from 'next/navigation';
 import { prisma } from '@/lib/prisma';
 import BlogPostClient from '@/components/BlogPostClient';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 60;
 export const dynamicParams = true;
-export const revalidate = 0;
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -298,10 +297,10 @@ export default async function BlogPostPage({ params }: Props) {
       
       {/* Pass data to the Client Component for interactivity */}
       <BlogPostClient 
-        post={post} 
-        ads={ads} 
-        relatedPosts={relatedPostsRaw} 
-        whatsappLinks={whatsappLinks}
+        post={JSON.parse(JSON.stringify(post))} 
+        ads={JSON.parse(JSON.stringify(ads))} 
+        relatedPosts={JSON.parse(JSON.stringify(relatedPostsRaw))} 
+        whatsappLinks={JSON.parse(JSON.stringify(whatsappLinks))}
         commentsEnabled={siteSettings?.commentsEnabled !== false}
       />
     </>

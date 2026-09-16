@@ -346,10 +346,11 @@ export default function BlogPostClient({ post, ads, relatedPosts, whatsappLinks,
         <header style={{ marginBottom: '3rem', textAlign: 'center' }}>
           {post.tags?.length > 0 && (
             <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
-              {post.tags.map((t: any) => {
-                const tagName = typeof t === 'string' ? t : (t.tag?.name || t.name);
+              {post.tags.map((t: any, idx: number) => {
+                const tagName = typeof t === 'string' ? t : (t?.tag?.name || t?.name);
+                if (!tagName) return null;
                 return (
-                <span key={tagName} style={{ background: tagName === 'Premium' ? 'linear-gradient(135deg, #f59e0b, #d97706)' : 'var(--color-bg-secondary)', padding: '0.4rem 1rem', borderRadius: '20px', fontSize: '0.8rem', fontWeight: 600, color: tagName === 'Premium' ? '#fff' : 'var(--color-accent)' }}>
+                <span key={tagName || idx} style={{ background: tagName === 'Premium' ? 'linear-gradient(135deg, #f59e0b, #d97706)' : 'var(--color-bg-secondary)', padding: '0.4rem 1rem', borderRadius: '20px', fontSize: '0.8rem', fontWeight: 600, color: tagName === 'Premium' ? '#fff' : 'var(--color-accent)' }}>
                   {tagName === 'Premium' ? '👑 Premium' : tagName}
                 </span>
               )})}
@@ -366,7 +367,16 @@ export default function BlogPostClient({ post, ads, relatedPosts, whatsappLinks,
           <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-2 text-sm" style={{ color: 'var(--color-text-secondary)' }}>
             <span style={{ fontWeight: 600, color: 'var(--color-text-primary)' }}>{post.author?.name || 'Vikas Sangwal'}</span>
             <span className="text-gray-600 dark:text-gray-400">•</span>
-            <time>{new Date(post.publishedAt || post.createdAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</time>
+            <time>{(() => {
+              const d = post?.publishedAt || post?.createdAt;
+              if (!d) return 'Recently Updated';
+              try {
+                const dt = new Date(d);
+                return isNaN(dt.getTime()) ? 'Recently Updated' : dt.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+              } catch {
+                return 'Recently Updated';
+              }
+            })()}</time>
             <span className="text-gray-600 dark:text-gray-400">•</span>
             <span>{Math.ceil((contentHtml?.length || 0) / 1000)} min read</span>
             <span className="text-gray-600 dark:text-gray-400">•</span>

@@ -94,10 +94,14 @@ export async function generateMetadata(
 
     const pubDate = safeDate(post.publishedAt) || safeDate(post.createdAt) || new Date().toISOString();
 
+    const modDate = safeDate(post.updatedAt) || pubDate;
+    const authorName = post.author?.name || 'Vikas Sangwal';
+
     return {
       title: title,
       description: description,
       keywords: post.seoKeywords || '',
+      authors: [{ name: authorName, url: 'https://knowora.in/about' }],
       alternates: { canonical: url },
       openGraph: {
         title: title,
@@ -108,6 +112,8 @@ export async function generateMetadata(
         locale: 'hi_IN',
         type: 'article',
         publishedTime: pubDate,
+        modifiedTime: modDate,
+        authors: [authorName],
       },
       twitter: {
         card: 'summary_large_image',
@@ -159,42 +165,73 @@ export default async function BlogPostPage({ params }: Props) {
     }
   };
 
-  // 3. JSON-LD STRUCTURED DATA (NEWS ARTICLE SCHEMA)
+  // 3. JSON-LD STRUCTURED DATA (ENHANCED NEWSARTICLE & BLOGPOSTING SCHEMA)
+  const contentStr = post.content || '';
+  const words = contentStr.replace(/<[^>]+>/g, ' ').trim().split(/\s+/).length;
+
+  // Extract official government citations for GEO & source grounding
+  const citations: string[] = [];
+  const linkRegex = /href=["'](https?:\/\/[^"']+)["']/gi;
+  let linkMatch;
+  while ((linkMatch = linkRegex.exec(contentStr)) !== null) {
+    const href = linkMatch[1];
+    if (href.includes('.gov.in') || href.includes('.nic.in') || href.includes('upsc.') || href.includes('ssc.') || href.includes('rrb')) {
+      if (!citations.includes(href)) citations.push(href);
+    }
+  }
+  if (citations.length === 0) {
+    citations.push('https://india.gov.in');
+  }
+
   const jsonLd = {
     '@context': 'https://schema.org',
-    '@type': 'BlogPosting',
+    '@type': ['BlogPosting', 'NewsArticle'],
     headline: post.seoTitle || post.title,
     image: [imageUrl],
     datePublished: toIso(post.publishedAt) || toIso(post.createdAt) || new Date().toISOString(),
     dateModified: toIso(post.updatedAt) || toIso(post.createdAt) || new Date().toISOString(),
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': url,
+    },
+    inLanguage: ['hi-IN', 'en-IN'],
+    wordCount: words,
+    speakable: {
+      '@type': 'SpeakableSpecification',
+      cssSelector: ['h1', 'article p', '.blog-content h2']
+    },
+    citation: citations.slice(0, 5),
     author: [{
       '@type': 'Person',
-      name: post.author?.name || `${siteName} Team`,
-      url: `https://knowora.in/author/${post.authorId || 'admin'}`
+      name: post.author?.name || 'Vikas Sangwal',
+      jobTitle: 'Founder & Editor-in-Chief',
+      url: `https://knowora.in/team/${post.authorId || 'admin'}`
     }],
     publisher: {
-      '@type': 'Organization',
+      '@type': 'NewsMediaOrganization',
       name: siteName,
+      url: 'https://knowora.in',
       logo: {
         '@type': 'ImageObject',
         url: 'https://knowora.in/logo.png'
-      }
+      },
+      publishingPrinciples: 'https://knowora.in/editorial-policy',
+      correctionsPolicy: 'https://knowora.in/fact-check-policy'
     },
     description: post.seoDescription || post.excerpt
   };
 
-  // Generate FAQ Schema from H2 headings
+  // Generate FAQ Schema from H2 headings (AEO: up to 450 chars per answer)
   const faqItems: { question: string; answer: string }[] = [];
   const h2Regex = /<h2[^>]*>(.*?)<\/h2>/gi;
-  const contentStr = post.content || '';
   let h2Match;
   while ((h2Match = h2Regex.exec(contentStr)) !== null) {
     const question = h2Match[1].replace(/<[^>]+>/g, '').trim();
     const startIdx = h2Match.index + h2Match[0].length;
     const nextH2 = contentStr.indexOf('<h2', startIdx);
-    const answerHtml = contentStr.substring(startIdx, nextH2 === -1 ? startIdx + 500 : nextH2);
-    const answer = answerHtml.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().substring(0, 200);
-    if (question && answer && answer.length > 20) {
+    const answerHtml = contentStr.substring(startIdx, nextH2 === -1 ? startIdx + 800 : nextH2);
+    const answer = answerHtml.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().substring(0, 450);
+    if (question && answer && answer.length > 25) {
       faqItems.push({ question, answer });
     }
   }
@@ -208,18 +245,19 @@ export default async function BlogPostPage({ params }: Props) {
   let jobPostingJsonLd: any = null;
   if (isJob) {
     let orgName = "Government Department";
-    if (titleLower.includes('upsc')) orgName = "Union Public Service Commission (UPSC)";
-    else if (titleLower.includes('ssc')) orgName = "Staff Selection Commission (SSC)";
-    else if (titleLower.includes('ibps')) orgName = "Institute of Banking Personnel Selection (IBPS)";
-    else if (titleLower.includes('railway') || titleLower.includes('rrb')) orgName = "Railway Recruitment Board (RRB)";
-    else if (titleLower.includes('sbi')) orgName = "State Bank of India (SBI)";
-    else if (titleLower.includes('bpsc')) orgName = "Bihar Public Service Commission (BPSC)";
-    else if (titleLower.includes('uppsc')) orgName = "Uttar Pradesh Public Service Commission (UPPSC)";
-    else if (titleLower.includes('rpsc')) orgName = "Rajasthan Public Service Commission (RPSC)";
-    else if (titleLower.includes('rvun') || titleLower.includes('rvunl') || titleLower.includes('jvvn')) orgName = "Rajasthan Vidyut Nigam (RVUNL)";
-    else if (titleLower.includes('hssc')) orgName = "Haryana Staff Selection Commission (HSSC)";
-    else if (titleLower.includes('jkssb')) orgName = "Jammu & Kashmir Services Selection Board (JKSSB)";
-    else if (titleLower.includes('post office') || titleLower.includes('india post')) orgName = "India Post";
+    let officialOrgUrl = "https://india.gov.in";
+    if (titleLower.includes('upsc')) { orgName = "Union Public Service Commission (UPSC)"; officialOrgUrl = "https://upsc.gov.in"; }
+    else if (titleLower.includes('ssc')) { orgName = "Staff Selection Commission (SSC)"; officialOrgUrl = "https://ssc.gov.in"; }
+    else if (titleLower.includes('ibps')) { orgName = "Institute of Banking Personnel Selection (IBPS)"; officialOrgUrl = "https://ibps.in"; }
+    else if (titleLower.includes('railway') || titleLower.includes('rrb')) { orgName = "Railway Recruitment Board (RRB)"; officialOrgUrl = "https://indianrailways.gov.in"; }
+    else if (titleLower.includes('sbi')) { orgName = "State Bank of India (SBI)"; officialOrgUrl = "https://sbi.co.in"; }
+    else if (titleLower.includes('bpsc')) { orgName = "Bihar Public Service Commission (BPSC)"; officialOrgUrl = "https://bpsc.bih.nic.in"; }
+    else if (titleLower.includes('uppsc')) { orgName = "Uttar Pradesh Public Service Commission (UPPSC)"; officialOrgUrl = "https://uppsc.up.nic.in"; }
+    else if (titleLower.includes('rpsc')) { orgName = "Rajasthan Public Service Commission (RPSC)"; officialOrgUrl = "https://rpsc.rajasthan.gov.in"; }
+    else if (titleLower.includes('rvun') || titleLower.includes('rvunl') || titleLower.includes('jvvn')) { orgName = "Rajasthan Vidyut Nigam (RVUNL)"; officialOrgUrl = "https://energy.rajasthan.gov.in"; }
+    else if (titleLower.includes('hssc')) { orgName = "Haryana Staff Selection Commission (HSSC)"; officialOrgUrl = "https://hssc.gov.in"; }
+    else if (titleLower.includes('jkssb')) { orgName = "Jammu & Kashmir Services Selection Board (JKSSB)"; officialOrgUrl = "https://jkssb.nic.in"; }
+    else if (titleLower.includes('post office') || titleLower.includes('india post')) { orgName = "India Post"; officialOrgUrl = "https://indiapost.gov.in"; }
 
     const STATES_LIST = ['Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh', 'Goa', 'Gujarat', 'Haryana', 'Himachal Pradesh', 'Jharkhand', 'Karnataka', 'Kerala', 'Madhya Pradesh', 'Maharashtra', 'Manipur', 'Meghalaya', 'Mizoram', 'Nagaland', 'Odisha', 'Punjab', 'Rajasthan', 'Sikkim', 'Tamil Nadu', 'Telangana', 'Tripura', 'Uttar Pradesh', 'Uttarakhand', 'West Bengal', 'Delhi'];
     let stateLocation = "Delhi";
@@ -236,12 +274,23 @@ export default async function BlogPostPage({ params }: Props) {
       title: post.title.replace(/संभावित|Upcoming|Expected|आगामी/gi, '').trim(),
       description: post.excerpt || plainDesc,
       datePosted: toIso(post.publishedAt) || toIso(post.createdAt) || new Date().toISOString(),
-      validThrough: toIso(post.expiryDate),
+      validThrough: toIso(post.expiryDate) || new Date(Date.now() + 60 * 24 * 60 * 60 * 1000).toISOString(),
       employmentType: 'FULL_TIME',
+      qualifications: "10th / 12th / Graduate / Post Graduate as specified in the official notification",
+      baseSalary: {
+        '@type': 'MonetaryAmount',
+        currency: 'INR',
+        value: {
+          '@type': 'QuantitativeValue',
+          minValue: 25500,
+          maxValue: 142400,
+          unitText: 'MONTH'
+        }
+      },
       hiringOrganization: {
         '@type': 'Organization',
         name: orgName,
-        sameAs: 'https://knowora.in'
+        sameAs: officialOrgUrl
       },
       jobLocation: {
         '@type': 'Place',

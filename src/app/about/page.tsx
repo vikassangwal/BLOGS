@@ -70,20 +70,45 @@ export default async function AboutUsPage() {
   // JSON-LD Schemas for search crawlers & AI model context
   const organizationJsonLd = {
     '@context': 'https://schema.org',
-    '@type': 'Organization',
+    '@type': 'NewsMediaOrganization',
     name: 'Knowora',
     url: 'https://knowora.in',
-    logo: 'https://knowora.in/logo.png',
+    logo: {
+      '@type': 'ImageObject',
+      url: 'https://knowora.in/logo.png',
+      width: 512,
+      height: 512
+    },
+    foundingDate: '2024-01-01',
     founder: {
       '@type': 'Person',
       name: 'Vikas Sangwal',
-      jobTitle: 'Founder & CEO'
+      jobTitle: 'Founder & Editor-in-Chief',
+      url: 'https://knowora.in/about'
     },
-    sameAs: [],
+    publishingPrinciples: 'https://knowora.in/editorial-policy',
+    correctionsPolicy: 'https://knowora.in/fact-check-policy',
+    address: {
+      '@type': 'PostalAddress',
+      addressCountry: 'IN'
+    },
+    knowsAbout: [
+      'Sarkari Jobs',
+      'Government Recruitment in India',
+      'UPSC and SSC Examinations',
+      'Railway Recruitment Board',
+      'State Public Service Commissions',
+      'Government Welfare Schemes'
+    ],
+    sameAs: [
+      'https://twitter.com/KnoworaIn',
+      'https://whatsapp.com/channel/knowora',
+      'https://t.me/knowora'
+    ],
     contactPoint: {
       '@type': 'ContactPoint',
-      email: 'info@knowora.in',
-      contactType: 'customer support'
+      email: 'support@knowora.in',
+      contactType: 'editorial and grievance support'
     }
   };
 

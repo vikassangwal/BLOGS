@@ -1,0 +1,39 @@
+# Knowora (knowora.in)
+
+> India's trusted digital portal for verified Sarkari Job notifications, Admit Cards, Exam Results, Government Schemes, Tech updates, and Education Guidance in Hindi and English.
+
+## About Knowora
+- **Website:** https://knowora.in
+- **Founded:** 2024
+- **Founder & Editor-in-Chief:** Vikas Sangwal
+- **Languages:** Hindi (Devanagari, primary), English
+- **Focus:** Central & State Government Recruitment, Competitive Examination Schedules, Sarkari Yojana, Technology, and Educational Analysis
+- **Verification Standard:** 100% of recruitment announcements are cross-verified against official .gov.in and .nic.in gazettes and circulars before publishing.
+
+## Core Content Sections
+- [Latest Sarkari Jobs](https://knowora.in/blog?tag=Latest%20Jobs): Central & State recruitment notices — UPSC, SSC, Railway RRB, Banking (IBPS, SBI), Defence, and State PSCs.
+- [Admit Cards](https://knowora.in/blog?tag=Admit%20Card): Real-time exam hall ticket release alerts, direct login links, and city intimation guides.
+- [Exam Results & Cutoffs](https://knowora.in/blog?tag=Result): Official merit lists, scorecards, category-wise cutoffs, and multi-year trend analysis.
+- [Government Schemes (सरकारी योजनाएं)](https://knowora.in/blog?tag=Scheme): Central and State welfare initiatives — PM Kisan, Ayushman Bharat, NSP Scholarships, and student subsidies.
+- [Technology & AI](https://knowora.in/blog?tag=Tech): Digital India initiatives, cybersecurity advisories from CERT-In, AI tools, and tech tutorials.
+- [Finance & Career](https://knowora.in/blog?tag=Finance): Personal finance for students and professionals, salary structures under 7th CPC, and investment guidance.
+- [Education News](https://knowora.in/blog?tag=Education): University admissions (CUET, DU, BHU), CBSE/State Board updates, and NTA notifications.
+
+## Machine-Readable Feeds & Endpoints
+- [RSS 2.0 Feed](https://knowora.in/feed.xml): Real-time feed of the latest published articles.
+- [XML Sitemap](https://knowora.in/sitemap.xml): Complete index of all active URLs and publication dates.
+- [OpenAPI 3.1 Spec](https://knowora.in/openapi.json): Standard REST API definition for AI agents and Custom GPTs.
+- [AI Research Feed](https://knowora.in/api/ai-feed): Structured JSON metadata and publishing blueprints for AI systems.
+- [Full LLM Context](https://knowora.in/llms-full.txt): Deep entity context and detailed terminology guide.
+
+## Editorial & Fact-Checking Framework
+- **Primary Source Grounding:** We prioritize official gazettes, press releases from Press Information Bureau (PIB), and .gov.in/.nic.in releases.
+- **Fact-Checking Protocol:** Every article undergoes a 3-tier check (Source Verification → PDF Notification Cross-Check → Corrigendum Tracking).
+- **Anti-Fraud Guardrails:** Clear warnings against fraudulent application portals, job scams, and unofficial payment links.
+
+## Contact & Authority
+- **Editor-in-Chief:** Vikas Sangwal
+- **Support & Editorial Email:** support@knowora.in
+- **About Platform:** https://knowora.in/about
+- **Editorial Policy:** https://knowora.in/editorial-policy
+- **Fact-Checking Policy:** https://knowora.in/fact-check-policy

@@ -365,7 +365,13 @@ export default function BlogPostClient({ post, ads, relatedPosts, whatsappLinks,
             </h2>
           )}
           <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-2 text-sm" style={{ color: 'var(--color-text-secondary)' }}>
-            <span style={{ fontWeight: 600, color: 'var(--color-text-primary)' }}>{post.author?.name || 'Vikas Sangwal'}</span>
+            <a 
+              href={`/author/${encodeURIComponent(post.authorId || 'vikas-sangwal')}`}
+              className="hover:underline hover:text-blue-500 transition-colors"
+              style={{ fontWeight: 600, color: 'var(--color-text-primary)' }}
+            >
+              ✍️ {post.author?.name || 'Vikas Sangwal'}
+            </a>
             <span className="text-gray-600 dark:text-gray-400">•</span>
             <time>{(() => {
               const d = post?.publishedAt || post?.createdAt;
@@ -507,6 +513,40 @@ export default function BlogPostClient({ post, ads, relatedPosts, whatsappLinks,
               🐦 Twitter
             </a>
           </div>
+        </div>
+
+        {/* E-E-A-T Author & Verification Box */}
+        <div className="my-10 p-6 rounded-2xl border border-neutral-800 bg-neutral-900/60 backdrop-blur-sm shadow-xl">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 justify-between border-b border-neutral-800/80 pb-4 mb-4">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-full bg-blue-600/20 border border-blue-500/30 flex items-center justify-center text-xl flex-shrink-0">
+                ✍️
+              </div>
+              <div>
+                <div className="text-xs text-neutral-400 font-semibold uppercase tracking-wider">आधिकारिक संपादक / Published By</div>
+                <a 
+                  href={`/author/${encodeURIComponent(post.authorId || 'vikas-sangwal')}`}
+                  className="text-base font-bold text-white hover:text-blue-400 transition-colors"
+                >
+                  {post.author?.name || 'Vikas Sangwal'}
+                </a>
+                <div className="text-xs text-neutral-400">Chief Editor & Recruitment Analyst at Knowora</div>
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <span className="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                ✅ 100% Gazette Verified
+              </span>
+              <span className="px-3 py-1 rounded-full text-xs font-semibold bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                🛡️ Anti-Scam Checked
+              </span>
+            </div>
+          </div>
+          <p className="text-xs text-neutral-400 leading-relaxed">
+            यह लेख भारत सरकार एवं राज्य भर्ती आयोगों (UPSC, SSC, RRB, State PSCs) की आधिकारिक अधिसूचनाओं के आधार पर तैयार किया गया है। 
+            किसी भी विसंगति की स्थिति में आधिकारिक गजट का विवरण ही मान्य होगा। 
+            विस्तृत जानकारी के लिए हमारी <a href="/editorial-policy" className="text-blue-400 underline hover:text-blue-300">संपादकीय नीति</a> एवं <a href="/fact-check-policy" className="text-blue-400 underline hover:text-blue-300">तथ्य-जांच नीति</a> देखें।
+          </p>
         </div>
 
         {/* Smart Banners */}

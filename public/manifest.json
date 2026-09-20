@@ -1,7 +1,7 @@
 {
-  "name": "Anti Gravity Blog",
-  "short_name": "AntiGravity",
-  "description": "AI Powered Blogging Platform",
+  "name": "Knowora — Sarkari Job & Educational Portal",
+  "short_name": "Knowora",
+  "description": "Latest Sarkari Job Alerts, Admit Cards, Exam Results, Government Schemes & Education News",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0a0a0a",
@@ -9,11 +9,11 @@
   "icons": [
     {
       "src": "/favicon.ico",
-      "sizes": "192x192",
-      "type": "image/png"
+      "sizes": "48x48",
+      "type": "image/x-icon"
     },
     {
-      "src": "/favicon.ico",
+      "src": "/logo.png",
       "sizes": "512x512",
       "type": "image/png"
     }

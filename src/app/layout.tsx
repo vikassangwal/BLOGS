@@ -44,6 +44,23 @@ export async function generateMetadata(): Promise<Metadata> {
         },
       ],
     },
+    alternates: {
+      canonical: 'https://knowora.in',
+      types: {
+        'application/rss+xml': 'https://knowora.in/feed.xml',
+      },
+    },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        'max-video-preview': -1,
+        'max-image-preview': 'large',
+        'max-snippet': -1,
+      },
+    },
     twitter: {
       card: 'summary_large_image',
       title: settings?.seoTitle || 'Knowora | Sarkari Job & Educational Portal',
@@ -86,7 +103,41 @@ export default async function RootLayout({
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2689010221295201"
           crossOrigin="anonymous"
         />
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ "@context":"https://schema.org","@type":"WebSite","name": siteName,"url":"https://knowora.in","potentialAction":{ "@type":"SearchAction","target":"https://knowora.in/blog?search={search_term_string}","query-input":"required name=search_term_string" } }) }} />
+        <link rel="describedby" href="https://knowora.in/llms.txt" />
+        <link rel="alternate" type="application/rss+xml" title="Knowora RSS Feed" href="https://knowora.in/feed.xml" />
+        <meta name="robots" content="max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "WebSite",
+              "name": siteName,
+              "url": "https://knowora.in",
+              "inLanguage": ["hi", "en"],
+              "publisher": {
+                "@type": "NewsMediaOrganization",
+                "name": siteName,
+                "url": "https://knowora.in",
+                "logo": {
+                  "@type": "ImageObject",
+                  "url": "https://knowora.in/logo.png"
+                },
+                "founder": {
+                  "@type": "Person",
+                  "name": "Vikas Sangwal"
+                },
+                "publishingPrinciples": "https://knowora.in/editorial-policy",
+                "correctionsPolicy": "https://knowora.in/fact-check-policy"
+              },
+              "potentialAction": {
+                "@type": "SearchAction",
+                "target": "https://knowora.in/blog?search={search_term_string}",
+                "query-input": "required name=search_term_string"
+              }
+            })
+          }}
+        />
         <Script id="cookie-consent" strategy="afterInteractive">{`
 function setCookie(name,value,days){var d=new Date();d.setTime(d.getTime()+(days*24*60*60*1000));var expires="expires="+d.toUTCString();document.cookie=name+"="+value+";"+expires+";path=/";}
 function getCookie(name){var nameEQ=name+"=";var ca=document.cookie.split(';');for(var i=0;i<ca.length;i++){var c=ca[i].trim();if(c.indexOf(nameEQ)==0)return c.substring(nameEQ.length);}return null;}

@@ -5,7 +5,7 @@ export const metadata: Metadata = {
   title: 'Disclaimer | Knowora',
   description: 'Read the official Non-Governmental Disclaimer and Content Accuracy Policy for Knowora.',
   alternates: {
-    canonical: 'https://www.knowora.in/disclaimer'
+    canonical: 'https://knowora.in/disclaimer'
   }
 };
 

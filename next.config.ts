@@ -39,6 +39,9 @@ const nextConfig: NextConfig = {
       { source: '/finance', destination: '/blog?tag=Finance%20%26%20Earning', permanent: true },
       { source: '/privacy', destination: '/privacy-policy', permanent: true },
       { source: '/terms', destination: '/terms-of-service', permanent: true },
+      { source: '/about-us', destination: '/about', permanent: true },
+      { source: '/contact-us', destination: '/contact', permanent: true },
+      { source: '/disclaimers', destination: '/disclaimer', permanent: true },
     ];
   },
   images: {

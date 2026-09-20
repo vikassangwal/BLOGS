@@ -2,13 +2,38 @@ import React from 'react';
 import Link from 'next/link';
 
 export const metadata = {
-  title: 'Contact Us | Knowora',
-  description: 'Get in touch with the Knowora team.',
+  title: 'Contact Us | Knowora — Editorial & Support Desk',
+  description: 'Get in touch with the Knowora editorial and support team. Inquiries, corrections, and partnerships.',
+  alternates: {
+    canonical: 'https://knowora.in/contact'
+  }
 };
 
 export default function ContactPage() {
+  const contactJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'ContactPage',
+    name: 'Contact Knowora',
+    url: 'https://knowora.in/contact',
+    description: 'Contact information for Knowora news and government recruitment portal.',
+    mainEntity: {
+      '@type': 'NewsMediaOrganization',
+      name: 'Knowora',
+      url: 'https://knowora.in',
+      contactPoint: {
+        '@type': 'ContactPoint',
+        email: 'support@knowora.in',
+        contactType: 'customer support and editorial grievance'
+      }
+    }
+  };
+
   return (
     <div className="container mx-auto px-4 py-16 max-w-3xl animate-fade-in min-h-[70vh]">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(contactJsonLd) }}
+      />
       <h1 className="text-4xl md:text-5xl font-bold mb-8 text-center bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-emerald-400">
         Contact Us
       </h1>

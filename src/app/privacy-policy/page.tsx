@@ -5,7 +5,7 @@ export const metadata: Metadata = {
   title: 'Privacy Policy | Knowora',
   description: 'Read the official Privacy Policy of Knowora including Google AdSense cookies disclosure, data collection, and user rights.',
   alternates: {
-    canonical: 'https://www.knowora.in/privacy-policy'
+    canonical: 'https://knowora.in/privacy-policy'
   }
 };
 

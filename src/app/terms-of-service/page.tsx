@@ -5,7 +5,7 @@ export const metadata: Metadata = {
   title: 'Terms of Service | Knowora',
   description: 'Read the Terms of Service and Conditions for using Knowora news and job portal.',
   alternates: {
-    canonical: 'https://www.knowora.in/terms-of-service'
+    canonical: 'https://knowora.in/terms-of-service'
   }
 };
 

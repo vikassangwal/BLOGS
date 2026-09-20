@@ -4,7 +4,25 @@ import Image from 'next/image';
 import { prisma } from '@/lib/prisma';
 import BlogChatbot from '@/components/BlogChatbot';
 import SocialJoinStrip from '@/components/SocialJoinStrip';
+import type { Metadata } from 'next';
+
 export const revalidate = 60; // Revalidate the page every 60 seconds for performance
+
+export const metadata: Metadata = {
+  title: 'Knowora | सरकारी नौकरी, Sarkari Result, Admit Card & Education News 2026',
+  description: 'Knowora: भारत का विश्वसनीय सरकारी नौकरी और शिक्षा समाचार पोर्टल। पायें UPSC, SSC, Railway, Banking, State PSC भर्ती अधिसूचना, प्रवेश पत्र, और परिणाम।',
+  alternates: {
+    canonical: 'https://knowora.in',
+  },
+  openGraph: {
+    title: 'Knowora — Sarkari Job & Education Intelligence Portal',
+    description: 'Latest Central & State government job notifications, admit cards, answer keys, exam results, and schemes in Hindi & English.',
+    url: 'https://knowora.in',
+    siteName: 'Knowora',
+    locale: 'hi_IN',
+    type: 'website',
+  },
+};
 
 async function getPostsByTag(tag: string) {
   try {
@@ -902,6 +920,68 @@ export default async function HomePage() {
 
   return (
     <div className="flex flex-col items-center justify-center px-3 sm:px-4 pt-4 pb-10">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@graph': [
+              {
+                '@type': 'WebSite',
+                '@id': 'https://knowora.in/#website',
+                url: 'https://knowora.in',
+                name: 'Knowora',
+                description: 'Latest Sarkari Job Alerts, Admit Cards, Exam Results, Government Schemes & Education News 2026',
+                inLanguage: ['hi', 'en'],
+                publisher: {
+                  '@type': 'NewsMediaOrganization',
+                  name: 'Knowora',
+                  url: 'https://knowora.in',
+                  logo: {
+                    '@type': 'ImageObject',
+                    url: 'https://knowora.in/logo.png'
+                  },
+                  founder: {
+                    '@type': 'Person',
+                    name: 'Vikas Sangwal'
+                  },
+                  publishingPrinciples: 'https://knowora.in/editorial-policy',
+                  correctionsPolicy: 'https://knowora.in/fact-check-policy'
+                },
+                potentialAction: {
+                  '@type': 'SearchAction',
+                  target: 'https://knowora.in/blog?search={search_term_string}',
+                  'query-input': 'required name=search_term_string'
+                }
+              },
+              {
+                '@type': 'CollectionPage',
+                '@id': 'https://knowora.in/#webpage',
+                url: 'https://knowora.in',
+                name: 'Knowora — Sarkari Job, Educational News & Tech Portal',
+                isPartOf: { '@id': 'https://knowora.in/#website' },
+                about: {
+                  '@type': 'Thing',
+                  name: 'Sarkari Naukri & Competitive Exams in India'
+                },
+                mainEntity: {
+                  '@type': 'ItemList',
+                  name: 'Core Government Recruitment & Education Sections',
+                  itemListElement: [
+                    { '@type': 'ListItem', position: 1, name: 'Latest Government Jobs', url: 'https://knowora.in/blog?tag=Latest%20Jobs' },
+                    { '@type': 'ListItem', position: 2, name: 'Admit Cards & Hall Tickets', url: 'https://knowora.in/blog?tag=Admit%20Card' },
+                    { '@type': 'ListItem', position: 3, name: 'Exam Results & Cutoffs', url: 'https://knowora.in/blog?tag=Result' },
+                    { '@type': 'ListItem', position: 4, name: 'Government Welfare Schemes', url: 'https://knowora.in/blog?tag=Scheme' },
+                    { '@type': 'ListItem', position: 5, name: 'Scholarships & Education', url: 'https://knowora.in/blog?tag=Scholarship' },
+                    { '@type': 'ListItem', position: 6, name: 'Technology & AI', url: 'https://knowora.in/blog?tag=Tech' },
+                    { '@type': 'ListItem', position: 7, name: 'Finance & Career Guidance', url: 'https://knowora.in/blog?tag=Finance' }
+                  ]
+                }
+              }
+            ]
+          })
+        }}
+      />
       {/* Hero Section */}
       <div className="max-w-4xl mx-auto text-center animate-slide-up mt-2 sm:mt-6">
         <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full glass-panel text-xs text-blue-400 mb-4 border-blue-500/20 shadow-[0_0_20px_rgba(59,130,246,0.1)]">

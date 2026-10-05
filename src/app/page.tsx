@@ -984,21 +984,21 @@ export default async function HomePage() {
       />
       {/* Hero Section */}
       <div className="max-w-4xl mx-auto text-center animate-slide-up mt-2 sm:mt-6">
-        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full glass-panel text-xs text-blue-400 mb-4 border-blue-500/20 shadow-[0_0_20px_rgba(59,130,246,0.1)]">
+        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full glass-panel text-xs text-emerald-400 mb-4 border-emerald-500/20 shadow-[0_0_20px_rgba(16,185,129,0.1)]">
           <span className="relative flex h-2.5 w-2.5">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-blue-500"></span>
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
           </span>
-          AI-Powered Content Generation is Live
+          ✅ 100% सत्यापित सरकारी नौकरी व शिक्षा समाचार पोर्टल
         </div>
         
         <h1 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight mb-3 leading-tight text-white">
-          Next-Generation <br className="hidden sm:block" />
-          <span className="premium-gradient-text">Blogging Platform</span>
+          सरकारी नौकरी, रिजल्ट व <br className="hidden sm:block" />
+          <span className="premium-gradient-text">एजुकेशन पोर्टल 2026</span>
         </h1>
         
-        <p className="text-xs sm:text-sm text-gray-400 mb-5 max-w-xl mx-auto font-light leading-relaxed px-4">
-          Discover expertly curated and AI-assisted insights in Technology, Education & Career, and Finance & Earning. High-quality knowledge for the modern world.
+        <p className="text-xs sm:text-sm text-gray-400 mb-5 max-w-2xl mx-auto font-light leading-relaxed px-4">
+          भारत के सभी प्रमुख भर्ती आयोगों (UPSC, SSC, Railway, State PSC, Bank) के आधिकारिक नोटिफिकेशन, एडमिट कार्ड, परीक्षा परिणाम और सरकारी योजनाओं की निष्पक्ष एवं प्रामाणिक जानकारी।
         </p>
         
         <div className="flex gap-4 justify-center items-center">

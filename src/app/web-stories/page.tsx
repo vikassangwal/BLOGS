@@ -9,10 +9,13 @@ export const revalidate = 300; // Revalidate every 5 minutes
 export const metadata: Metadata = {
   title: 'Visual Web Stories | Knowora',
   description: 'Explore visual Web Stories on latest Sarkari Jobs, Tech News, Finance Updates, and Career Guidance.',
+  alternates: {
+    canonical: 'https://knowora.in/web-stories'
+  },
   openGraph: {
     title: 'Visual Web Stories | Knowora',
     description: 'Explore visual Web Stories on latest Sarkari Jobs, Tech News, Finance Updates, and Career Guidance.',
-    url: 'https://www.knowora.in/web-stories',
+    url: 'https://knowora.in/web-stories',
     siteName: 'Knowora',
     type: 'website'
   }

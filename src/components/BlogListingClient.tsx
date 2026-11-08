@@ -30,7 +30,15 @@ const QUALIFICATIONS = [
   'ITI / Diploma'
 ];
 
-export default function BlogListingClient({ uiConfig }: { uiConfig?: any }) {
+export default function BlogListingClient({
+  uiConfig,
+  initialPosts = [],
+  initialTotalPages = 1
+}: {
+  uiConfig?: any;
+  initialPosts?: any[];
+  initialTotalPages?: number;
+}) {
   const searchParams = useSearchParams();
   const initialTag = searchParams ? searchParams.get('tag') || '' : '';
   const initialSearch = searchParams ? searchParams.get('search') || '' : '';
@@ -56,14 +64,23 @@ export default function BlogListingClient({ uiConfig }: { uiConfig?: any }) {
       ? mapSearchToQualification(initialSearch)
       : 'All Qualifications';
 
-  const [posts, setPosts] = useState<any[]>([]);
-  const [tags, setTags] = useState<string[]>([]);
+  const [posts, setPosts] = useState<any[]>(initialPosts);
+  const [tags, setTags] = useState<string[]>(() => {
+    if (initialPosts.length > 0) {
+      const allTags = new Set<string>();
+      initialPosts.forEach((p: any) => p.tags?.forEach((t: string) => {
+        if (t && t !== '${topic}') allTags.add(t);
+      }));
+      return Array.from(allTags);
+    }
+    return [];
+  });
   const [activeTag, setActiveTag] = useState(initialTag);
   const [subTag, setSubTag] = useState('');
   const [search, setSearch] = useState(initialSearch);
   const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [isLoading, setIsLoading] = useState(true);
+  const [totalPages, setTotalPages] = useState(initialTotalPages);
+  const [isLoading, setIsLoading] = useState(initialPosts.length === 0);
   const [selectedState, setSelectedState] = useState('All India');
   const [selectedQualification, setSelectedQualification] = useState(initialQualification);
   const [isStateDetected, setIsStateDetected] = useState(false);
@@ -215,10 +232,16 @@ export default function BlogListingClient({ uiConfig }: { uiConfig?: any }) {
     }
   };
 
+  const hasMounted = useRef(false);
+
   useEffect(() => {
-    if (isStateDetected) {
-      fetchPosts();
+    if (!hasMounted.current) {
+      hasMounted.current = true;
+      if (initialPosts.length > 0) {
+        return;
+      }
     }
+    fetchPosts();
   }, [page, activeTag, isStateDetected, selectedState, selectedQualification, activeOnly]);
 
   useEffect(() => {

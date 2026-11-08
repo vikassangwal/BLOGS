@@ -75,10 +75,66 @@ export async function generateMetadata(
   };
 }
 
-export default async function BlogListingPage() {
+export default async function BlogListingPage({ searchParams }: Props) {
+  const resolvedSearchParams = await searchParams;
+  const tag = resolvedSearchParams?.tag;
+  const search = resolvedSearchParams?.search;
+  const qual = resolvedSearchParams?.qualification;
+
   let siteSettings = null;
+  let initialPosts: any[] = [];
+  let initialTotalPages = 1;
+
   try {
     siteSettings = await prisma.siteSettings.findUnique({ where: { id: 'default' } });
+
+    const where: any = { status: 'Published' };
+    if (tag) {
+      where.tags = { some: { tag: { name: tag } } };
+    }
+    if (search) {
+      where.OR = [
+        { title: { contains: search, mode: 'insensitive' } },
+        { content: { contains: search, mode: 'insensitive' } }
+      ];
+    }
+    if (qual && qual !== 'All Qualifications') {
+      where.qualifications = { has: qual };
+    }
+
+    const [rawPosts, count] = await Promise.all([
+      prisma.blogPost.findMany({
+        where,
+        take: 12,
+        orderBy: { publishedAt: 'desc' },
+        include: {
+          tags: { include: { tag: true } },
+          author: { select: { id: true, name: true } }
+        }
+      }),
+      prisma.blogPost.count({ where })
+    ]);
+
+    initialTotalPages = Math.ceil(count / 12) || 1;
+    initialPosts = rawPosts.map((p: any) => ({
+      id: p.id,
+      title: p.title,
+      slug: p.slug,
+      excerpt: p.excerpt || (p.content ? p.content.replace(/<[^>]+>/g, ' ').slice(0, 160).trim() + '...' : ''),
+      featuredImage: p.featuredImage || '/default-og.png',
+      tags: p.tags?.map((t: any) => t.tag?.name).filter(Boolean) || [],
+      publishedAt: p.publishedAt ? p.publishedAt.toISOString() : p.createdAt.toISOString(),
+      createdAt: p.createdAt.toISOString(),
+      updatedAt: p.updatedAt ? p.updatedAt.toISOString() : null,
+      applyStartDate: p.applyStartDate ? p.applyStartDate.toISOString() : null,
+      applyLastDate: p.applyLastDate ? p.applyLastDate.toISOString() : null,
+      expiryDate: p.expiryDate ? p.expiryDate.toISOString() : null,
+      vacancyCount: p.vacancyCount || null,
+      qualifications: p.qualifications || [],
+      jobStates: p.jobStates || [],
+      officialApplyUrl: p.officialApplyUrl || null,
+      author: p.author ? { name: p.author.name } : { name: 'Vikas Sangwal' }
+    }));
   } catch (e) {
     console.error("Prisma error in BlogListingPage:", e);
   }
@@ -92,7 +148,7 @@ export default async function BlogListingPage() {
 
   return (
     <Suspense fallback={<div style={{ minHeight: '100vh', background: 'var(--color-bg-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><span style={{ color: 'var(--color-text-secondary)' }}>Loading Page...</span></div>}>
-      <BlogListingClient uiConfig={uiConfig} />
+      <BlogListingClient uiConfig={uiConfig} initialPosts={initialPosts} initialTotalPages={initialTotalPages} />
     </Suspense>
   );
 }

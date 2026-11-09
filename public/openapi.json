@@ -23,7 +23,7 @@
             "required": true,
             "schema": {
               "type": "string",
-              "default": "knowora-secret-2026"
+              "default": "YOUR_GPT_SECRET_KEY"
             },
             "description": "API Secret Key"
           },
@@ -97,7 +97,7 @@
             "required": true,
             "schema": {
               "type": "string",
-              "default": "knowora-secret-2026"
+              "default": "YOUR_GPT_SECRET_KEY"
             }
           }
         ],
@@ -134,7 +134,7 @@
                 "properties": {
                   "secret": {
                     "type": "string",
-                    "default": "knowora-secret-2026"
+                    "default": "YOUR_GPT_SECRET_KEY"
                   },
                   "title": {
                     "type": "string",
@@ -206,7 +206,7 @@
             "required": true,
             "schema": {
               "type": "string",
-              "default": "knowora-secret-2026"
+              "default": "YOUR_GPT_SECRET_KEY"
             }
           }
         ],
@@ -236,7 +236,7 @@
                 "properties": {
                   "secret": {
                     "type": "string",
-                    "default": "knowora-secret-2026"
+                    "default": "YOUR_GPT_SECRET_KEY"
                   },
                   "title": {
                     "type": "string"

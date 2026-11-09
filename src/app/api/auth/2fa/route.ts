@@ -24,7 +24,7 @@ export async function POST(request: Request) {
         data: { twoFactorSecret: secret, twoFactorEnabled: false } // Save secret but don't enable yet
       });
 
-      const uri = getTOTPUri(secret, dbUser.email, 'AntiGravity');
+      const uri = getTOTPUri(secret, dbUser.email, 'Knowora');
       return NextResponse.json({ secret, uri });
     }
 

@@ -62,7 +62,7 @@ export function generateRecoveryCodes(count: number = 8): string[] {
 /**
  * Get the otpauth URI for QR code generation
  */
-export function getTOTPUri(secret: string, email: string, issuer: string = 'AntiGravity'): string {
+export function getTOTPUri(secret: string, email: string, issuer: string = 'Knowora'): string {
   return `otpauth://totp/${encodeURIComponent(issuer)}:${encodeURIComponent(email)}?secret=${secret}&issuer=${encodeURIComponent(issuer)}&algorithm=SHA1&digits=${TOTP_DIGITS}&period=${TOTP_PERIOD}`;
 }
 

@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache';
 
 export const dynamic = 'force-dynamic';
 
-const SECRET_KEY = 'knowora-secret-2026';
+const SECRET_KEY = process.env.GPT_API_SECRET || 'knowora-secret-2026';
 
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
